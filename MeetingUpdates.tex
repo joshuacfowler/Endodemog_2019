@@ -1,0 +1,222 @@
+\documentclass{article}
+
+\usepackage[dvipsnames]{xcolor}
+\newcommand{\tom}[1]{{\textit{\color{WildStrawberry}{[#1]}}}}
+
+\title{Meeting Updates}
+\author{Joshua Fowler}
+
+%\usepackage{Sweave}
+\begin{document}
+%\input{MeetingUpdates-concordance}
+%\SweaveOpts{concordance=TRUE}
+  \maketitle
+  Tom's comments are in \tom{WildStrawberry}.
+
+\section*{Jan 23, 2019}
+\subsection*{Meeting Overview}
+We talked about geographic patterns in rates of climate change. Overall, the SE US has not seen the largest historic changes in temperature, and Indiana and Texas have both seen climate change in slightly different ways. There is a general pattern of more precipitation across Texas going north. This led us to general agreement to focus on the Texas region/Eastern species with western range edges because it also lines up nicely with the precipitation gradient that exists here. We also briefly talked about the Southwest or other areas that have experienced climate change around the US. Following off of this, we talked about getting some seeds to test if we can find endophytes. We also talked about adding a competition treatment to the range limit experiment, which I think could be valuable based on my current beliefs about the sorts of things that are contributing to the Texas ranges, but needs to be more fleshed out. We also talked Thursday about the possibility that we can use only herbarium specimens and not resample sites which could make sense to have the two projects less connected to each other.
+
+\subsection*{Goals for next meeting:}
+\begin{itemize}
+\item{I am in contact with Jessica Budke, and I will contact some regional herbaria. I think it would be great to have a concrete plan towards getting seeds set up by next week's meeting, and then potentially getting seeds by the two weeks following. This will include:
+\begin{itemize}
+\item{Choosing species}
+\item{Choosing herbarium records}
+\item{Traveling to get the samples. There is a possibility of "loans" but that is something I will find out about.}
+\end{itemize}}
+\item{I will keep working on the data script. I would like to have a mostly finalized version by next week. I have been in contact with Jenn which is useful.}
+\item{I built up the survival model to run with a species effect, but haven't played around with it too much to see how it fits. I want to have a run of this model by next week and potentially do the same for the flowering model.}
+\item{We also talked about my committee meeting. I will ask Volker and Lydia so that we can start planning that.}
+\end{itemize}
+
+
+\section*{Jan 16, 2019}
+\subsection*{Meeting Overview}
+We talked about working on two general areas for this semester. I have a goal of finishing the IPM for the Endo variability project by the end of the semester. We also talked about field work for the range limit questions.
+
+\subsection*{Goals for next meeting:}
+\begin{itemize}
+\item{Refine Herbarium questions and hypotheses. Come up with mock plan for how to test these. I will send Jessica Budke an email before our next meeting.}
+\item{Look into rates of climate change thinking about ranges where herbarium studies would be interesting.}
+\item{Finalize data script by Jan. 30th. I will send Jenn an email before our meeting next week for some clarifications.}
+\item{Write up the Survival model so that it can be run with a species effect by our next meeting.}
+\item{Longer term: I will start coding up the stan models for Growth, seed production, and recruitment. I will plan to start with Growth and go from there. Hopefully starting working on that after Jan. 30th.}
+\end{itemize}
+
+
+
+\section*{Dec 15, 2018}
+\subsection*{Winter Break Time Line}
+Overall, we decided to work on the three vital rate models for survival, growth, and flowering tillers. We also need to do model diagnostics and work on figures for the EvoDemo meeting on Jan 9th. The following is a general schedule where I am setting deadlines, but will plan that much of this can be worked on concurrently.
+
+\subsection*{Schedule:}
+\begin{itemize}
+\item{Dec 21: I want to have a functioning version of the survival model at this point. We talked during our last meeting about how to add in the endo effect to be able to analyze the variance. I will work on incorporating this as a term within the year random effect. \tom{I think there are two ways of doing this. The way that we wrote out would have E+ and E- plants having different temporal distributions on the intercept values. A second way would be to put a temporal distribution on an endophyte effect parameter. These would be equivalent models that use a different parameterization, essentially a `mean parameterization' versus an `effect parameterization'. For now, proceed with whatever makes the most sense to you and we can discuss.}}
+\item{Dec 24: Finish the Flower model. This should be pretty similar to the Survival model. I will also start looking at model diagnostics and think about visualizing the data once the models are running.\tom{Yes, flowering will be easy once you do survival.}} 
+\item{Dec 28: Finish the Growth model. This is different from the other two in that it will require a negative binomial distribution.\tom{Yes, there are several ways to parameterize a NB. The easiest (and hackiest) way to do this would be to use a Poisson model but add an individual-level random effect. This basically adds overdispersion, which allows the Poisson to approximate the NB. Also remember that this will need to be zero-truncated. This is easy to do in BUGS, not sure about Stan (google it).}}
+\item{Dec 29 - Jan 4: Run the models, and save the outputs. During this, time, I will also finish up model diagnostics and figures.}
+\item{Jan 6th: Back at Rice\tom{Let's schedule a meeting first thing when you are back, so you can show me what should basically be all the raw materials for your poster.}}
+\item{Jan7-8th: Print poster}
+\item{Jan 9th: Travel to Miami}
+\end{itemize}
+
+\section*{Nov 15, 2018}
+\tom{This all looks good to me. Coding up the interaction models in Stan may be the most challenging part so it is worth getting this sorted out soon. As you know, I have not done this myself, but I am certain we can figure it out together.}
+
+\subsection*{Meeting Overview}
+
+We talked about my progress with the models and the data script. I didn't make as much progress with the interactive terms because Stan has been giving me an error I think due to how I am loading in the data and calling it within the model. I will try to have that figured out for next week. I want to find some resources about vectorizing the code with random effects because I think that is part of the issue, as well as vectorizing just not being totally clear to me yet. We also talked about learning more about choosing distributions. 
+
+\subsection*{Goals for Next Meeting}
+\textbf{Goals include:}
+\begin{itemize}
+\item{I want to make progress with the data script. I can have all the species (but probably not the seed data frame done yet) for next Thursday, and then we could start using that data for the survival model. I can hopefully have both the regular and the seed data done by the following week, when we will have our next Thursday meeting. I will have looked more into that this coming week, and so maybe we can talk about how we are doing the seed estimate.} 
+\item{For 2 weeks from now, I want to have my error message figured out so that I can run the models without continuing to have these problems. Then I think it should be relatively easy to add in fixed parameters, especially once I have the full dataframe.}
+\end{itemize}
+
+\subsection*{Goals continuing from last Meeting}
+\textbf{Goals include:}
+\begin{itemize}
+\item{For Tues., Nov. 20, have 1-2 paragraph intro for the proposal.}
+\item{For Tues., Nov. 20, look at maps for the endodemog focal species.}
+\item{For Thurs., Nov. 22, Thanksgiving}
+\item{For Tues., Nov. 27, have a rough draft of the core course proposal for Tom to review.}
+\item{For Thurs., Nov. 29, rough draft of the proposal is due for core course.}
+\item{For Thurs., Nov. 29, have a rough draft of a Science Day presentation.}
+\item{For Thurs., Nov. 29, finish up the data script, both the main sheet and the seed production sheet.}
+\item{For Mon., Dec. 3, Science Day!}
+\item{For Thurs, Dec. 6, the core course proposal is due.}
+\item{For Mon., Dec. 7, the NDSEG is due.}
+\item{Longer term, we have the EvoDemo Meeting Jan. 10th-12th.}
+\end{itemize}
+
+\section*{Nov. 13, 2018}
+\subsection*{Meeting Overview}
+
+We talked about my "Top 8" papers list. Basically, there is a common thread that we are developing between the papers that includes using a comprehensive demographic approach to study range edges and how biotic interactions influence these range edges,  while thinking about how elevational vs latitudinal gradients compare, and the herbarium idea. 
+
+\subsection*{Goals for Next Meeting and Beyond}
+\textbf{Goals include:}
+\begin{itemize}
+\item{For next Tuesday, come up with a first paragraph for the end of semester proposal that will be the quick literature review of the problems on which we are focusing.}
+\item{For next Tuesday, look up distribution maps for the species of grasses from the Endodemog data set}
+\end{itemize}
+
+\subsection*{Goals continuing from last Meeting}
+\textbf{Goals include:}
+\begin{itemize}
+\item{I still need to send out the information about the NDSEG. I will do that on Wednesday.}
+\item{See the previous meeting for goals for the Endodemog model and data script.}
+\end{itemize}
+
+
+\section*{Nov. 8, 2018}
+\subsection*{Meeting Overview}
+
+This section includes the meeting information for both this and the preceding Tuesday meeting. We talked about my gathering bibliography and planned to have a "Top 10" List for the following Tuesday. During the Thursday meeting, we talked about the data script and then discussed full linear predictor for the endodemog model.
+
+\subsection*{Goals for Next Meeting and Beyond}
+\textbf{Goals include:}
+\begin{itemize}
+\item{Add top 10 papers to the annotated bibliography. Those that encapsulate the ideas that I am interested in and are potentially going to be foundational.}
+\item{Continue to work on the data cleaning script. For next Thursday, I would like to pull out the seedling data for 1 species, and get started on that, as well as continue to add species to the main dataframe.}
+\item{We will work on the implementing the full model for Survival. I'm not sure if I will be able to have this done, but I will try to add in one of the interacting effects for next week.}
+\end{itemize}
+
+\subsection*{Goals continuing from last Meeting}
+\textbf{Goals include:}
+\begin{itemize}
+\item{I need to send out information to my reference writers for the NDSEG still. I am hoping to work all of the various end of the semester projects kind of at the same time, which is a little bit overwhelming, but I think that as I make progress on the core course proposal and write up the NDSEG, it will all come together.}
+\end{itemize}
+
+\section*{Oct. 30, 2018}
+
+\subsection*{Meeting Overview}
+
+We discussed my progress in defining a project. We talked about how we have done some backwards type exploration and we want to push forwards to meet in the middle with the literature review. We basically talked about lining these up to fit the timeline of the proposal for core course, my application for the NDSEG, Science day, for the EvoDemo conference, and eventually for this summer.
+ 
+\subsection*{Goals for Next Meeting and Beyond}
+\textbf{Goals include:} 
+\begin{itemize}
+\item{Tom adds comments to the coreview by Thursday, update and send to New Phytologist by Friday.}
+\item{Have the annotated bibliography filled out at least as far as having the citations for literature related to fungal endophyte surveys, other related symbionts like wolbachia, and range limits with biotic interactions}
+\item{I will look this weekend at the application for the NSDEG fellowship and provide information for the letters of reference.}
+\end{itemize}
+
+\subsection*{Goals continuing from last Meeting}
+\textbf{Goals include:} 
+\begin{itemize}
+\item{For the data cleanup script, I need to read about relational databases, as I am at the point where I have gotten pretty far (melt and cast have been very helpful) with the main survival/growth sheet for Poal, but will have to set up the data for the seed production estimates.}
+\item{For continuing to develop my research ideas, I am doing the annotated bibliography and exploring other ideas. Both of these are relevant to the Core Course final proposal, as well as Science Day presentations, and partially the EvoDemo conference. The core course final proposal is my current deadline for having a mostly finished annotated bibliography of the main ideas that I want to research.}
+\end{itemize}
+
+
+\section*{Oct. 16, 2018}
+
+\subsection*{Meeting Overview}
+
+We talked briefly about the Hertz fellowship and then we discussed geographic mosaic theory.Tom said he would send a couple of papers (I don't remember who by, but about range limits and gene flow). Overall, we will continue to think about these other topics, especially how they may be complementary to thinking about range limits, but we are going to focus on making progress on the modeling and on developing an annotated bibliography for the range limits questions. We also set a timeline for the co-review.
+
+\subsection*{Goals for Next Meeting and Beyond}
+\textbf{Goals include:} 
+\begin{itemize}
+\item{Read paper for co-review by Tuesday. I don't remember exactly what we laid out for the rest, but basically comments for the week following, then I will write up the review and give it to you to adjust. Can you add the timeline we talked about?}
+\item{Exploring other topics is partially on the backburner. See my continuing goals.}
+\end{itemize}
+
+\subsection*{Goals continuing from last Meeting}
+\textbf{Goals include:} 
+\begin{itemize}
+\item{For data cleanup script, I need to go through the raw data files, and loading them into Rstudio. I would like to have this done by next week. The next step is that I need to pull out the important columns and combine sheets. This is also the stage where the relational database will come in because we have to include the seed count data.}
+\item{For the model, I will include post. pred. checks by next Thursday. I think I will probably not start the Growth model until after next week but a good place to start is visualizing the data and writing the most simple Stan Model (using the Poisson distribution). I will put a hopeful goal of this for Thursday, Nov. 1st.}
+\item{Edit Hertz application essays, and finish the personal informationand experience side of the application. Due Dates: \begin{itemize}
+\item{Feedback on my essays = Oct 19th} 
+\item{Josh's Application = Oct 24th} 
+\item{Reference Letters = Oct 26th}
+\end{itemize}}
+\item{For continuing to develop my research ideas, I am doing the annotated bibliography and exploring other ideas. Both of these are relevant to the Core Course final proposal, as well as Science Day presentations, and partially the EvoDemo conference. The core course final proposal is my current deadline for having a mostly finished annotated bibliography of the main ideas that I want to research}
+\item{For the annotated bibliography, identify the key papers that I am working from, like the Angert papers, for next week. I think it would be good to develop a list of my key words as well.}
+\end{itemize}
+
+\section*{Oct. 11, 2018}
+
+\subsection*{Meeting Overview}
+
+We discussed our survival model with year effects, and briefly looked at the model output. We talked about starting to work with the raw data, and potentially starting to look at working on the growth model. We also talked about the EvoDemoSoc meeting, which would be really cool to attend.
+
+\subsection*{Goals for Next Meeting and Beyond}
+\textbf{Goals include:} 
+\begin{itemize}
+\item{Build script to clean up data}
+\item{Get year variance from model, and visualize posterior predictive checks}
+\item{Figure out my computer's Stan error}
+\item{Start to work on Growth (start with Poisson distribution) \tom{When you are ready for it, I can share an example of negative binomial growth modeling in Stan.}}
+\end{itemize}
+
+\subsection*{Goals continuing from last Meeting}
+\textbf{Goals include:} 
+\begin{itemize}
+\item{Work on Hertz application}
+\item{Work on annotated bibliography and continue to look at systems and logistics \tom{See comment on same point below}}
+\item{Brainstorm other research ideas: Reading about Geographic mosaic theory of coevolution for Tuesday, Oct. 16th}
+\end{itemize}
+
+
+\section*{Oct. 3, 2018}
+\tom{I made the notes below before pulling some of the more recent meeting notes - sorry. Some of these are not as relevant given your points above.}
+\subsection*{Meeting Overview}
+
+We discussed the Hertz Fellowship, predictions and next steps for the transplant experiment, as well as other possible research directions to explore.
+
+\subsection*{Goals for Next Meeting and Beyond \tom{Not clear which of goals below are near-term action items vs longer-term stuff.}}
+\textbf{Goals include:} 
+\begin{itemize}
+\item{Work on Hertz application} \tom{What does `work' mean? What do you need to do?}
+\item{Start on annotated bibliography and continue to look at systems and logistics \tom{How will you do this? What steps will you take?}}
+\item{Brainstorm other research ideas}
+\item{Work on Endodemog model with year effects and visualizing the model for Stan \tom{This is a good, concrete goal. We talked about posterior predictive checks and I think this should be included in your modeling work.}}
+\item{Work on Endodemog data cleaning script \tom{Again, what are the steps involved here and what is your timeline for completing them?}} 
+\item{\tom{Obviously, most of my suggestions here are about making your work - and your ability to hold yourself accountable - more explicit with dates and specific steps.}}
+\end{itemize}
+\end{document}
