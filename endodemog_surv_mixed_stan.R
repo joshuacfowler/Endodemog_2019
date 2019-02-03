@@ -128,9 +128,9 @@ cat("
     
     parameters {
     vector[K] beta;              // predictor parameters
-    matrix[nEndo, nyear] tau_year[nSpp];      // random year effect
+    real tau_year[nSpp,nEndo, nyear];      // random year effect
       
-    vector<lower=0>[nEndo] sigma_0;        //year variance intercept
+    real<lower=0> sigma_0[nSpp,nEndo];        //year variance intercept
     }
     
 
@@ -140,17 +140,17 @@ cat("
        // Linear Predictor
     for(n in 1:N){
        mu[n] = Xs[n]*beta
-       + tau_year[species_index[n]][endo_index[n], year_t[n]];
+       + tau_year[species_index[n], endo_index[n], year_t[n]];
     }
     // Priors
     beta ~ normal(0,1e6);      // prior for predictor intercepts
-    for(n in 1:nSpp){
-    to_vector(tau_year[n]) ~ normal(0, sigma_0);
-    }
-    //for(n in 1:nyear){
-    //for(e in 1:nEndo){
-    //tau_year[e,n] ~ normal(0,sigma_0[e]);   // prior for year random effects
-    //}}
+    
+    for(n in 1:nyear){
+    for(e in 1:nEndo){
+    for(s in 1:nSpp){
+    tau_year[s,e,n] ~ normal(0, sigma_0[s,e]); // prior for year random effects
+    }}}
+ 
     // Likelihood
       surv_t1 ~ bernoulli_logit(mu);
     }
@@ -180,8 +180,8 @@ stanmodel <- stanc("endodemog_surv_matrix.stan")
 sm <- stan(file = "endodemog_surv_matrix.stan", data = LTREB_surv_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
 
-print(sm)
-
+summary(sm)
+print(sm, pars = "sigma_0")
 
 ## Create dataframes with individual species datasets
 POAL_data <- LTREB_endodemog %>% 
