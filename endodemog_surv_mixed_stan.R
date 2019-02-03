@@ -19,10 +19,169 @@ logit = function(x) { log(x/(1-x)) }
 #############################################################################################
 ## Load in full data frame
 LTREB_endodemog <- 
-  read.csv("~/Documents/R projects/LTREBendodemog/endo_demog_long.csv")
+  read.csv(file = "endo_demog_long.csv")
+
 
 str(LTREB_endodemog)
 dim(LTREB_endodemog)
+
+
+## Clean up the main data frame for NA's, other small data entry errors, and change standardize the coding for variables.
+LTREB_data <- LTREB_endodemog %>% 
+  mutate(size_t, logsize_t = log(size_t)) %>% 
+  mutate(size_t1, logsize_t1 = log(size_t1)) %>%  
+  mutate(surv_t1 = as.integer(recode(surv_t1, "0" = 0, "1" =1, "2" = 1, "4" = 1))) %>% 
+  mutate(species_index = as.integer(recode_factor(species,                   
+                                       "AGPE" = 1, "ELRI" = 2, "ELVI" = 3, 
+                                       "FESU" = 4, "LOAR" = 5, "POAL" = 6, 
+                                       "POSY" = 7))) %>%                              
+  mutate(year_t_index = as.integer(recode_factor(year_t, 
+                                      '2007' = 1, '2008' = 2, '2009' = 3, 
+                                      '2010' = 4, '2011' = 5, '2012' = 6, 
+                                      '2013' = 7, '2014' = 8, '2015' = 9, 
+                                      '2016' = 10, '2017' = 11))) %>%             
+  mutate(year_t1_index = as.integer(recode_factor(year_t1, 
+                                       '2008' = 2, '2009' = 3, '2010' = 4, 
+                                       '2011' = 5, '2012' = 6, '2013' = 7, 
+                                       '2014' = 8, '2015' = 9, '2016' = 10, 
+                                       '2017' = 11, '2018' = 12))) %>%               
+  mutate(origin_01 = as.integer(case_when(origin == "O" ~ 0, 
+                                          origin == "R" ~ 1, 
+                                          origin != "R" | origin != "O" ~ 1))) %>%   
+  mutate(plot_fixed = (case_when(plot != "R" ~ plot, 
+                                 plot == "R" ~ origin))) %>%                         
+  mutate(plot_index = as.integer(as.factor(plot_fixed))) %>%                         
+  mutate(endo_01 = case_when(endo == "0" | endo == "minus" ~ 0,
+                             endo == "1"| endo =="plus" ~ 1)) %>% 
+  mutate(endo_index = as.integer(as.factor(endo_01+1)))                              
+
+dim(LTREB_data)
+unique(LTREB_data$surv_t1)
+View(LTREB_data)
+# NA's in survival come from mostly 2017 recruits.
+LTREB_data1 <- LTREB_data %>%
+  filter(!is.na(surv_t1)) %>% 
+  filter(!is.na(logsize_t)) %>% 
+  filter(logsize_t >= 0) %>% 
+  filter(!is.na(endo_01))
+  
+dim(LTREB_data1)
+LTREB_for_matrix <- model.frame(surv_t1 ~ logsize_t + endo_01 + species_index + origin_01 
+                               + logsize_t*species_index + logsize_t * endo_01 + species_index*endo_01 
+                               + logsize_t*species_index*endo_01, data = LTREB_data1)
+Xs <- model.matrix(surv_t1 ~ logsize_t + endo_01 + species_index + origin_01 
+                                  + logsize_t*species_index + logsize_t * endo_01 + species_index*endo_01 
+                                  + logsize_t*species_index*endo_01, data =LTREB_for_matrix)
+
+# Create data list for Stan model
+LTREB_surv_data_list <- list(surv_t1 = LTREB_data1$surv_t1,
+                             Xs = Xs,    
+                             endo_index = LTREB_data1$endo_index,
+                             species_index = LTREB_data1$species_index,
+                             year_t = LTREB_data1$year_t_index, 
+                             N = nrow(LTREB_data1), 
+                             K = 9L, 
+                             nyear = length(unique(LTREB_data1$year_t_index)), 
+                             nEndo =   length(unique(LTREB_data1$endo_01)),
+                             nSpp = length(unique(LTREB_data1$species_index)))
+  
+
+str(LTREB_surv_data_list)
+
+
+
+
+
+#########################################################################################################
+# GLMM for Surv~ size +Endo + Origin  with year random effects------------------------------
+#########################################################################################################
+## run this code to optimize computer system settings for MCMC
+rstan_options(auto_write = TRUE)
+options(mc.cores = parallel::detectCores())
+set.seed(123)
+
+## MCMC settings
+ni <- 100
+nb <- 50
+nc <- 1
+
+# Stan model -------------
+## here is the Stan model with a model matrix and species effects ##
+
+
+
+sink("endodemog_surv_matrix.stan")
+cat("
+    data { 
+    int<lower=0> N;                       // number of observations
+    int<lower=0> K;                       // number of predictors
+    
+    int<lower=0> nyear;                       // number of years (used as index)
+    int<lower=0> year_t[N];                      // year of observation
+    int<lower=0> nEndo;                       // number of endo treatments
+    int<lower=0> nSpp;                         // number of species
+    int<lower=1, upper=2> endo_index[N];       // index for endophyte effect
+    int<lower=1, upper=7> species_index[N];  // index for species effect
+    int<lower=0, upper=1> surv_t1[N];      // plant survival at time t+1 and target variable (response)
+    matrix[N,K] Xs;                  //  predictor matrix - surv_t1~logsize_t+endo+origin+logsize_t*endo
+    }
+    
+    parameters {
+    vector[K] beta;              // predictor parameters
+    matrix[nEndo, nyear] tau_year[nSpp];      // random year effect
+      
+    vector<lower=0>[nEndo] sigma_0;        //year variance intercept
+    }
+    
+
+    model {
+    vector[N] mu;
+   
+       // Linear Predictor
+    for(n in 1:N){
+       mu[n] = Xs[n]*beta
+       + tau_year[species_index[n]][endo_index[n], year_t[n]];
+    }
+    // Priors
+    beta ~ normal(0,1e6);      // prior for predictor intercepts
+    for(n in 1:nSpp){
+    to_vector(tau_year[n]) ~ normal(0, sigma_0);
+    }
+    //for(n in 1:nyear){
+    //for(e in 1:nEndo){
+    //tau_year[e,n] ~ normal(0,sigma_0[e]);   // prior for year random effects
+    //}}
+    // Likelihood
+      surv_t1 ~ bernoulli_logit(mu);
+    }
+    
+   //generated quantities{
+    //int yrep[N];
+    //vector[N] mu;
+    
+    // for posterior predictive check
+    //for(n in 1:N){
+     // mu[n] = Xs[n]*beta
+    //   + tau_year[endo_index[n], year_t[n]];
+      
+    //  yrep[n] = bernoulli_logit_rng(mu[n]);
+    //}
+    
+   // }
+  
+    ", fill = T)
+sink()
+
+stanmodel <- stanc("endodemog_surv_matrix.stan")
+
+## Run the model by calling stan()
+## and save the output to .rds files so that they can be called laters
+
+sm <- stan(file = "endodemog_surv_matrix.stan", data = LTREB_surv_data_list,
+               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
+
+print(sm)
+
 
 ## Create dataframes with individual species datasets
 POAL_data <- LTREB_endodemog %>% 
@@ -58,6 +217,7 @@ dim(AGPE_data)
 POAL_data1 <- POAL_data %>% 
   mutate(size_t, logsize_t = log(size_t)) %>% 
   mutate(year_t_index = as.factor(recode(year_t, '2007'=1, '2008'=2, '2009'=3, '2010'=4, '2011'=5, '2012'=6, '2013'=7, '2014'=8, '2015'=9, '2016'=10, '2017'=11))) %>% 
+  mutate(year_t1_index = as.factor(recode(year_t1, '2008'=2, '2009'=3, '2010'=4, '2011'=5, '2012'=6, '2013'=7, '2014'=8, '2015'=9, '2016'=10, '2017'=11, '2018'=12))) %>% 
   mutate(year_t1_index = as.factor(recode(year_t1, '2008'=2, '2009'=3, '2010'=4, '2011'=5, '2012'=6, '2013'=7, '2014'=8, '2015'=9, '2016'=10, '2017'=11, '2018'=12))) %>% 
   mutate(plot_index = as.factor(recode(plot, 'R'=8, '3'=1, '4'=2, '8'=3, '9'=4, '10'=5, '11'=6, '15'=7, '16'=8, '17'=9, '19'=10, '151'=11, '152'=12, '153'=13, '154'=14, '155'=15, '156'=16, '157'=17, '158'=18)))
 dim(POAL_data1)
@@ -871,93 +1031,8 @@ launch_shinystan(shiny)
 
 
 
-# Stan model with model matrix to deal with species predictor -------------
 
 
 
 
 
-
-## here is the Stan model with a model matrix and species effect ##
-
-
-str(endo_data_list)
-endo_data_for_matrix <- as.data.frame(endo_data_list)
-Xs <- model.matrix(surv_t1~logsize_t+endo+origin+logsize_t*endo, data = POAL_data_for_matrix)
-
-POAL_data_list1 <-  list(surv_t1 = POAL_surv_dat$surv_t1,
-                         Xs = Xs,    
-                         endo_index = POAL_endo_dat$endo_index,
-                         year_t = POAL_year_dat$year_t_index, 
-                         N = 3241L, K = 5L, nyear = 11L, nEndo = 2L)
-
-str(POAL_data_list1)
-sink("endodemog_surv_matrix.stan")
-cat("
-    data { 
-    int<lower=0> N;                       // number of observations
-    int<lower=0> K;                       // number of predictors
-    
-    int<lower=0> nyear;                       // number of years (used as index)
-    int<lower=0> year_t[N];                      // year of observation
-    int<lower=0> nEndo;                       // number of endo treatments
-    int<lower=1, upper=2> endo_index[N];       // index for endophyte effect
-
-    int<lower=0, upper=1> surv_t1[N];      // plant survival at time t+1 and target variable (response)
-    matrix[N,K] Xs;                  //  predictor matrix - surv_t1~logsize_t+endo+origin+logsize_t*endo
-    }
-    
-    parameters {
-    vector[K] beta;              // predictor parameters
-    matrix[nEndo, nyear] tau_year;      // random year effect
-      
-    real<lower=0> sigma_0[nEndo];        //year variance intercept
-    }
-    
-
-    model {
-    vector[N] mu;
-   
-       // Linear Predictor
-    for(n in 1:N){
-       mu[n] = Xs[n]*beta
-       + tau_year[endo_index[n], year_t[n]];
-    }
-    // Priors
-    beta ~ normal(0,1e6);      // prior for predictor intercepts
-    for(n in 1:nyear){
-    for(e in 1:nEndo){
-    tau_year[e,n] ~ normal(0,sigma_0[e]);   // prior for year random effects
-    }}
-    // Likelihood
-      surv_t1 ~ bernoulli_logit(mu);
-    }
-    
-   //generated quantities{
-    //int yrep[N];
-    //vector[N] mu;
-    
-    // for posterior predictive check
-    //for(n in 1:N){
-     // mu[n] = Xs[n]*beta
-    //   + tau_year[endo_index[n], year_t[n]];
-      
-    //  yrep[n] = bernoulli_logit_rng(mu[n]);
-    //}
-    
-   // }
-  
-    ", fill = T)
-sink()
-
-stanmodel <- stanc("endodemog_surv_matrix.stan")
-
-## Run the model by calling stan()
-## and save the output to .rds files so that they can be called laters
-
-smPOAL <- stan(file = "endodemog_surv_matrix.stan", data = POAL_data_list1,
-               iter = 500, warmup = 250, chains = 1, save_warmup = FALSE)
-smPOAL2 <- stan(file = "endodemog_surv_full.stan", data = POAL_data_list,
-               iter = 500, warmup = 250, chains = 1, save_warmup = FALSE)
-print(smPOAL)
-print(smPOAL2)
