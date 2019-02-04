@@ -31,7 +31,7 @@ LTREB_data <- LTREB_endodemog %>%
   mutate(size_t, logsize_t = log(size_t)) %>% 
   mutate(size_t1, logsize_t1 = log(size_t1)) %>%  
   mutate(surv_t1 = as.integer(recode(surv_t1, "0" = 0, "1" =1, "2" = 1, "4" = 1))) %>% 
-  mutate(species_index = as.integer(recode_factor(species,                   
+  mutate(species_index = (recode_factor(species,                   
                                        "AGPE" = 1, "ELRI" = 2, "ELVI" = 3, 
                                        "FESU" = 4, "LOAR" = 5, "POAL" = 6, 
                                        "POSY" = 7))) %>%                              
@@ -57,7 +57,6 @@ LTREB_data <- LTREB_endodemog %>%
 
 dim(LTREB_data)
 unique(LTREB_data$surv_t1)
-View(LTREB_data)
 # NA's in survival come from mostly 2017 recruits.
 LTREB_data1 <- LTREB_data %>%
   filter(!is.na(surv_t1)) %>% 
@@ -66,12 +65,11 @@ LTREB_data1 <- LTREB_data %>%
   filter(!is.na(endo_01))
   
 dim(LTREB_data1)
-LTREB_for_matrix <- model.frame(surv_t1 ~ logsize_t + endo_01 + species_index + origin_01 
-                               + logsize_t*species_index + logsize_t * endo_01 + species_index*endo_01 
-                               + logsize_t*species_index*endo_01, data = LTREB_data1)
-Xs <- model.matrix(surv_t1 ~ logsize_t + endo_01 + species_index + origin_01 
-                                  + logsize_t*species_index + logsize_t * endo_01 + species_index*endo_01 
-                                  + logsize_t*species_index*endo_01, data =LTREB_for_matrix)
+LTREB_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01 + species_index)^3 + origin_01 
+                                 , data = LTREB_data1)
+Xs <- model.matrix(surv_t1 ~ (logsize_t + endo_01 + species_index)^3 + origin_01 
+                                 , data =LTREB_for_matrix)
+
 
 # Create data list for Stan model
 LTREB_surv_data_list <- list(surv_t1 = LTREB_data1$surv_t1,
@@ -80,7 +78,7 @@ LTREB_surv_data_list <- list(surv_t1 = LTREB_data1$surv_t1,
                              species_index = LTREB_data1$species_index,
                              year_t = LTREB_data1$year_t_index, 
                              N = nrow(LTREB_data1), 
-                             K = 9L, 
+                             K = ncol(Xs), 
                              nyear = length(unique(LTREB_data1$year_t_index)), 
                              nEndo =   length(unique(LTREB_data1$endo_01)),
                              nSpp = length(unique(LTREB_data1$species_index)))
@@ -101,8 +99,8 @@ options(mc.cores = parallel::detectCores())
 set.seed(123)
 
 ## MCMC settings
-ni <- 100
-nb <- 50
+ni <- 10
+nb <- 5
 nc <- 1
 
 # Stan model -------------
@@ -127,30 +125,28 @@ cat("
     }
     
     parameters {
-    vector[K] beta;              // predictor parameters
-    real tau_year[nSpp,nEndo, nyear];      // random year effect
+    vector[K] beta;                     // predictor parameters
+    matrix[nEndo,nyear] tau_year[nSpp];      // random year effect
       
-    real<lower=0> sigma_0[nSpp,nEndo];        //year variance intercept
+    real<lower=0> sigma_0[nSpp, nEndo];        //year variance intercept
     }
-    
 
     model {
     vector[N] mu;
-   
-       // Linear Predictor
+    
+    // Linear Predictor
     for(n in 1:N){
-       mu[n] = Xs[n]*beta
-       + tau_year[species_index[n], endo_index[n], year_t[n]];
+    mu = Xs*beta
+    + tau_year[species_index[n], endo_index[n], year_t[n]];
     }
     // Priors
     beta ~ normal(0,1e6);      // prior for predictor intercepts
-    
-    for(n in 1:nyear){
-    for(e in 1:nEndo){
-    for(s in 1:nSpp){
-    tau_year[s,e,n] ~ normal(0, sigma_0[s,e]); // prior for year random effects
+ for(s in 1:nSpp){
+ for(e in 1:nyear){
+ for(y in 1:nEndo){
+      tau_year[s,e,y] ~ normal(0,sigma_0[s,e]);  // prior for year random effects
     }}}
- 
+
     // Likelihood
       surv_t1 ~ bernoulli_logit(mu);
     }
@@ -173,6 +169,8 @@ cat("
 sink()
 
 stanmodel <- stanc("endodemog_surv_matrix.stan")
+
+
 
 ## Run the model by calling stan()
 ## and save the output to .rds files so that they can be called laters
