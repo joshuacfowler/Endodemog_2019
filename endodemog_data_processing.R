@@ -1760,7 +1760,7 @@ pflw$year<- ifelse(pflw$variable == "Flwtillers1", 2008, ifelse(pflw$variable  =
 
 # View(pflw)
 
-pseedmerge_ss <- merge(pseed, pspike, by = c( "plot", "pos", "tag", "Endo", 
+pseedmerge_ss <- left_join(pspike, pseed, by = c( "plot", "pos", "tag", "Endo", 
                                          "Birth Year","year", "tillerid"))
 # View(pseedmerge_ss)
 
@@ -1810,7 +1810,7 @@ rflw$year<- ifelse(rflw$variable == "FLWtiller10", 2010, ifelse(rflw$variable ==
 # View(rflw)
 
 
-rseedmerge_ss <- merge(rseed, rspike, by = c( "plot", "pos", "tag", "Endo", 
+rseedmerge_ss <- left_join(rspike, rseed, by = c( "plot", "pos", "tag", "Endo", 
                                               "Birth Year","year", "tillerid"))
 # View(rseedmerge_ss)
 
@@ -1869,7 +1869,7 @@ poldflw <- POAL_data_old %>%
 poldflw$year<- ifelse(poldflw$variable == "Flwtillers1", 2008, ifelse(poldflw$variable  == "FlwTillers3", 2009, ifelse(poldflw$variable  == "FlwTillers4", 2010, ifelse(poldflw$variable  == "FlwTillers5", 2011, ifelse(poldflw$variable  == "FlwTillers6", 2012, ifelse(poldflw$variable  == "FlwTillers7", 2013,ifelse(poldflw$variable == "FlwTillers8", 2014,ifelse(poldflw$variable == "FlwTillers9", 2015,ifelse(poldflw$variable  == "FlwTillers10", 2016, NA)))))))))
 # View(poldflw)
 
-pold_seedmerge_ss <- merge(pold_seed, pold_spike, by = c( "plot", "pos", "tag", "Endo", 
+pold_seedmerge_ss <- left_join(pold_spike, pold_seed, by = c( "plot", "pos", "tag", "Endo", 
                                                           "Birth Year","year", "tillerid"))
 # View(pold_seedmerge_ss)
 
@@ -1920,7 +1920,7 @@ roldflw <- POAL_data_old_r %>%
 roldflw$year<- ifelse(roldflw$variable == "FLWTiller09", 2009, ifelse(roldflw$variable == "FLWtiller10", 2010, ifelse(roldflw$variable == "FLWtiller11", 2011, ifelse(roldflw$variable  == "FLWtiller12", 2012, ifelse(roldflw$variable  == "FLWtiller13", 2013, ifelse(roldflw$variable  == "FLWtiller14", 2014, ifelse(roldflw$variable  == "FLWtiller15", 2015, ifelse(roldflw$variable  == "FLWtiller16", 2016, NA))))))))
 # View(roldflw)
 
-rold_seedmerge_ss <- merge(rold_seed, rold_spike, by = c( "plot", "pos", "tag", "Endo", 
+rold_seedmerge_ss <- left_join(rold_spike, rold_seed, by = c( "plot", "pos", "tag", "Endo", 
                                                           "Birth Year","year", "tillerid"))
 # View(rold_seedmerge_ss)
 
@@ -1982,8 +1982,317 @@ POALrepro_2 <- POALrepro_t1 %>%
 
 
 
+
+
+# Combining seed productions measurements across years for the “New” POSY data -------------
+
+## recoding for the year of measurement
+## merging these measurements into one dataframe
+po_seed <- POSY_data %>% 
+  mutate("Birth Year" = year(as.character(`Planted Date`))) %>% 
+  mutate(seed2008 = NA, seed2010 = NA, seed2011 = NA, seed2012 = NA, seed2013 = NA, seed2014 = NA, seed2015 = NA) %>% 
+  melt(id.var = c("plot","pos", "tag", "Endo", "Birth Year"),
+       measure.var = c("seed2008", "seeds_InflA2", "seeds_InflB2", 
+                       "seed2010", "seed2011", "seed2012", "seed2013", 
+                       "seed2014", "seed2015"),
+       value.name = "seed") %>% 
+  mutate(tillerid = case_when(grepl("A", variable) ~ "A", 
+                              grepl("B",variable) ~ "B",
+                              grepl("C", variable) ~ "C"))
+         
+
+po_seed$year<- ifelse(po_seed$variable == "seed2008", 2008,ifelse(po_seed$variable == "seeds_InflA2", 2009, ifelse(po_seed$variable  == "seeds_InflB2", 2009, ifelse(po_seed$variable  == "seed2010", 2010, ifelse(po_seed$variable  == "seed2011", 2011, ifelse(po_seed$variable  == "seed2012", 2012, ifelse(po_seed$variable  == "seed2013", 2013,ifelse(po_seed$variable == "seed2014", 2014,ifelse(po_seed$variable == "seed2015", 2015,ifelse(po_seed$variable  == "seed2016", 2016, NA))))))))))
+
+
+# View(po_seed)
+
+po_spike <- POSY_data %>% 
+  mutate("Birth Year" = year(as.character(`Planted Date`))) %>% 
+  mutate(spike2008 = NA) %>% 
+  melt(id.var = c("plot","pos", "tag", "Endo", "Birth Year"),
+       measure.var = c("spike2008", "spikelets_InflA2", "spikelets_InflB2", "spikelets_inflA3", 
+                       "spikelets_inflB3", "spikelets_inflA4","spikelets_inflB4",
+                       "spikelets_inflA5", "spikelets_inflA6", "spikelets_InflB6", 
+                       "spikelets_inflC6", "spikelets_inflA7", "spikelets_InflB7", 
+                       "spikelets_inflC7","spikelets_inflA8", "spikelets_InflB8", 
+                       "spikelets_inflC8"),
+       value.name = "spikelets") %>% 
+  mutate(tillerid = case_when(grepl("A", variable) ~ "A", 
+                              grepl("B", variable) ~ "B",
+                              grepl("C", variable) ~ "C"))
+po_spike$year<- ifelse(po_spike$variable == "spike2008", 2008,ifelse(po_spike$variable == "spikelets_InflA2", 2009, ifelse(po_spike$variable  == "spikelets_InflB2", 2009, ifelse(po_spike$variable  == "spikelets_inflA3", 2010, ifelse(po_spike$variable  == "spikelets_inflB3", 2010, ifelse(po_spike$variable  == "spikelets_inflB3", 2010, ifelse(po_spike$variable  == "spikelets_inflA4", 2011, ifelse(po_spike$variable == "spikelets_inflB4", 2011, ifelse(po_spike$variable == "spikelets_inflA5", 2012,ifelse(po_spike$variable == "spikelets_inflA6", 2013, ifelse(po_spike$variable == "spikelets_InflB6", 2013, ifelse(po_spike$variable == "spikelets_inflC6", 2013, ifelse(po_spike$variable  == "spikelets_inflA7", 2014, ifelse(po_spike$variable == "spikelets_InflB7", 2014, ifelse(po_spike$variable == "spikelets_inflC7", 2014, ifelse(po_spike$variable == "spikelets_inflA8", 2015, ifelse(po_spike$variable == "spikelets_InflB8", 2015, ifelse(po_spike$variable ==   "spikelets_inflC8", 2015, ifelse(po_spike$variable == "spikelets_inflA9", 2016, ifelse(po_spike$variable == "spikelets_InflB9", 2016, ifelse(po_spike$variable == "spikelets_inflC9", 2016, NA)))))))))))))))))))))
+# View(po_spike)
+
+
+
+po_flw <- POSY_data %>% 
+  mutate("Birth Year" = year(as.character(`Planted Date`))) %>% 
+  melt(id.var = c("plot","pos", "tag", "Endo", "Birth Year"), 
+       measure.var = c("Flwtillers1", "FlwTillers2", "FlwTillers3", 
+                       "FlwTillers4", "FlwTillers5", "FlwTillers6", 
+                       "FlwTillers7", "FlwTillers8"), 
+       value.name = "flw") 
+po_flw$year<- ifelse(po_flw$variable == "Flwtillers1", 2008, ifelse(po_flw$variable  == "FlwTillers2", 2009, ifelse(po_flw$variable  == "FlwTillers3", 2010, ifelse(po_flw$variable  == "FlwTillers4", 2011, ifelse(po_flw$variable  == "FlwTillers5", 2012, ifelse(po_flw$variable  == "FlwTillers6", 2013,ifelse(po_flw$variable == "FlwTillers7", 2014,ifelse(po_flw$variable == "FlwTillers8", 2015,ifelse(po_flw$variable  == "FlwTillers9", 2016, NA)))))))))
+# View(po_flw)
+
+po_seedmerge_ss <- left_join(po_spike, po_seed, by = c("plot", "pos", "tag", "Endo", 
+                                                   "Birth Year","year","tillerid"))
+# View(po_seedmerge_ss)
+
+
+po_seedmerge_ssf <- merge(po_seedmerge_ss,po_flw, by = c("plot", "pos", "tag", "Endo", 
+                                                          "Birth Year","year"))
+
+# View(po_seedmerge_ssf)
+
+
+
+
+# Combining measurements across years for the "New" POSY recruits data ---------------
+
+
+## Combining measurements across years for the recruits data
+## recoding for the year of measurement
+## merging these measurements into one dataframe
+po_rseed <- POSY_data_r %>% 
+  rename("Birth Year" = "Date", "tag" = "Tag", "plot" = "Plot", "pos" = "RecruitNo") %>% 
+  mutate(seed2009 = NA, seed2010 = NA, seed2011 = NA, seed2012 = NA, seed2013 = NA, seed2014 = NA, seed2015 = NA, seed2016 = NA) %>% 
+  melt(id.var = c("plot","pos", "tag", "Endo", "Birth Year"),
+       measure.var = c("seed2009", "seed2010", "seed2011",
+                       "seed2012", "seed2013", "seed2014", 
+                       "seed2015", "seed2016"),
+       value.name = "seed") %>% 
+  mutate(tillerid = case_when(grepl("A", variable) ~ "A", 
+                              grepl("B",variable) ~ "B",
+                              grepl("C", variable) ~ "C"))
+
+
+po_rseed$year<- ifelse(po_rseed$variable == "seed", 2009, ifelse(po_rseed$variable  == "seed2010", 2010, ifelse(po_rseed$variable  == "seed2011", 2011, ifelse(po_rseed$variable  == "seed2012", 2012, ifelse(po_rseed$variable  == "seed2013", 2013,ifelse(po_rseed$variable == "seed2014", 2014,ifelse(po_rseed$variable == "seed2015", 2015,ifelse(po_rseed$variable  == "seed2016", 2016, NA))))))))
+
+
+# View(po_rseed)
+
+po_rspike <- POSY_data_r %>% 
+  rename("Birth Year" = "Date", "tag" = "Tag", "plot" = "Plot", "pos" = "RecruitNo") %>% 
+  mutate(spike_2009 = NA, spike_2010 = NA, spike_2011 = NA,) %>% 
+  melt(id.var = c("plot","pos", "tag", "Endo", "Birth Year"),
+       measure.var = c("spike_2009", "spike_2010", "spike_2011", 
+                       "spikelets_inflA5", "spikelets_inflA5__1", 
+                       "spikelets_infl14","spike1", "spike2", 
+                       "spike3", "spike1__1", "spike2__1", "spike3__1"),
+       value.name = "spikelets") %>% 
+  mutate(tillerid = case_when(grepl("spike1", variable) ~ "A", 
+                              grepl("spike2", variable) ~ "B",
+                              grepl("spike3", variable) ~ "C"))
+po_rspike$year<- ifelse(po_rspike$variable  == "spike_2009", 2009, ifelse(po_rspike$variable  == "spike_2010", 2010, ifelse(po_rspike$variable == "spike_2011", 2011, ifelse(po_rspike$variable  == "spikelets_inflA5", 2012, ifelse(po_rspike$variable == "spikelets_inflA5__1", 2013, ifelse(po_rspike$variable == "spikelets_InflB6", 2013, ifelse(po_rspike$variable == "spikelets_inflC6", 2013, ifelse(po_rspike$variable  == "spikelets_infl14", 2014, ifelse(po_rspike$variable == "spike1", 2015, ifelse(po_rspike$variable == "spike2", 2015, ifelse(po_rspike$variable ==   "spike3", 2015, ifelse(po_rspike$variable == "spike1__1", 2016, ifelse(po_rspike$variable == "spike2__1", 2016, ifelse(po_rspike$variable == "spike3__1", 2016, NA))))))))))))))
+# View(po_rspike)
+
+
+
+po_rflw <- POSY_data_r %>%
+  rename("Birth Year" = "Date", "tag" = "Tag", "plot" = "Plot", "pos" = "RecruitNo") %>%
+  mutate(FLWtiller09 = NA) %>% 
+  melt(id.var = c("plot", "pos", "tag", "Endo", "Birth Year"),
+       measure.var = c( "FLWtiller09", "FLWtiller10","FLWtiller11", "FLWtiller12", 
+                       "FLWtiller13", "FLWtiller14", "FLWtiller15",
+                       "FLWtiller16"),
+       value.name = "flw") 
+po_rflw$year<- ifelse(po_rflw$variable == "FLWtiller09", 2009, ifelse(po_rflw$variable == "FLWtiller10", 2010, ifelse(po_rflw$variable == "FLWtiller11", 2011, ifelse(po_rflw$variable  == "FLWtiller12", 2012, ifelse(po_rflw$variable  == "FLWtiller13", 2013, ifelse(po_rflw$variable  == "FLWtiller14", 2014, ifelse(po_rflw$variable  == "FLWtiller15", 2015, ifelse(po_rflw$variable  == "FLWtiller16", 2016, NA))))))))
+po_rflw$flw <- ifelse(grepl("09", po_rflw$`Birth Year`) & grepl("09", po_rflw$variable), 0, NA)
+# View(po_rflw)
+
+
+po_rmerge_ss <- left_join(po_rspike, po_rseed, by = c( "plot", "pos", "tag", "Endo", "Birth Year", "year"))
+# View(po_rmerge_ss)
+
+po_rmerge_ssf <- merge(po_rmerge_ss, po_rflw, by = c("plot", "pos", "tag", "Endo", "Birth Year", "year"))
+# View(po_rmerge_ssf)
+
+
+
+
+
+
+# Combining measurements across years for the “Old” POSY data ------------------
+
+
+## Combining data across years from the "Old" excel sheet
+## recoding the values for year
+## Merging these into one dataframe
+po_oldsurv <- POSY_data_old %>%
+  rename("Birth Year" = "Date", "plot" = "PLOT", "pos" = "POS", "tag" = "TAG") %>%
+  melt(id.var = c("plot","pos", "tag", "Endo", "Loc'n", 
+                  "Birth Year", "TRT", "Plant"),
+       measure.var = c("survive1", "survive3", "survive4", 
+                       "survive5", "Survive6", "survive7", 
+                       "survive8", "survive9", "survive10"),
+       value.name = "surv") 
+po_oldsurv$year<- ifelse(po_oldsurv$variable == "survive1", 2008, ifelse(po_oldsurv$variable  == "survive3", 2009, ifelse(po_oldsurv$variable  == "survive4", 2010, ifelse(po_oldsurv$variable  == "survive5", 2011, ifelse(po_oldsurv$variable  == "Survive6", 2012, ifelse(po_oldsurv$variable  == "survive7", 2013,ifelse(po_oldsurv$variable == "survive8", 2014,ifelse(po_oldsurv$variable == "survive9", 2015,ifelse(po_oldsurv$variable  == "survive10", 2016, NA)))))))))
+# View(po_oldsurv)
+
+po_oldgrow <- POSY_data_old %>% 
+  rename("Birth Year" = "Date", "plot" = "PLOT", "pos" = "POS", "tag" = "TAG") %>% 
+  melt(id.var = c("plot","pos", "tag", "Endo", "Loc'n", 
+                  "Birth Year", "TRT", "Plant"), 
+       measure.var = c("TotTillers1", "TotTillers3","TotTillers4", 
+                       "TotTillers5", "TotTillers6","TotTillers7", 
+                       "TotTillers8", "TotTillers9", "TotTillers10"), 
+       value.name = "size") 
+po_oldgrow$year<- ifelse(po_oldgrow$variable == "TotTillers1", 2008, ifelse(po_oldgrow$variable  == "TotTillers3", 2009, ifelse(po_oldgrow$variable  == "TotTillers4", 2010, ifelse(po_oldgrow$variable  == "TotTillers5", 2011, ifelse(po_oldgrow$variable  == "TotTillers6", 2012, ifelse(po_oldgrow$variable  == "TotTillers7", 2013, ifelse(po_oldgrow$variable == "TotTillers8", 2014, ifelse(po_oldgrow$variable == "TotTillers9", 2015, ifelse(po_oldgrow$variable  == "TotTillers10", 2016, NA)))))))))
+# View(po_oldgrow)
+
+po_oldflw <- POSY_data_old %>% 
+  rename("Birth Year" = "Date", "plot" = "PLOT", "pos" = "POS", "tag" = "TAG") %>% 
+  melt(id.var = c("plot","pos", "tag", "Endo", "Loc'n",
+                  "Birth Year", "TRT", "Plant"), 
+       measure.var = c("FlwTillers1", "FlwTillers3", "FlwTillers4", 
+                       "FlwTillers5", "FlwTillers6", "FlwTillers7", 
+                       "FlwTillers8", "FlwTillers9", "FlwTillers10"), 
+       value.name = "flw") 
+po_oldflw$year<- ifelse(po_oldflw$variable == "FlwTillers1", 2008, ifelse(po_oldflw$variable  == "FlwTillers3", 2009, ifelse(po_oldflw$variable  == "FlwTillers4", 2010, ifelse(po_oldflw$variable  == "FlwTillers5", 2011, ifelse(po_oldflw$variable  == "FlwTillers6", 2012, ifelse(po_oldflw$variable  == "FlwTillers7", 2013,ifelse(po_oldflw$variable == "FlwTillers8", 2014,ifelse(po_oldflw$variable == "FlwTillers9", 2015,ifelse(po_oldflw$variable  == "FlwTillers10", 2016, NA)))))))))
+# View(po_oldflw)
+
+
+po_oldmerge_sg <- merge(po_oldsurv, po_oldgrow, by = c( "plot","pos", "tag", "Endo", 
+                                                        "Loc'n", "Birth Year", "TRT",
+                                                        "Plant", "year"))
+# View(po_oldmerge_sg)
+
+po_oldmerge_sgf <- merge(po_oldmerge_sg, po_oldflw, by = c( "plot","pos", "tag", "Endo", 
+                                                            "Loc'n", "Birth Year", "TRT",
+                                                            "Plant", "year"))
+# View(po_ldmerge_sgf)
+
+# getting a dataframe with t and t_1
+po_oldmerge_t1 <-po_oldmerge_sgf %>%
+  filter(year!= min(year)) %>% 
+  rename(year_t1 = year, surv_t1 = surv, size_t1 = size, flw_t1 = flw) %>%  
+  mutate(year_t = year_t1 - 1)
+# View(po_oldmerge_t1)
+
+po_oldmerge_t <-po_oldmerge_sgf %>%
+  filter(year != max(year)) %>% 
+  select(-surv) %>% 
+  rename(year_t = year, size_t = size, flw_t = flw) 
+# View(po_oldmerge_t)
+
+po_oldmerge <- po_oldmerge_t1 %>% 
+  full_join(po_oldmerge_t, by = c("plot","pos", "tag", "Endo", 
+                                  "Loc'n", "Birth Year", "TRT",
+                                  "Plant", "year_t"), all.x = all, all.y = all) %>% 
+  select(-contains("variable")) %>% 
+  mutate(origin = 0) %>% 
+  mutate(`Birth Year` = year(`Birth Year`))
+# View(po_oldmerge)
+
+
+# Combining measurements across years for the “Old” POSY recruits data --------
+
+## Combining data for recruits across years from the "Old" excel sheet
+## recoding the values for year
+## Merging these into one dataframe
+po_roldsurv <- POSY_data_old_r %>%
+  rename("Birth Year" = "Date", "tag" = "Tag", "plot" = "Plot", "pos" = "RecruitNo") %>% 
+  mutate(survive09 = "NA") %>% 
+  melt(id.var = c("plot", "pos", "tag", "Endo", "Birth Year"),
+       measure.var = c("survive09", "survive10", "survive11", "survive12", "survive13", "Survive14", 
+                       "Survive15", "Survive16"),
+       value.name = "surv") 
+po_roldsurv$year<- ifelse(po_roldsurv$variable == "survive09", 2009, ifelse(po_roldsurv$variable == "survive10", 2010, ifelse(po_roldsurv$variable == "survive11", 2011, ifelse(po_roldsurv$variable  == "survive12", 2012, ifelse(po_roldsurv$variable  == "survive13", 2013, ifelse(po_roldsurv$variable  == "Survive14", 2014, ifelse(po_roldsurv$variable  == "Survive15", 2015, ifelse(po_roldsurv$variable  == "Survive16", 2016, NA))))))))
+# View(po_roldsurv)
+
+
+po_roldgrow <- POSY_data_old_r %>%
+  rename("Birth Year" = "Date", "tag" = "Tag", "plot" = "Plot", "pos" = "RecruitNo") %>% 
+  melt(id.var = c("plot", "pos", "tag", "Endo", "Birth Year"),
+       measure.var = c("TOTtiller09", "TOTtiller10","TOTtiller11", "TOTtiller12", 
+                       "TOTtiller13", "TOTtiller14", "TOTtiller15", 
+                       "TOTtiller16"),
+       value.name = "size") 
+po_roldgrow$year<- ifelse(po_roldgrow$variable == "TOTtiller09", 2009, ifelse(po_roldgrow$variable == "TOTtiller10", 2010, ifelse(po_roldgrow$variable == "TOTtiller11", 2011, ifelse(po_roldgrow$variable  == "TOTtiller12", 2012, ifelse(po_roldgrow$variable  == "TOTtiller13", 2013, ifelse(po_roldgrow$variable  == "TOTtiller14", 2014, ifelse(po_roldgrow$variable  == "TOTtiller15", 2015, ifelse(po_roldgrow$variable  == "TOTtiller16", 2016, NA))))))))
+# View(po_roldgrow)
+
+po_roldflw <- POSY_data_old_r %>%
+  rename("Birth Year" = "Date", "tag" = "Tag", "plot" = "Plot", "pos" = "RecruitNo") %>% 
+  mutate(FLWtiller09 = NA) %>% 
+  melt(id.var = c("plot", "pos", "tag", "Endo", "Birth Year"),
+       measure.var = c("FLWtiller09", "FLWtiller10","FLWtiller11", "FLWTiller12", 
+                       "FLWTiller13", "FLWtiller14", "FLWtiller15",
+                       "FLWtiller16"),
+       value.name = "flw") 
+po_roldflw$year<- ifelse(po_roldflw$variable == "FLWtiller09", 2009, ifelse(po_roldflw$variable == "FLWtiller10", 2010, ifelse(po_roldflw$variable == "FLWtiller11", 2011, ifelse(po_roldflw$variable  == "FLWTiller12", 2012, ifelse(po_roldflw$variable  == "FLWTiller13", 2013, ifelse(po_roldflw$variable  == "FLWtiller14", 2014, ifelse(po_roldflw$variable  == "FLWtiller15", 2015, ifelse(po_roldflw$variable  == "FLWtiller16", 2016, NA))))))))
+# View(po_roldflw)
+
+po_roldmerge_sg <- merge(po_roldsurv, po_roldgrow, by = c( "plot", "pos", "tag", "Endo", "Birth Year", "year"))
+# View(po_roldmerge_sg)
+
+po_roldmerge_sgf <- merge(po_roldmerge_sg, po_roldflw, by = c("plot", "pos", "tag", "Endo", "Birth Year", "year"))
+# View(po_roldmerge_sgf)
+
+## getting a dataframe with time t and t_1
+po_roldmerge_t1 <-po_roldmerge_sgf %>%
+  filter(year!= min(year)) %>% 
+  rename(year_t1 = year, surv_t1 = surv, size_t1 = size, flw_t1 = flw) %>%  
+  mutate(year_t = year_t1 - 1)
+# View(po_roldmerge_t1)
+
+po_roldmerge_t <-po_roldmerge_sgf %>%
+  filter(year != max(year)) %>% 
+  rename(year_t = year, surv_t = surv, size_t = size, flw_t = flw) 
+# View(po_roldmerge_t)
+
+po_roldmerge <- po_roldmerge_t1 %>% 
+  full_join(po_roldmerge_t, by = c("plot", "pos", "tag", "Endo", "Birth Year", "year_t"),
+            all.x = all, all.y = all) %>% 
+  select(-contains("variable")) %>% 
+  mutate(origin = 1) %>% 
+  mutate(`Loc'n` = NA) %>% 
+  mutate(TRT = NA) %>% 
+  mutate(Plant = NA)
+# View(po_roldmerge)
+
+
+
+
+
+
+# Combining the old and new and original and recruit POSY dataframes ---------
+po_merge <- po_merge[c("plot", "pos", "tag", "Endo", "origin", "Loc'n", "Birth Year",
+                       "TRT", "Plant", "year_t1", "surv_t1", "size_t1", "flw_t1",
+                       "year_t", "size_t", "flw_t")]
+po_ldmerge <- po_oldmerge[c("plot", "pos", "tag", "Endo", "origin", "Loc'n", "Birth Year",
+                            "TRT", "Plant", "year_t1", "surv_t1", "size_t1", "flw_t1",
+                            "year_t", "size_t", "flw_t")]
+po_rmerge <- po_rmerge[c("plot", "pos", "tag", "Endo", "origin", "Loc'n", "Birth Year",
+                         "TRT", "Plant", "year_t1", "surv_t1", "size_t1", "flw_t1",
+                         "year_t", "size_t", "flw_t")]
+po_roldmerge <- po_roldmerge[c("plot", "pos", "tag", "Endo", "origin", "Loc'n", "Birth Year",
+                               "TRT", "Plant", "year_t1", "surv_t1", "size_t1", "flw_t1",
+                               "year_t", "size_t", "flw_t")]
+
+POSY <- po_merge %>% 
+  rbind(po_oldmerge) %>% 
+  rbind(po_roldmerge) %>% 
+  rbind(po_rmerge) %>% 
+  mutate(species = "POSY") %>% 
+  mutate(surv_t1 = ifelse(surv_t1 == 'NA', NA, surv_t1))
+POSY <- POSY[!(is.na(POSY$surv_t1)),]
+
+View(POSY)
+
+
+
+
+
+
+
+
+
 # What we want our final data frame to look like
 LTREB_endodemog <- data.frame(colnames("quad", "species", "origin", "plot", "pos", "id", "surv_t1", "size_t1", "seed_t1", "flower_t1", "size_t", "endo", "birth", "year_t", "year_t1"))
+
+
+
 
 
 
