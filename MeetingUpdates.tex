@@ -13,6 +13,36 @@
   \maketitle
   Tom's comments are in \tom{WildStrawberry}.
 
+\section*{Feb 7, 2019}
+\subsection*{Progress Update}
+\begin{itemize}
+\item{\textbf{Stochastic demography:}
+I have good progress on the flowering and seed data script. Overall, there is flowering tiller information for everything, barring a few NAs from data entry. There is information about the spikelets/inflorescence for a subset of the plants, but this is actually measured, and not estimated. It depends on the plant, but some have one inflorescence measured and some have up to 3 measured. There is seeds/spikelet information for even less plants than for spikelets. In the raw data sheets, there is often seed info, but it is basically just multiplied number of spikelets by some average that was calculated based on the seeds/spikelet data. So the way I am currently pulling in the data is to keep only the seed data that is actually measured. The rest are NA's, and I figure we can calculate that later. 
+
+I have versions written up of the Survival and Flowering status models with the Species parameter. As we talked about, I have been trying to vectorize the  assignment statement for the prior for the year effect. I have gotten it to run with loops, but it is pretty slow, especially for the full dataset, so I think this could be worth doing, and talking to Bene about.
+}
+
+\item{\textbf{Herbarium:}
+Currently, my plan is to follow the procedure that we outlined with Jessica. It sounds like they have good amounts of Lolium perenne, Agrostis hyemalis,  Elymus virginicus and Poa autumnalis. It's possible that they have other grasses, so having a list of possibilities would be useful, but I think it is mostly regional species, and that it is probably easier to get enough material from more common species. Hopefully I can get a bunch of seeds and we will find out if we can see endophytes. 
+
+Before I go up there, I am going to put together a spreadsheet to keep track of what specimens we collect from which herbarium, and record the collection info. Having herbaria that are digitized will probably help us out but I think since we are handling each plant individually, it won't add much time. What time would work for us to chat about this before I go?
+
+Longer term, I think it makes sense to put together candidate herbaria that I want to visit based on their collections, or locations. There will be a fair amount of work to be able to contact them ahead of time and schedule times to visit, and doing this sooner rather than later will be important if I want to do this throughout this semester/summer. Getting a lot of the collecting done this summer is my plan, but we can also continue to visit new herbaria over time because the specimens will still be there.  
+
+I have a general idea that as many plants as possible is good, but maybe we can talk about how many we actually are aiming for. Based on the searching I did through the UT Austin database, It seems like it is not totally uncommon for there to be multiple collections over time within a county. I think this is partially related to the question of how good of an estimate of endophyte prevalence do we have in a location based on one plant. Sometimes there are multiple collections from the same county potentially within the same year or a few years, which would be useful to have, but I think would probably be something that I will need to justify to herbarium directors.}
+
+\item{\textbf{Range Limit project:}
+I've identified research questions and I'm attaching a picture of a sketch of the experimental design. I want to make sure that this is not just asking the question, what is controlling the range limit for these grasses.
+      Questions: 
+                Generally, how do mutualistic biotic interactions contribute to species range limits?
+                Given that they are often context dependent, where do mutualists have the biggest influence?
+
+ Within this picture, I am including 5 sites, but having more is good. By "paired plots" I mean that for each env - competition treatment, we would have an E+ plot and an E- plot that are next to each other, and we would have more than one of these pairs. We can't plant them in the same plot because we want to track the recruits and know the endophyte status. Within the plot, I would have multiple plants that are a random mix of plants collected from across the range. This is opposed to having a plot for each population that we collect from, and having multiple populations planted at each location would minimize the effect of local adaptation. This is also what it would look like for 1 species. I think it would make sense to have separate plots with this same set up for other species. I don't know how difficult it is to id different species as recruits, but I think that we would also have to contend with them competing with each other in that situation.  I also think it would be cool to have multiple transects, one south and one north, but I'm not sure how logistically feasible that is.}
+
+\item{\textbf{Lab Greenhouse project:}
+The green house portion of Michelle Afkhami's range limit paper has a comparison of E+, E-, and E+-, but the treatment is a fungicide. So if I'm reading it correctly, they have natural E+ and E minus, and E+- and E- fungicide. I think it's also not uncommon for people to do at least some sort of comparison between the control and the treatment, although I don't think it is always included in the full experiment, or as a main aim, just that there is often a line to justify that their treatment control is valid.}
+\end{itemize}
+
 \section*{Jan 30, 2019}
 \subsection*{Meeting Overview}
 \textbf{We talked about:}
