@@ -31,10 +31,11 @@ LTREB_data <- LTREB_endodemog %>%
   mutate(size_t, logsize_t = log(size_t)) %>% 
   mutate(size_t1, logsize_t1 = log(size_t1)) %>%  
   mutate(surv_t1 = as.integer(recode(surv_t1, "0" = 0, "1" =1, "2" = 1, "4" = 1))) %>% 
-  mutate(species_index = (recode_factor(species,                   
+  mutate(species_0 = (recode_factor(species,                   
                                        "AGPE" = 1, "ELRI" = 2, "ELVI" = 3, 
                                        "FESU" = 4, "LOAR" = 5, "POAL" = 6, 
-                                       "POSY" = 7))) %>%                              
+                                       "POSY" = 7))) %>%        
+  mutate(species_index = as.integer(species_0)) %>% 
   mutate(year_t_index = as.integer(recode_factor(year_t, 
                                       '2007' = 1, '2008' = 2, '2009' = 3, 
                                       '2010' = 4, '2011' = 5, '2012' = 6, 
@@ -57,6 +58,7 @@ LTREB_data <- LTREB_endodemog %>%
 
 dim(LTREB_data)
 unique(LTREB_data$surv_t1)
+
 # NA's in survival come from mostly 2017 recruits.
 LTREB_data1 <- LTREB_data %>%
   filter(!is.na(surv_t1)) %>% 
@@ -65,9 +67,9 @@ LTREB_data1 <- LTREB_data %>%
   filter(!is.na(endo_01))
   
 dim(LTREB_data1)
-LTREB_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01 + species_index)^3 + origin_01 
+LTREB_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01 + species_0)^3 + origin_01 
                                  , data = LTREB_data1)
-Xs <- model.matrix(surv_t1 ~ (logsize_t + endo_01 + species_index)^3 + origin_01 
+Xs <- model.matrix(surv_t1 ~ (logsize_t + endo_01 + species_0)^3 + origin_01 
                                  , data =LTREB_for_matrix)
 
 
@@ -86,9 +88,27 @@ LTREB_surv_data_list <- list(surv_t1 = LTREB_data1$surv_t1,
 
 str(LTREB_surv_data_list)
 
+LTREB_sample <- sample_n(LTREB_data1, 1000)
+sample_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01 + species_0) + origin_01 
+                                , data = LTREB_sample)
+Xs <- model.matrix(surv_t1 ~ (logsize_t + endo_01 + species_0) + origin_01 
+                   , data =sample_for_matrix)
 
 
+# Create sample data list for Stan model
+sample_surv_data_list <- list(surv_t1 = LTREB_sample$surv_t1,
+                             Xs = Xs,    
+                             endo_index = LTREB_sample$endo_index,
+                             species_index = LTREB_sample$species_index,
+                             year_t = LTREB_sample$year_t_index, 
+                             N = nrow(LTREB_sample), 
+                             K = ncol(Xs), 
+                             nyear = length(unique(LTREB_sample$year_t_index)), 
+                             nEndo =   length(unique(LTREB_sample$endo_01)),
+                             nSpp = length(unique(LTREB_sample$species_index)))
 
+
+str(sample_surv_data_list)
 
 #########################################################################################################
 # GLMM for Surv~ size +Endo + Origin  with year random effects------------------------------
@@ -100,7 +120,7 @@ set.seed(123)
 
 ## MCMC settings
 ni <- 10
-nb <- 5
+nb <- 2
 nc <- 1
 
 # Stan model -------------
@@ -126,27 +146,26 @@ cat("
     
     parameters {
     vector[K] beta;                     // predictor parameters
-    matrix[nEndo,nyear] tau_year[nSpp];      // random year effect
-      
-    real<lower=0> sigma_0[nSpp, nEndo];        //year variance intercept
+    vector[nEndo*nSpp] tau_year[nyear];      // mean random year effect
+    vector<lower=0>[nEndo*nSpp] sigma_0;        //year variance intercept
     }
-
+ 
     model {
+    
     vector[N] mu;
     
     // Linear Predictor
     for(n in 1:N){
     mu = Xs*beta
-    + tau_year[species_index[n], endo_index[n], year_t[n]];
+    + tau_year[year_t[n],endo_index[n]*species_index[n]];
     }
+    
     // Priors
     beta ~ normal(0,1e6);      // prior for predictor intercepts
- for(s in 1:nSpp){
- for(e in 1:nyear){
- for(y in 1:nEndo){
-      tau_year[s,e,y] ~ normal(0,sigma_0[s,e]);  // prior for year random effects
-    }}}
-
+    for(n in 1:nyear){
+    (tau_year[n][]) ~ normal(0,sigma_0[]);
+    }
+   
     // Likelihood
       surv_t1 ~ bernoulli_logit(mu);
     }
@@ -178,8 +197,9 @@ stanmodel <- stanc("endodemog_surv_matrix.stan")
 sm <- stan(file = "endodemog_surv_matrix.stan", data = LTREB_surv_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
 
+print(sm)
 summary(sm)
-print(sm, pars = "sigma_0")
+print(sm, pars = "tau_year")
 
 ## Create dataframes with individual species datasets
 POAL_data <- LTREB_endodemog %>% 
