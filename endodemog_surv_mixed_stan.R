@@ -19,7 +19,7 @@ logit = function(x) { log(x/(1-x)) }
 #############################################################################################
 ## Load in full data frame
 LTREB_endodemog <- 
-  read.csv(file = "endo_demog_long.csv")
+  read.csv(file = "C:/Users/MillerLab/Desktop/Endodemog-master/endo_demog_long.csv")
 
 
 str(LTREB_endodemog)
@@ -31,7 +31,7 @@ LTREB_data <- LTREB_endodemog %>%
   mutate(size_t, logsize_t = log(size_t)) %>% 
   mutate(size_t1, logsize_t1 = log(size_t1)) %>%  
   mutate(surv_t1 = as.integer(recode(surv_t1, "0" = 0, "1" =1, "2" = 1, "4" = 1))) %>% 
-  mutate(species_index = (recode_factor(species,                   
+  mutate(species_index = as.integer(recode_factor(species,                   
                                        "AGPE" = 1, "ELRI" = 2, "ELVI" = 3, 
                                        "FESU" = 4, "LOAR" = 5, "POAL" = 6, 
                                        "POSY" = 7))) %>%                              
@@ -126,9 +126,9 @@ cat("
     
     parameters {
     vector[K] beta;                     // predictor parameters
-    matrix[nEndo,nyear] tau_year[nSpp];      // random year effect
+    vector[nEndo*nSpp] tau_year[nyear];      // random year effect
       
-    real<lower=0> sigma_0[nSpp, nEndo];        //year variance intercept
+    vector<lower=0>[nEndo*nSpp] sigma_0;        //year variance intercept
     }
 
     model {
@@ -137,15 +137,13 @@ cat("
     // Linear Predictor
     for(n in 1:N){
     mu = Xs*beta
-    + tau_year[species_index[n], endo_index[n], year_t[n]];
+    + tau_year[year_t[n],endo_index[n]*species_index[n]];
     }
     // Priors
     beta ~ normal(0,1e6);      // prior for predictor intercepts
- for(s in 1:nSpp){
- for(e in 1:nyear){
- for(y in 1:nEndo){
-      tau_year[s,e,y] ~ normal(0,sigma_0[s,e]);  // prior for year random effects
-    }}}
+ for(n in 1:nyear){
+     tau_year[n,] ~ normal(0,sigma_0[]); // prior for year random effects
+    }
 
     // Likelihood
       surv_t1 ~ bernoulli_logit(mu);
@@ -180,6 +178,12 @@ sm <- stan(file = "endodemog_surv_matrix.stan", data = LTREB_surv_data_list,
 
 summary(sm)
 print(sm, pars = "sigma_0")
+
+
+
+
+
+
 
 ## Create dataframes with individual species datasets
 POAL_data <- LTREB_endodemog %>% 
