@@ -19,7 +19,7 @@ logit = function(x) { log(x/(1-x)) }
 #############################################################################################
 ## Load in full data frame
 LTREB_endodemog <- 
-  read.csv(file = "C:/Users/MillerLab/Desktop/Endodemog-master/endo_demog_long.csv")
+  read.csv(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Fulldataplusmetadata/endo_demog_long.csv")
 
 
 str(LTREB_endodemog)
@@ -31,11 +31,14 @@ LTREB_data <- LTREB_endodemog %>%
   mutate(size_t, logsize_t = log(size_t)) %>% 
   mutate(size_t1, logsize_t1 = log(size_t1)) %>%  
   mutate(surv_t1 = as.integer(recode(surv_t1, "0" = 0, "1" =1, "2" = 1, "4" = 1))) %>% 
-  mutate(species_index = recode_factor(species,                   
+  mutate(endo_01 = case_when(endo == "0" | endo == "minus" ~ 0,
+                             endo == "1"| endo =="plus" ~ 1)) %>% 
+  mutate(endo_index = as.integer(as.factor(endo_01+1)))  %>% 
+  mutate(species_index = as.integer(recode_factor(species,                   
                                        "AGPE" = 1, "ELRI" = 2, "ELVI" = 3, 
                                        "FESU" = 4, "LOAR" = 5, "POAL" = 6, 
-                                       "POSY" = 7))) %>%   
-  mutate(speciesbyendo_index = as.integer(species_index))
+                                       "POSY" = 7))) %>% 
+  mutate(spp_endo_index = as.integer(interaction(species_index,endo_index))) %>% 
   mutate(year_t_index = as.integer(recode_factor(year_t, 
                                       '2007' = 1, '2008' = 2, '2009' = 3, 
                                       '2010' = 4, '2011' = 5, '2012' = 6, 
@@ -51,13 +54,9 @@ LTREB_data <- LTREB_endodemog %>%
                                           origin != "R" | origin != "O" ~ 1))) %>%   
   mutate(plot_fixed = (case_when(plot != "R" ~ plot, 
                                  plot == "R" ~ origin))) %>%                         
-  mutate(plot_index = as.integer(as.factor(plot_fixed))) %>%                         
-  mutate(endo_01 = case_when(endo == "0" | endo == "minus" ~ 0,
-                             endo == "1"| endo =="plus" ~ 1)) %>% 
-  mutate(endo_index = as.integer(as.factor(endo_01+1)))                              
+  mutate(plot_index = as.integer(as.factor(plot_fixed)))                     
 
 dim(LTREB_data)
-unique(LTREB_data$surv_t1)
 
 # NA's in survival come from mostly 2017 recruits.
 LTREB_data1 <- LTREB_data %>%
@@ -78,7 +77,7 @@ LTREB_surv_data_list <- list(surv_t1 = LTREB_data1$surv_t1,
                              Xs = Xs,    
                              endo_index = LTREB_data1$endo_index,
                              species_index = LTREB_data1$species_index,
-                             speciesbyendo_index = LTREB_data1$speciesbyendo_index
+                             spp_endo_index = LTREB_data1$spp_endo_index,
                              year_t = LTREB_data1$year_t_index, 
                              N = nrow(LTREB_data1), 
                              K = ncol(Xs), 
@@ -89,10 +88,10 @@ LTREB_surv_data_list <- list(surv_t1 = LTREB_data1$surv_t1,
 
 str(LTREB_surv_data_list)
 
-LTREB_sample <- sample_n(LTREB_data1, 1000)
-sample_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01 + species_0) + origin_01 
+LTREB_sample <- sample_n(LTREB_data1, 2000)
+sample_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01 + species)^3 + origin_01 
                                 , data = LTREB_sample)
-Xs <- model.matrix(surv_t1 ~ (logsize_t + endo_01 + species_0) + origin_01 
+Xs <- model.matrix(surv_t1 ~ (logsize_t + endo_01 + species)^3 + origin_01 
                    , data =sample_for_matrix)
 
 
@@ -101,6 +100,7 @@ sample_surv_data_list <- list(surv_t1 = LTREB_sample$surv_t1,
                              Xs = Xs,    
                              endo_index = LTREB_sample$endo_index,
                              species_index = LTREB_sample$species_index,
+                             spp_endo_index = LTREB_sample$spp_endo_index,
                              year_t = LTREB_sample$year_t_index, 
                              N = nrow(LTREB_sample), 
                              K = ncol(Xs), 
@@ -121,7 +121,7 @@ set.seed(123)
 
 ## MCMC settings
 ni <- 10
-nb <- 2
+nb <- 5
 nc <- 1
 
 # Stan model -------------
@@ -139,8 +139,7 @@ cat("
     int<lower=0> year_t[N];                      // year of observation
     int<lower=0> nEndo;                       // number of endo treatments
     int<lower=0> nSpp;                         // number of species
-    int<lower=1, upper=2> endo_index[N];       // index for endophyte effect
-    int<lower=1, upper=7> species_index[N];  // index for species effect
+    int<lower=1, upper=14> spp_endo_index[N]; // index for endophyte effect by species
     int<lower=0, upper=1> surv_t1[N];      // plant survival at time t+1 and target variable (response)
     matrix[N,K] Xs;                  //  predictor matrix - surv_t1~logsize_t+endo+origin+logsize_t*endo
     }
@@ -160,7 +159,7 @@ cat("
     // Linear Predictor
     for(n in 1:N){
     mu = Xs*beta
-    + tau_year[year_t[n],endo_index[n]*species_index[n]];
+    + tau_year[year_t[n],spp_endo_index[n]];
     }
     
     // Priors
@@ -198,7 +197,7 @@ stanmodel <- stanc("endodemog_surv_matrix.stan")
 ## Run the model by calling stan()
 ## and save the output to .rds files so that they can be called laters
 
-sm <- stan(file = "endodemog_surv_matrix.stan", data = LTREB_surv_data_list,
+sm <- stan(file = "endodemog_surv_matrix.stan", data = sample_surv_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
 
 print(sm)
