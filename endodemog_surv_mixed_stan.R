@@ -31,12 +31,11 @@ LTREB_data <- LTREB_endodemog %>%
   mutate(size_t, logsize_t = log(size_t)) %>% 
   mutate(size_t1, logsize_t1 = log(size_t1)) %>%  
   mutate(surv_t1 = as.integer(recode(surv_t1, "0" = 0, "1" =1, "2" = 1, "4" = 1))) %>% 
-
-  mutate(species_index = as.integer(recode_factor(species,                   
+  mutate(species_index = recode_factor(species,                   
                                        "AGPE" = 1, "ELRI" = 2, "ELVI" = 3, 
                                        "FESU" = 4, "LOAR" = 5, "POAL" = 6, 
-                                       "POSY" = 7))) %>%        
-  mutate(species_index = as.integer(species_0)) %>% 
+                                       "POSY" = 7))) %>%   
+  mutate(speciesbyendo_index = as.integer(species_index))
   mutate(year_t_index = as.integer(recode_factor(year_t, 
                                       '2007' = 1, '2008' = 2, '2009' = 3, 
                                       '2010' = 4, '2011' = 5, '2012' = 6, 
@@ -68,9 +67,9 @@ LTREB_data1 <- LTREB_data %>%
   filter(!is.na(endo_01))
   
 dim(LTREB_data1)
-LTREB_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01 + species_0)^3 + origin_01 
+LTREB_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01 + species)^3 + origin_01 
                                  , data = LTREB_data1)
-Xs <- model.matrix(surv_t1 ~ (logsize_t + endo_01 + species_0)^3 + origin_01 
+Xs <- model.matrix(surv_t1 ~ (logsize_t + endo_01 + species)^3 + origin_01 
                                  , data =LTREB_for_matrix)
 
 
@@ -79,6 +78,7 @@ LTREB_surv_data_list <- list(surv_t1 = LTREB_data1$surv_t1,
                              Xs = Xs,    
                              endo_index = LTREB_data1$endo_index,
                              species_index = LTREB_data1$species_index,
+                             speciesbyendo_index = LTREB_data1$speciesbyendo_index
                              year_t = LTREB_data1$year_t_index, 
                              N = nrow(LTREB_data1), 
                              K = ncol(Xs), 
