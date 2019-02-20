@@ -87,8 +87,8 @@ LTREB_surv_data_list <- list(surv_t1 = LTREB_data1$surv_t1,
   
 
 str(LTREB_surv_data_list)
-
-LTREB_sample <- sample_n(LTREB_data1, 2000)
+# take sample from dataset.
+LTREB_sample <- sample_n(LTREB_data1, 1000)
 sample_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01 + species)^3 + origin_01 
                                 , data = LTREB_sample)
 Xs <- model.matrix(surv_t1 ~ (logsize_t + endo_01 + species)^3 + origin_01 
@@ -136,7 +136,7 @@ cat("
     int<lower=0> K;                       // number of predictors
     
     int<lower=0> nyear;                       // number of years (used as index)
-    int<lower=0> year_t[N];                      // year of observation
+    int<lower=0, upper=11> year_t[N];                      // year of observation
     int<lower=0> nEndo;                       // number of endo treatments
     int<lower=0> nSpp;                         // number of species
     int<lower=1, upper=14> spp_endo_index[N]; // index for endophyte effect by species
@@ -144,12 +144,17 @@ cat("
     matrix[N,K] Xs;                  //  predictor matrix - surv_t1~logsize_t+endo+origin+logsize_t*endo
     }
     
+    transformed data{
+    int <lower=0> nSppEndo;
+    nSppEndo = nSpp*nEndo;
+    }
+    
     parameters {
     vector[K] beta;                     // predictor parameters
 
-    vector[nEndo*nSpp] tau_year[nyear];      // random year effect
+    vector[nyear] tau_year[nSppEndo];      // random year effect
       
-    vector<lower=0>[nEndo*nSpp] sigma_0;        //year variance intercept
+    real<lower=0> sigma_0[nSppEndo];        //year variance intercept
     }
  
     model {
@@ -159,17 +164,17 @@ cat("
     // Linear Predictor
     for(n in 1:N){
     mu = Xs*beta
-    + tau_year[year_t[n],spp_endo_index[n]];
+    + tau_year[spp_endo_index[n],year_t[n]];
     }
     
     // Priors
-    beta ~ normal(0,1e6);      // prior for predictor intercepts
- for(n in 1:nyear){
-     tau_year[n,] ~ normal(0,sigma_0[]); // prior for year random effects
-    }
+    beta ~ normal(0,100);      // prior for predictor intercepts
+    for(n in 1:nyear)
+    to_vector(tau_year[,n]) ~ normal(0,sigma_0); // prior for year random effects
 
-   
-    // Likelihood
+    
+    
+        // Likelihood
       surv_t1 ~ bernoulli_logit(mu);
     }
     
@@ -179,7 +184,7 @@ cat("
     
     // for posterior predictive check
     //for(n in 1:N){
-     // mu[n] = Xs[n]*beta
+    // mu[n] = Xs[n]*beta
     //   + tau_year[endo_index[n], year_t[n]];
       
     //  yrep[n] = bernoulli_logit_rng(mu[n]);
