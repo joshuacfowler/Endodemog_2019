@@ -19,9 +19,10 @@ logit = function(x) { log(x/(1-x)) }
 #############################################################################################
 ## Load in full data frame
 LTREB_endodemog <- 
-  read.csv(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Fulldataplusmetadata/endo_demog_long.csv")
+  read.csv(file = "C:/Users/MillerLab/Desktop/Endodemog-master/endo_demog_long.csv")
 
-
+#"C:/Users/MillerLab/Desktop/Endodemog-master/endo_demog_long.csv"
+#"/Users/joshuacfowler/Dropbox/EndodemogData/Fulldataplusmetadata/endo_demog_long.csv")
 str(LTREB_endodemog)
 dim(LTREB_endodemog)
 
@@ -66,9 +67,9 @@ LTREB_data1 <- LTREB_data %>%
   filter(!is.na(endo_01))
   
 dim(LTREB_data1)
-LTREB_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01 + species)^3 + origin_01 
+LTREB_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01 + species)^2 + origin_01 
                                  , data = LTREB_data1)
-Xs <- model.matrix(surv_t1 ~ (logsize_t + endo_01 + species)^3 + origin_01 
+Xs <- model.matrix(surv_t1 ~ (logsize_t + endo_01 + species)^2 + origin_01 
                                  , data =LTREB_for_matrix)
 
 
@@ -88,10 +89,10 @@ LTREB_surv_data_list <- list(surv_t1 = LTREB_data1$surv_t1,
 
 str(LTREB_surv_data_list)
 
-LTREB_sample <- sample_n(LTREB_data1, 2000)
-sample_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01 + species)^3 + origin_01 
+LTREB_sample <- sample_n(LTREB_data1, 1000)
+sample_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01 + species)^2 + origin_01 
                                 , data = LTREB_sample)
-Xs <- model.matrix(surv_t1 ~ (logsize_t + endo_01 + species)^3 + origin_01 
+Xs <- model.matrix(surv_t1 ~ (logsize_t + endo_01 + species)^2 + origin_01 
                    , data =sample_for_matrix)
 
 
@@ -120,8 +121,8 @@ options(mc.cores = parallel::detectCores())
 set.seed(123)
 
 ## MCMC settings
-ni <- 10
-nb <- 5
+ni <- 5
+nb <- 2
 nc <- 1
 
 # Stan model -------------
@@ -197,7 +198,7 @@ stanmodel <- stanc("endodemog_surv_matrix.stan")
 ## Run the model by calling stan()
 ## and save the output to .rds files so that they can be called laters
 
-sm <- stan(file = "endodemog_surv_matrix.stan", data = sample_surv_data_list,
+sm <- stan(file = "endodemog_surv_matrix.stan", data = LTREB_surv_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
 
 print(sm)
