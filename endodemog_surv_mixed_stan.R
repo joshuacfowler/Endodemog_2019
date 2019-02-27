@@ -19,9 +19,10 @@ logit = function(x) { log(x/(1-x)) }
 #############################################################################################
 ## Load in full data frame
 LTREB_endodemog <- 
-  read.csv(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Fulldataplusmetadata/endo_demog_long.csv")
+  read.csv(file = "C:/Users/MillerLab/Desktop/Endodemog-master/endo_demog_long.csv")
 
-
+#"C:/Users/MillerLab/Desktop/Endodemog-master/endo_demog_long.csv"
+#"/Users/joshuacfowler/Dropbox/EndodemogData/Fulldataplusmetadata/endo_demog_long.csv")
 str(LTREB_endodemog)
 dim(LTREB_endodemog)
 
@@ -67,9 +68,9 @@ LTREB_data1 <- LTREB_data %>%
   filter(!is.na(endo_01))
   
 dim(LTREB_data1)
-LTREB_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01 + species)^3 + origin_01 
+LTREB_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01 + species)^2 + origin_01 
                                  , data = LTREB_data1)
-Xs <- model.matrix(surv_t1 ~ (logsize_t + endo_01 + species)^3 + origin_01 
+Xs <- model.matrix(surv_t1 ~ (logsize_t + endo_01 + species)^2 + origin_01 
                                  , data =LTREB_for_matrix)
 
 
@@ -89,11 +90,11 @@ LTREB_surv_data_list <- list(surv_t1 = LTREB_data1$surv_t1,
   
 
 str(LTREB_surv_data_list)
-# take sample from dataset.
+
 LTREB_sample <- sample_n(LTREB_data1, 1000)
-sample_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01 + species)^3 + origin_01 
+sample_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01 + species)^2 + origin_01 
                                 , data = LTREB_sample)
-Xs <- model.matrix(surv_t1 ~ (logsize_t + endo_01 + species)^3 + origin_01 
+Xs <- model.matrix(surv_t1 ~ (logsize_t + endo_01 + species)^2 + origin_01 
                    , data =sample_for_matrix)
 
 
@@ -123,8 +124,8 @@ rstan_options(auto_write = TRUE)
 set.seed(123)
 
 ## MCMC settings
-ni <- 50
-nb <- 20
+ni <- 5
+nb <- 2
 nc <- 1
 
 # Stan model -------------
@@ -145,11 +146,6 @@ cat("
     int<lower=0> nSpp;                         // number of species
     int<lower=0, upper=1> surv_t1[N];      // plant survival at time t+1 and target variable (response)
     matrix[N,K] Xs;                  //  predictor matrix - surv_t1~logsize_t+endo+origin+logsize_t*endo
-    }
-    
-    transformed data{
-    int <lower=0> nSppEndo;
-    nSppEndo = nSpp*nEndo;
     }
     
     parameters {
@@ -185,7 +181,10 @@ cat("
       to_vector(tau_year[10][]) ~ normal(0,sigma_0);
       to_vector(tau_year[11][]) ~ normal(0,sigma_0);
         
-        // Likelihood
+
+
+   
+    // Likelihood
       surv_t1 ~ bernoulli_logit(mu);
     }
     
@@ -195,7 +194,7 @@ cat("
     
     // for posterior predictive check
     //for(n in 1:N){
-    // mu[n] = Xs[n]*beta
+     // mu[n] = Xs[n]*beta
     //   + tau_year[endo_index[n], year_t[n]];
       
     //  yrep[n] = bernoulli_logit_rng(mu[n]);
@@ -213,7 +212,7 @@ stanmodel <- stanc("endodemog_surv_matrix.stan")
 ## Run the model by calling stan()
 ## and save the output to .rds files so that they can be called laters
 
-sm <- stan(file = "endodemog_surv_matrix.stan", data = sample_surv_data_list,
+sm <- stan(file = "endodemog_surv_matrix.stan", data = LTREB_surv_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
 
 print(sm)
