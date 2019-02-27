@@ -39,16 +39,17 @@ LTREB_data <- LTREB_endodemog %>%
                                        "FESU" = 4, "LOAR" = 5, "POAL" = 6, 
                                        "POSY" = 7))) %>% 
   mutate(spp_endo_index = as.integer(interaction(species_index,endo_index))) %>% 
-  mutate(year_t_index = as.integer(recode_factor(year_t, 
+  mutate(year_t_index = as.integer(recode(year_t, 
                                       '2007' = 1, '2008' = 2, '2009' = 3, 
                                       '2010' = 4, '2011' = 5, '2012' = 6, 
                                       '2013' = 7, '2014' = 8, '2015' = 9, 
                                       '2016' = 10, '2017' = 11))) %>%             
-  mutate(year_t1_index = as.integer(recode_factor(year_t1, 
+  mutate(year_t1_index = as.integer(recode(year_t1, 
                                        '2008' = 2, '2009' = 3, '2010' = 4, 
                                        '2011' = 5, '2012' = 6, '2013' = 7, 
                                        '2014' = 8, '2015' = 9, '2016' = 10, 
                                        '2017' = 11, '2018' = 12))) %>%               
+  mutate(spp_year_index = as.integer(interaction(species_index, year_t_index))) %>% 
   mutate(origin_01 = as.integer(case_when(origin == "O" ~ 0, 
                                           origin == "R" ~ 1, 
                                           origin != "R" | origin != "O" ~ 1))) %>%   
@@ -78,6 +79,7 @@ LTREB_surv_data_list <- list(surv_t1 = LTREB_data1$surv_t1,
                              endo_index = LTREB_data1$endo_index,
                              species_index = LTREB_data1$species_index,
                              spp_endo_index = LTREB_data1$spp_endo_index,
+                             spp_year_index = LTREB_data1$spp_year_index,
                              year_t = LTREB_data1$year_t_index, 
                              N = nrow(LTREB_data1), 
                              K = ncol(Xs), 
@@ -101,6 +103,7 @@ sample_surv_data_list <- list(surv_t1 = LTREB_sample$surv_t1,
                              endo_index = LTREB_sample$endo_index,
                              species_index = LTREB_sample$species_index,
                              spp_endo_index = LTREB_sample$spp_endo_index,
+                             spp_year_index = LTREB_sample$spp_year_index,
                              year_t = LTREB_sample$year_t_index, 
                              N = nrow(LTREB_sample), 
                              K = ncol(Xs), 
@@ -116,12 +119,12 @@ str(sample_surv_data_list)
 #########################################################################################################
 ## run this code to optimize computer system settings for MCMC
 rstan_options(auto_write = TRUE)
-options(mc.cores = parallel::detectCores())
+#options(mc.cores = parallel::detectCores())
 set.seed(123)
 
 ## MCMC settings
-ni <- 10
-nb <- 5
+ni <- 50
+nb <- 20
 nc <- 1
 
 # Stan model -------------
@@ -136,10 +139,10 @@ cat("
     int<lower=0> K;                       // number of predictors
     
     int<lower=0> nyear;                       // number of years (used as index)
-    int<lower=0, upper=11> year_t[N];                      // year of observation
+    int<lower=0, upper=11> year_t[N];         // year of observation
     int<lower=0> nEndo;                       // number of endo treatments
+    int<lower=1, upper=14> spp_endo_index[N];          // index for species by endophyte effect
     int<lower=0> nSpp;                         // number of species
-    int<lower=1, upper=14> spp_endo_index[N]; // index for endophyte effect by species
     int<lower=0, upper=1> surv_t1[N];      // plant survival at time t+1 and target variable (response)
     matrix[N,K] Xs;                  //  predictor matrix - surv_t1~logsize_t+endo+origin+logsize_t*endo
     }
@@ -152,11 +155,10 @@ cat("
     parameters {
     vector[K] beta;                     // predictor parameters
 
-    vector[nyear] tau_year[nSppEndo];      // random year effect
-      
-    real<lower=0> sigma_0[nSppEndo];        //year variance intercept
+    vector[nSppEndo] tau_year[nyear];      // random year effect
+    real<lower=0> sigma_0[nSppEndo];        //year variance intercept E-
     }
- 
+
     model {
     
     vector[N] mu;
@@ -164,16 +166,25 @@ cat("
     // Linear Predictor
     for(n in 1:N){
     mu = Xs*beta
-    + tau_year[spp_endo_index[n],year_t[n]];
+    + tau_year[year_t[n], spp_endo_index[n]];
     }
     
     // Priors
     beta ~ normal(0,100);      // prior for predictor intercepts
-    for(n in 1:nyear)
-    to_vector(tau_year[,n]) ~ normal(0,sigma_0); // prior for year random effects
+    sigma_0 ~ gamma(2,.1);
 
-    
-    
+      to_vector(tau_year[1][]) ~ normal(0,sigma_0); // prior for year random effects
+      to_vector(tau_year[2][]) ~ normal(0,sigma_0);
+      to_vector(tau_year[3][]) ~ normal(0,sigma_0);
+      to_vector(tau_year[4][]) ~ normal(0,sigma_0);
+      to_vector(tau_year[5][]) ~ normal(0,sigma_0);
+      to_vector(tau_year[6][]) ~ normal(0,sigma_0);
+      to_vector(tau_year[7][]) ~ normal(0,sigma_0);
+      to_vector(tau_year[8][]) ~ normal(0,sigma_0);
+      to_vector(tau_year[9][]) ~ normal(0,sigma_0);
+      to_vector(tau_year[10][]) ~ normal(0,sigma_0);
+      to_vector(tau_year[11][]) ~ normal(0,sigma_0);
+        
         // Likelihood
       surv_t1 ~ bernoulli_logit(mu);
     }
@@ -207,7 +218,7 @@ sm <- stan(file = "endodemog_surv_matrix.stan", data = sample_surv_data_list,
 
 print(sm)
 summary(sm)
-print(sm, pars = "tau_year")
+print(sm, pars = "sigma_0")
 
 
 

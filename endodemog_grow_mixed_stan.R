@@ -31,11 +31,14 @@ LTREB_data <- LTREB_endodemog %>%
   mutate(size_t, logsize_t = log(size_t)) %>% 
   mutate(size_t1, logsize_t1 = log(size_t1)) %>%  
   mutate(surv_t1 = as.integer(recode(surv_t1, "0" = 0, "1" =1, "2" = 1, "4" = 1))) %>% 
-  mutate(species_0 = (recode_factor(species,                   
-                                    "AGPE" = 1, "ELRI" = 2, "ELVI" = 3, 
-                                    "FESU" = 4, "LOAR" = 5, "POAL" = 6, 
-                                    "POSY" = 7))) %>%        
-  mutate(species_index = as.integer(species_0)) %>% 
+  mutate(endo_01 = case_when(endo == "0" | endo == "minus" ~ 0,
+                             endo == "1"| endo =="plus" ~ 1)) %>% 
+  mutate(endo_index = as.integer(as.factor(endo_01+1)))  %>% 
+  mutate(species_index = as.integer(recode_factor(species,                   
+                                                  "AGPE" = 1, "ELRI" = 2, "ELVI" = 3, 
+                                                  "FESU" = 4, "LOAR" = 5, "POAL" = 6, 
+                                                  "POSY" = 7))) %>% 
+  mutate(spp_endo_index = as.integer(interaction(species_index,endo_index))) %>% 
   mutate(year_t_index = as.integer(recode_factor(year_t, 
                                                  '2007' = 1, '2008' = 2, '2009' = 3, 
                                                  '2010' = 4, '2011' = 5, '2012' = 6, 
@@ -51,36 +54,35 @@ LTREB_data <- LTREB_endodemog %>%
                                           origin != "R" | origin != "O" ~ 1))) %>%   
   mutate(plot_fixed = (case_when(plot != "R" ~ plot, 
                                  plot == "R" ~ origin))) %>%                         
-  mutate(plot_index = as.integer(as.factor(plot_fixed))) %>%                         
-  mutate(endo_01 = case_when(endo == "0" | endo == "minus" ~ 0,
-                             endo == "1"| endo =="plus" ~ 1)) %>% 
-  mutate(endo_index = as.integer(as.factor(endo_01+1)))                              
+  mutate(plot_index = as.integer(as.factor(plot_fixed)))                       
 
 dim(LTREB_data)
 unique(LTREB_data$logsize_t)
 
 # NA's in survival come from mostly 2017 recruits.
 LTREB_data1 <- LTREB_data %>%
-  filter(!is.na(logsize_t1)) %>%
   filter(!is.na(logsize_t)) %>% 
-  filter(logsize_t >= 0) %>% 
+  filter(size_t > 0) %>% 
+  filter(size_t1 > 0) %>%
+  mutate(size_t1 = as.integer(size_t1)) %>% 
   filter(!is.na(endo_01))
 
 dim(LTREB_data1)
-LTREB_for_matrix <- model.frame(size_t1 ~ (logsize_t + endo_01 + species_0)^2 + origin_01 
+
+LTREB_for_matrix <- model.frame(size_t1 ~ (logsize_t + endo_01 + species)^3 + origin_01 
                                 , data = LTREB_data1)
-Xs <- model.matrix(size_t1~ (logsize_t + endo_01 + species_0)^2 + origin_01 
+Xs <- model.matrix(size_t1~ (logsize_t + endo_01 + species)^3 + origin_01 
                    , data =LTREB_for_matrix)
 
 
 # Create data list for Stan model
 LTREB_grow_data_list <- list(size_t1 = LTREB_data1$size_t1,
                              Xs = Xs,    
-                             endo_index = LTREB_data1$endo_index,
-                             species_index = LTREB_data1$species_index,
+                             spp_endo_index = LTREB_data1$spp_endo_index,
                              year_t = LTREB_data1$year_t_index, 
                              N = nrow(LTREB_data1), 
                              K = ncol(Xs), 
+                             lowerlimit = min(LTREB_data1$size_t1),
                              nyear = length(unique(LTREB_data1$year_t_index)), 
                              nEndo =   length(unique(LTREB_data1$endo_01)),
                              nSpp = length(unique(LTREB_data1$species_index)))
@@ -89,20 +91,20 @@ LTREB_grow_data_list <- list(size_t1 = LTREB_data1$size_t1,
 str(LTREB_grow_data_list)
 
 LTREB_sample <- sample_n(LTREB_data1, 1000)
-sample_for_matrix <- model.frame(size_t1 ~ (logsize_t + endo_01 + species_0) + origin_01 
+sample_for_matrix <- model.frame(size_t1 ~ (logsize_t + endo_01 + species)^3 + origin_01 
                                  , data = LTREB_sample)
-Xs <- model.matrix(size_t1 ~ (logsize_t + endo_01 + species_0) + origin_01 
+Xs <- model.matrix(size_t1 ~ (logsize_t + endo_01 + species)^3 + origin_01 
                    , data =sample_for_matrix)
 
 
 # Create sample data list for Stan model
 sample_grow_data_list <- list(size_t1 = LTREB_sample$size_t1,
                               Xs = Xs,    
-                              endo_index = LTREB_sample$endo_index,
-                              species_index = LTREB_sample$species_index,
+                              spp_endo_index = LTREB_sample$spp_endo_index,
                               year_t = LTREB_sample$year_t_index, 
                               N = nrow(LTREB_sample), 
                               K = ncol(Xs), 
+                              lowerlimit = min(LTREB_sample$size_t1),
                               nyear = length(unique(LTREB_sample$year_t_index)), 
                               nEndo =   length(unique(LTREB_sample$endo_01)),
                               nSpp = length(unique(LTREB_sample$species_index)))
@@ -115,12 +117,12 @@ str(sample_grow_data_list)
 #########################################################################################################
 ## run this code to optimize computer system settings for MCMC
 rstan_options(auto_write = TRUE)
-options(mc.cores = parallel::detectCores())
+# options(mc.cores = parallel::detectCores())
 set.seed(123)
 
 ## MCMC settings
-ni <- 100
-nb <- 50
+ni <- 10
+nb <- 5
 nc <- 1
 
 # Stan model -------------
@@ -133,21 +135,25 @@ cat("
     data { 
     int<lower=0> N;                       // number of observations
     int<lower=0> K;                       // number of predictors
-    
+    int<lower=0> lowerlimit;              // lower limit for truncation for size measurments (>0)
     int<lower=0> nyear;                       // number of years (used as index)
     int<lower=0> year_t[N];                      // year of observation
     int<lower=0> nEndo;                       // number of endo treatments
     int<lower=0> nSpp;                         // number of species
-    int<lower=1, upper=2> endo_index[N];       // index for endophyte effect
-    int<lower=1, upper=7> species_index[N];  // index for species effect
-    int<lower=0> size_t1[N];      // plant survival at time t+1 and target variable (response)
+    int<lower=1, upper=14> spp_endo_index[N]; // index for endophyte effect by species
+    int<lower=lowerlimit> size_t1[N];      // plant survival at time t+1 and target variable (response)
     matrix[N,K] Xs;                  //  predictor matrix - surv_t1~logsize_t+endo+origin+logsize_t*endo
+    }
+    
+      transformed data {
+    int <lower=0> nSppEndo;
+    nSppEndo = nSpp*nEndo;
     }
     
     parameters {
     vector[K] beta;                     // predictor parameters
-    //matrix[nEndo,nyear] tau_year[nSpp];      // mean random year effect
-    //matrix<lower=0>[nSpp,nEndo] sigma_0;        //year variance intercept
+    real tau_year[nSppEndo, nyear];      // mean random year effect
+    real<lower=0> sigma_0[nSppEndo];        //year variance intercept
     }
  
  
@@ -156,20 +162,16 @@ cat("
     
     // Linear Predictor
     for(n in 1:N){
-    mu = Xs*beta;
-    //+ tau_year[species_index[n],endo_index[n],year_t[n]];
+    mu = Xs*beta + tau_year[spp_endo_index[n],year_t[n]];
     }
     // Priors
-    beta ~ normal(0,1e6);      // prior for predictor intercepts
-    //to_matrix(tau_year) ~ normal(0,100);
-    
-    //sigma_0 ~ gamma(0,1/10);
-   // for(s in 1:nSpp){
-    //for(e in 1:nSpp){
-   // tau_year[s,e] ~ normal(0,sigma_0[s,e]);  // prior for year random effects
-   // }}
+    beta ~ normal(0,100);      // prior for predictor intercepts
+    sigma_0 ~ gamma(2,.1);
+    for(n in 1:nyear){
+      tau_year[n][] ~ normal(0,sigma_0);
+    }
     // Likelihood
-      size_t1 ~ binomial_logit(N,mu);
+      size_t1 ~ neg_binomial_2_log(N,mu) T[lowerlimit,];
     }
     
    //generated quantities{
