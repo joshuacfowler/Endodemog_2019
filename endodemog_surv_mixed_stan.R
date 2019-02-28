@@ -19,7 +19,8 @@ logit = function(x) { log(x/(1-x)) }
 #############################################################################################
 ## Load in full data frame
 LTREB_endodemog <- 
-  read.csv(file = "C:/Users/MillerLab/Desktop/Endodemog-master/endo_demog_long.csv")
+  read.csv(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Fulldataplusmetadata/endo_demog_long.csv")
+
 
 #"C:/Users/MillerLab/Desktop/Endodemog-master/endo_demog_long.csv"
 #"/Users/joshuacfowler/Dropbox/EndodemogData/Fulldataplusmetadata/endo_demog_long.csv")
@@ -39,7 +40,6 @@ LTREB_data <- LTREB_endodemog %>%
                                        "AGPE" = 1, "ELRI" = 2, "ELVI" = 3, 
                                        "FESU" = 4, "LOAR" = 5, "POAL" = 6, 
                                        "POSY" = 7))) %>% 
-  mutate(spp_endo_index = as.integer(interaction(species_index,endo_index))) %>% 
   mutate(year_t_index = as.integer(recode(year_t, 
                                       '2007' = 1, '2008' = 2, '2009' = 3, 
                                       '2010' = 4, '2011' = 5, '2012' = 6, 
@@ -50,13 +50,11 @@ LTREB_data <- LTREB_endodemog %>%
                                        '2011' = 5, '2012' = 6, '2013' = 7, 
                                        '2014' = 8, '2015' = 9, '2016' = 10, 
                                        '2017' = 11, '2018' = 12))) %>%               
-  mutate(spp_year_index = as.integer(interaction(species_index, year_t_index))) %>% 
   mutate(origin_01 = as.integer(case_when(origin == "O" ~ 0, 
                                           origin == "R" ~ 1, 
                                           origin != "R" | origin != "O" ~ 1))) %>%   
   mutate(plot_fixed = (case_when(plot != "R" ~ plot, 
-                                 plot == "R" ~ origin))) %>%                         
-  mutate(plot_index = as.integer(as.factor(plot_fixed)))                     
+                                 plot == "R" ~ origin)))                       
 
 dim(LTREB_data)
 
@@ -68,91 +66,242 @@ LTREB_data1 <- LTREB_data %>%
   filter(!is.na(endo_01))
   
 dim(LTREB_data1)
-LTREB_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01 + species)^2 + origin_01 
-                                 , data = LTREB_data1)
-Xs <- model.matrix(surv_t1 ~ (logsize_t + endo_01 + species)^2 + origin_01 
-                                 , data =LTREB_for_matrix)
 
+# LTREB_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01 + species)^2 + origin_01 
+                                 # , data = LTREB_data1)
+# Xs <- model.matrix(surv_t1 ~ (logsize_t + endo_01 + species)^2 + origin_01 
+                                 # , data =LTREB_for_matrix)
 
-# Create data list for Stan model
-LTREB_surv_data_list <- list(surv_t1 = LTREB_data1$surv_t1,
-                             Xs = Xs,    
-                             endo_index = LTREB_data1$endo_index,
-                             species_index = LTREB_data1$species_index,
-                             spp_endo_index = LTREB_data1$spp_endo_index,
-                             spp_year_index = LTREB_data1$spp_year_index,
-                             year_t = LTREB_data1$year_t_index, 
-                             N = nrow(LTREB_data1), 
-                             K = ncol(Xs), 
-                             nyear = length(unique(LTREB_data1$year_t_index)), 
-                             nEndo =   length(unique(LTREB_data1$endo_01)),
-                             nSpp = length(unique(LTREB_data1$species_index)))
-  
-
-str(LTREB_surv_data_list)
-
-LTREB_sample <- sample_n(LTREB_data1, 1000)
-sample_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01 + species)^2 + origin_01 
-                                , data = LTREB_sample)
-Xs <- model.matrix(surv_t1 ~ (logsize_t + endo_01 + species)^2 + origin_01 
-                   , data =sample_for_matrix)
-
-
-# Create sample data list for Stan model
-sample_surv_data_list <- list(surv_t1 = LTREB_sample$surv_t1,
-                             Xs = Xs,    
-                             endo_index = LTREB_sample$endo_index,
-                             species_index = LTREB_sample$species_index,
-                             spp_endo_index = LTREB_sample$spp_endo_index,
-                             spp_year_index = LTREB_sample$spp_year_index,
-                             year_t = LTREB_sample$year_t_index, 
-                             N = nrow(LTREB_sample), 
-                             K = ncol(Xs), 
-                             nyear = length(unique(LTREB_sample$year_t_index)), 
-                             nEndo =   length(unique(LTREB_sample$endo_01)),
-                             nSpp = length(unique(LTREB_sample$species_index)))
-
-
-str(sample_surv_data_list)
+# 
+# # Create data list for Stan model
+# # # LTREB_surv_data_list <- list(surv_t1 = LTREB_data1$surv_t1,
+# #                              Xs = Xs,    
+# #                              endo_index = LTREB_data1$endo_index,
+# #                              species_index = LTREB_data1$species_index,
+# #                              spp_endo_index = LTREB_data1$spp_endo_index,
+# #                              spp_year_index = LTREB_data1$spp_year_index,
+# #                              year_t = LTREB_data1$year_t_index, 
+# #                              N = nrow(LTREB_data1), 
+# #                              K = ncol(Xs), 
+# #                              nyear = length(unique(LTREB_data1$year_t_index)), 
+# #                              nEndo =   length(unique(LTREB_data1$endo_01)),
+# #                              nSpp = length(unique(LTREB_data1$species_index)))
+# # /*** /*
+# 
+# str(LTREB_surv_data_list)
+# 
+# LTREB_sample <- sample_n(LTREB_data1, 1000)
+# sample_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01 + species)^3 + origin_01 
+#                                 , data = LTREB_sample)
+# Xs <- model.matrix(surv_t1 ~ (logsize_t + endo_01 + species)^3 + origin_01 
+#                    , data =sample_for_matrix)
+# 
+# 
+# # Create sample data list for Stan model
+# sample_surv_data_list <- list(surv_t1 = LTREB_sample$surv_t1,
+#                              Xs = Xs,    
+#                              endo_index = LTREB_sample$endo_index,
+#                              species_index = LTREB_sample$species_index,
+#                              spp_endo_index = LTREB_sample$spp_endo_index,
+#                              spp_year_index = LTREB_sample$spp_year_index,
+#                              year_t = LTREB_sample$year_t_index, 
+#                              N = nrow(LTREB_sample), 
+#                              K = ncol(Xs), 
+#                              nyear = length(unique(LTREB_sample$year_t_index)), 
+#                              nEndo =   length(unique(LTREB_sample$endo_01)),
+#                              nSpp = length(unique(LTREB_sample$species_index)))
+# 
+# 
+# str(sample_surv_data_list)
 
 #########################################################################################################
-# GLMM for Surv~ size +Endo + Origin  with year random effects------------------------------
+# Creating individual species data lists to be passed to the model------------------------------
 #########################################################################################################
-## run this code to optimize computer system settings for MCMC
+# Split up the main dataframe by species and recode plot to be used as an index for each species
+AGPE_data <- LTREB_data1 %>% 
+  filter(species == "AGPE") %>% 
+  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
+ELRI_data <- LTREB_data1 %>% 
+  filter(species == "ELRI") %>% 
+  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
+ELVI_data <- LTREB_data1 %>% 
+  filter(species == "ELVI") %>% 
+  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
+FESU_data <- LTREB_data1 %>% 
+  filter(species == "FESU") %>% 
+  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
+LOAR_data <- LTREB_data1 %>% 
+  filter(species == "LOAR") %>% 
+  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
+POAL_data <- LTREB_data1 %>% 
+  filter(species == "POAL") %>% 
+  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
+POSY_data <- LTREB_data1 %>% 
+  filter(species == "POSY") %>% 
+  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
+
+
+# Create model matrices for each species
+AGPE_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01 + origin_01)^3
+, data = AGPE_data)
+AGPE_Xs <- model.matrix(surv_t1 ~ (logsize_t + endo_01 + origin_01)^3
+, data =AGPE_for_matrix)
+
+ELRI_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01 + origin_01)^3
+                               , data = ELRI_data)
+ELRI_Xs <- model.matrix(surv_t1 ~ (logsize_t + endo_01 + origin_01)^3
+                        , data =ELRI_for_matrix)
+
+ELVI_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01 + origin_01)^3
+                               , data = ELVI_data)
+ELVI_Xs <- model.matrix(surv_t1 ~ (logsize_t + endo_01 + origin_01)^3
+                        , data =ELVI_for_matrix)
+
+FESU_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01 + origin_01)^3
+                               , data = FESU_data)
+FESU_Xs <- model.matrix(surv_t1 ~ (logsize_t + endo_01 + origin_01)^3
+                        , data =FESU_for_matrix)
+
+LOAR_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01 + origin_01)^3
+                               , data = LOAR_data)
+LOAR_Xs <- model.matrix(surv_t1 ~ (logsize_t + endo_01 + origin_01)^3
+                        , data =LOAR_for_matrix)
+
+POAL_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01 + origin_01)^3
+                               , data = POAL_data)
+POAL_Xs <- model.matrix(surv_t1 ~ (logsize_t + endo_01 + origin_01)^3
+                        , data =POAL_for_matrix)
+
+POSY_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01 + origin_01)^3
+                               , data = POSY_data)
+POSY_Xs <- model.matrix(surv_t1 ~ (logsize_t + endo_01 + origin_01)^3
+                        , data =POSY_for_matrix)
+
+
+
+# Create data lists to be used for the Stan model
+AGPE_surv_data_list <- list(surv_t1 = AGPE_data$surv_t1,
+                             Xs = AGPE_Xs,
+                             endo_index = AGPE_data$endo_index,
+                             year_t = AGPE_data$year_t_index,
+                             plot = AGPE_data$plot_index,
+                             N = nrow(AGPE_data),
+                             K = ncol(AGPE_Xs),
+                             nYear = length(unique(AGPE_data$year_t_index)),
+                             nPlot = length(unique(AGPE_data$plot_index)),
+                             nEndo =   length(unique(AGPE_data$endo_01)))
+str(AGPE_surv_data_list)
+
+ELRI_surv_data_list <- list(surv_t1 = ELRI_data$surv_t1,
+                            Xs = ELRI_Xs,
+                            endo_index = ELRI_data$endo_index,
+                            year_t = ELRI_data$year_t_index,
+                            plot = ELRI_data$plot_index,
+                            N = nrow(ELRI_data),
+                            K = ncol(ELRI_Xs),
+                            nYear = length(unique(ELRI_data$year_t_index)),
+                            nPlot = length(unique(ELRI_data$plot_index)),
+                            nEndo =   length(unique(ELRI_data$endo_01)))
+str(ELRI_surv_data_list)
+
+ELVI_surv_data_list <- list(surv_t1 = ELVI_data$surv_t1,
+                            Xs = ELVI_Xs,
+                            endo_index = ELVI_data$endo_index,
+                            year_t = ELVI_data$year_t_index,
+                            plot = ELVI_data$plot_index,
+                            N = nrow(ELVI_data),
+                            K = ncol(ELVI_Xs),
+                            nYear = length(unique(ELVI_data$year_t_index)),
+                            nPlot = length(unique(ELVI_data$plot_index)),
+                            nEndo =   length(unique(ELVI_data$endo_01)))
+str(ELVI_surv_data_list)
+
+FESU_surv_data_list <- list(surv_t1 = FESU_data$surv_t1,
+                            Xs = FESU_Xs,
+                            endo_index = FESU_data$endo_index,
+                            year_t = FESU_data$year_t_index,
+                            plot = FESU_data$plot_index,
+                            N = nrow(FESU_data),
+                            K = ncol(FESU_Xs),
+                            nYear = length(unique(FESU_data$year_t_index)),
+                            nPlot = length(unique(FESU_data$plot_index)),
+                            nEndo =   length(unique(FESU_data$endo_01)))
+str(FESU_surv_data_list)
+
+LOAR_surv_data_list <- list(surv_t1 = LOAR_data$surv_t1,
+                            Xs = LOAR_Xs,
+                            endo_index = LOAR_data$endo_index,
+                            year_t = LOAR_data$year_t_index,
+                            plot = LOAR_data$plot_index,
+                            N = nrow(LOAR_data),
+                            K = ncol(LOAR_Xs),
+                            nYear = length(unique(LOAR_data$year_t_index)),
+                            nPlot = length(unique(LOAR_data$plot_index)),
+                            nEndo =   length(unique(LOAR_data$endo_01)))
+str(LOAR_surv_data_list)
+
+POAL_surv_data_list <- list(surv_t1 = POAL_data$surv_t1,
+                            Xs = POAL_Xs,
+                            endo_index = POAL_data$endo_index,
+                            year_t = POAL_data$year_t_index,
+                            plot = POAL_data$plot_index,
+                            N = nrow(POAL_data),
+                            K = ncol(POAL_Xs),
+                            nYear = length(unique(POAL_data$year_t_index)),
+                            nPlot = length(unique(POAL_data$plot_index)),
+                            nEndo =   length(unique(POAL_data$endo_01)))
+str(POAL_surv_data_list)
+
+POSY_surv_data_list <- list(surv_t1 = POSY_data$surv_t1,
+                            Xs = POSY_Xs,
+                            endo_index = POSY_data$endo_index,
+                            year_t = POSY_data$year_t_index,
+                            plot = POSY_data$plot_index,
+                            N = nrow(POSY_data),
+                            K = ncol(POSY_Xs),
+                            nYear = length(unique(POSY_data$year_t_index)),
+                            nPlot = length(unique(POSY_data$plot_index)),
+                            nEndo =   length(unique(POSY_data$endo_01)))
+str(POSY_surv_data_list)
+
+#########################################################################################################
+# GLMM for Surv~ size +Endo + Origin  with year and plot random effects------------------------------
+#########################################################################################################
+## run this code recommended to optimize computer system settings for MCMC
 rstan_options(auto_write = TRUE)
-#options(mc.cores = parallel::detectCores())
+options(mc.cores = parallel::detectCores())
 set.seed(123)
 
 ## MCMC settings
-ni <- 5
-nb <- 2
+ni <- 100
+nb <- 50
 nc <- 1
 
 # Stan model -------------
-## here is the Stan model with a model matrix and species effects ##
+## here is the Stan model
 
-
-
-sink("endodemog_surv_matrix.stan")
+sink("endodemog_surv.stan")
 cat("
     data { 
     int<lower=0> N;                       // number of observations
     int<lower=0> K;                       // number of predictors
     
-    int<lower=0> nyear;                       // number of years (used as index)
+    int<lower=0> nYear;                       // number of years
     int<lower=0, upper=11> year_t[N];         // year of observation
     int<lower=0> nEndo;                       // number of endo treatments
-    int<lower=1, upper=14> spp_endo_index[N];          // index for species by endophyte effect
-    int<lower=0> nSpp;                         // number of species
+    int<lower=1, upper=14> endo_index[N];          // index for endophyte effect
+    int<lower=0> nPlot;                         // number of plots
+    int<lower=0> plot[N];                   // plot of observation
     int<lower=0, upper=1> surv_t1[N];      // plant survival at time t+1 and target variable (response)
-    matrix[N,K] Xs;                  //  predictor matrix - surv_t1~logsize_t+endo+origin+logsize_t*endo
+    matrix[N,K] Xs;                     //  predictor matrix 
     }
-    
+ 
     parameters {
     vector[K] beta;                     // predictor parameters
 
-    vector[nSppEndo] tau_year[nyear];      // random year effect
-    real<lower=0> sigma_0[nSppEndo];        //year variance intercept E-
+    vector[nYear] tau_year[nEndo];      // random year effect
+    real<lower=0> sigma_e[nEndo];        //year variance by endophyte effect
+    vector[nPlot] tau_plot;        // random plot effect
     }
 
     model {
@@ -162,27 +311,16 @@ cat("
     // Linear Predictor
     for(n in 1:N){
     mu = Xs*beta
-    + tau_year[year_t[n], spp_endo_index[n]];
+    + tau_year[endo_index[n],year_t[n]] + tau_plot[plot[n]];
     }
     
     // Priors
     beta ~ normal(0,100);      // prior for predictor intercepts
-    sigma_0 ~ gamma(2,.1);
-
-      to_vector(tau_year[1][]) ~ normal(0,sigma_0); // prior for year random effects
-      to_vector(tau_year[2][]) ~ normal(0,sigma_0);
-      to_vector(tau_year[3][]) ~ normal(0,sigma_0);
-      to_vector(tau_year[4][]) ~ normal(0,sigma_0);
-      to_vector(tau_year[5][]) ~ normal(0,sigma_0);
-      to_vector(tau_year[6][]) ~ normal(0,sigma_0);
-      to_vector(tau_year[7][]) ~ normal(0,sigma_0);
-      to_vector(tau_year[8][]) ~ normal(0,sigma_0);
-      to_vector(tau_year[9][]) ~ normal(0,sigma_0);
-      to_vector(tau_year[10][]) ~ normal(0,sigma_0);
-      to_vector(tau_year[11][]) ~ normal(0,sigma_0);
-        
-
-
+    sigma_e ~ gamma(2,.1);
+    tau_plot ~ normal(0,100);
+    for(e in 1:nEndo){
+    to_vector(tau_year[e][]) ~ normal(0,sigma_e[e]); // prior for year random effects
+    }
    
     // Likelihood
       surv_t1 ~ bernoulli_logit(mu);
@@ -205,14 +343,14 @@ cat("
     ", fill = T)
 sink()
 
-stanmodel <- stanc("endodemog_surv_matrix.stan")
+stanmodel <- stanc("endodemog_surv.stan")
 
 
 
 ## Run the model by calling stan()
 ## and save the output to .rds files so that they can be called laters
 
-sm <- stan(file = "endodemog_surv_matrix.stan", data = LTREB_surv_data_list,
+sm <- stan(file = "endodemog_surv.stan", data = AGPE_surv_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
 
 print(sm)
