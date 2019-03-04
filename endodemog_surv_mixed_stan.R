@@ -142,39 +142,39 @@ POSY_data <- LTREB_data1 %>%
 
 
 # Create model matrices for each species
-AGPE_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01 + origin_01)^3
+AGPE_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01)^2 + origin_01
 , data = AGPE_data)
-AGPE_Xs <- model.matrix(surv_t1 ~ (logsize_t + endo_01 + origin_01)^3
+AGPE_Xs <- model.matrix(surv_t1 ~ (logsize_t + endo_01)^2 + origin_01
 , data =AGPE_for_matrix)
 
-ELRI_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01 + origin_01)^3
+ELRI_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01)^2 + origin_01
                                , data = ELRI_data)
-ELRI_Xs <- model.matrix(surv_t1 ~ (logsize_t + endo_01 + origin_01)^3
+ELRI_Xs <- model.matrix(surv_t1 ~ (logsize_t + endo_01)^2 + origin_01
                         , data =ELRI_for_matrix)
 
-ELVI_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01 + origin_01)^3
+ELVI_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01)^2 + origin_01
                                , data = ELVI_data)
-ELVI_Xs <- model.matrix(surv_t1 ~ (logsize_t + endo_01 + origin_01)^3
+ELVI_Xs <- model.matrix(surv_t1 ~ (logsize_t + endo_01)^2 + origin_01
                         , data =ELVI_for_matrix)
 
-FESU_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01 + origin_01)^3
+FESU_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01)^2 + origin_01
                                , data = FESU_data)
-FESU_Xs <- model.matrix(surv_t1 ~ (logsize_t + endo_01 + origin_01)^3
+FESU_Xs <- model.matrix(surv_t1 ~ (logsize_t + endo_01)^2 + origin_01
                         , data =FESU_for_matrix)
 
-LOAR_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01 + origin_01)^3
+LOAR_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01)^2 + origin_01
                                , data = LOAR_data)
-LOAR_Xs <- model.matrix(surv_t1 ~ (logsize_t + endo_01 + origin_01)^3
+LOAR_Xs <- model.matrix(surv_t1 ~ (logsize_t + endo_01)^2 + origin_01
                         , data =LOAR_for_matrix)
 
-POAL_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01 + origin_01)^3
+POAL_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01)^2 + origin_01
                                , data = POAL_data)
-POAL_Xs <- model.matrix(surv_t1 ~ (logsize_t + endo_01 + origin_01)^3
+POAL_Xs <- model.matrix(surv_t1 ~ (logsize_t + endo_01)^2 + origin_01
                         , data =POAL_for_matrix)
 
-POSY_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01 + origin_01)^3
+POSY_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01)^2 + origin_01
                                , data = POSY_data)
-POSY_Xs <- model.matrix(surv_t1 ~ (logsize_t + endo_01 + origin_01)^3
+POSY_Xs <- model.matrix(surv_t1 ~ (logsize_t + endo_01)^2 + origin_01
                         , data =POSY_for_matrix)
 
 
@@ -299,8 +299,8 @@ cat("
     parameters {
     vector[K] beta;                     // predictor parameters
 
-    vector[nYear] tau_year[nEndo];      // random year effect
-    real<lower=0> sigma_e[nEndo];        //year variance by endophyte effect
+    matrix[nEndo,nYear] tau_year;      // random year effect
+    vector<lower=0>[nEndo] sigma_e;        //year variance by endophyte effect
     vector[nPlot] tau_plot;        // random plot effect
     }
 
@@ -315,12 +315,10 @@ cat("
     }
     
     // Priors
-    beta ~ normal(0,100);      // prior for predictor intercepts
-    sigma_e ~ gamma(2,.1);
-    tau_plot ~ normal(0,100);
-    for(e in 1:nEndo){
-      tau_year[e][] ~ normal(0,sigma_e[e]); // prior for year random effects
-    }
+    to_vector(beta) ~ normal(0,100);      // prior for predictor intercepts
+    to_vector(tau_plot) ~ normal(0,100);   // prior for plot random effects
+    to_vector(tau_year[1][]) ~ normal(0,sigma_e[1]); // prior for year random effects
+    to_vector(tau_year[2][]) ~ normal(0,sigma_e[2]);
    
     // Likelihood
       surv_t1 ~ bernoulli_logit(mu);
@@ -328,17 +326,17 @@ cat("
     
    //generated quantities{
     //int yrep[N];
-    //vector[N] mu;
+   // vector[N] mu;
     
     // for posterior predictive check
     //for(n in 1:N){
-     // mu[n] = Xs[n]*beta
-    //   + tau_year[endo_index[n], year_t[n]];
-      
-    //  yrep[n] = bernoulli_logit_rng(mu[n]);
+    // mu[n] = Xs[n]*beta
+    // + tau_year[endo_index[n], year_t[n]] + tau_plot[plot[n]];
+    
+    // yrep[n] = bernoulli_logit_rng(mu[n]);
     //}
     
-   // }
+  // }
   
     ", fill = T)
 sink()
@@ -354,26 +352,26 @@ smAGPE <- stan(file = "endodemog_surv.stan", data = AGPE_surv_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
 # saveRDS(smAGPE, file = "endodemog_surv_AGPE.rds")
 
-smELRI <- stan(file = "endodemog_surv.stan", data = AGPE_surv_data_list,
+smELRI <- stan(file = "endodemog_surv.stan", data = ELRI_surv_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
 # saveRDS(smELRI, file = "endodemog_surv_ELRI.rds")
 
-smELVI <- stan(file = "endodemog_surv.stan", data = AGPE_surv_data_list,
+smELVI <- stan(file = "endodemog_surv.stan", data = ELVI_surv_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
 # saveRDS(smSLVI, file = "endodemog_surv_ELVI.rds")
-smFESU <- stan(file = "endodemog_surv.stan", data = AGPE_surv_data_list,
+smFESU <- stan(file = "endodemog_surv.stan", data = FESU_surv_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
 # saveRDS(smFESU, file = "endodemog_surv_FESU.rds")
 
-smLOAR <- stan(file = "endodemog_surv.stan", data = AGPE_surv_data_list,
+smLOAR <- stan(file = "endodemog_surv.stan", data = LOAR_surv_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
 # saveRDS(smLOAR, file = "endodemog_surv_LOAR.rds")
 
-smPOAL <- stan(file = "endodemog_surv.stan", data = AGPE_surv_data_list,
+smPOAL <- stan(file = "endodemog_surv.stan", data = POAL_surv_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
 # saveRDS(smPOAL, file = "endodemog_surv_POAL.rds")
 
-smPOSY <- stan(file = "endodemog_surv.stan", data = AGPE_surv_data_list,
+smPOSY <- stan(file = "endodemog_surv.stan", data = POSY_surv_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
 # saveRDS(smPOSY, file = "endodemog_surv_POSY.rds")
 
@@ -384,122 +382,6 @@ print(sm, pars = "sigma_e")
 
 
 
-
-
-
-
-
-
-#########################################################################################################
-# OLD GLMM for Surv~ size +Endo + Origin  with year random effects------------------------------
-#########################################################################################################
-## run this code to optimize computer system settings for MCMC
-rstan_options(auto_write = TRUE)
-options(mc.cores = parallel::detectCores())
-set.seed(123)
-
-## MCMC settings
-# ni <- 5000
-# nb <- 2500
-# nc <- 4
-
-## here is the Stan model ##
-sink("endodemog_surv_full.stan")
-cat("
-    data { 
-    int<lower=0> N;                       // number of observations
-    int<lower=0> K;                       // number of predictors
-    
-    int<lower=0> nyear;                       // number of years (used as index)
-    int<lower=0> year_t[N];                      // year of observation
-    int<lower=0> nEndo;                       // number of endo treatments
-    
-    int<lower=0, upper=1> surv_t1[N];      // plant survival at time t+1 and target variable (response)
-    vector<lower=-1>[N] logsize_t;                  // log of plant size at time t (predictor)
-    int<lower=0, upper=1> endo[N];            // endophyte status 
-    int<lower=1, upper=2> endo_index[N];       // index for endophyte effect
-    int<lower=0, upper=1> origin[N];            // origin status
-    }
-    
-    parameters {
-    real alpha;                  // intercept
-    vector[K] beta;              // predictor parameters
-    matrix[nEndo, nyear] tau_year;      // random year effect
-      
-    real<lower=0> sigma_0[nEndo];        //year variance intercept
-    }
-    
-
-    model {
-    vector[N] mu;
-   
-       // Linear Predictor
-    for(n in 1:N){
-       mu[n] = alpha + beta[1]*logsize_t[n] + beta[2]*endo[n] + beta[3]*origin[n] 
-       + beta[4]*logsize_t[n]*endo[n] +
-       + tau_year[endo_index[n], year_t[n]];
-    }
-    // Priors
-    alpha ~ normal(0,1e6);      // prior for fixed intercept
-    beta ~ normal(0,1e6);      // prior for predictor intercepts
-    for(n in 1:nyear){
-    for(e in 1:nEndo){
-    tau_year[e,n] ~ normal(0,sigma_0[e]);   // prior for year random effects
-    }}
-    // Likelihood
-      surv_t1 ~ bernoulli_logit(mu);
-    }
-    
-   generated quantities{
-    int yrep[N];
-    vector[N] mu;
-    
-    // for posterior predictive check
-    for(n in 1:N){
-      mu[n] = alpha + beta[1]*logsize_t[n] + beta[2]*endo[n] + beta[3]*origin[n] 
-      +beta[4]*logsize_t[n]*endo[n]
-      + tau_year[endo_index[n], year_t[n]];
-      
-      yrep[n] = bernoulli_logit_rng(mu[n]);
-    }
-    
-    }
-  
-    ", fill = T)
-sink()
-
-stanmodel <- stanc("endodemog_surv_full.stan")
-
-## Run the model by calling stan()
-## and save the output to .rds files so that they can be called laters
-
-smPOAL <- stan(file = "endodemog_surv_full.stan", data = POAL_data_list,
-               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-saveRDS(smPOAL, file = "endodemog_surv_full_POAL.rds")
-
-smPOSY <- stan(file = "endodemog_surv_full.stan", data = POSY_data_list,
-           iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-saveRDS(smPOSY, file = "endodemog_surv_full_POSY.rds")
-
-smLOAR <- stan(file = "endodemog_surv_full.stan", data = LOAR_data_list,
-               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-saveRDS(smLOAR, file = "endodemog_surv_full_LOAR.rds")
-
-smELVI <- stan(file = "endodemog_surv_full.stan", data = ELVI_data_list,
-               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-saveRDS(smELVI, file = "endodemog_surv_full_ELVI.rds")
-
-smELRI <- stan(file = "endodemog_surv_full.stan", data = ELRI_data_list,
-               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-saveRDS(smELRI, file = "endodemog_surv_full_ELRI.rds")
-
-smFESU <- stan(file = "endodemog_surv_full.stan", data = FESU_data_list,
-               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-saveRDS(smFESU, file = "endodemog_surv_full_FESU.rds")
-
-smAGPE<- stan(file = "endodemog_surv_full.stan", data = AGPE_data_list,
-               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-saveRDS(smAGPE, file = "endodemog_surv_full_AGPE.rds")
 
 ## to read in model output without rerunning models
 smPOAL <- readRDS(file = "endodemog_surv_full_POAL.rds")
