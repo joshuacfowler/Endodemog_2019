@@ -90,7 +90,7 @@ LTREB_surv_data_list <- list(surv_t1 = LTREB_data1$surv_t1,
 str(LTREB_surv_data_list)
 
 # take sample from dataset.
-LTREB_sample <- sample_n(LTREB_data1, 1000)
+LTREB_sample <- sample_n(LTREB_data1, 2000)
 sample_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01 + species)^3 + origin_01 
                                 , data = LTREB_sample)
 Xs <- model.matrix(surv_t1 ~ (logsize_t + endo_01 + species)^3 + origin_01 
@@ -120,9 +120,9 @@ str(sample_surv_data_list)
 rstan_options(auto_write = TRUE)
 options(mc.cores = parallel::detectCores())
 set.seed(123)
-
+memory.limit(size=3.2e10)
 ## MCMC settings
-ni <- 10
+ni <- 6
 nb <- 5
 nc <- 1
 
@@ -165,14 +165,13 @@ cat("
     
     // Linear Predictor
     for(n in 1:N){
-    mu = Xs*beta
-    + tau_year[spp_endo_index[n],year_t[n]];
+    mu = Xs*beta + tau_year[spp_endo_index[n],year_t[n]];
     }
     
     // Priors
     beta ~ normal(0,100);      // prior for predictor intercepts
     for(n in 1:nyear){
-      to_vector(tau_year[,n]) ~ normal(0,sigma_0); // prior for year random effects
+      tau_year[,n] ~ normal(0,sigma_0); // prior for year random effects
     }
     
     
