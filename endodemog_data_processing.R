@@ -4,7 +4,6 @@
 ## Last Update: 11/28/2018
 ######################################################
 library(tidyverse)
-<<<<<<<<<HEAD
 library(reshape2)
 library(lubridate)
 library(readxl)
@@ -2052,7 +2051,7 @@ po_seedmerge_ssf <- merge(po_seedmerge_ss,po_flw, by = c("plot", "pos", "tag", "
 
 
 
-# Combining measurements across years for the "New" POSY recruits data ---------------
+# Combining repro measurements across years for the "New" POSY recruits data ---------------
 
 
 ## Combining measurements across years for the recruits data
@@ -2113,7 +2112,7 @@ po_rseedmerge_ssf <- merge(po_rseedmerge_ss, po_rflw, by = c("plot", "pos", "tag
 
 
 
-# Combining measurements across years for the “Old” POSY data ------------------
+# Combining repro measurements across years for the “Old” POSY data ------------------
 
 
 ## Combining data across years from the "Old" excel sheet
@@ -2179,7 +2178,7 @@ po_oldseedmerge_ssf <- merge(po_oldseedmerge_ss, po_oldflw, by = c( "plot", "pos
 # View(po_oldmerge_ssf)
 
 
-# Combining measurements across years for the “Old” POSY recruits data --------
+# Combining repro measurements across years for the “Old” POSY recruits data --------
 
 ## Combining data for recruits across years from the "Old" excel sheet
 ## recoding the values for year
@@ -2236,7 +2235,7 @@ po_roldflw$year<- ifelse(po_roldflw$variable == "FLWtiller09", 2009, ifelse(po_r
 po_roldseedmerge_ss <- left_join(po_roldspike, po_roldseed, by = c( "plot", "pos", "tag", "Endo", "Birth Year", "year", "tillerid"))
 # View(po_roldmerge_ss)
 
-po_roldseedmerge_ssf <- merge(po_roldmerge_ss, po_roldflw, by = c("plot", "pos", "tag", "Endo", "Birth Year", "year"), all = TRUE)
+po_roldseedmerge_ssf <- merge(po_roldseedmerge_ss, po_roldflw, by = c("plot", "pos", "tag", "Endo", "Birth Year", "year"), all = TRUE)
 # View(po_roldmerge_ssf)
 
 
@@ -2244,7 +2243,7 @@ po_roldseedmerge_ssf <- merge(po_roldmerge_ss, po_roldflw, by = c("plot", "pos",
 
 
 
-# Combining the old and new and original and recruit POSY dataframes ---------
+# Combining the old and new and original and recruit POSY repro dataframes ---------
 po_seedmerge_ssf <- po_seedmerge_ssf[c("plot", "pos", "tag", "Endo", "Birth Year","year",
                                    "tillerid", "flw","spikelets", "seed")]
 po_oldseedmerge_ssf <- po_oldseedmerge_ssf[c("plot", "pos", "tag", "Endo", "Birth Year","year",
@@ -2299,7 +2298,7 @@ POSYrepro_2 <- POSYrepro_t1 %>%
 
 
 
-# Combining measurements across years for the LOAR data ------------------
+# Combining repro measurements across years for the LOAR data ------------------
 
 ## Combining measurements across years for reproduction measurements
 
@@ -2315,9 +2314,9 @@ lseed$year<- ifelse(lseed$variable == "seed1", 2008, ifelse(lseed$variable  == "
 View(lseed)
 
 lseed2008 <- LOAR_data_seed2008 %>% 
-  rename("Birth Year" = "Date", "plot" = "PLOT", "pos" = "POS", 
-         "tag" = "TAG" ) %>% 
-  melt(id.var = c("plot","pos", "tag", "Endo", "Birth Year"),
+  rename("tag" = "Tag" ) %>%
+  distinct(tag) 
+  melt(id.var = c("tag"),
        measure.var = c("seed1", "seed2", "seed3","seed5",
                        "seed6(2012)", "seed7(2013)", "seed8(2014)", 
                        "seed9(2015)", "seed10(2016)"),
@@ -2387,7 +2386,7 @@ l_merge <- l_merge_t1 %>%
 # View(l_merge)
 
 
-# Combining measurements across years for the LOAR recruits data ---------------
+# Combining repro measurements across years for the LOAR recruits data ---------------
 
 
 ## Combining measurements across years for the recruits data
@@ -2457,7 +2456,7 @@ l_rmerge <- l_rmerge_t1 %>%
 
 
 
-# Combining the  original and recruit LOAR dataframes ---------
+# Combining the  original and recruit repro LOAR dataframes ---------
 l_merge <- l_merge[c("plot", "pos", "tag", "Endo", "origin", "Loc'n", "Birth Year",
                      "TRT", "Plant", "year_t1", "seed_t1", "size_t1", "flw_t1",
                      "year_t", "size_t", "flw_t")]
