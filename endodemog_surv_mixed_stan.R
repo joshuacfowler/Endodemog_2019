@@ -33,8 +33,8 @@ LTREB_data <- LTREB_endodemog %>%
   mutate(size_t, logsize_t = log(size_t)) %>% 
   mutate(size_t1, logsize_t1 = log(size_t1)) %>%  
   mutate(surv_t1 = as.integer(recode(surv_t1, "0" = 0, "1" =1, "2" = 1, "4" = 1))) %>% 
-  mutate(endo_01 = case_when(endo == "0" | endo == "minus" ~ 0,
-                             endo == "1"| endo =="plus" ~ 1)) %>% 
+  mutate(endo_01 = as.integer(case_when(endo == "0" | endo == "minus" ~ 0,
+                             endo == "1"| endo =="plus" ~ 1))) %>% 
   mutate(endo_index = as.integer(as.factor(endo_01+1)))  %>% 
   mutate(species_index = as.integer(recode_factor(species,                   
                                        "AGPE" = 1, "ELRI" = 2, "ELVI" = 3, 
@@ -182,6 +182,9 @@ POSY_Xs <- model.matrix(surv_t1 ~ (logsize_t + endo_01)^2 + origin_01
 # Create data lists to be used for the Stan model
 AGPE_surv_data_list <- list(surv_t1 = AGPE_data$surv_t1,
                              Xs = AGPE_Xs,
+                             logsize_t = AGPE_data$logsize_t,
+                             origin_01 = AGPE_data$origin_01,
+                             endo_01 = AGPE_data$endo_01,
                              endo_index = AGPE_data$endo_index,
                              year_t = AGPE_data$year_t_index,
                              plot = AGPE_data$plot_index,
@@ -194,6 +197,9 @@ str(AGPE_surv_data_list)
 
 ELRI_surv_data_list <- list(surv_t1 = ELRI_data$surv_t1,
                             Xs = ELRI_Xs,
+                            logsize_t = ELRI_data$logsize_t,
+                            origin_01 = ELRI_data$origin_01,
+                            endo_01 = ELRI_data$endo_01,
                             endo_index = ELRI_data$endo_index,
                             year_t = ELRI_data$year_t_index,
                             plot = ELRI_data$plot_index,
@@ -206,6 +212,9 @@ str(ELRI_surv_data_list)
 
 ELVI_surv_data_list <- list(surv_t1 = ELVI_data$surv_t1,
                             Xs = ELVI_Xs,
+                            logsize_t = ELVI_data$logsize_t,
+                            origin_01 = ELVI_data$origin_01,
+                            endo_01 = ELVI_data$endo_01,
                             endo_index = ELVI_data$endo_index,
                             year_t = ELVI_data$year_t_index,
                             plot = ELVI_data$plot_index,
@@ -218,6 +227,9 @@ str(ELVI_surv_data_list)
 
 FESU_surv_data_list <- list(surv_t1 = FESU_data$surv_t1,
                             Xs = FESU_Xs,
+                            logsize_t = FESU_data$logsize_t,
+                            origin_01 = FESU_data$origin_01,
+                            endo_01 = FESU_data$endo_01,
                             endo_index = FESU_data$endo_index,
                             year_t = FESU_data$year_t_index,
                             plot = FESU_data$plot_index,
@@ -230,6 +242,9 @@ str(FESU_surv_data_list)
 
 LOAR_surv_data_list <- list(surv_t1 = LOAR_data$surv_t1,
                             Xs = LOAR_Xs,
+                            logsize_t = LOAR_data$logsize_t,
+                            origin_01 = LOAR_data$origin_01,
+                            endo_01 = LOAR_data$endo_01,
                             endo_index = LOAR_data$endo_index,
                             year_t = LOAR_data$year_t_index,
                             plot = LOAR_data$plot_index,
@@ -242,6 +257,9 @@ str(LOAR_surv_data_list)
 
 POAL_surv_data_list <- list(surv_t1 = POAL_data$surv_t1,
                             Xs = POAL_Xs,
+                            logsize_t = POAL_data$logsize_t,
+                            origin_01 = POAL_data$origin_01,
+                            endo_01 = POAL_data$endo_01,
                             endo_index = POAL_data$endo_index,
                             year_t = POAL_data$year_t_index,
                             plot = POAL_data$plot_index,
@@ -254,6 +272,9 @@ str(POAL_surv_data_list)
 
 POSY_surv_data_list <- list(surv_t1 = POSY_data$surv_t1,
                             Xs = POSY_Xs,
+                            logsize_t = POSY_data$logsize_t,
+                            origin_01 = POSY_data$origin_01,
+                            endo_01 = POSY_data$endo_01,
                             endo_index = POSY_data$endo_index,
                             year_t = POSY_data$year_t_index,
                             plot = POSY_data$plot_index,
@@ -272,9 +293,9 @@ rstan_options(auto_write = TRUE)
 options(mc.cores = parallel::detectCores())
 set.seed(123)
 ## MCMC settings
-ni <- 1000
-nb <- 500
-nc <- 3
+ni <- 200
+nb <- 100
+nc <- 1
 
 # Stan model -------------
 ## here is the Stan model
@@ -291,12 +312,13 @@ cat("
     int<lower=0> nPlot;                         // number of plots
     int<lower=0> plot[N];                   // plot of observation
     int<lower=0, upper=1> surv_t1[N];      // plant survival at time t+1 and target variable (response)
-    matrix[N,K] Xs;                     //  predictor matrix 
+    vector<lower=0>[N] logsize_t;             // plant size at time t (predictor)
+    int<lower=0,upper=1> endo_01[N];            // plant endophyte status (predictor)
+    int<lower=0,upper=1> origin_01[N];          // plant origin status (predictor)
     }
 
     parameters {
     vector[K] beta;                     // predictor parameters
-
     vector[nYear] tau_year[nEndo];      // random year effect
     real<lower=0> sigma_e[nEndo];        //year variance by endophyte effect
     vector[nPlot] tau_plot;        // random plot effect
@@ -307,16 +329,18 @@ cat("
     vector[N] mu;
     
     // Linear Predictor
-    mu = Xs*beta
-    + tau_year[endo_index[n],year_t[n]] + tau_plot[plot[n]];
+    for(n in 1:N){
+    mu[n] = beta[1] + beta[2]*logsize_t[n] + beta[3]*endo_01[n] +beta[4]*origin_01[n]
+    + beta[5]*logsize_t[n]*endo_01[n] 
+    + tau_year[endo_index[n],year_t[n]] 
+    + tau_plot[plot[n]];
     }
     
     // Priors
     beta ~ normal(0,100);      // prior for predictor intercepts
     tau_plot ~ normal(0,1e6);   // prior for plot random effects
-    for(e in 1:nEndo)
-    tau_year[e] ~ normal(0,sigma_e[e]); // prior for year random effects
-    
+    to_vector(tau_year[1]) ~ normal(0,sigma_e[1]);   // prior for E- year random effects
+    to_vector(tau_year[2]) ~ normal(0,sigma_e[2]);   // prior for E+ year random effects
     // Likelihood
       surv_t1 ~ bernoulli_logit(mu);
     }
