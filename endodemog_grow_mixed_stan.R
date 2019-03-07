@@ -144,34 +144,34 @@ AGPE_for_matrix <- model.frame(size_t1 ~ (logsize_t + endo_01 + origin_01)^3
 AGPE_Xs <- model.matrix(size_t1 ~ (logsize_t + endo_01 + origin_01)^3
                         , data =AGPE_for_matrix)
 
-ELRI_for_matrix <- model.frame(size_t1 ~ (logsize_t + endo_01 + origin_01)^3
+ELRI_for_matrix <- model.frame(size_t1 ~ (logsize_t + endo_01)^2 + origin_01
                                , data = ELRI_data)
-ELRI_Xs <- model.matrix(size_t1 ~ (logsize_t + endo_01 + origin_01)^3
+ELRI_Xs <- model.matrix(size_t1 ~ (logsize_t + endo_01)^2 + origin_01
                         , data =ELRI_for_matrix)
 
-ELVI_for_matrix <- model.frame(size_t1 ~ (logsize_t + endo_01 + origin_01)^3
+ELVI_for_matrix <- model.frame(size_t1 ~ (logsize_t + endo_01)^2 + origin_01
                                , data = ELVI_data)
-ELVI_Xs <- model.matrix(size_t1 ~ (logsize_t + endo_01 + origin_01)^3
+ELVI_Xs <- model.matrix(size_t1 ~ (logsize_t + endo_01)^2 + origin_01
                         , data =ELVI_for_matrix)
 
-FESU_for_matrix <- model.frame(size_t1 ~ (logsize_t + endo_01 + origin_01)^3
+FESU_for_matrix <- model.frame(size_t1 ~ (logsize_t + endo_01)^2 + origin_01
                                , data = FESU_data)
-FESU_Xs <- model.matrix(size_t1 ~ (logsize_t + endo_01 + origin_01)^3
+FESU_Xs <- model.matrix(size_t1 ~ (logsize_t + endo_01)^2 + origin_01
                         , data =FESU_for_matrix)
 
-LOAR_for_matrix <- model.frame(size_t1 ~ (logsize_t + endo_01 + origin_01)^3
+LOAR_for_matrix <- model.frame(size_t1 ~ (logsize_t + endo_01)^2 + origin_01
                                , data = LOAR_data)
-LOAR_Xs <- model.matrix(size_t1 ~ (logsize_t + endo_01 + origin_01)^3
+LOAR_Xs <- model.matrix(size_t1 ~ (logsize_t + endo_01)^2 + origin_01
                         , data =LOAR_for_matrix)
 
-POAL_for_matrix <- model.frame(size_t1 ~ (logsize_t + endo_01 + origin_01)^3
+POAL_for_matrix <- model.frame(size_t1 ~ (logsize_t + endo_01)^2 + origin_01
                                , data = POAL_data)
-POAL_Xs <- model.matrix(size_t1 ~ (logsize_t + endo_01 + origin_01)^3
+POAL_Xs <- model.matrix(size_t1 ~ (logsize_t + endo_01)^2 + origin_01
                         , data =POAL_for_matrix)
 
-POSY_for_matrix <- model.frame(size_t1 ~ (logsize_t + endo_01 + origin_01)^3
+POSY_for_matrix <- model.frame(size_t1 ~ (logsize_t + endo_01)^2 + origin_01
                                , data = POSY_data)
-POSY_Xs <- model.matrix(size_t1 ~ (logsize_t + endo_01 + origin_01)^3
+POSY_Xs <- model.matrix(size_t1 ~ (logsize_t + endo_01)^2 + origin_01
                         , data =POSY_for_matrix)
 
 
@@ -279,8 +279,8 @@ options(mc.cores = parallel::detectCores())
 set.seed(123)
 
 ## MCMC settings
-ni <- 10
-nb <- 5
+ni <- 100
+nb <- 50
 nc <- 1
 
 # Stan model -------------
@@ -290,14 +290,6 @@ nc <- 1
 
 sink("endodemog_grow.stan")
 cat("
-      functions{
-    real neg_binomial_2_log_lb_rng(vector mu, real phi, int lb) {
-    real p = neg_binomial_2_lcdf(lb| mu, phi);  // cdf for bounds
-    real u = uniform_rng(p, 1);
-    return (phi * inv_Phi(u)) + mu;  // inverse cdf for value
-    }
-      }
-    
     data { 
     int<lower=0> N;                       // number of observations
     int<lower=0> K;                       // number of predictors
@@ -305,42 +297,36 @@ cat("
     int<lower=0> nYear;                       // number of years
     int<lower=0, upper=11> year_t[N];         // year of observation
     int<lower=0> nEndo;                       // number of endo treatments
-    int<lower=1, upper=14> endo_index[N];          // index for endophyte effect
-    int<lower=0> nPlot;                         // number of plots
-    int<lower=0> plot[N];                   // plot of observation
+    int<lower=1, upper=2> endo_index[N];          // index for endophyte effect
+    //int<lower=0> nPlot;                         // number of plots
+    //int<lower=0> plot[N];                   // plot of observation
     int<lower=lowerlimit> size_t1[N];      // plant survival at time t+1 and target variable (response)
     matrix[N,K] Xs;                  //  predictor matrix - surv_t1~logsize_t+endo+origin+logsize_t*endo
     }
     
     parameters {
     vector[K] beta;                     // predictor parameters
-    vector[nYear] tau_year[nEndo];      // mean random year effect
-    real<lower=0> sigma_e[nEndo];        //year variance intercept
-    vector[nPlot] tau_plot;        // random plot effect
-    
-    real reciprocal_phi;
 
+    real tau_year[nEndo,nYear];      // random year effect
+    real<lower=0> sigma_e[nEndo];        //year variance by endophyte effect
+    //vector[nPlot] tau_plot;        // random plot effect
+    real<lower=0> phi;
     }
-    
-    transformed parameters {
-    real phi;
-    phi = 1./reciprocal_phi;
-    } 
  
     model {
     vector[N] mu;
     
     // Linear Predictor
     for(n in 1:N){
-    mu = Xs*beta + tau_year[endo_index[n],year_t[n]] + tau_plot[plot[n]];
+    mu = Xs*beta + tau_year[endo_index[n],year_t[n]]; // + tau_plot[plot[n]];
     }
     // Priors
     beta ~ normal(0,100);      // prior for predictor intercepts
-    sigma_e ~ gamma(2,.1);      // prior for year variance
-    tau_plot ~normal(0,100);
-    for(e in 1:nEndo){         
-      tau_year[e][] ~ normal(0,sigma_e[e]);    //prior for year random effects
-    }
+    //to_vector(tau_plot) ~ normal(0,100);   // prior for plot random effects
+    for(e in 1:nEndo){
+    for(y in 1:nYear){
+    tau_year[e,y]~ normal(0,sigma_e[e]); // prior for year random effects
+    }}
     // Likelihood
     for(n in 1:N){
       size_t1[n] ~ neg_binomial_2_log(mu[n],phi);
@@ -375,26 +361,26 @@ smAGPE <- stan(file = "endodemog_grow.stan", data = AGPE_grow_data_list,
            iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
 # saveRDS(smAGPE, file = "endodemog_grow_AGPE.rds")
 
-smELRI <- stan(file = "endodemog_grow.stan", data = AGPE_grow_data_list,
+smELRI <- stan(file = "endodemog_grow.stan", data = ELRI_grow_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
 # saveRDS(smELRI, file = "endodemog_grow_ELRI.rds")
 
-smELVI <- stan(file = "endodemog_grow.stan", data = AGPE_grow_data_list,
+smELVI <- stan(file = "endodemog_grow.stan", data = ELVI_grow_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
 # saveRDS(smSLVI, file = "endodemog_grow_ELVI.rds")
-smFESU <- stan(file = "endodemog_grow.stan", data = AGPE_grow_data_list,
+smFESU <- stan(file = "endodemog_grow.stan", data = FESU_grow_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
 # saveRDS(smFESU, file = "endodemog_grow_FESU.rds")
 
-smLOAR <- stan(file = "endodemog_grow.stan", data = AGPE_grow_data_list,
+smLOAR <- stan(file = "endodemog_grow.stan", data = LOAR_grow_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
 # saveRDS(smLOAR, file = "endodemog_grow_LOAR.rds")
 
-smPOAL <- stan(file = "endodemog_grow.stan", data = AGPE_grow_data_list,
+smPOAL <- stan(file = "endodemog_grow.stan", data = POAL_grow_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
 # saveRDS(smPOAL, file = "endodemog_grow_POAL.rds")
 
-smPOSY <- stan(file = "endodemog_grow.stan", data = AGPE_grow_data_list,
+smPOSY <- stan(file = "endodemog_grow.stan", data = POSY_grow_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
 # saveRDS(smPOSY, file = "endodemog_grow_POSY.rds")
 

@@ -269,13 +269,13 @@ str(POSY_surv_data_list)
 #########################################################################################################
 ## run this code recommended to optimize computer system settings for MCMC
 rstan_options(auto_write = TRUE)
-options(mc.cores = parallel::detectCores())
+# options(mc.cores = parallel::detectCores())
 set.seed(123)
 
 ## MCMC settings
-ni <- 10
-nb <- 5
-nc <- 1
+ni <- 1000
+nb <- 500
+nc <- 3
 
 # Stan model -------------
 ## here is the Stan model
@@ -289,7 +289,7 @@ cat("
     int<lower=0> nYear;                       // number of years
     int<lower=0, upper=11> year_t[N];         // year of observation
     int<lower=0> nEndo;                       // number of endo treatments
-    int<lower=1, upper=14> endo_index[N];          // index for endophyte effect
+    int<lower=1, upper=2> endo_index[N];          // index for endophyte effect
     int<lower=0> nPlot;                         // number of plots
     int<lower=0> plot[N];                   // plot of observation
     int<lower=0, upper=1> surv_t1[N];      // plant survival at time t+1 and target variable (response)
@@ -299,8 +299,8 @@ cat("
     parameters {
     vector[K] beta;                     // predictor parameters
 
-    matrix[nEndo,nYear] tau_year;      // random year effect
-    vector<lower=0>[nEndo] sigma_e;        //year variance by endophyte effect
+    vector[nYear] tau_year[nEndo];      // random year effect
+    real<lower=0> sigma_e[nEndo];        //year variance by endophyte effect
     vector[nPlot] tau_plot;        // random plot effect
     }
 
@@ -310,16 +310,15 @@ cat("
     
     // Linear Predictor
     for(n in 1:N){
-    mu = Xs*beta
-    + tau_year[endo_index[n],year_t[n]] + tau_plot[plot[n]];
+    mu = Xs*beta + tau_year[endo_index[n],year_t[n]] + tau_plot[plot[n]];
     }
     
     // Priors
-    to_vector(beta) ~ normal(0,100);      // prior for predictor intercepts
-    to_vector(tau_plot) ~ normal(0,100);   // prior for plot random effects
-    to_vector(tau_year[1][]) ~ normal(0,sigma_e[1]); // prior for year random effects
-    to_vector(tau_year[2][]) ~ normal(0,sigma_e[2]);
-   
+    beta ~ normal(0,100);      // prior for predictor intercepts
+    tau_plot ~ normal(0,1e6);   // prior for plot random effects
+    for(e in 1:nEndo)
+    tau_year[e] ~ normal(0,sigma_e[e]); // prior for year random effects
+    
     // Likelihood
       surv_t1 ~ bernoulli_logit(mu);
     }

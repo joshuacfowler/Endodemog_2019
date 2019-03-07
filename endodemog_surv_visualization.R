@@ -11,6 +11,8 @@ library(bayesplot)
 library(devtools)
 library(reshape2)
 library(ggplot2)
+library(gridExtra)
+library(ggpubr)
 
 invlogit<-function(x){exp(x)/(1+exp(x))}
 logit = function(x) { log(x/(1-x)) }
@@ -327,23 +329,23 @@ ggplot(data = post_survPOSY,) +
 ########################
 
 # LOAR survival
-nvalues <- length(LOAR_size_dat$logsize_t)
-xdummy <- seq(min(LOAR_size_dat$logsize_t), max(LOAR_size_dat$logsize_t), length.out = nvalues)
+nvalues <- length(LOAR_data$logsize_t)
+xdummy <- seq(min(LOAR_data$logsize_t), max(LOAR_data$logsize_t), length.out = nvalues)
 
 # E- 
-ydummy_eminus <- as.vector(invlogit(mean(post_survLOAR$alpha) + mean(post_survLOAR$'beta[1]')*xdummy + mean(post_survLOAR$'beta[2]')*0 + mean(post_survLOAR$'beta[3]')*mean(LOAR_origin_dat$origin)
+ydummy_eminus <- as.vector(invlogit(mean(post_survLOAR$alpha) + mean(post_survLOAR$'beta[1]')*xdummy + mean(post_survLOAR$'beta[2]')*0 + mean(post_survLOAR$'beta[3]')*mean(LOAR_data$origin_01)
                                     + mean(post_survLOAR$'beta[4]')*xdummy*0
                                     + mean(mean(post_survLOAR$'tau_year[1,1]'),mean(post_survLOAR$'tau_year[1,2]'),mean(post_survLOAR$'tau_year[1,3]'),mean(post_survLOAR$'tau_year[1,4]'),mean(post_survLOAR$'tau_year[1,5]'),mean(post_survLOAR$'tau_year[1,6]'),mean(post_survLOAR$'tau_year[1,7]'),mean(post_survLOAR$'tau_year[1,8]'),mean(post_survLOAR$'tau_year[1,9]'),mean(post_survLOAR$'tau_year[1,10]'),mean(post_survLOAR$'tau_year[1,11]'))))
 
 # E+
-ydummy_eplus <- as.vector(invlogit(mean(post_survLOAR$alpha) + mean(post_survLOAR$'beta[1]')*xdummy + mean(post_survLOAR$'beta[2]')*1 + mean(post_survLOAR$'beta[3]')*mean(LOAR_origin_dat$origin)
+ydummy_eplus <- as.vector(invlogit(mean(post_survLOAR$alpha) + mean(post_survLOAR$'beta[1]')*xdummy + mean(post_survLOAR$'beta[2]')*1 + mean(post_survLOAR$'beta[3]')*mean(LOAR_data$origin_01)
                                    + mean(post_survLOAR$'beta[4]')*xdummy*1
                                    + mean(mean(post_survLOAR$'tau_year[2,1]'),mean(post_survLOAR$'tau_year[2,2]'),mean(post_survLOAR$'tau_year[2,3]'),mean(post_survLOAR$'tau_year[2,4]'),mean(post_survLOAR$'tau_year[2,5]'),mean(post_survLOAR$'tau_year[2,6]'),mean(post_survLOAR$'tau_year[2,7]'),mean(post_survLOAR$'tau_year[2,8]'),mean(post_survLOAR$'tau_year[2,9]'),mean(post_survLOAR$'tau_year[2,10]'),mean(post_survLOAR$'tau_year[2,11]'))))
 LOARfits <- as.data.frame(cbind(xdummy, ydummy_eminus, ydummy_eplus))
 LOARfits <- melt(LOARfits, id = "xdummy", measure.vars = c("ydummy_eplus", "ydummy_eminus")) %>% 
   mutate(Endo = recode(variable, "ydummy_eminus" = "E-", "ydummy_eplus" = "E+"))
 
-surv_bin <- LOAR_data1 %>% 
+surv_bin <- LOAR_data %>% 
   select(surv_t1, logsize_t, endo) %>% 
   mutate(endo = recode(endo, "0" = 'E-', "1" = 'E+')) %>% 
   mutate(size_bin = cut_interval(logsize_t, n = 12)) %>% 
@@ -358,30 +360,30 @@ ggplot(data = LOARfits) +
   scale_color_manual(values=colors2)
 
 ggplot(data = post_survLOAR,) +
-  geom_density( aes(`sigma_0[1]`), col = "#ff7f00", lwd = .8) +
-  geom_density(aes(`sigma_0[2]`), col = "#e31a1c", lwd = .8) +
-  labs(x = expression(σ[year]), y = "Posterior Density")
+  stat_density( aes(`sigma_0[1]`), geom = "line", col = "#ff7f00", lwd = .8) +
+  stat_density(aes(`sigma_0[2]`), geom = "line", col = "#e31a1c", lwd = .8) +
+  labs(title = "E+ plants have lower Surv. variance", x = expression(σ[year]), y = "Posterior Density")
 
 
 
 # ELVI survival
-nvalues <- length(ELVI_size_dat$logsize_t)
-xdummy <- seq(min(ELVI_size_dat$logsize_t), max(ELVI_size_dat$logsize_t), length.out = nvalues)
+nvalues <- length(ELVI_data$logsize_t)
+xdummy <- seq(min(ELVI_data$logsize_t), max(ELVI_data$logsize_t), length.out = nvalues)
 
 # E- 
-ydummy_eminus <- as.vector(invlogit(mean(post_survELVI$alpha) + mean(post_survELVI$'beta[1]')*xdummy + mean(post_survELVI$'beta[2]')*0 + mean(post_survELVI$'beta[3]')*mean(ELVI_origin_dat$origin1)
+ydummy_eminus <- as.vector(invlogit(mean(post_survELVI$alpha) + mean(post_survELVI$'beta[1]')*xdummy + mean(post_survELVI$'beta[2]')*0 + mean(post_survELVI$'beta[3]')*mean(ELVI_data$origin_01)
                                     + mean(post_survELVI$'beta[4]')*xdummy*0
                                     + mean(mean(post_survELVI$'tau_year[1,1]'),mean(post_survELVI$'tau_year[1,2]'),mean(post_survELVI$'tau_year[1,3]'),mean(post_survELVI$'tau_year[1,4]'),mean(post_survELVI$'tau_year[1,5]'),mean(post_survELVI$'tau_year[1,6]'),mean(post_survELVI$'tau_year[1,7]'),mean(post_survELVI$'tau_year[1,8]'),mean(post_survELVI$'tau_year[1,9]'),mean(post_survELVI$'tau_year[1,10]'),mean(post_survELVI$'tau_year[1,11]'))))
 
 # E+
-ydummy_eplus <- as.vector(invlogit(mean(post_survELVI$alpha) + mean(post_survELVI$'beta[1]')*xdummy + mean(post_survELVI$'beta[2]')*1 + mean(post_survELVI$'beta[3]')*mean(ELVI_origin_dat$origin1)
+ydummy_eplus <- as.vector(invlogit(mean(post_survELVI$alpha) + mean(post_survELVI$'beta[1]')*xdummy + mean(post_survELVI$'beta[2]')*1 + mean(post_survELVI$'beta[3]')*mean(ELVI_data$origin_01)
                                    + mean(post_survELVI$'beta[4]')*xdummy*1
                                    + mean(mean(post_survELVI$'tau_year[2,1]'),mean(post_survELVI$'tau_year[2,2]'),mean(post_survELVI$'tau_year[2,3]'),mean(post_survELVI$'tau_year[2,4]'),mean(post_survELVI$'tau_year[2,5]'),mean(post_survELVI$'tau_year[2,6]'),mean(post_survELVI$'tau_year[2,7]'),mean(post_survELVI$'tau_year[2,8]'),mean(post_survELVI$'tau_year[2,9]'),mean(post_survELVI$'tau_year[2,10]'),mean(post_survELVI$'tau_year[2,11]'))))
 ELVIfits <- as.data.frame(cbind(xdummy, ydummy_eminus, ydummy_eplus))
 ELVIfits <- melt(ELVIfits, id = "xdummy", measure.vars = c("ydummy_eplus", "ydummy_eminus")) %>% 
   mutate(Endo = recode(variable, "ydummy_eminus" = "E-", "ydummy_eplus" = "E+"))
 
-surv_bin <- ELVI_data1 %>% 
+surv_bin <- ELVI_data %>% 
   select(surv_t1, logsize_t, endo) %>% 
   mutate(endo = recode(endo, "minus" = 'E-', "plus" = 'E+')) %>% 
   mutate(size_bin = cut_interval(logsize_t, n = 12)) %>% 
@@ -442,23 +444,23 @@ ggplot(data = post_survELRI,) +
 
 
 # FESU survival
-nvalues <- length(FESU_size_dat$logsize_t)
-xdummy <- seq(min(FESU_size_dat$logsize_t), max(FESU_size_dat$logsize_t), length.out = nvalues)
+nvalues <- length(FESU_data$logsize_t)
+xdummy <- seq(min(FESU_data$logsize_t), max(FESU_data$logsize_t), length.out = nvalues)
 
 # E- 
-ydummy_eminus <- as.vector(invlogit(mean(post_survFESU$alpha) + mean(post_survFESU$'beta[1]')*xdummy + mean(post_survFESU$'beta[2]')*0 + mean(post_survFESU$'beta[3]')*mean(FESU_origin_dat$origin1)
+ydummy_eminus <- as.vector(invlogit(mean(post_survFESU$alpha) + mean(post_survFESU$'beta[1]')*xdummy + mean(post_survFESU$'beta[2]')*0 + mean(post_survFESU$'beta[3]')*mean(FESU_data$origin_01)
                                     + mean(post_survFESU$'beta[4]')*xdummy*0
                                     + mean(mean(post_survFESU$'tau_year[1,1]'),mean(post_survFESU$'tau_year[1,2]'),mean(post_survFESU$'tau_year[1,3]'),mean(post_survFESU$'tau_year[1,4]'),mean(post_survFESU$'tau_year[1,5]'),mean(post_survFESU$'tau_year[1,6]'),mean(post_survFESU$'tau_year[1,7]'),mean(post_survFESU$'tau_year[1,8]'),mean(post_survFESU$'tau_year[1,9]'),mean(post_survFESU$'tau_year[1,10]'),mean(post_survFESU$'tau_year[1,11]'))))
 
 # E+
-ydummy_eplus <- as.vector(invlogit(mean(post_survFESU$alpha) + mean(post_survFESU$'beta[1]')*xdummy + mean(post_survFESU$'beta[2]')*1 + mean(post_survFESU$'beta[3]')*mean(FESU_origin_dat$origin1)
+ydummy_eplus <- as.vector(invlogit(mean(post_survFESU$alpha) + mean(post_survFESU$'beta[1]')*xdummy + mean(post_survFESU$'beta[2]')*1 + mean(post_survFESU$'beta[3]')*mean(FESU_data$origin_01)
                                    + mean(post_survFESU$'beta[4]')*xdummy*1
                                    + mean(mean(post_survFESU$'tau_year[2,1]'),mean(post_survFESU$'tau_year[2,2]'),mean(post_survFESU$'tau_year[2,3]'),mean(post_survFESU$'tau_year[2,4]'),mean(post_survFESU$'tau_year[2,5]'),mean(post_survFESU$'tau_year[2,6]'),mean(post_survFESU$'tau_year[2,7]'),mean(post_survFESU$'tau_year[2,8]'),mean(post_survFESU$'tau_year[2,9]'),mean(post_survFESU$'tau_year[2,10]'),mean(post_survFESU$'tau_year[2,11]'))))
 FESUfits <- as.data.frame(cbind(xdummy, ydummy_eminus, ydummy_eplus))
 FESUfits <- melt(FESUfits, id = "xdummy", measure.vars = c("ydummy_eplus", "ydummy_eminus")) %>% 
   mutate(Endo = recode(variable, "ydummy_eminus" = "E-", "ydummy_eplus" = "E+"))
 
-surv_bin <- FESU_data1 %>% 
+surv_bin <- FESU_data %>% 
   select(surv_t1, logsize_t, endo) %>% 
   mutate(endo = recode(endo, "minus" = 'E-', "plus" = 'E+')) %>% 
   mutate(size_bin = cut_interval(logsize_t, n = 12)) %>% 
@@ -516,3 +518,77 @@ ggplot(data = post_survAGPE,) +
   geom_density(aes(`sigma_0[2]`), col = "#e31a1c", lwd = .8) +
   labs(x = expression(σ[year]), y = "Posterior Density")
 
+
+
+
+# variance by species
+
+ggplot() +
+  stat_density(data = post_survELVI, aes(`sigma_0[1]`), geom = "line", col = "#ff7f00", linetype = 3, lwd = .6) +
+  stat_density(data = post_survELVI, aes(`sigma_0[2]`), geom = "line", col = "#ff7f00", linetype = 1, lwd = .6) +
+  stat_density(data = post_survELRI, aes(`sigma_0[1]`), geom = "line", col = "#6a3d9a", linetype = 3, lwd = .6) +
+  stat_density(data = post_survELRI, aes(`sigma_0[2]`), geom = "line", col = "#6a3d9a", linetype = 1, lwd = .6) +
+  stat_density(data = post_survFESU, aes(`sigma_0[1]`), geom = "line", col = "#e31a1c", linetype = 3, lwd = .6) +
+  stat_density(data = post_survFESU, aes(`sigma_0[2]`), geom = "line", col = "#e31a1c", linetype = 1, lwd = .6) +
+  labs(x = expression(σ[year]), y = "Posterior Density", title = "Endophytes Reduce Variance") + theme_classic()
+
+ggplot() +
+  geom_histogram(data = post_survELVI, aes(`sigma_0[1]`), fill = "#ff7f00", linetype = 3, alpha = .6) +
+  geom_histogram(data = post_survELVI, aes(`sigma_0[2]`), fill = "#ff7f00", linetype = 1, alpha = .6) +
+  geom_histogram(data = post_survELRI, aes(`sigma_0[1]`), fill = "#6a3d9a", linetype = 3, alpha = .6) +
+  geom_histogram(data = post_survELRI, aes(`sigma_0[2]`), fill = "#6a3d9a", linetype = 1, alpha = .6) +
+  geom_histogram(data = post_survFESU, aes(`sigma_0[1]`), fill = "#e31a1c", linetype = 3, alpha = .6) +
+  geom_histogram(data = post_survFESU, aes(`sigma_0[2]`), fill = "#e31a1c", linetype = 1, alpha = .6) +
+  labs(x = expression(σ[year]), y = "Posterior Density", title = "Endophytes Reduce Variance") + theme_classic()
+
+ELVI_s <- ggplot() +
+  geom_histogram(data = post_survELVI, aes(`sigma_0[1]`), fill = "#ff7f00", linetype = 3, alpha = .5, bins = 200) +
+  geom_histogram(data = post_survELVI, aes(`sigma_0[2]`), fill = "#6a3d9a", linetype = 1, alpha = .5, bins = 200) +
+  labs(x = expression(σ[year]), y = "", title = "ELVI") + theme_classic()
+
+FESU_s <- ggplot() +
+  geom_histogram(data = post_survFESU, aes(`sigma_0[1]`), fill = "#ff7f00", linetype = 3, alpha = .5, bins = 200) +
+  geom_histogram(data = post_survFESU, aes(`sigma_0[2]`), fill = "#6a3d9a", linetype = 1, alpha = .5, bins = 200) +
+  labs(x = expression(σ[year]), y = "", title = "FESU") + theme_classic()
+
+ELRI_s <- ggplot() +
+  geom_histogram(data = post_survELRI, aes(`sigma_0[1]`), fill = "#ff7f00", linetype = 3, alpha = .4, bins = 200) +
+  geom_histogram(data = post_survELRI, aes(`sigma_0[2]`), fill = "#6a3d9a", linetype = 1, alpha = .4, bins = 200) +
+  labs(x = expression(σ[year]), y = "", title = "ELRI") + theme_classic()
+
+LOAR_s <- ggplot() +
+  geom_histogram(data = post_survLOAR, aes(`sigma_0[1]`), fill = "#ff7f00", linetype = 3, alpha = .5, bins = 200) +
+  geom_histogram(data = post_survLOAR, aes(`sigma_0[2]`), fill = "#6a3d9a", linetype = 1, alpha = .5, bins = 200) +
+  labs(x = expression(σ[year]), y = "", title = "LOAR") + theme_classic()
+
+ELVI_f <- ggplot() +
+  geom_histogram(data = post_flwELVI, aes(`sigma_0[1]`), fill = "#ff7f00", linetype = 3, alpha = .5, bins = 200) +
+  geom_histogram(data = post_flwELVI, aes(`sigma_0[2]`), fill = "#6a3d9a", linetype = 1, alpha = .5, bins = 200) +
+  labs(x = expression(σ[year]), y = "", title = "ELVI") + theme_classic()
+
+FESU_f <- ggplot() +
+  geom_histogram(data = post_flwFESU, aes(`sigma_0[1]`), fill = "#ff7f00", linetype = 3, alpha = .5, bins = 200) +
+  geom_histogram(data = post_flwFESU, aes(`sigma_0[2]`), fill = "#6a3d9a", linetype = 1, alpha = .5, bins = 200) +
+  labs(x = expression(σ[year]), y = "", title = "FESU") + theme_classic()
+
+ELRI_f <- ggplot() +
+  geom_histogram(data = post_flwELRI, aes(`sigma_0[1]`), fill = "#ff7f00", linetype = 3, alpha = .4, bins = 200) +
+  geom_histogram(data = post_flwELRI, aes(`sigma_0[2]`), fill = "#6a3d9a", linetype = 1, alpha = .4, bins = 200) +
+  labs(x = expression(σ[year]), y = "", title = "ELRI") + theme_classic()
+
+LOAR_f <- ggplot() +
+  geom_histogram(data = post_flwLOAR, aes(`sigma_0[1]`), fill = "#ff7f00", linetype = 3, alpha = .5, bins = 200) +
+  geom_histogram(data = post_flwLOAR, aes(`sigma_0[2]`), fill = "#6a3d9a", linetype = 1, alpha = .5, bins = 200) +
+  labs(x = expression(σ[year]), y = "", title = "LOAR") + theme_classic()
+
+
+
+
+survvar <- grid.arrange(ELRI_s, ELVI_s, FESU_s, LOAR_s, ncol= 1)
+titlesurv <- annotate_figure(survvar, top = "Survival", left = "")
+flwrvar <- grid.arrange(ELRI_f, ELVI_f, FESU_f, LOAR_f, ncol= 1)
+titleflw <- annotate_figure(flwrvar, top = "Flowering", left = "")
+var <- grid.arrange(titlesurv,titleflw, ncol = 2)
+titlevar <- annotate_figure(var, top = "Interannual Variance", left = "Posterior Density")
+
+titlevar
