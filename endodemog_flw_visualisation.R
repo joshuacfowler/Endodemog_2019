@@ -44,11 +44,11 @@ yearcolors <- c("#a6cee3","#1f78b4","#b2df8a","#33a02c","#fb9a99",
 colors2 <- c("#e31a1c","#ff7f00")
 
 # POAL flowering
-nvalues <- length(POAL_size_dat$logsize_t)
-xdummy <- seq(min(POAL_size_dat$logsize_t), max(POAL_size_dat$logsize_t), length.out = nvalues)
+nvalues <- length(POAL_data$logsize_t)
+xdummy <- seq(min(POAL_data$logsize_t), max(POAL_data$logsize_t), length.out = nvalues)
 
 # actual data points for probability of flowering
-flwbin0 <- POAL_data1 %>% 
+flwbin0 <- POAL_data %>% 
   select(seed_t1, logsize_t, year_t, endo) %>%
   mutate(flw_t1 = as.integer(case_when(seed_t1 == 0 ~ 0, seed_t1 > 0 ~ 1, is.na(seed_t1) ~ 0))) %>% 
   mutate(endo = recode(endo, minus = 0, plus = 1)) %>% 
@@ -59,7 +59,7 @@ flwbin0 <- POAL_data1 %>%
   summarise(mean_size = mean((logsize_t),na.rm=T),
             mean_surv = mean(flw_t1,na.rm=T))
 
-flwbin1 <- POAL_data1 %>% 
+flwbin1 <- POAL_data %>% 
   select(seed_t1, logsize_t, year_t, endo) %>%
   mutate(flw_t1 = as.integer(case_when(seed_t1 == 0 ~ 0, seed_t1 > 0 ~ 1, is.na(seed_t1) ~ 0))) %>% 
   mutate(endo = recode(endo, minus = 0, plus = 1)) %>% 
@@ -73,40 +73,40 @@ flwbin1 <- POAL_data1 %>%
 
 
 # E- 
-ydummy_eminus <- as.vector(invlogit(mean(post_flwPOAL$alpha) + mean(post_flwPOAL$'beta[1]')*xdummy + mean(post_flwPOAL$'beta[2]')*0 + mean(post_flwPOAL$'beta[3]')*mean(POAL_origin_dat$origin1)
+ydummy_eminus <- as.vector(invlogit(mean(post_flwPOAL$alpha) + mean(post_flwPOAL$'beta[1]')*xdummy + mean(post_flwPOAL$'beta[2]')*0 + mean(post_flwPOAL$'beta[3]')*mean(POAL_data$origin_01)
                                     + mean(post_flwPOAL$'beta[4]')*xdummy*0
                                     + mean(mean(post_flwPOAL$'tau_year[1,1]'),mean(post_flwPOAL$'tau_year[1,2]'),mean(post_flwPOAL$'tau_year[1,3]'),mean(post_flwPOAL$'tau_year[1,4]'),mean(post_flwPOAL$'tau_year[1,5]'),mean(post_flwPOAL$'tau_year[1,6]'),mean(post_flwPOAL$'tau_year[1,7]'),mean(post_flwPOAL$'tau_year[1,8]'),mean(post_flwPOAL$'tau_year[1,9]'),mean(post_flwPOAL$'tau_year[1,10]'),mean(post_flwPOAL$'tau_year[1,11]'))))
-ydummy_eminus_y1 <- as.vector(invlogit(mean(post_flwPOAL$alpha) + mean(post_flwPOAL$'beta[1]')*xdummy + mean(post_flwPOAL$'beta[2]')*0 + mean(post_flwPOAL$'beta[3]')*mean(POAL_origin_dat$origin1)
+ydummy_eminus_y1 <- as.vector(invlogit(mean(post_flwPOAL$alpha) + mean(post_flwPOAL$'beta[1]')*xdummy + mean(post_flwPOAL$'beta[2]')*0 + mean(post_flwPOAL$'beta[3]')*mean(POAL_data$origin_01)
                                        + mean(post_flwPOAL$'beta[4]')*xdummy*0
                                        + mean(post_flwPOAL$'tau_year[1,1]')))
-ydummy_eminus_y2 <- as.vector(invlogit(mean(post_flwPOAL$alpha) + mean(post_flwPOAL$'beta[1]')*xdummy + mean(post_flwPOAL$'beta[2]')*0 + mean(post_flwPOAL$'beta[3]')*mean(POAL_origin_dat$origin1)
+ydummy_eminus_y2 <- as.vector(invlogit(mean(post_flwPOAL$alpha) + mean(post_flwPOAL$'beta[1]')*xdummy + mean(post_flwPOAL$'beta[2]')*0 + mean(post_flwPOAL$'beta[3]')*mean(POAL_data$origin_01)
                                        + mean(post_flwPOAL$'beta[4]')*xdummy*0
                                        + mean(post_flwPOAL$'tau_year[1,2]')))
-ydummy_eminus_y3 <- as.vector(invlogit(mean(post_flwPOAL$alpha) + mean(post_flwPOAL$'beta[1]')*xdummy + mean(post_flwPOAL$'beta[2]')*0 + mean(post_flwPOAL$'beta[3]')*mean(POAL_origin_dat$origin1)
+ydummy_eminus_y3 <- as.vector(invlogit(mean(post_flwPOAL$alpha) + mean(post_flwPOAL$'beta[1]')*xdummy + mean(post_flwPOAL$'beta[2]')*0 + mean(post_flwPOAL$'beta[3]')*mean(POAL_data$origin_01)
                                        + mean(post_flwPOAL$'beta[4]')*xdummy*0
                                        + mean(post_flwPOAL$'tau_year[1,3]')))
-ydummy_eminus_y4 <- as.vector(invlogit(mean(post_flwPOAL$alpha) + mean(post_flwPOAL$'beta[1]')*xdummy + mean(post_flwPOAL$'beta[2]')*0 + mean(post_flwPOAL$'beta[3]')*mean(POAL_origin_dat$origin1)
+ydummy_eminus_y4 <- as.vector(invlogit(mean(post_flwPOAL$alpha) + mean(post_flwPOAL$'beta[1]')*xdummy + mean(post_flwPOAL$'beta[2]')*0 + mean(post_flwPOAL$'beta[3]')*mean(POAL_data$origin_01)
                                        + mean(post_flwPOAL$'beta[4]')*xdummy*0
                                        + mean(post_flwPOAL$'tau_year[1,4]')))
-ydummy_eminus_y5 <- as.vector(invlogit(mean(post_flwPOAL$alpha) + mean(post_flwPOAL$'beta[1]')*xdummy + mean(post_flwPOAL$'beta[2]')*0 + mean(post_flwPOAL$'beta[3]')*mean(POAL_origin_dat$origin1)
+ydummy_eminus_y5 <- as.vector(invlogit(mean(post_flwPOAL$alpha) + mean(post_flwPOAL$'beta[1]')*xdummy + mean(post_flwPOAL$'beta[2]')*0 + mean(post_flwPOAL$'beta[3]')*mean(POAL_data$origin_01)
                                        + mean(post_flwPOAL$'beta[4]')*xdummy*0
                                        + mean(post_flwPOAL$'tau_year[1,5]')))
-ydummy_eminus_y6 <- as.vector(invlogit(mean(post_flwPOAL$alpha) + mean(post_flwPOAL$'beta[1]')*xdummy + mean(post_flwPOAL$'beta[2]')*0 + mean(post_flwPOAL$'beta[3]')*mean(POAL_origin_dat$origin1)
+ydummy_eminus_y6 <- as.vector(invlogit(mean(post_flwPOAL$alpha) + mean(post_flwPOAL$'beta[1]')*xdummy + mean(post_flwPOAL$'beta[2]')*0 + mean(post_flwPOAL$'beta[3]')*mean(POAL_data$origin_01)
                                        + mean(post_flwPOAL$'beta[4]')*xdummy*0
                                        + mean(post_flwPOAL$'tau_year[1,6]')))
-ydummy_eminus_y7 <- as.vector(invlogit(mean(post_flwPOAL$alpha) + mean(post_flwPOAL$'beta[1]')*xdummy + mean(post_flwPOAL$'beta[2]')*0 + mean(post_flwPOAL$'beta[3]')*mean(POAL_origin_dat$origin1)
+ydummy_eminus_y7 <- as.vector(invlogit(mean(post_flwPOAL$alpha) + mean(post_flwPOAL$'beta[1]')*xdummy + mean(post_flwPOAL$'beta[2]')*0 + mean(post_flwPOAL$'beta[3]')*mean(POAL_data$origin_01)
                                        + mean(post_flwPOAL$'beta[4]')*xdummy*0
                                        + mean(post_flwPOAL$'tau_year[1,7]')))
-ydummy_eminus_y8 <- as.vector(invlogit(mean(post_flwPOAL$alpha) + mean(post_flwPOAL$'beta[1]')*xdummy + mean(post_flwPOAL$'beta[2]')*0 + mean(post_flwPOAL$'beta[3]')*mean(POAL_origin_dat$origin1)
+ydummy_eminus_y8 <- as.vector(invlogit(mean(post_flwPOAL$alpha) + mean(post_flwPOAL$'beta[1]')*xdummy + mean(post_flwPOAL$'beta[2]')*0 + mean(post_flwPOAL$'beta[3]')*mean(POAL_data$origin_01)
                                        + mean(post_flwPOAL$'beta[4]')*xdummy*0
                                        + mean(post_flwPOAL$'tau_year[1,8]')))
-ydummy_eminus_y9 <- as.vector(invlogit(mean(post_flwPOAL$alpha) + mean(post_flwPOAL$'beta[1]')*xdummy + mean(post_flwPOAL$'beta[2]')*0 + mean(post_flwPOAL$'beta[3]')*mean(POAL_origin_dat$origin1)
+ydummy_eminus_y9 <- as.vector(invlogit(mean(post_flwPOAL$alpha) + mean(post_flwPOAL$'beta[1]')*xdummy + mean(post_flwPOAL$'beta[2]')*0 + mean(post_flwPOAL$'beta[3]')*mean(POAL_data$origin_01)
                                        + mean(post_flwPOAL$'beta[4]')*xdummy*0
                                        + mean(post_flwPOAL$'tau_year[1,9]')))
-ydummy_eminus_y10 <- as.vector(invlogit(mean(post_flwPOAL$alpha) + mean(post_flwPOAL$'beta[1]')*xdummy + mean(post_flwPOAL$'beta[2]')*0 + mean(post_flwPOAL$'beta[3]')*mean(POAL_origin_dat$origin1)
+ydummy_eminus_y10 <- as.vector(invlogit(mean(post_flwPOAL$alpha) + mean(post_flwPOAL$'beta[1]')*xdummy + mean(post_flwPOAL$'beta[2]')*0 + mean(post_flwPOAL$'beta[3]')*mean(POAL_data$origin_01)
                                         + mean(post_flwPOAL$'beta[4]')*xdummy*0
                                         + mean(post_flwPOAL$'tau_year[1,10]')))
-ydummy_eminus_y11 <- as.vector(invlogit(mean(post_flwPOAL$alpha) + mean(post_flwPOAL$'beta[1]')*xdummy + mean(post_flwPOAL$'beta[2]')*0 + mean(post_flwPOAL$'beta[3]')*mean(POAL_origin_dat$origin1)
+ydummy_eminus_y11 <- as.vector(invlogit(mean(post_flwPOAL$alpha) + mean(post_flwPOAL$'beta[1]')*xdummy + mean(post_flwPOAL$'beta[2]')*0 + mean(post_flwPOAL$'beta[3]')*mean(POAL_data$origin_01)
                                         + mean(post_flwPOAL$'beta[4]')*xdummy*0
                                         + mean(post_flwPOAL$'tau_year[1,11]')))
 POALfitsminus0 <- as.data.frame(cbind(xdummy, ydummy_eminus))
@@ -125,25 +125,105 @@ POALfitsminus <- melt(POALfitsminus1, id = "xdummy",
                        "ydummy_eminus_y9" = "9", "ydummy_eminus_y10" = "10",
                        "ydummy_eminus_y11" = "11") )
 ggplot(data = POALfitsminus1)+
-  geom_line(aes(x = xdummy, y = ydummy_eminus_y1))+
-  geom_line(aes(x = xdummy, y = ydummy_eminus_y2))+
-  geom_line(aes(x = xdummy, y = ydummy_eminus_y3), col = "red") +
-  geom_line(aes(x = xdummy, y = ydummy_eminus_y4))+
-  geom_line(aes(x = xdummy, y = ydummy_eminus_y5))+
-  geom_line(aes(x = xdummy, y = ydummy_eminus_y6))+
-  geom_line(aes(x = xdummy, y = ydummy_eminus_y7))+
-  geom_line(aes(x = xdummy, y = ydummy_eminus_y8))+
-  geom_line(aes(x = xdummy, y = ydummy_eminus_y9))+
-  geom_line(aes(x = xdummy, y = ydummy_eminus_y10))+
-  geom_line(aes(x = xdummy, y = ydummy_eminus_y11))
+  geom_line(aes(x = xdummy, y = ydummy_eminus_y1), col = "#6a3d9a")+
+  geom_line(aes(x = xdummy, y = ydummy_eminus_y2), col = "#6a3d9a")+
+  geom_line(aes(x = xdummy, y = ydummy_eminus_y3), col = "#6a3d9a") +
+  geom_line(aes(x = xdummy, y = ydummy_eminus_y4), col = "#6a3d9a")+
+  geom_line(aes(x = xdummy, y = ydummy_eminus_y5), col = "#6a3d9a")+
+  geom_line(aes(x = xdummy, y = ydummy_eminus_y6), col = "#6a3d9a")+
+  geom_line(aes(x = xdummy, y = ydummy_eminus_y7), col = "#6a3d9a")+
+  geom_line(aes(x = xdummy, y = ydummy_eminus_y8), col = "#6a3d9a")+
+  geom_line(aes(x = xdummy, y = ydummy_eminus_y9), col = "#6a3d9a")+
+  geom_line(aes(x = xdummy, y = ydummy_eminus_y10), col = "#6a3d9a")+
+  geom_line(aes(x = xdummy, y = ydummy_eminus_y11), col = "#6a3d9a") +
+  geom_line(aes(x = xdummy, y = ydummy_eplus_y1), col = "#ff7f00")+
+  geom_line(aes(x = xdummy, y = ydummy_eplus_y2), col = "#ff7f00")+
+  geom_line(aes(x = xdummy, y = ydummy_eplus_y3), col = "#ff7f00") +
+  geom_line(aes(x = xdummy, y = ydummy_eplus_y4), col = "#ff7f00")+
+  geom_line(aes(x = xdummy, y = ydummy_eplus_y5), col = "#ff7f00")+
+  geom_line(aes(x = xdummy, y = ydummy_eplus_y6), col = "#ff7f00")+
+  geom_line(aes(x = xdummy, y = ydummy_eplus_y7), col = "#ff7f00")+
+  geom_line(aes(x = xdummy, y = ydummy_eplus_y8), col = "#ff7f00")+
+  geom_line(aes(x = xdummy, y = ydummy_eplus_y9), col = "#ff7f00")+
+  geom_line(aes(x = xdummy, y = ydummy_eplus_y10), col = "#ff7f00")+
+  geom_line(aes(x = xdummy, y = ydummy_eplus_y11), col = "#ff7f00")
 
+ggplot(data = POALfitsminus1)+
+  geom_line(aes(x = xdummy, y = ydummy_eminus_y1), col = "#ff7f00")+
+  geom_line(aes(x = xdummy, y = ydummy_eminus_y2), col = "#ff7f00")+
+  geom_line(aes(x = xdummy, y = ydummy_eminus_y3), col = "#ff7f00") +
+  geom_line(aes(x = xdummy, y = ydummy_eminus_y4), col = "#ff7f00")+
+  geom_line(aes(x = xdummy, y = ydummy_eminus_y5), col = "#ff7f00")+
+  geom_line(aes(x = xdummy, y = ydummy_eminus_y6), col = "#ff7f00")+
+  geom_line(aes(x = xdummy, y = ydummy_eminus_y7), col = "#ff7f00")+
+  geom_line(aes(x = xdummy, y = ydummy_eminus_y8), col = "#ff7f00")+
+  geom_line(aes(x = xdummy, y = ydummy_eminus_y9), col = "#ff7f00")+
+  geom_line(aes(x = xdummy, y = ydummy_eminus_y10), col = "#ff7f00")+
+  geom_line(aes(x = xdummy, y = ydummy_eminus_y11), col = "#ff7f00") +
+  geom_line(aes(x = xdummy, y = ydummy_eplus_y1), col = "#6a3d9a")+
+  geom_line(aes(x = xdummy, y = ydummy_eplus_y2), col = "#6a3d9a")+
+  geom_line(aes(x = xdummy, y = ydummy_eplus_y3), col = "#6a3d9a") +
+  geom_line(aes(x = xdummy, y = ydummy_eplus_y4), col = "#6a3d9a")+
+  geom_line(aes(x = xdummy, y = ydummy_eplus_y5), col = "#6a3d9a")+
+  geom_line(aes(x = xdummy, y = ydummy_eplus_y6), col = "#6a3d9a")+
+  geom_line(aes(x = xdummy, y = ydummy_eplus_y7), col = "#6a3d9a")+
+  geom_line(aes(x = xdummy, y = ydummy_eplus_y8), col = "#6a3d9a")+
+  geom_line(aes(x = xdummy, y = ydummy_eplus_y9), col = "#6a3d9a")+
+  geom_line(aes(x = xdummy, y = ydummy_eplus_y10), col = "#6a3d9a")+
+  geom_line(aes(x = xdummy, y = ydummy_eplus_y11), col = "#6a3d9a")+
+  geom_point(data = flwbin0, aes(x = mean_size, y = mean_surv), color ="#ff7f00") +
+  geom_point(data = flwbin1, aes(x = mean_size, y = mean_surv), color ="#6a3d9a") +
+  labs(title = "POAL Flowering Probability", x = "log(size_t)", y = "Prob. of Flowering")
+  
+  
+
+# split up plus and minus with datapoints and add mean line
+POAL_minus <- ggplot(data = POALfitsminus1)+
+  geom_line(aes(x = xdummy, y = ydummy_eminus_y1), col = "#ff7f00", alpha = .5)+
+  geom_line(aes(x = xdummy, y = ydummy_eminus_y2), col = "#ff7f00", alpha = .5)+
+  geom_line(aes(x = xdummy, y = ydummy_eminus_y3), col = "#ff7f00", alpha = .5) +
+  geom_line(aes(x = xdummy, y = ydummy_eminus_y4), col = "#ff7f00", alpha = .5)+
+  geom_line(aes(x = xdummy, y = ydummy_eminus_y5), col = "#ff7f00", alpha = .5)+
+  geom_line(aes(x = xdummy, y = ydummy_eminus_y6), col = "#ff7f00", alpha = .5)+
+  geom_line(aes(x = xdummy, y = ydummy_eminus_y7), col = "#ff7f00", alpha = .5)+
+  geom_line(aes(x = xdummy, y = ydummy_eminus_y8), col = "#ff7f00", alpha = .5)+
+  geom_line(aes(x = xdummy, y = ydummy_eminus_y9), col = "#ff7f00", alpha = .5)+
+  geom_line(aes(x = xdummy, y = ydummy_eminus_y10), col = "#ff7f00", alpha = .5)+
+  geom_line(aes(x = xdummy, y = ydummy_eminus_y11), col = "#ff7f00", alpha = .5) +
+  geom_line(data = POALfitsminus0, aes(x = xdummy, y = ydummy_eminus), col = "#ff7f00", lwd = 1) +
+  geom_point(data = flwbin0, aes(x = mean_size, y = mean_surv), color ="#ff7f00") +
+  theme_classic()+
+  labs(title = "E-", x = "log(size_t)", y = "")
+
+
+POAL_plus <- ggplot(data = POALfitsminus1)+
+  geom_line(aes(x = xdummy, y = ydummy_eplus_y1), col = "#6a3d9a", alpha = .5)+
+  geom_line(aes(x = xdummy, y = ydummy_eplus_y2), col = "#6a3d9a", alpha = .5)+
+  geom_line(aes(x = xdummy, y = ydummy_eplus_y3), col = "#6a3d9a", alpha = .5) +
+  geom_line(aes(x = xdummy, y = ydummy_eplus_y4), col = "#6a3d9a", alpha = .5)+
+  geom_line(aes(x = xdummy, y = ydummy_eplus_y5), col = "#6a3d9a", alpha = .5)+
+  geom_line(aes(x = xdummy, y = ydummy_eplus_y6), col = "#6a3d9a", alpha = .5)+
+  geom_line(aes(x = xdummy, y = ydummy_eplus_y7), col = "#6a3d9a", alpha = .5)+
+  geom_line(aes(x = xdummy, y = ydummy_eplus_y8), col = "#6a3d9a", alpha = .5)+
+  geom_line(aes(x = xdummy, y = ydummy_eplus_y9), col = "#6a3d9a", alpha = .5)+
+  geom_line(aes(x = xdummy, y = ydummy_eplus_y10), col = "#6a3d9a", alpha = .5)+
+  geom_line(aes(x = xdummy, y = ydummy_eplus_y11), col = "#6a3d9a", alpha = .5)+
+  geom_line(data = POAL_fitsplus0, aes(x = xdummy, y = ydummy_eminus), col = "#6a3d9a", lwd = 1) +
+  geom_point(data = flwbin1, aes(x = mean_size, y = mean_surv), color ="#6a3d9a") +
+  theme_classic()+
+  labs(title = "E+", x = "log(size_t)", y = "")
+
+flw <- grid.arrange(POAL_plus, POAL_minus, ncol= 2)
+titleflw <- annotate_figure(flw, top = "POAL Flowering Probability", left = "Probability of Flowering")
+
+titleflw
 
 # with data points
 ggplot(data = POALfitsminus) +
   geom_line(aes(x = xdummy, y = value, color = Year), lwd = .7) +
   geom_point(data = flwbin0, aes(x = mean_size, y = mean_surv, color = Year)) +
-  labs(title = "POAL E- Flowering Probability", x = "log(size_t)", y = "Prob. of Flowering") +
-  scale_color_manual(values=yearcolors)
+  labs(title = "POAL E- Flowering Probability", x = "log(size_t)", y = "Prob. of Flowering")
+
 # without datapoints
 ggplot(data = POALfitsminus) +
   geom_line(aes(x = xdummy, y = value, color = Year), lwd = .7) +
@@ -157,40 +237,40 @@ ggplot(data = POALfitsminus0) +
   scale_color_manual(values=colors2)
 
 # E+
-ydummy_eplus <- as.vector(invlogit(mean(post_flwPOAL$alpha) + mean(post_flwPOAL$'beta[1]')*xdummy + mean(post_flwPOAL$'beta[2]')*1 + mean(post_flwPOAL$'beta[3]')*mean(POAL_origin_dat$origin1)
+ydummy_eplus <- as.vector(invlogit(mean(post_flwPOAL$alpha) + mean(post_flwPOAL$'beta[1]')*xdummy + mean(post_flwPOAL$'beta[2]')*1 + mean(post_flwPOAL$'beta[3]')*mean(POAL_data$origin_01)
                                    + mean(post_flwPOAL$'beta[4]')*xdummy*1
                                    + mean(mean(post_flwPOAL$'tau_year[2,1]'),mean(post_flwPOAL$'tau_year[2,2]'),mean(post_flwPOAL$'tau_year[2,3]'),mean(post_flwPOAL$'tau_year[2,4]'),mean(post_flwPOAL$'tau_year[2,5]'),mean(post_flwPOAL$'tau_year[2,6]'),mean(post_flwPOAL$'tau_year[2,7]'),mean(post_flwPOAL$'tau_year[2,8]'),mean(post_flwPOAL$'tau_year[2,9]'),mean(post_flwPOAL$'tau_year[2,10]'),mean(post_flwPOAL$'tau_year[2,11]'))))
-ydummy_eplus_y1 <-  as.vector(invlogit(mean(post_flwPOAL$alpha) + mean(post_flwPOAL$'beta[1]')*xdummy + mean(post_flwPOAL$'beta[2]')*1 + mean(post_flwPOAL$'beta[3]')*mean(POAL_origin_dat$origin1) 
+ydummy_eplus_y1 <-  as.vector(invlogit(mean(post_flwPOAL$alpha) + mean(post_flwPOAL$'beta[1]')*xdummy + mean(post_flwPOAL$'beta[2]')*1 + mean(post_flwPOAL$'beta[3]')*mean(POAL_data$origin_01) 
                                        + mean(post_flwPOAL$'beta[4]')*xdummy*1
                                        + mean(post_flwPOAL$'tau_year[2,1]')))
-ydummy_eplus_y2 <-  as.vector(invlogit(mean(post_flwPOAL$alpha) + mean(post_flwPOAL$'beta[1]')*xdummy + mean(post_flwPOAL$'beta[2]')*1 + mean(post_flwPOAL$'beta[3]')*mean(POAL_origin_dat$origin1) 
+ydummy_eplus_y2 <-  as.vector(invlogit(mean(post_flwPOAL$alpha) + mean(post_flwPOAL$'beta[1]')*xdummy + mean(post_flwPOAL$'beta[2]')*1 + mean(post_flwPOAL$'beta[3]')*mean(POAL_data$origin_01) 
                                        + mean(post_flwPOAL$'beta[4]')*xdummy*1
                                        + mean(post_flwPOAL$'tau_year[2,2')))
-ydummy_eplus_y3 <-  as.vector(invlogit(mean(post_flwPOAL$alpha) + mean(post_flwPOAL$'beta[1]')*xdummy + mean(post_flwPOAL$'beta[2]')*1 + mean(post_flwPOAL$'beta[3]')*mean(POAL_origin_dat$origin1) 
+ydummy_eplus_y3 <-  as.vector(invlogit(mean(post_flwPOAL$alpha) + mean(post_flwPOAL$'beta[1]')*xdummy + mean(post_flwPOAL$'beta[2]')*1 + mean(post_flwPOAL$'beta[3]')*mean(POAL_data$origin_01) 
                                        + mean(post_flwPOAL$'beta[4]')*xdummy*1
                                        + mean(post_flwPOAL$'tau_year[2,3]')))
-ydummy_eplus_y4 <-  as.vector(invlogit(mean(post_flwPOAL$alpha) + mean(post_flwPOAL$'beta[1]')*xdummy + mean(post_flwPOAL$'beta[2]')*1 + mean(post_flwPOAL$'beta[3]')*mean(POAL_origin_dat$origin1) 
+ydummy_eplus_y4 <-  as.vector(invlogit(mean(post_flwPOAL$alpha) + mean(post_flwPOAL$'beta[1]')*xdummy + mean(post_flwPOAL$'beta[2]')*1 + mean(post_flwPOAL$'beta[3]')*mean(POAL_data$origin_01) 
                                        + mean(post_flwPOAL$'beta[4]')*xdummy*1
                                        + mean(post_flwPOAL$'tau_year[2,4]')))
-ydummy_eplus_y5 <-  as.vector(invlogit(mean(post_flwPOAL$alpha) + mean(post_flwPOAL$'beta[1]')*xdummy + mean(post_flwPOAL$'beta[2]')*1 + mean(post_flwPOAL$'beta[3]')*mean(POAL_origin_dat$origin1) 
+ydummy_eplus_y5 <-  as.vector(invlogit(mean(post_flwPOAL$alpha) + mean(post_flwPOAL$'beta[1]')*xdummy + mean(post_flwPOAL$'beta[2]')*1 + mean(post_flwPOAL$'beta[3]')*mean(POAL_data$origin_01) 
                                        + mean(post_flwPOAL$'beta[4]')*xdummy*1
                                        + mean(post_flwPOAL$'tau_year[2,5]')))
-ydummy_eplus_y6 <-  as.vector(invlogit(mean(post_flwPOAL$alpha) + mean(post_flwPOAL$'beta[1]')*xdummy + mean(post_flwPOAL$'beta[2]')*1 + mean(post_flwPOAL$'beta[3]')*mean(POAL_origin_dat$origin1) 
+ydummy_eplus_y6 <-  as.vector(invlogit(mean(post_flwPOAL$alpha) + mean(post_flwPOAL$'beta[1]')*xdummy + mean(post_flwPOAL$'beta[2]')*1 + mean(post_flwPOAL$'beta[3]')*mean(POAL_data$origin_01) 
                                        + mean(post_flwPOAL$'beta[4]')*xdummy*1
                                        + mean(post_flwPOAL$'tau_year[2,6]')))
-ydummy_eplus_y7 <-  as.vector(invlogit(mean(post_flwPOAL$alpha) + mean(post_flwPOAL$'beta[1]')*xdummy + mean(post_flwPOAL$'beta[2]')*1 + mean(post_flwPOAL$'beta[3]')*mean(POAL_origin_dat$origin1) 
+ydummy_eplus_y7 <-  as.vector(invlogit(mean(post_flwPOAL$alpha) + mean(post_flwPOAL$'beta[1]')*xdummy + mean(post_flwPOAL$'beta[2]')*1 + mean(post_flwPOAL$'beta[3]')*mean(POAL_data$origin_01) 
                                        + mean(post_flwPOAL$'beta[4]')*xdummy*1
                                        + mean(post_flwPOAL$'tau_year[2,7]')))
-ydummy_eplus_y8 <-  as.vector(invlogit(mean(post_flwPOAL$alpha) + mean(post_flwPOAL$'beta[1]')*xdummy + mean(post_flwPOAL$'beta[2]')*1 + mean(post_flwPOAL$'beta[3]')*mean(POAL_origin_dat$origin1) 
+ydummy_eplus_y8 <-  as.vector(invlogit(mean(post_flwPOAL$alpha) + mean(post_flwPOAL$'beta[1]')*xdummy + mean(post_flwPOAL$'beta[2]')*1 + mean(post_flwPOAL$'beta[3]')*mean(POAL_data$origin_01) 
                                        + mean(post_flwPOAL$'beta[4]')*xdummy*1
                                        + mean(post_flwPOAL$'tau_year[2,8]')))
-ydummy_eplus_y9 <-  as.vector(invlogit(mean(post_flwPOAL$alpha) + mean(post_flwPOAL$'beta[1]')*xdummy + mean(post_flwPOAL$'beta[2]')*1 + mean(post_flwPOAL$'beta[3]')*mean(POAL_origin_dat$origin1) 
+ydummy_eplus_y9 <-  as.vector(invlogit(mean(post_flwPOAL$alpha) + mean(post_flwPOAL$'beta[1]')*xdummy + mean(post_flwPOAL$'beta[2]')*1 + mean(post_flwPOAL$'beta[3]')*mean(POAL_data$origin_01) 
                                        + mean(post_flwPOAL$'beta[4]')*xdummy*1
                                        + mean(post_flwPOAL$'tau_year[2,9]')))
-ydummy_eplus_y10 <-  as.vector(invlogit(mean(post_flwPOAL$alpha) + mean(post_flwPOAL$'beta[1]')*xdummy + mean(post_flwPOAL$'beta[2]')*1 + mean(post_flwPOAL$'beta[3]')*mean(POAL_origin_dat$origin1) 
+ydummy_eplus_y10 <-  as.vector(invlogit(mean(post_flwPOAL$alpha) + mean(post_flwPOAL$'beta[1]')*xdummy + mean(post_flwPOAL$'beta[2]')*1 + mean(post_flwPOAL$'beta[3]')*mean(POAL_data$origin_01) 
                                         + mean(post_flwPOAL$'beta[4]')*xdummy*1
                                         + mean(post_flwPOAL$'tau_year[2,10]')))
-ydummy_eplus_y11 <-  as.vector(invlogit(mean(post_flwPOAL$alpha) + mean(post_flwPOAL$'beta[1]')*xdummy + mean(post_flwPOAL$'beta[2]')*1 + mean(post_flwPOAL$'beta[3]')*mean(POAL_origin_dat$origin1) 
+ydummy_eplus_y11 <-  as.vector(invlogit(mean(post_flwPOAL$alpha) + mean(post_flwPOAL$'beta[1]')*xdummy + mean(post_flwPOAL$'beta[2]')*1 + mean(post_flwPOAL$'beta[3]')*mean(POAL_data$origin_01) 
                                         + mean(post_flwPOAL$'beta[4]')*xdummy*1
                                         + mean(post_flwPOAL$'tau_year[2,11]')))
 POAL_fitsplus0 <- as.data.frame(cbind(xdummy, ydummy_eplus))

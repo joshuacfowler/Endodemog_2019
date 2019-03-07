@@ -269,9 +269,8 @@ str(POSY_surv_data_list)
 #########################################################################################################
 ## run this code recommended to optimize computer system settings for MCMC
 rstan_options(auto_write = TRUE)
-# options(mc.cores = parallel::detectCores())
+options(mc.cores = parallel::detectCores())
 set.seed(123)
-
 ## MCMC settings
 ni <- 1000
 nb <- 500
@@ -285,7 +284,6 @@ cat("
     data { 
     int<lower=0> N;                       // number of observations
     int<lower=0> K;                       // number of predictors
-    
     int<lower=0> nYear;                       // number of years
     int<lower=0, upper=11> year_t[N];         // year of observation
     int<lower=0> nEndo;                       // number of endo treatments
@@ -295,7 +293,7 @@ cat("
     int<lower=0, upper=1> surv_t1[N];      // plant survival at time t+1 and target variable (response)
     matrix[N,K] Xs;                     //  predictor matrix 
     }
- 
+
     parameters {
     vector[K] beta;                     // predictor parameters
 
@@ -309,8 +307,8 @@ cat("
     vector[N] mu;
     
     // Linear Predictor
-    for(n in 1:N){
-    mu = Xs*beta + tau_year[endo_index[n],year_t[n]] + tau_plot[plot[n]];
+    mu = Xs*beta
+    + tau_year[endo_index[n],year_t[n]] + tau_plot[plot[n]];
     }
     
     // Priors
