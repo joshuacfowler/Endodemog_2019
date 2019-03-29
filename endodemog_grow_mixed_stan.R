@@ -11,8 +11,6 @@ library(shinystan)
 library(bayesplot)
 library(devtools)
 
-invlogit<-function(x){exp(x)/(1+exp(x))}
-logit = function(x) { log(x/(1-x)) }
 
 #############################################################################################
 ####### Data manipulation to prepare data as lists for Stan models------------------
@@ -64,10 +62,10 @@ LTREB_data1 <- LTREB_data %>%
   filter(!is.na(logsize_t1)) %>%
   filter(!is.na(logsize_t)) %>% 
   filter(logsize_t >= 0) %>% 
-  filter(!is.na(endo_01))
+  filter(!is.na(endo_01)) %>% 
+  mutate(size_t1 = as.integer(size_t1))
 
 dim(LTREB_data1)
-
 # LTREB_for_matrix <- model.frame(size_t1 ~ (logsize_t + endo_01 + species)^3 + origin_01 
 #                                 , data = LTREB_data1)
 # Xs <- model.matrix(size_t1~ (logsize_t + endo_01 + species)^3 + origin_01 
@@ -289,7 +287,7 @@ POSY_grow_data_list <- list(size_t1 = POSY_data$size_t1,
 str(POSY_grow_data_list)
 
 #########################################################################################################
-# GLMM for Surv~ size +Endo + Origin  with year random effects------------------------------
+# GLMM for size_t1~ size +Endo + Origin  with year random effects------------------------------
 #########################################################################################################
 ## run this code to optimize computer system settings for MCMC
 rstan_options(auto_write = TRUE)
@@ -297,9 +295,9 @@ options(mc.cores = parallel::detectCores())
 set.seed(123)
 
 ## MCMC settings
-ni <- 200
-nb <- 100
-nc <- 1
+ni <-5000
+nb <- 2500
+nc <- 3
 
 # Stan model -------------
 ## here is the Stan model with a model matrix and species effects ##
@@ -330,6 +328,7 @@ cat("
     vector[nYear] tau_year[nEndo];      // random year effect
     real<lower=0> sigma_e[nEndo];        //year variance by endophyte effect
     vector[nPlot] tau_plot;        // random plot effect
+    real<lower=0> sigma_p;          // plot variance
     real<lower=0> phi;
     }
     
@@ -345,7 +344,7 @@ cat("
     }
     // Priors
     beta ~ normal(0,100);      // prior for predictor intercepts
-    tau_plot ~ normal(0,100);   // prior for plot random effects
+    tau_plot ~ normal(0,sigma_p);   // prior for plot random effects
     to_vector(tau_year[1]) ~ normal(0,sigma_e[1]);   // prior for E- year random effects
     to_vector(tau_year[2]) ~ normal(0,sigma_e[2]);   // prior for E+ year random effects
     
@@ -356,8 +355,18 @@ cat("
       target += -log1m(neg_binomial_2_log_lpmf(lowerlimit | mu[n], phi)); // manually adjusting computation of likelihood because T[,] truncation syntax doesn't compile for neg binomial
     }
     }
-   //generated quantities{
-   // }
+    
+   generated quantities{
+      vector[N] mu;
+    
+    // for posterior predictive check
+    for(n in 1:N){
+      mu[n] = beta[1] + beta[2]*logsize_t[n] + beta[3]*endo_01[n] +beta[4]*origin_01[n]
+      + beta[5]*logsize_t[n]*endo_01[n] 
+      + tau_year[endo_index[n],year_t[n]]
+      + tau_plot[plot[n]];
+    }
+   }
   
     ", fill = T)
 sink()
@@ -379,7 +388,8 @@ smELRI <- stan(file = "endodemog_grow.stan", data = ELRI_grow_data_list,
 
 smELVI <- stan(file = "endodemog_grow.stan", data = ELVI_grow_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-# saveRDS(smSLVI, file = "endodemog_grow_ELVI.rds")
+# saveRDS(smELVI, file = "endodemog_grow_ELVI.rds")
+
 smFESU <- stan(file = "endodemog_grow.stan", data = FESU_grow_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
 # saveRDS(smFESU, file = "endodemog_grow_FESU.rds")
@@ -403,3 +413,63 @@ smPOSY <- stan(file = "endodemog_grow.stan", data = POSY_grow_data_list,
 print(sm)
 summary(sm)
 print(sm, pars = "tau_year")
+
+
+## to read in model output without rerunning models
+smPOAL <- readRDS(file = "model_run_MAR7/endodemog_grow_POAL.rds")
+smPOSY <- readRDS(file = "model_run_MAR7/endodemog_grow_POSY.rds")
+smLOAR <- readRDS(file = "model_run_MAR7/endodemog_grow_LOAR.rds")
+smELVI <- readRDS(file = "model_run_MAR7/endodemog_grow_ELVI.rds")
+smELRI <- readRDS(file = "model_run_MAR7/endodemog_grow_ELRI.rds")
+smFESU <- readRDS(file = "model_run_MAR7/endodemog_grow_FESU.rds")
+smAGPE <- readRDS(file = "model_run_MAR7/endodemog_grow_AGPE.rds")
+
+
+
+
+#########################################################################################################
+###### Perform posterior predictive checks and assess model convergence-------------------------
+#########################################################################################################
+params <- c("beta[1]", "beta[2]", "tau_year[1,1]", "sigma_e[1]", "sigma_e[2]")
+
+
+##### POAL - survival
+print(smPOAL)
+
+
+# Extract Entire posterior (for all parameters) - 3 chains
+posterior <- extract(smPOAL, inc_warmup = FALSE, permute = FALSE)
+
+# Generate new data
+
+y_rep <- apply(posterior, MARGIN = 1:2, FUN = function(draw) {
+  rnorm(n, mean = draw[grepl("^mu", names(draw))], sd = draw["sigma"])
+})
+
+
+dim(y_rep) # 16 replicates by 5000 iterations by 3 chains
+error_rep <- y - y_rep # y = 16 replications
+mean(error_rep^2) # far greater than sigma2 (92 vs true = 25) - also differs from estimated sigma2 of ~40
+
+# alternative way to extract mu MCMC estimates
+mu_rep <- apply(posterior, MARGIN = 1:2, FUN = function(draw) {
+  mu1 = draw[grepl("^mu", names(draw))]
+})
+
+# Fit statistics that are done within WinBUGS
+residual <- y - mu_rep
+sq <- residual^2
+sq.new <- (y_rep - mu_rep)^2
+
+for(i in 1:5000){
+  fit[i] <- sum(sq[ , i, 1]) # Not sure how to get this to loop right for 3 chains - might be easier with permuted extract function
+}
+
+for(i in 1:5000) fit.new[i] <- sum(sq.new[, i, 1])
+
+# Posterior predictive distributions and bayesian p-values
+test <- ifelse(test = (fit.new - fit) > 0, yes=1, no = 0) # Test whether new data set more extreme
+(bpvalue <- mean(test)) # Bayesian p-value = 0.0358 indicates poor fit (should be ~0.5)
+
+plot(fit, fit.new) 
+abline(0, 1) # Also shows poor fit - bias of idealized (new) fit data being lower than fit data. The SSQ are also MUCH larger than those found in WinBUGS. Seems like I did something incorrectly since the summary output was the same for WinBUGS and Stan.

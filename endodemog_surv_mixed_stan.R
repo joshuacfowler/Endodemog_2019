@@ -293,9 +293,9 @@ rstan_options(auto_write = TRUE)
 options(mc.cores = parallel::detectCores())
 set.seed(123)
 ## MCMC settings
-ni <- 200
-nb <- 100
-nc <- 1
+ni <- 5000
+nb <- 2500
+nc <- 3
 
 # Stan model -------------
 ## here is the Stan model
@@ -322,6 +322,7 @@ cat("
     vector[nYear] tau_year[nEndo];      // random year effect
     real<lower=0> sigma_e[nEndo];        //year variance by endophyte effect
     vector[nPlot] tau_plot;        // random plot effect
+    real<lower=0> sigma_p;          // plot variance effect
     }
 
     model {
@@ -338,26 +339,25 @@ cat("
     
     // Priors
     beta ~ normal(0,100);      // prior for predictor intercepts
-    tau_plot ~ normal(0,1e6);   // prior for plot random effects
+    tau_plot ~ normal(0,sigma_p);   // prior for plot random effects
     to_vector(tau_year[1]) ~ normal(0,sigma_e[1]);   // prior for E- year random effects
     to_vector(tau_year[2]) ~ normal(0,sigma_e[2]);   // prior for E+ year random effects
     // Likelihood
       surv_t1 ~ bernoulli_logit(mu);
     }
     
-   //generated quantities{
-    //int yrep[N];
-   // vector[N] mu;
+    generated quantities{
+    vector[N] mu;
     
     // for posterior predictive check
-    //for(n in 1:N){
-    // mu[n] = Xs[n]*beta
-    // + tau_year[endo_index[n], year_t[n]] + tau_plot[plot[n]];
+    for(n in 1:N){
+      mu[n] = beta[1] + beta[2]*logsize_t[n] + beta[3]*endo_01[n] +beta[4]*origin_01[n]
+      + beta[5]*logsize_t[n]*endo_01[n] 
+      + tau_year[endo_index[n],year_t[n]]
+      + tau_plot[plot[n]];
     
-    // yrep[n] = bernoulli_logit_rng(mu[n]);
-    //}
-    
-  // }
+    }
+    }
   
     ", fill = T)
 sink()
@@ -379,7 +379,8 @@ smELRI <- stan(file = "endodemog_surv.stan", data = ELRI_surv_data_list,
 
 smELVI <- stan(file = "endodemog_surv.stan", data = ELVI_surv_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-# saveRDS(smSLVI, file = "endodemog_surv_ELVI.rds")
+# saveRDS(smELVI, file = "endodemog_surv_ELVI.rds")
+
 smFESU <- stan(file = "endodemog_surv.stan", data = FESU_surv_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
 # saveRDS(smFESU, file = "endodemog_surv_FESU.rds")
@@ -405,19 +406,21 @@ print(sm, pars = "sigma_e")
 
 
 ## to read in model output without rerunning models
-smPOAL <- readRDS(file = "endodemog_surv_full_POAL.rds")
-smPOSY <- readRDS(file = "endodemog_surv_full_POSY.rds")
-smLOAR <- readRDS(file = "endodemog_surv_full_LOAR.rds")
-smELVI <- readRDS(file = "endodemog_surv_full_ELVI.rds")
-smELRI <- readRDS(file = "endodemog_surv_full_ELRI.rds")
-smFESU <- readRDS(file = "endodemog_surv_full_FESU.rds")
-smAGPE <- readRDS(file = "endodemog_surv_full_AGPE.rds")
+smPOAL <- readRDS(file = "model_run_MAR7/endodemog_surv_POAL.rds")
+smPOSY <- readRDS(file = "model_run_MAR7/endodemog_surv_POSY.rds")
+smLOAR <- readRDS(file = "model_run_MAR7/endodemog_surv_LOAR.rds")
+smELVI <- readRDS(file = "model_run_MAR7/endodemog_surv_ELVI.rds")
+smELRI <- readRDS(file = "model_run_MAR7/endodemog_surv_ELRI.rds")
+smFESU <- readRDS(file = "model_run_MAR7/endodemog_surv_FESU.rds")
+smAGPE <- readRDS(file = "model_run_MAR7/endodemog_surv_AGPE.rds")
+
+smFESUwithplot <- readRDS(file = "model_run_MAR7/endodemog_surv_FESU_withplot.rds")
 
 
 #########################################################################################################
 ###### Perform posterior predictive checks and assess model convergence-------------------------
 #########################################################################################################
-params <- c("alpha", "beta[1]", "beta[2]", "tau_year[1,1]", "sigma_0[1]", "sigma_0[2]")
+params <- c("beta[1]", "beta[2]", "tau_year[1,1]", "sigma_e[1]", "sigma_e[2]")
 
 ##### POAL - survival
 print(smPOAL)
@@ -427,7 +430,7 @@ print(smPOAL)
 traceplot(smPOAL, pars = params)
 
 ## Plotting residuals
-surv_t1 <- as.vector(POAL_surv_dat$surv_t1)
+surv_t1 <- as.vector(POAL_data$surv_t1)
 yrep <- as.matrix(smPOAL, pars = "yrep")
 mu <- as.matrix(smPOAL, pars = "mu")
 p <- invlogit(mu)
@@ -438,7 +441,7 @@ yrep_resid <- abs(yrep - p[1,])
 fit <- as.matrix(rowSums(y_resid))
 fit_yrep <- as.matrix(rowSums(yrep_resid))
 
-plot(x = fit, y = fit_yrep, main = "POAL surv Residual plot")
+plot(x = fit, y = fit_yrep, main = "FESU surv Residual plot")
 abline(a = 0, b = 1, col = "blue", lwd = 2)
 
 ## plot of neff ratios
@@ -612,15 +615,17 @@ shiny <- as.shinystan(smELRI)
 launch_shinystan(shiny)
 
 
+
+
 ##### FESU - survival
 print(smFESU)
 # summary(smFESU)
 
 ## plot traceplots of chains for select parameters
-traceplot(smFESU, pars = c("alpha", "beta[2]", "tau_year[1,1]", "sigma[1]", "sigma[2]"))
+traceplot(smFESU, pars = c("beta[1]", "beta[2]", "tau_plot[1]", "sigma_e[1]", "sigma_e[2]"))
 
 ## Plotting residuals
-surv_t1 <- as.vector(FESU_surv_dat$surv_t1)
+surv_t1 <- as.vector(FESU_data$surv_t1)
 yrep <- as.matrix(smFESU, pars = "yrep")
 mu <- as.matrix(smFESU, pars = "mu")
 p <- invlogit(mu)
@@ -631,7 +636,7 @@ yrep_resid <- abs(yrep - p[1,])
 fit <- as.matrix(rowSums(y_resid))
 fit_yrep <- as.matrix(rowSums(yrep_resid))
 
-plot(x = fit, y = fit_yrep, main = "FESU surv Residual plot")
+plot(x = fit, y = fit_yrep, main = "FESU surv with plot 2 Residual plot")
 abline(a = 0, b = 1, col = "blue", lwd = 2)
 
 ## plot of neff ratios
