@@ -293,9 +293,9 @@ rstan_options(auto_write = TRUE)
 options(mc.cores = parallel::detectCores())
 set.seed(123)
 ## MCMC settings
-ni <- 5000
-nb <- 2500
-nc <- 3
+ni <- 500
+nb <- 250
+nc <- 1
 
 # Stan model -------------
 ## here is the Stan model
@@ -324,18 +324,17 @@ cat("
     vector[nPlot] tau_plot;        // random plot effect
     real<lower=0> sigma_p;          // plot variance effect
     }
-
+    
     model {
-    
+        // Linear Predictor
     vector[N] mu;
-    
-    // Linear Predictor
     for(n in 1:N){
     mu[n] = beta[1] + beta[2]*logsize_t[n] + beta[3]*endo_01[n] +beta[4]*origin_01[n]
     + beta[5]*logsize_t[n]*endo_01[n] 
     + tau_year[endo_index[n],year_t[n]] 
     + tau_plot[plot[n]];
     }
+  
     
     // Priors
     beta ~ normal(0,100);      // prior for predictor intercepts
@@ -347,16 +346,6 @@ cat("
     }
     
     generated quantities{
-    vector[N] mu;
-    
-    // for posterior predictive check
-    for(n in 1:N){
-      mu[n] = beta[1] + beta[2]*logsize_t[n] + beta[3]*endo_01[n] +beta[4]*origin_01[n]
-      + beta[5]*logsize_t[n]*endo_01[n] 
-      + tau_year[endo_index[n],year_t[n]]
-      + tau_plot[plot[n]];
-    
-    }
     }
   
     ", fill = T)
@@ -406,13 +395,13 @@ print(sm, pars = "sigma_e")
 
 
 ## to read in model output without rerunning models
-smPOAL <- readRDS(file = "model_run_MAR7/endodemog_surv_POAL.rds")
-smPOSY <- readRDS(file = "model_run_MAR7/endodemog_surv_POSY.rds")
-smLOAR <- readRDS(file = "model_run_MAR7/endodemog_surv_LOAR.rds")
-smELVI <- readRDS(file = "model_run_MAR7/endodemog_surv_ELVI.rds")
-smELRI <- readRDS(file = "model_run_MAR7/endodemog_surv_ELRI.rds")
-smFESU <- readRDS(file = "model_run_MAR7/endodemog_surv_FESU.rds")
-smAGPE <- readRDS(file = "model_run_MAR7/endodemog_surv_AGPE.rds")
+smPOAL <- readRDS(file = "model_run_MAR7/endodemog_surv_POAL_withplot.rds")
+smPOSY <- readRDS(file = "model_run_MAR7/endodemog_surv_POSY_withplot.rds")
+smLOAR <- readRDS(file = "model_run_MAR7/endodemog_surv_LOAR_withplot.rds")
+smELVI <- readRDS(file = "model_run_MAR7/endodemog_surv_ELVI_withplot.rds")
+smELRI <- readRDS(file = "model_run_MAR7/endodemog_surv_ELRI_withplot.rds")
+smFESU <- readRDS(file = "model_run_MAR7/endodemog_surv_FESU_withplot.rds")
+smAGPE <- readRDS(file = "model_run_MAR7/endodemog_surv_AGPE_withplot.rds")
 
 smFESUwithplot <- readRDS(file = "model_run_MAR7/endodemog_surv_FESU_withplot.rds")
 
@@ -420,7 +409,7 @@ smFESUwithplot <- readRDS(file = "model_run_MAR7/endodemog_surv_FESU_withplot.rd
 #########################################################################################################
 ###### Perform posterior predictive checks and assess model convergence-------------------------
 #########################################################################################################
-params <- c("beta[1]", "beta[2]", "tau_year[1,1]", "sigma_e[1]", "sigma_e[2]")
+params <- c("beta", "tau_year", "tau_plot", "sigma_e")
 
 ##### POAL - survival
 print(smPOAL)
@@ -429,19 +418,55 @@ print(smPOAL)
 ## plot traceplots of chains for select parameters
 traceplot(smPOAL, pars = params)
 
-## Plotting residuals
-surv_t1 <- as.vector(POAL_data$surv_t1)
-yrep <- as.matrix(smPOAL, pars = "yrep")
-mu <- as.matrix(smPOAL, pars = "mu")
-p <- invlogit(mu)
+# Pull out the posteriors
+POALpost <- extract(smPOAL, pars = params)
 
-y_resid <-  abs(surv_t1 - p)
-yrep_resid <- abs(yrep - p[1,])
+# generate yrep from samples of parameters
+estimate_mu_rep <- function(x, post, length){
+  lin_pred <-    sample(post$beta[,1], size = length)
+  + sample(post$beta[,2], size = length)*x$logsize_t
+  + sample(post$beta[,3], size = length)*x$endo_01
+  + sample(post$beta[,4], size = length)*x$origin_01
+  + sample(post$beta[,5], size = length)*x$logsize_t*x$endo_01
+  + sample(rnorm(n = length(post$tau_plot), mean = mean(post$tau_plot),sd = sd(post$tau_plot)), size = length)
+  + sample(rnorm(n = length(post$tau_year), mean = mean(post$tau_year),sd = sd(post$tau_year)), size = length)
+  
+  mu <- invlogit(lin_pred)
+  
+  return(mu)
+}
+estimate_y_rep <- function(x, post, length){
+  lin_pred <-    sample(post$beta[,1], size = length)
+  + sample(post$beta[,2], size = length)*x$logsize_t
+  + sample(post$beta[,3], size = length)*x$endo_01
+  + sample(post$beta[,4], size = length)*x$origin_01
+  + sample(post$beta[,5], size = length)*x$logsize_t*x$endo_01
+  + sample(rnorm(n = length(post$tau_plot), mean = mean(post$tau_plot),sd = sd(post$tau_plot)), size = length)
+  + sample(rnorm(n = length(post$tau_year), mean = mean(post$tau_year),sd = sd(post$tau_year)), size = length)
+ 
+  mu <- invlogit(lin_pred)
+  estimate <- rbinom(length, 1, prob)
+
+  return(estimate)
+}
+
+yrep <- estimate_y_rep(x = POAL_surv_data_list, post = POALpost, length = length(POAL_surv_data_list$surv_t1))
+yrep <- replicate(100, estimate_y_rep(x = POAL_surv_data_list, post = POALpost, length = length(POAL_surv_data_list$surv_t1)))
+
+murep <- estimate_mu_rep(x = POAL_surv_data_list, post = POALpost, length = length(POAL_surv_data_list$surv_t1))
+murep <- replicate(100, estimate_mu_rep(x = POAL_surv_data_list, post = POALpost, length = length(POAL_surv_data_list$surv_t1)))
+
+## Plotting residuals
+surv_t1 <- as.vector(POAL_surv_data_list$surv_t1)
+hist(surv_t1)
+hist(yrep[,1])
+y_resid <-  abs(surv_t1 - murep)
+yrep_resid <- abs(yrep - murep[])
 
 fit <- as.matrix(rowSums(y_resid))
 fit_yrep <- as.matrix(rowSums(yrep_resid))
 
-plot(x = fit, y = fit_yrep, main = "FESU surv Residual plot")
+plot(x = fit, y = fit, main = "POAL surv Residual plot")
 abline(a = 0, b = 1, col = "blue", lwd = 2)
 
 ## plot of neff ratios

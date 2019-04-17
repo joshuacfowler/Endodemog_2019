@@ -416,13 +416,13 @@ print(sm, pars = "tau_year")
 
 
 ## to read in model output without rerunning models
-smPOAL <- readRDS(file = "model_run_MAR7/endodemog_grow_POAL.rds")
-smPOSY <- readRDS(file = "model_run_MAR7/endodemog_grow_POSY.rds")
-smLOAR <- readRDS(file = "model_run_MAR7/endodemog_grow_LOAR.rds")
-smELVI <- readRDS(file = "model_run_MAR7/endodemog_grow_ELVI.rds")
-smELRI <- readRDS(file = "model_run_MAR7/endodemog_grow_ELRI.rds")
-smFESU <- readRDS(file = "model_run_MAR7/endodemog_grow_FESU.rds")
-smAGPE <- readRDS(file = "model_run_MAR7/endodemog_grow_AGPE.rds")
+smPOAL <- readRDS(file = "model_run_MAR7/endodemog_grow_POAL_withplot.rds")
+smPOSY <- readRDS(file = "model_run_MAR7/endodemog_grow_POSY_withplot.rds")
+smLOAR <- readRDS(file = "model_run_MAR7/endodemog_grow_LOAR_withplot.rds")
+smELVI <- readRDS(file = "model_run_MAR7/endodemog_grow_ELVI_withplot.rds")
+smELRI <- readRDS(file = "model_run_MAR7/endodemog_grow_ELRI_withplot.rds")
+smFESU <- readRDS(file = "model_run_MAR7/endodemog_grow_FESU_withplot.rds")
+smAGPE <- readRDS(file = "model_run_MAR7/endodemog_grow_AGPE_withplot.rds")
 
 
 
@@ -433,8 +433,19 @@ smAGPE <- readRDS(file = "model_run_MAR7/endodemog_grow_AGPE.rds")
 params <- c("beta[1]", "beta[2]", "tau_year[1,1]", "sigma_e[1]", "sigma_e[2]")
 
 
-##### POAL - survival
+##### POAL - growth
 print(smPOAL)
+
+#extract posteriors into dataframe
+posterior <- as.data.frame(smPOAL)
+
+yrep <- gen_est(POAL_surv_data_list)
+
+
+
+y_rep <- apply(posterior, MARGIN = 1:2, FUN = function(draw) {
+  rnorm(n, mean = draw[grepl("mu", names(draw))], sd = "sigma")
+})
 
 
 # Extract Entire posterior (for all parameters) - 3 chains

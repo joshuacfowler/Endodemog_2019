@@ -55,11 +55,18 @@ dim(LTREB_data)
 
 LTREB_data1 <- LTREB_data %>%
   filter(!is.na(flw)) %>% 
-  filter(flw>0)
+  filter(flw>0) %>% 
+  mutate(seedperspike = case_when(species == "AGPE" ~ seed, 
+                                  species == "ELVI" | species == "ELRI" ~ seed/1,
+                                  species == "POAL" | species == "POSY" | species == "FESU" ~ seed/spikelets)) %>% 
+  group_by(plot, tag, species, endo_01, year) %>% 
+  summarize(seedperspike = mean(seedperspike, na.rm = TRUE))
+  
+  
 
 dim(LTREB_data1)
 
-
+# View(LTREB_data1)
 #########################################################################################################
 # Creating individual species data lists to be passed to the model------------------------------
 #########################################################################################################
@@ -68,10 +75,15 @@ AGPE_seed_data <- LTREB_data1 %>%
   filter(species == "AGPE") %>% 
   filter(!is.na(seed)) %>% 
   filter(spikelets > 0) %>% 
+  group_by(tag) %>% 
+  summarize(seedperspike = seed/spikelets)
+  mutate(seedperspike = seed)
   mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot)))))
 ELRI_seed_data <- LTREB_data1 %>% 
   filter(species == "ELRI") %>% 
   filter(!is.na(seed)) %>% 
+  group_by(tag) %>% 
+  summarize(seedperspike = mean(seed/1)) %>% 
   mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot)))))
 ELVI_seed_data <- LTREB_data1 %>% 
   filter(species == "ELVI") %>%  

@@ -1899,7 +1899,7 @@ LTREB_reprotem <- LTREB_repro %>%
   summarize(mean_seed_per_tiller = mean(seed, na.rm = TRUE), mean_spike_per_tiller = mean(spikelets, na.rm = TRUE))
 
 
-View(LTREB_reprotem)
+# View(LTREB_reprotem)
 
 table(is.na(LTREB_repro_tem$seed), LTREB_reprotem$year, LTREB_repro$species)
 table(LTREB_reprotem$year, is.na(LTREB_reprotem$mean_seed_per_tiller), LTREB_reprotem$species)
@@ -2040,16 +2040,21 @@ LTREB_tem <- LTREB_endodemog %>%
   rename("tag" = "id", "Endo" = "endo") %>% 
   mutate(Endo = case_when(Endo == "0" | Endo == "minus" ~ 0,
                              Endo == "1"| Endo =="plus" ~ 1))
-  
 
+
+# View(LTREB_tem)
 LTREB_f <- merge(x = LTREB_tem, y = flw_tillermerge, by = c("plot", "pos", "tag", "species", "year_t1", "year_t", "Endo"), all = TRUE)
 
 LTREB_f$flw_t1<- ifelse(is.na(LTREB_f$flw_t1.x) & is.na(LTREB_f$flw_t1.y), NA, ifelse(!is.na(LTREB_f$flw_t1.x) & is.na(LTREB_f$flw_t1.y), LTREB_f$flw_t1.x, ifelse(is.na(LTREB_f$flw_t1.x) & !is.na(LTREB_f$flw_t1.y), LTREB_f$flw_t1.y, NA)))
 
 LTREB_flw <- LTREB_f %>% 
+  mutate(flw_stat_t = case_when(flw_t == 0 ~0,
+                                flw_t == 1 ~1)) %>% 
   mutate(flw_stat_t1 = case_when(flw_t1 == 0 ~ 0,
                                  flw_t1 > 0 ~ 1)) %>% 
   filter(!is.na(flw_stat_t1)) 
        
 # View(LTREB_flw)
 table(LTREB_flw$species, LTREB_flw$year_t)
+table(LTREB_flw$flw_stat_t, LTREB_flw$year_t)
+table(LTREB_flw$flw_stat_t1, LTREB_flw$year_t1)

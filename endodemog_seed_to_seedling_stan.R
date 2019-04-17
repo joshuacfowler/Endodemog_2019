@@ -56,15 +56,14 @@ LTREB_data <- LTREB_endodemog %>%
 dim(LTREB_data)
 
 LTREB_data1 <- LTREB_data %>%
-  group_by(species, plot_fixed, year_t, year_t_index, endo_01, endo_index) %>% 
-  summarize(tot_seed_t = sum(seed_t, na.rm = TRUE),
-            tot_recruit_t1 = length((origin_01 == "1" & birth == year_t)),
-            samplesize = n())
-  
-
+  group_by(species, plot_fixed, year_t, year_t_index, year_t1, year_t1_index, endo_01, endo_index) %>% 
+  summarize(tot_seed_t = as.integer(round(sum(seed_t, na.rm = TRUE))),
+            tot_recruit_t1 = length((origin_01 == "1"& year_t == birth)),
+            samplesize = n()) 
 
 dim(LTREB_data1)
-View(LTREB_data)
+View(LTREB_data1)
+
 #########################################################################################################
 # Split up the main dataframe by species and recode plot to be used as an index for each species
 AGPE_data <- LTREB_data1 %>% 
@@ -72,19 +71,19 @@ AGPE_data <- LTREB_data1 %>%
   mutate(plot_index = case_when(plot_fixed == 111 ~ 1, plot_fixed ==112 ~2, plot_fixed ==113 ~ 3, plot_fixed ==114 ~ 4, plot_fixed ==115 ~ 5,plot_fixed == 116 ~ 6, plot_fixed ==117~ 7, plot_fixed ==118 ~ 8, plot_fixed ==119 ~ 9,plot_fixed == 120 ~ 10))
 ELRI_data <- LTREB_data1 %>% 
   filter(species == "ELRI") %>% 
-  mutate(plot_index = case_when(plot_fixed == 101 ~ 1, plot_fixed ==102 ~2, plot_fixed ==103 ~ 3, plot_fixed ==104 ~ 4, plot_fixed ==105 ~ 5,plot_fixed == 106 ~ 6, plot_fixed ==107~ 7, plot_fixed ==108 ~ 8, plot_fixed ==109 ~ 9,plot_fixed == 110 ~ 10))
+  mutate(plot_index = case_when(plot_fixed == 101 ~ 1, plot_fixed ==102 ~2, plot_fixed ==103 ~ 3, plot_fixed ==104 ~ 4, plot_fixed ==105 ~ 5,plot_fixed == 106 ~ 6, plot_fixed ==107~ 7, plot_fixed ==108 ~ 8, plot_fixed ==109 ~ 9,plot_fixed == 110 ~ 10)) 
 ELVI_data <- LTREB_data1 %>% 
   filter(species == "ELVI") %>% 
   mutate(plot_index = case_when(plot_fixed == 91 ~ 1, plot_fixed ==92 ~2, plot_fixed ==93 ~ 3, plot_fixed ==94 ~ 4, plot_fixed ==95 ~ 5,plot_fixed == 96 ~ 6, plot_fixed ==97~ 7, plot_fixed ==98 ~ 8, plot_fixed ==99 ~ 9,plot_fixed == 100 ~ 10, plot_fixed == 101 ~ 11))
 FESU_data <- LTREB_data1 %>% 
   filter(species == "FESU") %>% 
-  mutate(plot_index = case_when(plot_fixed == 121 ~ 1, plot_fixed ==122 ~2, plot_fixed ==123 ~ 3, plot_fixed ==124 ~ 4, plot_fixed ==125 ~ 5,plot_fixed == 126 ~ 6, plot_fixed ==127~ 7, plot_fixed ==128 ~ 8, plot_fixed ==129 ~ 9,plot_fixed == 130 ~ 10))
+  mutate(plot_index = case_when(plot_fixed == 121 ~ 1, plot_fixed ==122 ~2, plot_fixed ==123 ~ 3, plot_fixed ==124 ~ 4, plot_fixed ==125 ~ 5,plot_fixed == 126 ~ 6, plot_fixed ==127~ 7, plot_fixed ==128 ~ 8, plot_fixed ==129 ~ 9,plot_fixed == 130 ~ 10)) 
 LOAR_data <- LTREB_data1 %>% 
   filter(species == "LOAR") %>% 
-  mutate(plot_index = case_when(plot_fixed == 31 ~ 1, plot_fixed ==32 ~2, plot_fixed ==33 ~ 3, plot_fixed ==34 ~ 4, plot_fixed ==35 ~ 5,plot_fixed == 36 ~ 6, plot_fixed ==37~ 7, plot_fixed ==38 ~ 8, plot_fixed ==39 ~ 9,plot_fixed == 40 ~ 10, plot_fixed == 41 ~11,  plot_fixed == 42 ~12, plot_fixed == 43 ~13, plot_fixed == 44 ~14,))
+  mutate(plot_index = case_when(plot_fixed == 31 ~ 1, plot_fixed ==32 ~2, plot_fixed ==33 ~ 3, plot_fixed ==34 ~ 4, plot_fixed ==35 ~ 5,plot_fixed == 36 ~ 6, plot_fixed ==37~ 7, plot_fixed ==38 ~ 8, plot_fixed ==39 ~ 9,plot_fixed == 40 ~ 10, plot_fixed == 41 ~11,  plot_fixed == 42 ~12, plot_fixed == 43 ~13, plot_fixed == 44 ~14,)) 
 POAL_data <- LTREB_data1 %>% 
   filter(species == "POAL") %>% 
-  mutate(plot_index = case_when(plot_fixed == 3 ~ 1, plot_fixed ==4 ~2, plot_fixed ==8 ~ 3, plot_fixed ==9 ~ 4, plot_fixed ==10 ~ 5,plot_fixed == 11 ~ 6, plot_fixed ==15~ 7, plot_fixed ==16~ 8, plot_fixed ==17~ 9, plot_fixed ==151 ~ 10, plot_fixed ==152 ~ 11,plot_fixed == 153 ~ 12, plot_fixed == 154 ~13,  plot_fixed == 155 ~14, plot_fixed == 156 ~15, plot_fixed == 157 ~16,plot_fixed == 158 ~17, plot_fixed == 19 ~18, ))
+  mutate(plot_index = case_when(plot_fixed == 3 ~ 1, plot_fixed ==4 ~2, plot_fixed ==8 ~ 3, plot_fixed ==9 ~ 4, plot_fixed ==10 ~ 5,plot_fixed == 11 ~ 6, plot_fixed ==15~ 7, plot_fixed ==16~ 8, plot_fixed ==17~ 9, plot_fixed ==151 ~ 10, plot_fixed ==152 ~ 11,plot_fixed == 153 ~ 12, plot_fixed == 154 ~13,  plot_fixed == 155 ~14, plot_fixed == 156 ~15, plot_fixed == 157 ~16,plot_fixed == 158 ~17, plot_fixed == 19 ~18, )) 
 POSY_data <- LTREB_data1 %>% 
   filter(species == "POSY") %>% 
   mutate(plot_index = case_when(plot_fixed == 1 ~ 1, plot_fixed ==2 ~2, plot_fixed ==5 ~ 3, plot_fixed ==6 ~ 4, plot_fixed ==7 ~ 5,plot_fixed == 12 ~ 6, plot_fixed ==13~ 7, plot_fixed ==14 ~ 8, plot_fixed ==18 ~ 9,plot_fixed == 20 ~ 10, plot_fixed == 141 ~ 11, plot_fixed == 142 ~12,  plot_fixed == 143 ~13, plot_fixed == 144 ~14, plot_fixed == 145 ~15,plot_fixed == 146 ~16,plot_fixed == 147 ~17,plot_fixed == 148 ~18,plot_fixed == 149 ~19,plot_fixed == 150 ~20,))
@@ -199,9 +198,9 @@ rstan_options(auto_write = TRUE)
 options(mc.cores = parallel::detectCores())
 set.seed(123)
 ## MCMC settings
-ni <- 1000
-nb <- 500
-nc <- 3
+ni <- 100
+nb <- 50
+nc <- 1
 
 # Stan model -------------
 ## here is the Stan model
@@ -219,7 +218,7 @@ cat("
     int<lower=0> nPlot;                         // number of plots
     int<lower=0> plot[N];                   // plot of observation
     int<lower=0> tot_recruit_t1[N];      // total recruits into the plot (response)
-    vector<lower=0>[N] tot_seed_t;             // total seeds in plot (predictor)
+    int<lower=0> tot_seed_t[N];             // total seeds in plot (predictor)
     int<lower=0,upper=1> endo_01[N];            // plant endophyte status (predictor)
     }
 
@@ -238,7 +237,7 @@ cat("
     
     // Linear Predictor
     for(n in 1:N){
-    mu[n] = beta[1] + beta[2]*tot_seed_t[n]
+    mu[n] = beta[1] + beta[2]*endo_01[n]
     + tau_year[endo_index[n],year_t[n]]
     + tau_plot[plot[n]];
     }
@@ -248,11 +247,9 @@ cat("
     tau_plot ~ normal(0,sigma_p);   // prior for plot random effects
     to_vector(tau_year[1]) ~ normal(0,sigma_e[1]);   // prior for E- year random effects
     to_vector(tau_year[2]) ~ normal(0,sigma_e[2]);   // prior for E+ year random effects
+    
     // Likelihood
-        for(n in 1:N){
-      tot_recruit_t1[n] ~ neg_binomial_2_log(mu[n],phi);
-      target += -log1m(neg_binomial_2_log_lpmf(lowerlimit | mu[n], phi)); // manually adjusting computation of likelihood because T[,] truncation syntax doesn't compile for neg binomial
-    }
+    tot_recruit_t1 ~ binomial_logit(tot_seed_t, mu);
     }
     
     generated quantities{

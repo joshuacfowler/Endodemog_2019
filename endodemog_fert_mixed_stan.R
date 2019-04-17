@@ -67,6 +67,8 @@ dim(LTREB_data)
 # NA's in survival come from mostly 2017 recruits.
 LTREB_data1 <- LTREB_data %>%
   mutate(flw_stat_t1 = as.integer(flw_stat_t1)) %>%
+  mutate(flw_stat_t = as.integer(flw_stat_t)) %>% 
+  mutate(flw_t = as.integer(flw_t)) %>% 
   mutate(flw_t1 = as.integer(flw_t1)) %>% 
   filter(!is.na(flw_t1)) %>% 
   filter(flw_t1>0) %>% 
@@ -158,7 +160,7 @@ POSY_Xs <- model.matrix(flw_t1 ~ (logsize_t + endo_01)^2 + origin_01
 
 
 # Create data lists to be used for the Stan model
-AGPE_fert_data_list <- list(flw_t1 = AGPE_data$flw_t1,
+AGPE_fert_data_list <- list(flw_t = AGPE_data$flw_t,
                            Xs = AGPE_Xs,
                            logsize_t = AGPE_data$logsize_t,
                            origin_01 = AGPE_data$origin_01,
@@ -168,13 +170,13 @@ AGPE_fert_data_list <- list(flw_t1 = AGPE_data$flw_t1,
                            plot = AGPE_data$plot_index,
                            N = nrow(AGPE_data),
                            K = ncol(AGPE_Xs),
-                           lowerlimit = as.integer(min(AGPE_data$flw_t1)),
+                           lowerlimit = as.integer(min(AGPE_data$flw_t)),
                            nYear = length(unique(AGPE_data$year_t_index)),
                            nPlot = length(unique(AGPE_data$plot_index)),
                            nEndo =   length(unique(AGPE_data$endo_01)))
 str(AGPE_fert_data_list)
 
-ELRI_fert_data_list <- list(flw_t1 = ELRI_data$flw_t1,
+ELRI_fert_data_list <- list(flw_t = ELRI_data$flw_t,
                            Xs = ELRI_Xs,
                            logsize_t = ELRI_data$logsize_t,
                            origin_01 = ELRI_data$origin_01,
@@ -184,13 +186,13 @@ ELRI_fert_data_list <- list(flw_t1 = ELRI_data$flw_t1,
                            plot = ELRI_data$plot_index,
                            N = nrow(ELRI_data),
                            K = ncol(ELRI_Xs),
-                           lowerlimit = as.integer(min(ELRI_data$flw_t1)),
+                           lowerlimit = as.integer(min(ELRI_data$flw_t)),
                            nYear = length(unique(ELRI_data$year_t_index)),
                            nPlot = length(unique(ELRI_data$plot_index)),
                            nEndo =   length(unique(ELRI_data$endo_01)))
 str(ELRI_fert_data_list)
 
-ELVI_fert_data_list <- list(flw_t1 = ELVI_data$flw_t1,
+ELVI_fert_data_list <- list(flw_t = ELVI_data$flw_t,
                            Xs = ELVI_Xs,
                            logsize_t = ELVI_data$logsize_t,
                            origin_01 = ELVI_data$origin_01,
@@ -200,13 +202,13 @@ ELVI_fert_data_list <- list(flw_t1 = ELVI_data$flw_t1,
                            plot = ELVI_data$plot_index,
                            N = nrow(ELVI_data),
                            K = ncol(ELVI_Xs),
-                           lowerlimit = as.integer(min(ELVI_data$flw_t1)),
+                           lowerlimit = as.integer(min(ELVI_data$flw_t)),
                            nYear = length(unique(ELVI_data$year_t_index)),
                            nPlot = length(unique(ELVI_data$plot_index)),
                            nEndo =   length(unique(ELVI_data$endo_01)))
 str(ELVI_fert_data_list)
 
-FESU_fert_data_list <- list(flw_t1 = FESU_data$flw_t1,
+FESU_fert_data_list <- list(flw_t = FESU_data$flw_t,
                            Xs = FESU_Xs,
                            logsize_t = FESU_data$logsize_t,
                            origin_01 = FESU_data$origin_01,
@@ -216,13 +218,13 @@ FESU_fert_data_list <- list(flw_t1 = FESU_data$flw_t1,
                            plot = FESU_data$plot_index,
                            N = nrow(FESU_data),
                            K = ncol(FESU_Xs),
-                           lowerlimit = as.integer(min(FESU_data$flw_t1)),
+                           lowerlimit = as.integer(min(FESU_data$flw_t)),
                            nYear = length(unique(FESU_data$year_t_index)),
                            nPlot = length(unique(FESU_data$plot_index)),
                            nEndo =   length(unique(FESU_data$endo_01)))
 str(FESU_fert_data_list)
 
-LOAR_fert_data_list <- list(flw_t1 = LOAR_data$flw_t1,
+LOAR_fert_data_list <- list(flw_t = LOAR_data$flw_t,
                            Xs = LOAR_Xs,
                            logsize_t = LOAR_data$logsize_t,
                            origin_01 = LOAR_data$origin_01,
@@ -232,13 +234,12 @@ LOAR_fert_data_list <- list(flw_t1 = LOAR_data$flw_t1,
                            plot = LOAR_data$plot_index,
                            N = nrow(LOAR_data),
                            K = ncol(LOAR_Xs),
-                           lowerlimit = as.integer(min(LOAR_data$flw_t1)),
+                           lowerlimit = as.integer(min(LOAR_data$flw_t)),
                            nYear = length(unique(LOAR_data$year_t_index)),
                            nPlot = length(unique(LOAR_data$plot_index)),
                            nEndo =   length(unique(LOAR_data$endo_01)))
 str(LOAR_fert_data_list)
-
-POAL_fert_data_list <- list(flw_t1 = POAL_data$flw_t1,
+POAL_fert_data_list <- list(flw_t = POAL_data$flw_t,
                            Xs = POAL_Xs,
                            logsize_t = POAL_data$logsize_t,
                            origin_01 = POAL_data$origin_01,
@@ -248,13 +249,13 @@ POAL_fert_data_list <- list(flw_t1 = POAL_data$flw_t1,
                            plot = POAL_data$plot_index,
                            N = nrow(POAL_data),
                            K = ncol(POAL_Xs),
-                           lowerlimit = as.integer(min(POAL_data$flw_t1)),
+                           lowerlimit = as.integer(min(POAL_data$flw_t)),
                            nYear = length(unique(POAL_data$year_t_index)),
                            nPlot = length(unique(POAL_data$plot_index)),
                            nEndo =   length(unique(POAL_data$endo_01)))
 str(POAL_fert_data_list)
 
-POSY_fert_data_list <- list(flw_t1 = POSY_data$flw_t1,
+POSY_fert_data_list <- list(flw_t = POSY_data$flw_t,
                            Xs = POSY_Xs,
                            logsize_t = POSY_data$logsize_t,
                            origin_01 = POSY_data$origin_01,
@@ -264,7 +265,7 @@ POSY_fert_data_list <- list(flw_t1 = POSY_data$flw_t1,
                            plot = POSY_data$plot_index,
                            N = nrow(POSY_data),
                            K = ncol(POSY_Xs),
-                           lowerlimit = as.integer(min(POSY_data$flw_t1)),
+                           lowerlimit = as.integer(min(POSY_data$flw_t)),
                            nYear = length(unique(POSY_data$year_t_index)),
                            nPlot = length(unique(POSY_data$plot_index)),
                            nEndo =   length(unique(POSY_data$endo_01)))
@@ -280,9 +281,9 @@ options(mc.cores = parallel::detectCores())
 set.seed(123)
 
 ## MCMC settings
-ni <-5000
-nb <- 2500
-nc <- 3
+ni <-500
+nb <- 250
+nc <- 1
 
 # Stan model -------------
 ## here is the Stan model with a model matrix and species effects ##
@@ -301,7 +302,7 @@ cat("
     int<lower=1, upper=2> endo_index[N];          // index for endophyte effect
     int<lower=0> nPlot;                         // number of plots
     int<lower=0> plot[N];                   // plot of observation
-    int<lower=lowerlimit> flw_t1[N];      // plant size at time t+1 and target variable (response)
+    int<lower=lowerlimit> flw_t[N];      // plant size at time t+1 and target variable (response)
     vector<lower=0>[N] logsize_t;             // plant size at time t (predictor)
     int<lower=0,upper=1> endo_01[N];            // plant endophyte status (predictor)
     int<lower=0,upper=1> origin_01[N];          // plant origin status (predictor)
@@ -312,8 +313,8 @@ cat("
 
     vector[nYear] tau_year[nEndo];      // random year effect
     real<lower=0> sigma_e[nEndo];        //year variance by endophyte effect
-    vector[nPlot] tau_plot;        // random plot effect
-    real<lower=0> sigma_p;          // plot variance
+    //vector[nPlot] tau_plot;        // random plot effect
+    //real<lower=0> sigma_p;          // plot variance
     real<lower=0> phi;
     }
     
@@ -324,19 +325,19 @@ cat("
     for(n in 1:N){
       mu[n] = beta[1] + beta[2]*logsize_t[n] + beta[3]*endo_01[n] +beta[4]*origin_01[n]
       + beta[5]*logsize_t[n]*endo_01[n] 
-      + tau_year[endo_index[n],year_t[n]]
-      + tau_plot[plot[n]];
+      + tau_year[endo_index[n],year_t[n]];
+      //+ tau_plot[plot[n]];
     }
     // Priors
     beta ~ normal(0,100);      // prior for predictor intercepts
-    tau_plot ~ normal(0,sigma_p);   // prior for plot random effects
+    //tau_plot ~ normal(0,sigma_p);   // prior for plot random effects
     to_vector(tau_year[1]) ~ normal(0,sigma_e[1]);   // prior for E- year random effects
     to_vector(tau_year[2]) ~ normal(0,sigma_e[2]);   // prior for E+ year random effects
     
 
     // Likelihood
     for(n in 1:N){
-      flw_t1[n] ~ neg_binomial_2_log(mu[n],phi);
+      flw_t[n] ~ neg_binomial_2_log(mu[n],phi);
       target += -log1m(neg_binomial_2_log_lpmf(lowerlimit | mu[n], phi)); // manually adjusting computation of likelihood because T[,] truncation syntax doesn't compile for neg binomial
     }
     }
@@ -348,8 +349,8 @@ cat("
     for(n in 1:N){
       mu[n] = beta[1] + beta[2]*logsize_t[n] + beta[3]*endo_01[n] +beta[4]*origin_01[n]
       + beta[5]*logsize_t[n]*endo_01[n] 
-      + tau_year[endo_index[n],year_t[n]]
-      + tau_plot[plot[n]];
+      + tau_year[endo_index[n],year_t[n]];
+     // + tau_plot[plot[n]];
     }
    }
   
@@ -363,23 +364,23 @@ stanmodel <- stanc("endodemog_fert.stan")
 
 smAGPE<- stan(file = "endodemog_fert.stan", data = AGPE_fert_data_list,
               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-saveRDS(smAGPE, file = "endodemog_fert_AGPE_withplot.rds")
+saveRDS(smAGPE, file = "endodemog_fert_AGPE.rds")
 
 smELRI <- stan(file = "endodemog_fert.stan", data = ELRI_fert_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-saveRDS(smELRI, file = "endodemog_fert_ELRI_withplot.rds")
+saveRDS(smELRI, file = "endodemog_fert_ELRI.rds")
 
 smELVI <- stan(file = "endodemog_fert.stan", data = ELVI_fert_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-saveRDS(smELVI, file = "endodemog_fert_ELVI_withplot.rds")
+saveRDS(smELVI, file = "endodemog_fert_ELVI.rds")
 
 smFESU <- stan(file = "endodemog_fert.stan", data = FESU_fert_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-saveRDS(smFESU, file = "endodemog_fert_FESU_withplot.rds")
+saveRDS(smFESU, file = "endodemog_fert_FESU.rds")
 
 smLOAR <- stan(file = "endodemog_fert.stan", data = LOAR_fert_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-saveRDS(smLOAR, file = "endodemog_fert_LOAR_withplot.rds")
+saveRDS(smLOAR, file = "endodemog_fert_LOAR.rds")
 
 smPOAL <- stan(file = "endodemog_fert.stan", data = POAL_fert_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
@@ -391,18 +392,79 @@ saveRDS(smPOSY, file = "endodemog_fert_POSY_withplot.rds")
 
 
 
+# Here is a simpler model for those species with little data
 
+
+sink("endodemog_fert_woyearplot.stan")
+cat("
+    data { 
+    int<lower=0> N;                       // number of observations
+    int<lower=0> K;                       // number of predictors
+    int<lower=0> lowerlimit;                         //lower limit for truncated negative binomial
+    int<lower=0> nEndo;                       // number of endo treatments
+    int<lower=1, upper=2> endo_index[N];          // index for endophyte effect
+    int<lower=lowerlimit> flw_t1[N];      // plant size at time t+1 and target variable (response)
+    vector<lower=0>[N] logsize_t;             // plant size at time t (predictor)
+    int<lower=0,upper=1> endo_01[N];            // plant endophyte status (predictor)
+    int<lower=0,upper=1> origin_01[N];          // plant origin status (predictor)
+    }
+    
+    parameters {
+    vector[3] beta;                     // predictor parameters
+
+    real<lower=0> phi;
+    }
+    
+    model {
+    vector[N] mu;
+    
+    // Linear Predictor
+    for(n in 1:N){
+      mu[n] = beta[1] + beta[2]*logsize_t[n];
+    }
+    // Priors
+    beta ~ normal(0,100);      // prior for predictor intercepts
+
+    // Likelihood
+    for(n in 1:N){
+      flw_t1[n] ~ neg_binomial_2_log(mu[n],phi);
+      target += -log1m(neg_binomial_2_log_lpmf(lowerlimit | mu[n], phi)); // manually adjusting computation of likelihood because T[,] truncation syntax doesn't compile for neg binomial
+    }
+    }
+    
+   generated quantities{
+   }
+  
+    ", fill = T)
+sink()
+
+stanmodel <- stanc("endodemog_fert_woyearplot.stan")
+
+smELRI2 <- stan(file = "endodemog_fert_woyearplot.stan", data = ELRI_fert_data_list,
+               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
+# saveRDS(smELRI, file = "endodemog_fert_ELRI.rds")
+
+smELVI <- stan(file = "endodemog_fert_woyearplot.stan", data = ELVI_fert_data_list,
+               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
+# saveRDS(smELVI, file = "endodemog_fert_ELVI.rds")
+
+
+smLOAR <- stan(file = "endodemog_fert_woyearplot.stan", data = LOAR_fert_data_list,
+               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
+# saveRDS(smLOAR, file = "endodemog_fert_LOAR.rds")
 
 
 ## to read in model output without rerunning models
-smPOAL <- readRDS(file = "model_run_MAR7/endodemog_fert_POAL.rds")
-smPOSY <- readRDS(file = "model_run_MAR7/endodemog_fert_POSY.rds")
-smLOAR <- readRDS(file = "model_run_MAR7/endodemog_fert_LOAR.rds")
-smELVI <- readRDS(file = "model_run_MAR7/endodemog_fert_ELVI.rds")
-smELRI <- readRDS(file = "model_run_MAR7/endodemog_fert_ELRI.rds")
-smFESU <- readRDS(file = "model_run_MAR7/endodemog_fert_FESU.rds")
-smAGPE <- readRDS(file = "model_run_MAR7/endodemog_fert_AGPE.rds")
+smPOAL <- readRDS(file = "endodemog_fert_POAL_withplot.rds")
+smPOSY <- readRDS(file = "endodemog_fert_POSY_withplot.rds")
+smLOAR <- readRDS(file = "endodemog_fert_LOAR_withplot.rds")
+smELVI <- readRDS(file = "endodemog_fert_ELVI_withplot.rds")
+smELRI <- readRDS(file = "endodemog_fert_ELRI_withplot.rds")
+smFESU <- readRDS(file = "endodemog_fert_FESU_withplot.rds")
+smAGPE <- readRDS(file = "endodemog_fert_AGPE_withplot.rds")
 
+
+# Temporary section to look at the problems with the LOAR, ELVI, ELRI data
 
 #########################################################################################################
 ###### Perform posterior predictive checks and assess model convergence-------------------------
@@ -413,7 +475,7 @@ print(smPOAL)
 # summary(smPOAL)
 
 ## plot traceplots of chains for select parameters
-traceplot(smPOAL, pars = c("alpha", "beta[2]", "tau_year[1,1]", "sigma_0[1]", "sigma_0[2]"))
+traceplot(smPOAL, pars = c("beta[2]", "sigma_e[1]"))
 
 ## Plotting residuals
 flw_t1 <- as.vector(POAL_flw_dat$flw_t1)
@@ -453,7 +515,7 @@ print(smPOSY)
 # summary(smPOSY)
 
 ## plot traceplots of chains for select parameters
-traceplot(smPOSY, pars = c("beta[2]"))
+traceplot(smPOSY, pars = c("beta[2]", "sigma_e[1]"))
 
 ## Plotting residuals
 flw_t1 <- as.vector(POSY_data$flw_stat_t1)
@@ -570,7 +632,7 @@ print(smELRI)
 # summary(smELRI)
 
 ## plot traceplots of chains for select parameters
-traceplot(smELRI, pars = c("alpha", "beta[2]", "tau_year[1,1]", "sigma[1]", "sigma[2]"))
+traceplot(smELRI, pars = params)
 
 ## Plotting residuals
 flw_t1 <- as.vector(ELRI_flw_dat$flw_t1)
