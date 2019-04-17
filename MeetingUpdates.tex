@@ -12,7 +12,40 @@
 %\SweaveOpts{concordance=TRUE}
   \maketitle
   Tom's comments are in \tom{WildStrawberry}.
+  
+\section*{Apr 17, 2019}
+\subsection*{Meeting Overview}
+\textbf{We talked about:}
+The early Summer Fieldwork schedule, and plans for visiting herbaria. We also talked about continuing issues with the fertility models. 
 
+\subsection*{Updates on Goals from last meeting:}
+\begin{itemize}
+\item{\textbf{Range limit project:} I have a growing database with collection information, and we laid out a general schedule for fieldwork for the Summer. I need to come up with more specific plans for collection locations near our various other field trips. This also includes having a map of the Ecolab sites to be able to look for collections nearby.
+Overall, the schedule includes:
+\begin{itemize}
+\item{April 20-21 - Local collections  - Josh}
+\item{April 25-26 - Nagadoches Fieldwork - Tom, Josh, Kyle?}
+\item{May 1-3 - Ecolab sites - Tom, Josh, Kyle}
+\item{May 6-? Eastern collections trip - Josh}
+\item{May 17-19 - Josh in Tucson}
+\item{May 20-30 - SEV trip}
+\item{June 3-7 - Indiana trip}
+\item{June 10-14 (exact dates TBD) - Josh in Seattle}
+\item{July 22or29 - ? Indiana trip}
+\end{itemize}
+}
+\item{\textbf{Herbarium project:} For the Herbarium project, I have recommendations of herbaria with major grass collections from Bob Shaw, but this requires follow up with the actual herbaria. In general, we kind of talked about focusing on the major Texas herbaria, especially to start. Possibly planning this for June 7-10ish}
+\item{\textbf{Stochastic demography:} I updated the flowering and fertility models to include data from the same year t, but I haven't rerun the flowering model and saved the outputs. I rewrote the seed to seedling model as a binomial, but this has a constriction that the number of seeds must be greater than the number of recruits. We talked about solutions for this today, and this also relates using Jenn's seed data, which I have been doing mostly to start simpler. Basically we decided that we want to move forward with the other seed means data first, so that we know how much this is a problem for our actual data. The convergence problems with the negative binomial model are likely not related to the function that I am using, but we talked about simplifying the model and seeing if the problems persist.}
+\end{itemize}
+
+\subsection*{Goals for Next meeting (Tom will be gone on the 24th, but I will email updates):}
+\begin{itemize}
+\item{\textbf{Range limit project:} I will map our Ecolab sites. From that I will have a database of nearby collection location possibilities to the ecolab sites and to the Nagadoches trip. I plan to do some local collection this weekend.}
+\item{\textbf{Herbarium project:} I will contact the herbaria on my list to get more info about their collections. This will also be a necessary first step of setting up actual premission and times to sample at the herbaria. Generally we plan on starting with the Texas herbaria, and holding off on this until after collecting seeds from the field during peak seed time for early flowering species.}
+\item{\textbf{Stochastic demography:} I will do the fertility model debugging by looking at models of the mean and building up. I will also finish the seed models that I have been working on to have seed data to work with within the seed to seedling transition model. Then I will be able to table where we actually have more seedlings than seeds. I will also finish the Readme file and clean up the project folder a bit to keep notes for where I am in the project. I also have a goal to move the figures into Rmarkdown.}
+\end{itemize}
+ 
+ 
 \section*{Apr 10, 2019}
 \subsection*{Meeting Overview}
 \textbf{We talked about:}
