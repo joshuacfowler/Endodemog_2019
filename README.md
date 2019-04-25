@@ -18,7 +18,7 @@ endodemog_figure.R - combined figures script for surv/grw/flw vital rate models 
 Tom_figures.R - Tom file to redraw some figures<br/>
 MeetingUpdates.tex - weekly meeting notes<br/>
 
-Old/practice files:
+Old/practice files:<br/>
 endodemog_surv_visualization.R<br/>
 endodemog_grow_visualization.R<br/>
 endodemog_flw_visualization.R<br/>
