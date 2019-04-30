@@ -1751,36 +1751,39 @@ ELRIrepro$seed <- ifelse(ELRIrepro$seed == ".", NA, ELRIrepro$seed)
 
 ## Combining measurements across years for Seed, Spikelet, and Flowering using melt
 ## Recoding those measurements for the year they are taken
-
+### The repro data for AGPE is pretty funky. These are recorded as averages from multiple tillers as opposed to as counts with tiller id's for the other species.
+### The 2016 spikelet values are total spikelets for the plants, but all but one of the plants have only one tiller, meaning that for most of the plants the data is essentially spikelets per inflorescence. Currently I left this in, but the plant is plot 120, Pos 17, tag 2397. 
+### spikelet data is also recorded as tot spikes for a few years of recruits data.
 agpeseed <- AGPE_data %>%
   rename("Birth Year" = "PlantedDate", "plot" = "PLOT", "pos" = "POS", 
          "tag" = "TAG") %>% 
   mutate("Birth Year" = year(as.character(`Birth Year`))) %>% 
-  mutate(seed2007 = NA, seed2008 = NA, seed2009 = NA, seed2010 = NA, seed2011 = NA, seed2012 = NA, seed2013 = NA, seed2014 = NA, seed2015 = NA, seed2016 = NA) %>% 
+  mutate(seed2007 = NA,  seed2011 = NA, seed2012 = NA, seed2013 = NA, seed2014 = NA, seed2015 = NA, seed2016 = NA) %>% 
   melt(id.var = c("plot","pos", "tag", "Endo", "Loc'n", "Birth Year", 
                   "TRT", "Plant"),
-       measure.var = c("seed2007", "seed2008", "seed2009", 
-                       "seed2010", "seed2011",  "seed2012", "seed2013", 
+       measure.var = c("seed2007", "seeds_spikelet1", "seeds_spikelet2", 
+                       "seeds_spikelet3", "seed2011",  "seed2012", "seed2013", 
                        "seed2014", "seed2015", "seed2016"),
        value.name = "seed") %>% 
   mutate(tillerid = NA)
-agpeseed$year<-  ifelse(agpeseed$variable == "seed2007", 2007, ifelse(agpeseed$variable == "seed2008", 2008, ifelse(agpeseed$variable  == "seed2009", 2009, ifelse(agpeseed$variable  == "seed2010", 2010, ifelse(agpeseed$variable  == "seed2011", 2011, ifelse(agpeseed$variable  == "seed2012", 2012, ifelse(agpeseed$variable  == "seed2013", 2013,ifelse(agpeseed$variable == "seed2014", 2014,ifelse(agpeseed$variable == "seed2015", 2015,ifelse(agpeseed$variable  == "seed2016", 2016, NA))))))))))
+agpeseed$year<-  ifelse(agpeseed$variable == "seed2007", 2007, ifelse(agpeseed$variable == "seeds_spikelet1", 2008, ifelse(agpeseed$variable  == "seeds_spikelet2", 2009, ifelse(agpeseed$variable  == "seeds_spikelet3", 2010, ifelse(agpeseed$variable  == "seed2011", 2011, ifelse(agpeseed$variable  == "seed2012", 2012, ifelse(agpeseed$variable  == "seed2013", 2013,ifelse(agpeseed$variable == "seed2014", 2014,ifelse(agpeseed$variable == "seed2015", 2015,ifelse(agpeseed$variable  == "seed2016", 2016, NA))))))))))
 # View(agpeseed)
 
 agpespike <- AGPE_data %>% 
   rename("Birth Year" = "PlantedDate", "plot" = "PLOT", "pos" = "POS", 
          "tag" = "TAG") %>%
   mutate("Birth Year" = year(as.character(`Birth Year`))) %>% 
-  mutate(spike2007 = NA, spike2008 = NA, spike2009 = NA, spike2010 = NA, spike2011 = NA, spike2012 = NA, spike2013 = NA, spike2014 = NA, spike2015 = NA, spike2016 = NA) %>% 
+  mutate(spike2007 = NA,) %>% 
   melt(id.var = c("plot","pos", "tag", "Endo", "Loc'n", "Birth Year", 
                   "TRT", "Plant"), 
-       measure.var = c("spike2007", "spike2008", "spike2009", "spike2010",
-                       "spike2011", "spike2012", "spike2013", 
-                       "spike2014", "spike2015", "spike2016"), 
+       measure.var = c("spike2007", "Spikelets_tiller1", "Spikelets_Infl2", "no_total_spikelets_infl3",
+                       "avg_spikelets4", "avg_spikelets5", "avg_spikelets6", 
+                       "avg_spikelets7", "spike_infl8", "TotSpikelets9"), 
        value.name = "spikelets")  %>% 
   mutate(tillerid = NA)
-agpespike$year<- ifelse(agpespike$variable == "spike2007", 2007, ifelse(agpespike$variable == "spike2008", 2008, ifelse(agpespike$variable  == "spike2009", 2009, ifelse(agpespike$variable  == "spike2010", 2010, ifelse(agpespike$variable  == "spike2011", 2011, ifelse(agpespike$variable  == "spike2012", 2012, ifelse(agpespike$variable  == "spike2013", 2013, ifelse(agpespike$variable == "spike2014", 2014, ifelse(agpespike$variable == "spike2015", 2015, ifelse(agpespike$variable  == "spike2016", 2016, NA))))))))))
+agpespike$year<- ifelse(agpespike$variable == "spike2007", 2007, ifelse(agpespike$variable == "Spikelets_tiller1", 2008, ifelse(agpespike$variable  == "Spikelets_Infl2", 2009, ifelse(agpespike$variable  == "no_total_spikelets_infl3", 2010, ifelse(agpespike$variable  == "avg_spikelets4", 2011, ifelse(agpespike$variable  == "avg_spikelets5", 2012, ifelse(agpespike$variable  == "avg_spikelets6", 2013, ifelse(agpespike$variable == "avg_spikelets7", 2014, ifelse(agpespike$variable == "spike_infl8", 2015, ifelse(agpespike$variable  == "TotSpikelets9", 2016, NA))))))))))
 # View(agpespike)
+ 
 
 agpeflw <- AGPE_data %>% 
   rename("Birth Year" = "PlantedDate", "plot" = "PLOT", "pos" = "POS", 
@@ -1811,6 +1814,8 @@ agpe_seedmerge_ssf <- merge(agpe_seedmerge_ss, agpeflw, by = c("plot", "pos", "t
 ## Combining measurements across years for the recruits data
 ## recoding for the year of measurement
 ## merging these measurements into one dataframe
+### The spikelets data is also reported in Total spikelets for several years. The first two years there aren't any flwing tillers, and then in 2011 there are only single tillers, so this could essentially be spikelets/infl
+### 2013 and 2014 have lots of spikelet data, but this it is recorded as totals for the plant within an equatio, so I not including it right now.
 agpe_rseed <- AGPE_data_r %>%
   rename("Birth Year" = "birth", "plot" = "Plot", 
          "pos" = "RecruitNo", "Endo" = "endo", "tag" = "Tag") %>%
@@ -1826,15 +1831,15 @@ agpe_rseed$year<- ifelse(agpe_rseed$variable == "seed2007", 2007, ifelse(agpe_rs
 agpe_rspike <- AGPE_data_r %>%
   rename("Birth Year" = "birth", "plot" = "Plot", 
          "pos" = "RecruitNo", "Endo" = "endo", "tag" = "Tag") %>%
-  mutate(spike2007 = NA, spike2008 = NA, spike2009 = NA, spike2010 = NA, spike2011 = NA, spike2013 = NA, spike2014 = NA) %>% 
+  mutate(spike2007 = NA, spike2008 = NA, spike2009 = NA, spike2010 = NA, spike2013 = NA, spike2014 = NA) %>% 
   melt(id.var = c("plot", "pos", "tag", "Endo", "Birth Year"),
        measure.var = c("spike2007", "spike2008", "spike2009", 
-                       "spike2010","spike2011", "SpikeletsA12", 
+                       "spike2010","TotSpikelets11", "SpikeletsA12", 
                        "spike2013", "spike2014", "spikepertillerA15","spikepertillerB15",
                        "spikepertillerA16","spikepertillerB16"),
        value.name = "spikelets")  %>% 
   mutate(tillerid = NA)
-agpe_rspike$year<-  ifelse(agpe_rspike$variable == "spike2007", 2007, ifelse(agpe_rspike$variable == "spike2008", 2008, ifelse(agpe_rspike$variable == "spike2009", 2009, ifelse(agpe_rspike$variable == "spike2010", 2010, ifelse(agpe_rspike$variable == "spike2011", 2011, ifelse(agpe_rspike$variable  == "SpikeletsA12", 2012, ifelse(agpe_rspike$variable  == "spike2013", 2013, ifelse(agpe_rspike$variable  == "spike2014", 2014, ifelse(agpe_rspike$variable  == "spikepertillerA15", 2015, ifelse(agpe_rspike$variable  == "spikepertillerB15", 2015,ifelse(agpe_rspike$variable == "spikepertillerA16", 2016, ifelse(agpe_rspike$variable == "spikepertillerB16", 2016, NA))))))))))))
+agpe_rspike$year<-  ifelse(agpe_rspike$variable == "spike2007", 2007, ifelse(agpe_rspike$variable == "spike2008", 2008, ifelse(agpe_rspike$variable == "spike2009", 2009, ifelse(agpe_rspike$variable == "spike2010", 2010, ifelse(agpe_rspike$variable == "TotSpikelets11", 2011, ifelse(agpe_rspike$variable  == "SpikeletsA12", 2012, ifelse(agpe_rspike$variable  == "spike2013", 2013, ifelse(agpe_rspike$variable  == "spike2014", 2014, ifelse(agpe_rspike$variable  == "spikepertillerA15", 2015, ifelse(agpe_rspike$variable  == "spikepertillerB15", 2015,ifelse(agpe_rspike$variable == "spikepertillerA16", 2016, ifelse(agpe_rspike$variable == "spikepertillerB16", 2016, NA))))))))))))
 # View(agpe_rspike)
 
 agpe_rflw <- AGPE_data_r %>%
@@ -1908,7 +1913,6 @@ table(LTREB_repro$year, is.na(LTREB_repro$mean_spike_per_tiller), LTREB_repro$sp
 
 
 
-
 ## getting a dataframe with time t and t_1
 LTREB_repro_t1 <-LTREB_repro %>%
   filter(year!= min(year)) %>% 
@@ -1926,7 +1930,7 @@ LTREB_repro1 <- LTREB_repro_t1 %>%
   select(-contains("variable")) 
 
 # View(LTREB_repro1)
-LTREB_temp <- merge(x = LTREB_data, y = LTREB_repro, by.x = c("plot", "pos","id", "endo", "birth", "year_t1", "species"), by.y = c("plot", "pos","tag", "Endo", "Birth Year", "year_t", "species"))
+LTREB_temp <- merge(x = LTREB_data, y = LTREB_repro1, by.x = c("plot", "pos","id", "endo", "birth", "year_t1", "species"), by.y = c("plot", "pos","tag", "Endo", "Birth Year", "year_t", "species"))
 
 
 
@@ -2039,20 +2043,48 @@ LTREB_tem <- LTREB_endodemog %>%
   select(-seed_t, -seed_t1, -contains("spike")) %>% 
   rename("tag" = "id", "Endo" = "endo") %>% 
   mutate(Endo = case_when(Endo == "0" | Endo == "minus" ~ 0,
-                             Endo == "1"| Endo =="plus" ~ 1))
+                             Endo == "1"| Endo =="plus" ~ 1)) 
 
 
-# View(LTREB_tem)
-LTREB_f <- merge(x = LTREB_tem, y = flw_tillermerge, by = c("plot", "pos", "tag", "species", "year_t1", "year_t", "Endo"), all = TRUE)
+
+# I need to add flw_t for the 2016 and 2017 data which is entered into this main database. 
+LTREB_tem_t <- LTREB_tem %>%
+  filter(year_t1 != max(year_t1)) %>% 
+  rename(surv_t_new = surv_t1, size_t_new = size_t1, flw_t = flw_t1, year_t_new = year_t1,) %>% 
+  mutate(year_t1_new = year_t_new + 1) %>% 
+  select(-year_t,-size_t, -surv_t1, -notes)
+
+LTREB_tem_t1 <- LTREB_tem %>%
+  filter(year_t1 != min(year_t1)) %>% 
+  rename(surv_t1_new = surv_t1, size_t1_new = size_t1, flw_t1 = flw_t1, year_t1_new = year_t1) %>% 
+  mutate(year_t_new = year_t1_new - 1) %>% 
+  select(-year_t, -size_t, -surv_t1, -notes)
+
+
+LTREB_tem_merge <- LTREB_tem_t1 %>% 
+  full_join(LTREB_tem_t, by = c("plot", "pos", "tag", "Endo", "origin", "year_t1_new", "year_t_new", "birth", "species"),
+            all.x = all, all.y = all) %>% 
+  rename(year_t = year_t_new, year_t1 = year_t1_new)
+
+
+
+
+# View(LTREB_tem_merge)
+
+# Now I am going to merge this long data file with the flw tiller data from the other years
+LTREB_f <- merge(x = LTREB_tem_merge, y = flw_tillermerge, by = c("plot", "pos", "tag", "species", "year_t", "year_t1", "Endo"), all = TRUE)
 
 LTREB_f$flw_t1<- ifelse(is.na(LTREB_f$flw_t1.x) & is.na(LTREB_f$flw_t1.y), NA, ifelse(!is.na(LTREB_f$flw_t1.x) & is.na(LTREB_f$flw_t1.y), LTREB_f$flw_t1.x, ifelse(is.na(LTREB_f$flw_t1.x) & !is.na(LTREB_f$flw_t1.y), LTREB_f$flw_t1.y, NA)))
+LTREB_f$flw_t<- ifelse(is.na(LTREB_f$flw_t.x) & is.na(LTREB_f$flw_t.y), NA, ifelse(!is.na(LTREB_f$flw_t.x) & is.na(LTREB_f$flw_t.y), LTREB_f$flw_t.x, ifelse(is.na(LTREB_f$flw_t.x) & !is.na(LTREB_f$flw_t.y), LTREB_f$flw_t.y, NA)))
 
+# View(LTREB_f)
 LTREB_flw <- LTREB_f %>% 
-  mutate(flw_stat_t = case_when(flw_t == 0 ~0,
-                                flw_t == 1 ~1)) %>% 
+  select(-surv_t_new, -flw_t.x, -flw_t.y, -flw_t1.x, -flw_t1.y) %>% 
+  rename(size_t = size_t_new, size_t1 = size_t1_new, surv_t1 = surv_t1_new) %>% 
+  mutate(flw_stat_t = case_when(flw_t == 0 ~ 0,
+                                flw_t >0 ~1)) %>% 
   mutate(flw_stat_t1 = case_when(flw_t1 == 0 ~ 0,
-                                 flw_t1 > 0 ~ 1)) %>% 
-  filter(!is.na(flw_stat_t1)) 
+                                 flw_t1 > 0 ~ 1))
        
 # View(LTREB_flw)
 table(LTREB_flw$species, LTREB_flw$year_t)
