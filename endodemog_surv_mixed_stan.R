@@ -395,9 +395,9 @@ print(sm, pars = "sigma_e")
 
 
 ## to read in model output without rerunning models
-smPOAL <- readRDS(file = "model_run_MAR7/endodemog_surv_POAL_withplot.rds")
+smPOAL <- readRDS(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_surv_POAL_withplot.rds")
 smPOSY <- readRDS(file = "model_run_MAR7/endodemog_surv_POSY_withplot.rds")
-smLOAR <- readRDS(file = "model_run_MAR7/endodemog_surv_LOAR_withplot.rds")
+smLOAR <- readRDS(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_surv_LOAR_withplot.rds")
 smELVI <- readRDS(file = "model_run_MAR7/endodemog_surv_ELVI_withplot.rds")
 smELRI <- readRDS(file = "model_run_MAR7/endodemog_surv_ELRI_withplot.rds")
 smFESU <- readRDS(file = "model_run_MAR7/endodemog_surv_FESU_withplot.rds")
@@ -418,33 +418,92 @@ print(smPOAL)
 ## plot traceplots of chains for select parameters
 traceplot(smPOAL, pars = params)
 
+
+
 # Pull out the posteriors
 POALpost <- extract(smPOAL, pars = params)
 
+
+beta1_post <- POALpost$beta[,1]
+beta2_post <- POALpost$beta[,2]
+beta3_post <- POALpost$beta[,3]
+beta4_post <- POALpost$beta[,4]
+beta5_post <- POALpost$beta[,5]
+tauyear_post <- POALpost$tau_year
+tauplot_post <- POALpost$tau_plot
+s <- rnorm(mean = mean(tauplot_post), sd = sd(tauplot_post), n = 1000000)
+mean(s)
+mean(tauplot_post)
+str(POAL_surv_data_list)
+
+N <- as.integer(POAL_surv_data_list$N)
+logsize_t <- POAL_surv_data_list$logsize_t
+origin_01 <- POAL_surv_data_list$origin_01
+endo_01 <- POAL_surv_data_list$endo_01
+surv_t1 <- POAL_surv_data_list$surv_t1
+# Function for replicating y based on x
+lin_pred <-    replicate(1000, sample(beta1_post, size = N)+ sample(beta2_post,size = N)*logsize_t + sample(beta3_post,size = N)*endo_01 + sample(beta4_post,size = N)*origin_01 + sample(beta5_post,size = N)*logsize_t*endo_01 +sample(rnorm(mean = mean(tauyear_post), sd = sd(tauyear_post), n = 1000000), size = N)+ sample(rnorm(mean = mean(tauplot_post), sd = sd(tauplot_post), n = 1000000), size = N))
+
+prob <- as.list(as.data.frame(invlogit(lin_pred)))
+
+
+yrep <- list()
+yrep <- lapply(prob,(rbinom(3241, 1, prob = prob[1:1000])))
+  yrep <- 
+
+
+
+# generate residuals
+
+y_resid <-  abs(surv_t1 - prob)
+
+yrep_resid <- abs(yrep - prob[])
+
+
+fit <- colSums(y_resid)
+fit_yrep <- colSums(yrep_resid)
+
+plot(x = fit_yrep, y = fit)
+abline(a = 0, b = 1, col = "blue", lwd = 2)
+
+
+
+plot(y = yrep_resid[,1], x = logsize_t)
+ppc_dens_overlay(yrep = yrep[,1:10],y = surv_t1)
+
+
+length(surv_t1)
+# Run the function on x_test
+set.seed(56)
+y_pred_r <- gen_quant_r(x_test)
+# Accuracy
+mean(y_pred_r == y_test)
 # generate yrep from samples of parameters
 estimate_mu_rep <- function(x, post, length){
-  lin_pred <-    sample(post$beta[,1], size = length)
-  + sample(post$beta[,2], size = length)*x$logsize_t
-  + sample(post$beta[,3], size = length)*x$endo_01
-  + sample(post$beta[,4], size = length)*x$origin_01
-  + sample(post$beta[,5], size = length)*x$logsize_t*x$endo_01
-  + sample(rnorm(n = length(post$tau_plot), mean = mean(post$tau_plot),sd = sd(post$tau_plot)), size = length)
-  + sample(rnorm(n = length(post$tau_year), mean = mean(post$tau_year),sd = sd(post$tau_year)), size = length)
-  
+  beta1 <- sample(post$beta[,1], size = length)
+  beta2 <- sample(post$beta[,2], size = length)
+  beta3 <- sample(post$beta[,3], size = length)
+  beta4 <- sample(post$beta[,4], size = length)
+  beta5 <- sample(post$beta[,5], size = length)
+  lin_pred <- c(1:length)
+  for(i in 1:length){
+    lin_pred[i] <-    beta1[i] + beta2[i]*x$logsize_t[i] + beta3[i]*x$endo_01[i] + beta4[i]*x$origin_01[i] + beta5[i]*x$logsize_t[i]*x$endo_01[i]
+  }
   mu <- invlogit(lin_pred)
   
   return(mu)
 }
 estimate_y_rep <- function(x, post, length){
-  lin_pred <-    sample(post$beta[,1], size = length)
-  + sample(post$beta[,2], size = length)*x$logsize_t
-  + sample(post$beta[,3], size = length)*x$endo_01
-  + sample(post$beta[,4], size = length)*x$origin_01
-  + sample(post$beta[,5], size = length)*x$logsize_t*x$endo_01
-  + sample(rnorm(n = length(post$tau_plot), mean = mean(post$tau_plot),sd = sd(post$tau_plot)), size = length)
-  + sample(rnorm(n = length(post$tau_year), mean = mean(post$tau_year),sd = sd(post$tau_year)), size = length)
- 
-  mu <- invlogit(lin_pred)
+  beta1 <- sample(post$beta[,1], size = length)
+  beta2 <- sample(post$beta[,2], size = length)
+  beta3 <- sample(post$beta[,3], size = length)
+  beta4 <- sample(post$beta[,4], size = length)
+  beta5 <- sample(post$beta[,5], size = length)
+  lin_pred <- c(1:length)
+for(i in 1:length){
+  lin_pred[i] <-    beta1[i] + beta2[i]*x$logsize_t[i] + beta3[i]*x$endo_01[i] + beta4[i]*x$origin_01[i] + beta5[i]*x$logsize_t[i]*x$endo_01[i]
+}
+  prob <- invlogit(lin_pred)
   estimate <- rbinom(length, 1, prob)
 
   return(estimate)
@@ -461,20 +520,26 @@ surv_t1 <- as.vector(POAL_surv_data_list$surv_t1)
 hist(surv_t1)
 hist(yrep[,1])
 y_resid <-  abs(surv_t1 - murep)
-yrep_resid <- abs(yrep - murep[])
+yrep_resid <- abs(yrep - murep[,1])
 
 fit <- as.matrix(rowSums(y_resid))
 fit_yrep <- as.matrix(rowSums(yrep_resid))
 
-plot(x = fit, y = fit, main = "POAL surv Residual plot")
+plot(x = yrep_resid[,1], y = fit, main = "POAL surv Residual plot")
 abline(a = 0, b = 1, col = "blue", lwd = 2)
+
+plot(x = POAL_surv_data_list$logsize_t, y = surv_t1, main = "POAL surv Residual plot")
+plot(x = POAL_surv_data_list$logsize_t, y = yrep[,1], main = "POAL surv Residual plot")
+plot(x = POAL_surv_data_list$logsize_t, y = yrep[,2], main = "POAL surv Residual plot")
+mean(yrep)
+ppc_dens_overlay(yrep[1:3241], surv_t1)
 
 ## plot of neff ratios
 ratios_smPOAL <- neff_ratio(smPOAL)
 mcmc_neff(ratios_smPOAL, size =3)
 
 ## Overlay plot of yrep vs surv_t1 
-ppc_dens_overlay(surv_t1, yrep[1:500, ])
+ppc_dens_overlay(surv_t1, yrep[,1])
 
 ## Density plot of postieror distribution for select parameters
 stan_dens(smPOAL, pars = params)
