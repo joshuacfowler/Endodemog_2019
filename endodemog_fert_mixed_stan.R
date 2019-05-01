@@ -277,8 +277,8 @@ options(mc.cores = parallel::detectCores())
 set.seed(123)
 
 ## MCMC settings
-ni <-500
-nb <- 250
+ni <-2000
+nb <- 1000
 nc <- 3
 
 # Stan model -------------
@@ -387,19 +387,31 @@ smPOSY <- stan(file = "endodemog_fert.stan", data = POSY_fert_data_list,
 
 
 
-get_est <- function(post, data){
+get_est <- function(post, data, size){
   df <- as_data_frame(cbind(data$year_t, data$endo_index, data$plot, data$flw_t, data$logsize_t, data$origin_01))
   df <- setNames(object = df, nm = c("year_t", "endo_index", "plot", "flw_t", "logsize_t", "origin_01"))
-  fixedeff <- mean(post$`beta[1]`)+ mean(post$`beta[2]`)*data$logsize_t + mean(post$`beta[3]`)*data$endo_01 + mean(post$`beta[4]`)*data$origin_01 + mean(post$`beta[5]`)*data$logsize_t*data$endo_01
-  year_rand_eff <- ifelse(df$year_t == 1 & df$endo_index == 1, mean(post$`tau_year[1,1]`),ifelse(df$year_t == 1 & df$endo_index == 2, mean(post$`tau_year[2,1]`),ifelse(df$year_t == 2 & df$endo_index == 1, mean(post$`tau_year[1,2]`),ifelse(df$year_t == 2 & df$endo_index == 2, mean(post$`tau_year[2,2]`),ifelse(df$year_t == 3 & df$endo_index == 1, mean(post$`tau_year[1,3]`),ifelse(df$year_t == 3 & df$endo_index == 2, mean(post$`tau_year[2,3]`),ifelse(df$year_t == 4 & df$endo_index == 1, mean(post$`tau_year[1,4]`),ifelse(df$year_t == 4 & df$endo_index == 2, mean(post$`tau_year[2,4]`),ifelse(df$year_t == 5 & df$endo_index == 1, mean(post$`tau_year[1,5]`),ifelse(df$year_t == 5 & df$endo_index == 2, mean(post$`tau_year[2,5]`),ifelse(df$year_t == 6 & df$endo_index == 1, mean(post$`tau_year[1,6]`),ifelse(df$year_t == 6 & df$endo_index == 2, mean(post$`tau_year[2,6]`),ifelse(df$year_t == 7 & df$endo_index == 1, mean(post$`tau_year[1,7]`),ifelse(df$year_t == 7 & df$endo_index == 2, mean(post$`tau_year[2,7]`),ifelse(df$year_t ==8 & df$endo_index == 1, mean(post$`tau_year[1,8]`),ifelse(df$year_t == 8 & df$endo_index == 2, mean(post$`tau_year[2,8]`),ifelse(df$year_t == 9 & df$endo_index == 1, mean(post$`tau_year[1,9]`),ifelse(df$year_t == 9 & df$endo_index ==2, mean(post$`tau_year[2,9]`),ifelse(df$year_t == 10 & df$endo_index == 1, mean(post$`tau_year[1,10]`),ifelse(df$year_t ==10 & df$endo_index == 2, mean(post$`tau_year[2,10]`),ifelse(df$year_t == 11 & df$endo_index == 1, mean(post$`tau_year[1,11]`),ifelse(df$year_t == 11 & df$endo_index == 2, mean(post$`tau_year[2,11]`),ifelse(df$year_t == 12 & df$endo_index == 1, mean(post$`tau_year[1,12]`),ifelse(df$year_t == 12 & df$endo_index == 2, mean(post$`tau_year[2,12]`),NA))))))))))))))))))))))))
-  plot_rand_eff <- ifelse(df$plot == 1, mean(post$`tau_plot[1]`), ifelse(df$plot == 2, mean(post$`tau_plot[2]`), ifelse(df$plot == 3, mean(post$`tau_plot[3]`), ifelse(df$plot == 4, mean(post$`tau_plot[4]`), ifelse(df$plot == 5, mean(post$`tau_plot[5]`), ifelse(df$plot == 6, mean(post$`tau_plot[6]`), ifelse(df$plot == 7, mean(post$`tau_plot[7]`), ifelse(df$plot == 8, mean(post$`tau_plot[8]`), ifelse(df$plot == 9, mean(post$`tau_plot[9]`), ifelse(df$plot == 10, mean(post$`tau_plot[10]`), ifelse(df$plot == 11, mean(post$`tau_plot[11]`), ifelse(df$plot == 12, mean(post$`tau_plot[12]`), ifelse(df$plot == 13, mean(post$`tau_plot[13]`), ifelse(df$plot == 14, mean(post$`tau_plot[14]`), ifelse(df$plot == 15, mean(post$`tau_plot[15]`), ifelse(df$plot == 16, mean(post$`tau_plot[16]`), ifelse(df$plot == 17, mean(post$`tau_plot[17]`), ifelse(df$plot == 18, mean(post$`tau_plot[18]`), ifelse(df$plot == 19, mean(post$`tau_plot[19]`), ifelse(df$plot == 20, mean(post$`tau_plot20]`) ,NA))))))))))))))))))))
+  fixedeff <- sample(post$`beta[1]`,size = size)+ sample(post$`beta[2]`,size = size)*data$logsize_t + sample(post$`beta[3]`,size = size)*data$endo_01 + sample(post$`beta[4]`,size = size)*data$origin_01 + sample(post$`beta[5]`,size = size)*data$logsize_t*data$endo_01
+  year_rand_eff <- ifelse(df$year_t == 1 & df$endo_index == 1, sample(post$`tau_year[1,1]`,size = size),ifelse(df$year_t == 1 & df$endo_index == 2, sample(post$`tau_year[2,1]`,size = size),ifelse(df$year_t == 2 & df$endo_index == 1, sample(post$`tau_year[1,2]`,size = size),ifelse(df$year_t == 2 & df$endo_index == 2, sample(post$`tau_year[2,2]`,size = size),ifelse(df$year_t == 3 & df$endo_index == 1, sample(post$`tau_year[1,3]`,size = size),ifelse(df$year_t == 3 & df$endo_index == 2, sample(post$`tau_year[2,3]`,size = size),ifelse(df$year_t == 4 & df$endo_index == 1, sample(post$`tau_year[1,4]`,size = size),ifelse(df$year_t == 4 & df$endo_index == 2, sample(post$`tau_year[2,4]`,size = size),ifelse(df$year_t == 5 & df$endo_index == 1, sample(post$`tau_year[1,5]`,size = size),ifelse(df$year_t == 5 & df$endo_index == 2, sample(post$`tau_year[2,5]`,size = size),ifelse(df$year_t == 6 & df$endo_index == 1, sample(post$`tau_year[1,6]`,size = size),ifelse(df$year_t == 6 & df$endo_index == 2, sample(post$`tau_year[2,6]`,size = size),ifelse(df$year_t == 7 & df$endo_index == 1, sample(post$`tau_year[1,7]`,size = size),ifelse(df$year_t == 7 & df$endo_index == 2, sample(post$`tau_year[2,7]`,size = size),ifelse(df$year_t ==8 & df$endo_index == 1, sample(post$`tau_year[1,8]`,size = size),ifelse(df$year_t == 8 & df$endo_index == 2, sample(post$`tau_year[2,8]`,size = size),ifelse(df$year_t == 9 & df$endo_index == 1, sample(post$`tau_year[1,9]`,size = size),ifelse(df$year_t == 9 & df$endo_index ==2, sample(post$`tau_year[2,9]`,size = size),ifelse(df$year_t == 10 & df$endo_index == 1, sample(post$`tau_year[1,10]`,size = size),ifelse(df$year_t ==10 & df$endo_index == 2, sample(post$`tau_year[2,10]`,size = size),ifelse(df$year_t == 11 & df$endo_index == 1, sample(post$`tau_year[1,11]`,size = size),ifelse(df$year_t == 11 & df$endo_index == 2, sample(post$`tau_year[2,11]`,size = size),ifelse(df$year_t == 12 & df$endo_index == 1, sample(post$`tau_year[1,12]`,size = size),ifelse(df$year_t == 12 & df$endo_index == 2, sample(post$`tau_year[2,12]`,size = size),NA))))))))))))))))))))))))
+  plot_rand_eff <- ifelse(df$plot == 1, sample(post$`tau_plot[1]`,size = size), ifelse(df$plot == 2, sample(post$`tau_plot[2]`,size = size), ifelse(df$plot == 3, sample(post$`tau_plot[3]`,size = size), ifelse(df$plot == 4, sample(post$`tau_plot[4]`,size = size), ifelse(df$plot == 5, sample(post$`tau_plot[5]`,size = size), ifelse(df$plot == 6, sample(post$`tau_plot[6]`,size = size), ifelse(df$plot == 7, sample(post$`tau_plot[7]`,size = size), ifelse(df$plot == 8, sample(post$`tau_plot[8]`,size = size), ifelse(df$plot == 9, sample(post$`tau_plot[9]`,size = size), ifelse(df$plot == 10, sample(post$`tau_plot[10]`,size = size), ifelse(df$plot == 11, sample(post$`tau_plot[11]`,size = size), ifelse(df$plot == 12, sample(post$`tau_plot[12]`,size = size), ifelse(df$plot == 13, sample(post$`tau_plot[13]`,size = size), ifelse(df$plot == 14, sample(post$`tau_plot[14]`,size = size), ifelse(df$plot == 15, sample(post$`tau_plot[15]`,size = size), ifelse(df$plot == 16, sample(post$`tau_plot[16]`,size = size), ifelse(df$plot == 17, sample(post$`tau_plot[17]`,size = size), ifelse(df$plot == 18, sample(post$`tau_plot[18]`,size = size), ifelse(df$plot == 19, sample(post$`tau_plot[19]`,size = size), ifelse(df$plot == 20, sample(post$`tau_plot20]`,size = size) ,NA))))))))))))))))))))
   df$est<- as.integer(exp(fixedeff+year_rand_eff+plot_rand_eff))
   
   return(df)
 }
-AGPE_post <- as.data.frame(smAGPE)
 
-AGPE_est <-get_est(post = AGPE_post, data = AGPE_fert_data_list)
+AGPE_post <- as.data.frame(smAGPE)
+AGPE_data_for_est <- LTREB_data %>% 
+  mutate(flw_stat_t1 = as.integer(flw_stat_t1)) %>%
+  mutate(flw_stat_t = as.integer(flw_stat_t)) %>% 
+  mutate(flw_t = as.integer(flw_t)) %>% 
+  mutate(flw_t1 = as.integer(flw_t1)) %>%
+  filter(!is.na(logsize_t)) %>% 
+  filter(logsize_t >= 0) %>% 
+  filter(!is.na(endo_01)) %>% 
+  filter(species == "AGPE") %>% 
+  mutate(year_t = as.integer(as.factor(as.character(year_t_index)))) %>% 
+  mutate(plot = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
+
+AGPE_est <-get_est(post = AGPE_post, data = AGPE_data_for_est, size = length(AGPE_data_for_est$flw_t))
 
 View(AGPE_est)
 
