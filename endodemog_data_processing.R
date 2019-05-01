@@ -2052,13 +2052,13 @@ LTREB_tem_t <- LTREB_tem %>%
   filter(year_t1 != max(year_t1)) %>% 
   rename(surv_t_new = surv_t1, size_t_new = size_t1, flw_t = flw_t1, year_t_new = year_t1,) %>% 
   mutate(year_t1_new = year_t_new + 1) %>% 
-  select(-year_t,-size_t, -surv_t1, -notes)
+  select(-year_t,-size_t, -notes)
 
 LTREB_tem_t1 <- LTREB_tem %>%
   filter(year_t1 != min(year_t1)) %>% 
   rename(surv_t1_new = surv_t1, size_t1_new = size_t1, flw_t1 = flw_t1, year_t1_new = year_t1) %>% 
   mutate(year_t_new = year_t1_new - 1) %>% 
-  select(-year_t, -size_t, -surv_t1, -notes)
+  select(-year_t, -size_t, -notes)
 
 
 LTREB_tem_merge <- LTREB_tem_t1 %>% 
