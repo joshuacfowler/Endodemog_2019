@@ -56,81 +56,69 @@ dim(LTREB_data)
 LTREB_data1 <- LTREB_data %>%
   filter(!is.na(flw)) %>% 
   filter(flw>0) %>% 
-  mutate(seedperspike = case_when(species == "AGPE" ~ seed, 
-                                  species == "ELVI" | species == "ELRI" ~ seed/1,
-                                  species == "POAL" | species == "POSY" | species == "FESU" ~ seed/spikelets)) %>% 
-  group_by(plot, tag, species, endo_01, year) %>% 
-  summarize(seedperspike = mean(seedperspike, na.rm = TRUE))
+  mutate(seedperspike = case_when(species == "ELVI" | species == "ELRI" ~ NA_real_,
+                                  species == "POAL" | species == "POSY" | species == "FESU" | species == "LOAR" ~ seed/spikelets, # for these species, they are recorded as seeds/infl (collected for a few years) and spikelets/infl (collected for all year), so we are calculating avg seed/spike to be able to multiply byspiklets/infl in years without seed counts 
+                                  species == "AGPE" ~ seed)) %>% 
+  mutate(seedperinf = case_when(species == "ELVI" | species == "ELRI" ~ seed,
+                                species == "POAL" | species == "POSY" | species == "FESU" | species == "LOAR" ~ NA_real_,
+                                species == "AGPE"~ NA_real_)) %>% 
+  group_by(plot, tag, species, endo_01,endo_index, year, year_index) %>% 
+  summarize(seedperspike = mean(seedperspike, na.rm = TRUE),
+            seedperinf = mean(seedperinf, na.rm = TRUE),
+            spikeperinf = mean(spikelets),
+            flw = mean(flw),
+            samplesize = n())
   
   
 
 dim(LTREB_data1)
 
-# View(LTREB_data1)
+View(LTREB_data1)
 #########################################################################################################
 # Creating individual species data lists to be passed to the model------------------------------
 #########################################################################################################
 # Split up the main dataframe by species and recode plot to be used as an index for each species
 AGPE_seed_data <- LTREB_data1 %>% 
   filter(species == "AGPE") %>% 
-  filter(!is.na(seed)) %>% 
-  filter(spikelets > 0) %>% 
-  group_by(tag) %>% 
-  summarize(seedperspike = seed/spikelets)
-  mutate(seedperspike = seed)
   mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot)))))
 ELRI_seed_data <- LTREB_data1 %>% 
   filter(species == "ELRI") %>% 
-  filter(!is.na(seed)) %>% 
-  group_by(tag) %>% 
-  summarize(seedperspike = mean(seed/1)) %>% 
   mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot)))))
 ELVI_seed_data <- LTREB_data1 %>% 
   filter(species == "ELVI") %>%  
-  filter(!is.na(seed)) %>% 
   mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot)))))
 FESU_seed_data <- LTREB_data1 %>% 
   filter(species == "FESU") %>% 
-  filter(!is.na(seed)) %>% 
-  filter(spikelets > 0) %>% 
   mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot))))) 
 LOAR_seed_data <- LTREB_data1 %>% 
   filter(species == "LOAR") %>% 
-  filter(!is.na(seed)) %>% 
-  filter(spikelets > 0) %>% 
   mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot))))) 
 POAL_seed_data <- LTREB_data1 %>% 
   filter(species == "POAL") %>% 
-  filter(!is.na(seed)) %>% 
-  filter(spikelets > 0) %>% 
   mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot))))) 
 POSY_seed_data <- LTREB_data1 %>% 
   filter(species == "POSY") %>% 
-  filter(!is.na(seed)) %>% 
-  filter(spikelets > 0) %>% 
   mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot)))))
 
 
 
 # Create data lists to be used for the Stan model
-AGPE_seed_data_list <- list(seed = AGPE_seed_data$seed,
-                            spike = AGPE_seed_data$spikelets,
-                            flw = AGPE_seed_data$flw,
+AGPE_seed_data_list <- list(seed = na.omit(AGPE_seed_data$seedperspike),
+                            spike = na.omit(AGPE_seed_data$spikeperinf),
                             endo_01 = AGPE_seed_data$endo_01,
                             endo_index = AGPE_seed_data$endo_index,
                             year = AGPE_seed_data$year_index,
                             plot = AGPE_seed_data$plot_index,
-                            N = nrow(AGPE_seed_data),
+                            Nseed = length(na.omit(AGPE_seed_data$seedperspike)),
+                            Nspike = length(na.omit(AGPE_seed_data$spikeperinf)),
                             K = 2,
                             nYear = length(unique(AGPE_seed_data$year_index)),
                             nPlot = length(unique(AGPE_seed_data$plot_index)),
                             nEndo =   length(unique(AGPE_seed_data$endo_01)))
 str(AGPE_seed_data_list)
 
-ELRI_seed_data_list <- list(seed = ELRI_seed_data$seed,
-                            spike = ELRI_seed_data$spikelets,
-                            flw = ELRI_seed_data$flw,
-                            endo_01 = ELRI_seed_data$endo_01,
+ELRI_seed_data_list <- list(seed = na.omit(ELRI_seed_data$seedperinf),
+                            endo_01 = na.omit(ELRI_seed_data$endo_01),
                             endo_index = ELRI_seed_data$endo_index,
                             year = ELRI_seed_data$year_index,
                             plot = ELRI_seed_data$plot_index,
@@ -141,10 +129,8 @@ ELRI_seed_data_list <- list(seed = ELRI_seed_data$seed,
                             nEndo =   length(unique(ELRI_seed_data$endo_01)))
 str(ELRI_seed_data_list)
 
-ELVI_seed_data_list <- list(seed = ELVI_seed_data$seed,
-                            spike = ELVI_seed_data$spikelets,
-                            flw = ELVI_seed_data$flw,
-                            endo_01 = ELVI_seed_data$endo_01,
+ELVI_seed_data_list <- list(seed = na.omit(ELVI_seed_data$seedperinf),
+                            endo_01 = na.omit(ELVI_seed_data$endo_01),
                             endo_index = ELVI_seed_data$endo_index,
                             year = ELVI_seed_data$year_index,
                             plot = ELVI_seed_data$plot_index,
@@ -155,56 +141,56 @@ ELVI_seed_data_list <- list(seed = ELVI_seed_data$seed,
                             nEndo =   length(unique(ELVI_seed_data$endo_01)))
 str(ELVI_seed_data_list)
 
-FESU_seed_data_list <- list(seed = FESU_seed_data$seed,
-                            spike = FESU_seed_data$spikelets,
-                            flw = FESU_seed_data$flw,
-                            endo_01 = FESU_seed_data$endo_01,
+FESU_seed_data_list <- list(seed = na.omit(FESU_seed_data$seedperspike),
+                            spike = na.omit(FESU_seed_data$spikeperinf),
+                            endo_01 = na.omit(FESU_seed_data$endo_01),
                             endo_index = FESU_seed_data$endo_index,
                             year = FESU_seed_data$year_index,
                             plot = FESU_seed_data$plot_index,
-                            N = nrow(FESU_seed_data),
+                            Nseed = length(na.omit(FESU_seed_data$seedperspike)),
+                            Nspike = length(na.omit(FESU_seed_data$spikeperinf)),
                             K = 2,
                             nYear = length(unique(FESU_seed_data$year_index)),
                             nPlot = length(unique(FESU_seed_data$plot_index)),
                             nEndo =   length(unique(FESU_seed_data$endo_01)))
 str(FESU_seed_data_list)
 
-LOAR_seed_data_list <- list(seed = LOAR_seed_data$seed,
-                            spike = LOAR_seed_data$spikelets,
-                            flw = LOAR_seed_data$flw,
-                            endo_01 = LOAR_seed_data$endo_01,
+LOAR_seed_data_list <- list(seed = na.omit(LOAR_seed_data$seedperspike),
+                            spike = na.omit(LOAR_seed_data$spikeperinf),
+                            endo_01 = na.omit(LOAR_seed_data$endo_01),
                             endo_index = LOAR_seed_data$endo_index,
                             year = LOAR_seed_data$year_index,
                             plot = LOAR_seed_data$plot_index,
-                            N = nrow(LOAR_seed_data),
+                            Nseed = length(na.omit(LOAR_seed_data$seedperspike)),
+                            Nspike = length(na.omit(LOAR_seed_data$spikeperinf)),
                             K = 2,
                             nYear = length(unique(LOAR_seed_data$year_index)),
                             nPlot = length(unique(LOAR_seed_data$plot_index)),
                             nEndo =   length(unique(LOAR_seed_data$endo_01)))
 str(LOAR_seed_data_list)
 
-POAL_seed_data_list <- list(seed = POAL_seed_data$seed,
-                            spike = POAL_seed_data$spikelets,
-                            flw = POAL_seed_data$flw,
-                            endo_01 = POAL_seed_data$endo_01,
+POAL_seed_data_list <- list(seed = na.omit(POAL_seed_data$seedperspike),
+                            spike = na.omit(POAL_seed_data$spikeperinf),
+                            endo_01 = na.omit(POAL_seed_data$endo_01),
                             endo_index = POAL_seed_data$endo_index,
                             year = POAL_seed_data$year_index,
                             plot = POAL_seed_data$plot_index,
-                            N = nrow(POAL_seed_data),
+                            Nseed = length(na.omit(POAL_seed_data$seedperspike)),
+                            Nspike = length(na.omit(POAL_seed_data$spikeperinf)),
                             K = 2,
                             nYear = length(unique(POAL_seed_data$year_index)),
                             nPlot = length(unique(POAL_seed_data$plot_index)),
                             nEndo =   length(unique(POAL_seed_data$endo_01)))
 str(POAL_seed_data_list)
 
-POSY_seed_data_list <- list(seed = POSY_seed_data$seed,
-                            spike = POSY_seed_data$spikelets,
-                            flw = POSY_seed_data$flw,
-                            endo_01 = POSY_seed_data$endo_01,
+POSY_seed_data_list <- list(seed = na.omit(POSY_seed_data$seedperspike),
+                            spike = na.omit(POSY_seed_data$spikeperinf),
+                            endo_01 = na.omit(POSY_seed_data$endo_01),
                             endo_index = POSY_seed_data$endo_index,
                             year = POSY_seed_data$year_index,
                             plot = POSY_seed_data$plot_index,
-                            N = nrow(POSY_seed_data),
+                            Nseed = length(na.omit(POSY_seed_data$seedperspike)),
+                            Nspike = length(na.omit(POSY_seed_data$spikeperinf)),
                             K = 2,
                             nYear = length(unique(POSY_seed_data$year_index)),
                             nPlot = length(unique(POSY_seed_data$plot_index)),
@@ -231,33 +217,27 @@ nc <- 3
 sink("endodemog_seed_mean.stan")
 cat("
     data { 
-    int<lower=0> N;                       // number of observations
+    int<lower=0> Nseed;                       // number of observations of seed/spikelet
+    int<lower=0> Nspike;                       // number of observations of spikelets/inf
     int<lower=0> K;                       // number of predictors
-    int<lower=0> nEndo;                       // number of endo treatments
-    int<lower=1, upper=2> endo_index[N];          // index for endophyte effect
-    real<lower=0> seed[N];               // number of seeds per inflorescence
-    real<lower=0> spike[N];                  // number of spikelets per inflorescence
+    real<lower=0> seed[Nseed];               // number of seeds per spikelet or seeds per inflorescence
+    real<lower=0> spike[Nspike];
     }
     
-    transformed data{
-    vector<lower=0>[N] seedperspike; // number of seeds per spikelet 
-    for(i in 1:N){
-    seedperspike[i] = seed[i]/spike[i];
-    }
-    }
     
     parameters {
-    real<lower=0> mu;
-    real<lower=0> sigma_0;
+    real<lower=0> mu_seed;
+    real<lower=0> sigma_seed;
+    real<lower=0> mu_spike;
+    real<lower=0> sigma_spike;
     }
     
     model {
 
     // Priors
-    mu ~ normal(100,100);      // prior for mu
-
     // Likelihood
-      seedperspike ~ normal(mu,sigma_0);
+      seed ~ normal(mu_seed,sigma_seed);
+      spike ~ normal(mu_spike, sigma_spike);
     }
 
   
@@ -268,15 +248,6 @@ stanmodel <- stanc("endodemog_seed_mean.stan")
 
 ## Run the model by calling stan()
 ## Save the outputs as rds files
-Pdf <- POAL_seed_data %>% 
-  mutate(seed_spike = seed/spikelets) %>% 
-  summarize(mean_seed_spike = mean(seed_spike),
-            sample_size = n()) 
-  summarize(mean = mean(mean_seed_spike),
-            sample_size = n())
-View(Pdf)
-
-
 smFESU <- stan(file = "endodemog_seed_mean.stan", data = FESU_seed_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
 # saveRDS(smFESU, file = "endodemog_seed_mean_FESU.rds")
@@ -293,25 +264,34 @@ smPOSY <- stan(file = "endodemog_seed_mean.stan", data = POSY_seed_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
 # saveRDS(smPOSY, file = "endodemog_seed_mean_POSY_withplot.rds")
 
-
-# ELRI and ELVI had data collected in a slightly different way
-
-
-
-
-smELRI <- stan(file = "endodemog_seed_mean_elymus.stan", data = ELRI_seed_data_list,
-               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-saveRDS(smELRI, file = "endodemog_seed_mean_ELRI.rds")
-
-smELVI <- stan(file = "endodemog_seed_mean_elymus.stan", data = ELVI_seed_data_list,
-               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-saveRDS(smELVI, file = "endodemog_seed_mean_ELVI.rds")
-
-
-# AGPE has seed data in a different format
+# AGPE had data recorded as seed/spikelet already, but we are using this model to calculate seed/spikelet on average, so this is using the seed/spikelet info from AGPE
 smAGPE<- stan(file = "endodemog_seed_mean.stan", data = AGPE_seed_data_list,
               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-saveRDS(smAGPE, file = "endodemog_seed_mean_AGPE.rds")
+# saveRDS(smAGPE, file = "endodemog_seed_mean_AGPE.rds")
 
 
+# ELRI and ELVI had data collected in a slightly different way. They recorded seeds/inflorescence
 
+
+smELRI <- stan(file = "endodemog_seed_mean.stan", data = ELRI_seed_data_list,
+               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
+# saveRDS(smELRI, file = "endodemog_seed_mean_ELRI.rds")
+
+smELVI <- stan(file = "endodemog_seed_mean.stan", data = ELVI_seed_data_list,
+               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
+# saveRDS(smELVI, file = "endodemog_seed_mean_ELVI.rds")
+
+
+est_seed <- function(df,x){
+v <- sample(df$mu, size = nrow(x), replace = TRUE)*x$spikeperinf*x$flw
+return(v)
+}
+
+# calculate POAL seed estimate
+POAL <- as.data.frame(smPOAL)
+POAL_est_data <- LTREB_data1 %>% 
+  filter(species == "POAL")
+
+
+POAL_est_data$seed_est <- est_seed(POAL, POAL_est_data)
+View(POAL_est_data)
