@@ -70,8 +70,8 @@ LTREB_data1 <- LTREB_data %>%
   mutate(flw_stat_t = as.integer(flw_stat_t)) %>% 
   mutate(flw_t = as.integer(flw_t)) %>% 
   mutate(flw_t1 = as.integer(flw_t1)) %>% 
-  filter(!is.na(flw_t1)) %>% 
-  filter(flw_t1>0) %>% 
+  filter(!is.na(flw_t)) %>% 
+  filter(flw_t>0) %>% 
   filter(!is.na(logsize_t)) %>% 
   filter(logsize_t >= 0) %>% 
   filter(!is.na(endo_01))
@@ -85,76 +85,72 @@ dim(LTREB_data1)
 # Split up the main dataframe by species and recode plot to be used as an index for each species
 AGPE_data <- LTREB_data1 %>% 
   filter(species == "AGPE") %>% 
+  mutate(year_t_index = as.integer(as.factor(as.character(year_t_index)))) %>% 
   mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
 ELRI_data <- LTREB_data1 %>% 
   filter(species == "ELRI") %>% 
+  mutate(year_t_index = as.integer(as.factor(as.character(year_t_index)))) %>% 
   mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
 ELVI_data <- LTREB_data1 %>% 
   filter(species == "ELVI") %>% 
+  mutate(year_t_index = as.integer(as.factor(as.character(year_t_index)))) %>% 
   mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
 FESU_data <- LTREB_data1 %>% 
   filter(species == "FESU") %>% 
   mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed))))) %>% 
-  mutate(year_t_index = as.integer(recode(year_t, 
-                                          '2007' = 0, '2008' = 1, '2009' = 2, 
-                                          '2010' = 3, '2011' = 4, '2012' = 5, 
-                                          '2013' = 6, '2014' = 7, '2015' = 8, 
-                                          '2016' = 9, '2017' = 10)))
+  mutate(year_t_index = as.integer(as.factor(as.integer(as.character(year_t_index))))) 
+  
+
 LOAR_data <- LTREB_data1 %>% 
   filter(species == "LOAR") %>% 
   mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed))))) %>% 
-  mutate(year_t_index = as.integer(recode(year_t, 
-                                          '2007' = 0, '2008' = 0, '2009' = 0, 
-                                          '2010' = 1, '2011' = 0, '2012' = 2, 
-                                          '2013' = 3, '2014' = 4, '2015' = 5, 
-                                          '2016' = 6, '2017' = 7)))
+  mutate(year_t_index = as.integer(as.factor(as.integer(as.character(year_t_index))))) 
+
 POAL_data <- LTREB_data1 %>% 
   filter(species == "POAL") %>% 
   mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed))))) %>%
-  mutate(year_t_index = as.integer(recode(year_t, 
-                                          '2007' = 1, '2008' = 2, '2009' = 3, 
-                                          '2010' = 4, '2011' = 5, '2012' = 6, 
-                                          '2013' = 7, '2014' = 0, '2015' = 8, 
-                                          '2016' = 9, '2017' = 10)))
+  mutate(year_t_index = as.integer(as.factor(as.integer(as.character(year_t_index))))) 
+
 POSY_data <- LTREB_data1 %>% 
   filter(species == "POSY") %>% 
-  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
+  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed))))) %>% 
+mutate(year_t_index = as.integer(as.factor(as.integer(as.character(year_t_index))))) 
 
 
 # Create model matrices for each species
-AGPE_for_matrix <- model.frame(flw_t1 ~ (logsize_t + endo_01)^2 + origin_01
+AGPE_for_matrix <- model.frame(flw_t ~ (logsize_t + endo_01)^2 + origin_01
                                , data = AGPE_data)
-AGPE_Xs <- model.matrix(flw_t1 ~ (logsize_t + endo_01)^2 + origin_01
+AGPE_Xs <- model.matrix(flw_t ~ (logsize_t + endo_01)^2 + origin_01
                         , data =AGPE_for_matrix)
 
-ELRI_for_matrix <- model.frame(flw_t1 ~ (logsize_t + endo_01)^2 + origin_01
+ELRI_for_matrix <- model.frame(flw_t ~ (logsize_t + endo_01)^2 + origin_01
                                , data = ELRI_data)
-ELRI_Xs <- model.matrix(flw_t1 ~ (logsize_t + endo_01)^2 + origin_01
+ELRI_Xs <- model.matrix(flw_t ~ (logsize_t + endo_01)^2 + origin_01
                         , data =ELRI_for_matrix)
 
-ELVI_for_matrix <- model.frame(flw_t1 ~ (logsize_t + endo_01)^2 + origin_01
+ELVI_for_matrix <- model.frame(flw_t ~ (logsize_t + endo_01)^2 + origin_01
                                , data = ELVI_data)
-ELVI_Xs <- model.matrix(flw_t1 ~ (logsize_t + endo_01)^2 + origin_01
+ELVI_Xs <- model.matrix(flw_t ~ (logsize_t + endo_01)^2 + origin_01
                         , data =ELVI_for_matrix)
 
-FESU_for_matrix <- model.frame(flw_t1 ~ (logsize_t + endo_01)^2 + origin_01
+FESU_for_matrix <- model.frame(flw_t ~ (logsize_t + endo_01)^2 + origin_01
                                , data = FESU_data)
-FESU_Xs <- model.matrix(flw_t1 ~ (logsize_t + endo_01)^2 + origin_01
+FESU_Xs <- model.matrix(flw_t ~ (logsize_t + endo_01)^2 + origin_01
                         , data =FESU_for_matrix)
 
-LOAR_for_matrix <- model.frame(flw_t1 ~ (logsize_t + endo_01)^2 + origin_01
+LOAR_for_matrix <- model.frame(flw_t ~ (logsize_t + endo_01)^2 + origin_01
                                , data = LOAR_data)
-LOAR_Xs <- model.matrix(flw_t1 ~ (logsize_t + endo_01)^2 + origin_01
+LOAR_Xs <- model.matrix(flw_t ~ (logsize_t + endo_01)^2 + origin_01
                         , data =LOAR_for_matrix)
 
-POAL_for_matrix <- model.frame(flw_t1 ~ (logsize_t + endo_01)^2 + origin_01
+POAL_for_matrix <- model.frame(flw_t ~ (logsize_t + endo_01)^2 + origin_01
                                , data = POAL_data)
-POAL_Xs <- model.matrix(flw_t1 ~ (logsize_t + endo_01)^2 + origin_01
+POAL_Xs <- model.matrix(flw_t ~ (logsize_t + endo_01)^2 + origin_01
                         , data =POAL_for_matrix)
 
-POSY_for_matrix <- model.frame(flw_t1 ~ (logsize_t + endo_01)^2 + origin_01
+POSY_for_matrix <- model.frame(flw_t ~ (logsize_t + endo_01)^2 + origin_01
                                , data = POSY_data)
-POSY_Xs <- model.matrix(flw_t1 ~ (logsize_t + endo_01)^2 + origin_01
+POSY_Xs <- model.matrix(flw_t ~ (logsize_t + endo_01)^2 + origin_01
                         , data =POSY_for_matrix)
 
 
@@ -283,7 +279,7 @@ set.seed(123)
 ## MCMC settings
 ni <-500
 nb <- 250
-nc <- 1
+nc <- 3
 
 # Stan model -------------
 ## here is the Stan model with a model matrix and species effects ##
@@ -313,9 +309,13 @@ cat("
 
     vector[nYear] tau_year[nEndo];      // random year effect
     real<lower=0> sigma_e[nEndo];        //year variance by endophyte effect
-    //vector[nPlot] tau_plot;        // random plot effect
-    //real<lower=0> sigma_p;          // plot variance
-    real<lower=0> phi;
+    vector[nPlot] tau_plot;        // random plot effect
+    real<lower=0> sigma_p;          // plot variance
+    real<lower=0> reciprocal_phi;            // inverse dispersion parameter
+    }
+    transformed parameters{
+    real<lower=0> phi;                    // negative binomial dispersion parameter
+    phi = 1. / reciprocal_phi;
     }
     
     model {
@@ -325,15 +325,15 @@ cat("
     for(n in 1:N){
       mu[n] = beta[1] + beta[2]*logsize_t[n] + beta[3]*endo_01[n] +beta[4]*origin_01[n]
       + beta[5]*logsize_t[n]*endo_01[n] 
-      + tau_year[endo_index[n],year_t[n]];
-      //+ tau_plot[plot[n]];
+      + tau_year[endo_index[n],year_t[n]]
+      + tau_plot[plot[n]];
     }
     // Priors
     beta ~ normal(0,100);      // prior for predictor intercepts
-    //tau_plot ~ normal(0,sigma_p);   // prior for plot random effects
+    tau_plot ~ normal(0,sigma_p);   // prior for plot random effects
     to_vector(tau_year[1]) ~ normal(0,sigma_e[1]);   // prior for E- year random effects
     to_vector(tau_year[2]) ~ normal(0,sigma_e[2]);   // prior for E+ year random effects
-    
+    reciprocal_phi ~ cauchy(0., 5.);
 
     // Likelihood
     for(n in 1:N){
@@ -343,15 +343,6 @@ cat("
     }
     
    generated quantities{
-      vector[N] mu;
-    
-    // for posterior predictive check
-    for(n in 1:N){
-      mu[n] = beta[1] + beta[2]*logsize_t[n] + beta[3]*endo_01[n] +beta[4]*origin_01[n]
-      + beta[5]*logsize_t[n]*endo_01[n] 
-      + tau_year[endo_index[n],year_t[n]];
-     // + tau_plot[plot[n]];
-    }
    }
   
     ", fill = T)
@@ -364,33 +355,64 @@ stanmodel <- stanc("endodemog_fert.stan")
 
 smAGPE<- stan(file = "endodemog_fert.stan", data = AGPE_fert_data_list,
               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-saveRDS(smAGPE, file = "endodemog_fert_AGPE.rds")
+# saveRDS(smAGPE, file = "endodemog_fert_AGPE.rds")
 
 smELRI <- stan(file = "endodemog_fert.stan", data = ELRI_fert_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-saveRDS(smELRI, file = "endodemog_fert_ELRI.rds")
+# saveRDS(smELRI, file = "endodemog_fert_ELRI.rds")
 
 smELVI <- stan(file = "endodemog_fert.stan", data = ELVI_fert_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-saveRDS(smELVI, file = "endodemog_fert_ELVI.rds")
+# saveRDS(smELVI, file = "endodemog_fert_ELVI.rds")
 
 smFESU <- stan(file = "endodemog_fert.stan", data = FESU_fert_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-saveRDS(smFESU, file = "endodemog_fert_FESU.rds")
+# saveRDS(smFESU, file = "endodemog_fert_FESU.rds")
 
 smLOAR <- stan(file = "endodemog_fert.stan", data = LOAR_fert_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-saveRDS(smLOAR, file = "endodemog_fert_LOAR.rds")
+# saveRDS(smLOAR, file = "endodemog_fert_LOAR.rds")
 
 smPOAL <- stan(file = "endodemog_fert.stan", data = POAL_fert_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-saveRDS(smPOAL, file = "endodemog_fert_POAL_withplot.rds")
+# saveRDS(smPOAL, file = "endodemog_fert_POAL_withplot.rds")
 
 smPOSY <- stan(file = "endodemog_fert.stan", data = POSY_fert_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-saveRDS(smPOSY, file = "endodemog_fert_POSY_withplot.rds")
+# saveRDS(smPOSY, file = "endodemog_fert_POSY_withplot.rds")
 
 
+
+# Working on a function to get fertility estimates to use with the seed means estimates to get estimates of seed production. 
+
+
+
+get_est <- function(post, data){
+  df <- as_data_frame(cbind(data$year_t, data$endo_index, data$plot, data$flw_t, data$logsize_t, data$origin_01))
+  df <- setNames(object = df, nm = c("year_t", "endo_index", "plot", "flw_t", "logsize_t", "origin_01"))
+  fixedeff <- mean(post$`beta[1]`)+ mean(post$`beta[2]`)*data$logsize_t + mean(post$`beta[3]`)*data$endo_01 + mean(post$`beta[4]`)*data$origin_01 + mean(post$`beta[5]`)*data$logsize_t*data$endo_01
+  year_rand_eff <- ifelse(df$year_t == 1 & df$endo_index == 1, mean(post$`tau_year[1,1]`),ifelse(df$year_t == 1 & df$endo_index == 2, mean(post$`tau_year[2,1]`),ifelse(df$year_t == 2 & df$endo_index == 1, mean(post$`tau_year[1,2]`),ifelse(df$year_t == 2 & df$endo_index == 2, mean(post$`tau_year[2,2]`),ifelse(df$year_t == 3 & df$endo_index == 1, mean(post$`tau_year[1,3]`),ifelse(df$year_t == 3 & df$endo_index == 2, mean(post$`tau_year[2,3]`),ifelse(df$year_t == 4 & df$endo_index == 1, mean(post$`tau_year[1,4]`),ifelse(df$year_t == 4 & df$endo_index == 2, mean(post$`tau_year[2,4]`),ifelse(df$year_t == 5 & df$endo_index == 1, mean(post$`tau_year[1,5]`),ifelse(df$year_t == 5 & df$endo_index == 2, mean(post$`tau_year[2,5]`),ifelse(df$year_t == 6 & df$endo_index == 1, mean(post$`tau_year[1,6]`),ifelse(df$year_t == 6 & df$endo_index == 2, mean(post$`tau_year[2,6]`),ifelse(df$year_t == 7 & df$endo_index == 1, mean(post$`tau_year[1,7]`),ifelse(df$year_t == 7 & df$endo_index == 2, mean(post$`tau_year[2,7]`),ifelse(df$year_t ==8 & df$endo_index == 1, mean(post$`tau_year[1,8]`),ifelse(df$year_t == 8 & df$endo_index == 2, mean(post$`tau_year[2,8]`),ifelse(df$year_t == 9 & df$endo_index == 1, mean(post$`tau_year[1,9]`),ifelse(df$year_t == 9 & df$endo_index ==2, mean(post$`tau_year[2,9]`),ifelse(df$year_t == 10 & df$endo_index == 1, mean(post$`tau_year[1,10]`),ifelse(df$year_t ==10 & df$endo_index == 2, mean(post$`tau_year[2,10]`),ifelse(df$year_t == 11 & df$endo_index == 1, mean(post$`tau_year[1,11]`),ifelse(df$year_t == 11 & df$endo_index == 2, mean(post$`tau_year[2,11]`),ifelse(df$year_t == 12 & df$endo_index == 1, mean(post$`tau_year[1,12]`),ifelse(df$year_t == 12 & df$endo_index == 2, mean(post$`tau_year[2,12]`),NA))))))))))))))))))))))))
+  plot_rand_eff <- ifelse(df$plot == 1, mean(post$`tau_plot[1]`), ifelse(df$plot == 2, mean(post$`tau_plot[2]`), ifelse(df$plot == 3, mean(post$`tau_plot[3]`), ifelse(df$plot == 4, mean(post$`tau_plot[4]`), ifelse(df$plot == 5, mean(post$`tau_plot[5]`), ifelse(df$plot == 6, mean(post$`tau_plot[6]`), ifelse(df$plot == 7, mean(post$`tau_plot[7]`), ifelse(df$plot == 8, mean(post$`tau_plot[8]`), ifelse(df$plot == 9, mean(post$`tau_plot[9]`), ifelse(df$plot == 10, mean(post$`tau_plot[10]`), ifelse(df$plot == 11, mean(post$`tau_plot[11]`), ifelse(df$plot == 12, mean(post$`tau_plot[12]`), ifelse(df$plot == 13, mean(post$`tau_plot[13]`), ifelse(df$plot == 14, mean(post$`tau_plot[14]`), ifelse(df$plot == 15, mean(post$`tau_plot[15]`), ifelse(df$plot == 16, mean(post$`tau_plot[16]`), ifelse(df$plot == 17, mean(post$`tau_plot[17]`), ifelse(df$plot == 18, mean(post$`tau_plot[18]`), ifelse(df$plot == 19, mean(post$`tau_plot[19]`), ifelse(df$plot == 20, mean(post$`tau_plot20]`) ,NA))))))))))))))))))))
+  df$est<- as.integer(exp(fixedeff+year_rand_eff+plot_rand_eff))
+  
+  return(df)
+}
+AGPE_post <- as.data.frame(smAGPE)
+
+AGPE_est <-get_est(post = AGPE_post, data = AGPE_fert_data_list)
+
+View(AGPE_est)
+
+plot(AGPE_est$logsize_t, AGPE_est$est)
+points(AGPE_est$logsize_t, AGPE_est$flw_t, col = "blue")
+
+ELRI_post <- as.data.frame(smELRI)
+
+ELRI_est <- get_est(post = ELRI_post, data = ELRI_fert_data_list)
+View(ELRI_est)
+
+plot(ELRI_est$logsize_t, ELRI_est$est)
+points(ELRI_est$logsize_t, ELRI_est$flw_t, col = "blue")
 
 # Here is a simpler model for those species with little data
 
@@ -403,7 +425,7 @@ cat("
     int<lower=0> lowerlimit;                         //lower limit for truncated negative binomial
     int<lower=0> nEndo;                       // number of endo treatments
     int<lower=1, upper=2> endo_index[N];          // index for endophyte effect
-    int<lower=lowerlimit> flw_t1[N];      // plant size at time t+1 and target variable (response)
+    int<lower=lowerlimit> flw_t[N];      // plant size at time t+1 and target variable (response)
     vector<lower=0>[N] logsize_t;             // plant size at time t (predictor)
     int<lower=0,upper=1> endo_01[N];            // plant endophyte status (predictor)
     int<lower=0,upper=1> origin_01[N];          // plant origin status (predictor)
@@ -412,7 +434,7 @@ cat("
     parameters {
     vector[3] beta;                     // predictor parameters
 
-    real<lower=0> phi;
+    real<lower=0> phi;            // neg. binomial disperion parameter
     }
     
     model {
@@ -423,11 +445,11 @@ cat("
       mu[n] = beta[1] + beta[2]*logsize_t[n];
     }
     // Priors
-    beta ~ normal(0,100);      // prior for predictor intercepts
-
+    beta ~ normal(0,10);      // prior for predictor intercepts
+    phi ~ gamma(2,0.1);
     // Likelihood
     for(n in 1:N){
-      flw_t1[n] ~ neg_binomial_2_log(mu[n],phi);
+      flw_t[n] ~ neg_binomial_2_log(mu[n],phi);
       target += -log1m(neg_binomial_2_log_lpmf(lowerlimit | mu[n], phi)); // manually adjusting computation of likelihood because T[,] truncation syntax doesn't compile for neg binomial
     }
     }
@@ -444,12 +466,12 @@ smELRI2 <- stan(file = "endodemog_fert_woyearplot.stan", data = ELRI_fert_data_l
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
 # saveRDS(smELRI, file = "endodemog_fert_ELRI.rds")
 
-smELVI <- stan(file = "endodemog_fert_woyearplot.stan", data = ELVI_fert_data_list,
+smELVI2 <- stan(file = "endodemog_fert_woyearplot.stan", data = ELVI_fert_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
 # saveRDS(smELVI, file = "endodemog_fert_ELVI.rds")
 
 
-smLOAR <- stan(file = "endodemog_fert_woyearplot.stan", data = LOAR_fert_data_list,
+smFESU2 <- stan(file = "endodemog_fert_woyearplot.stan", data = FESU_fert_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
 # saveRDS(smLOAR, file = "endodemog_fert_LOAR.rds")
 
