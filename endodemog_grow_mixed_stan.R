@@ -295,9 +295,9 @@ options(mc.cores = parallel::detectCores())
 set.seed(123)
 
 ## MCMC settings
-ni <-5000
-nb <- 2500
-nc <- 3
+ni <-500
+nb <- 250
+nc <- 1
 
 # Stan model -------------
 ## here is the Stan model with a model matrix and species effects ##
@@ -329,7 +329,11 @@ cat("
     real<lower=0> sigma_e[nEndo];        //year variance by endophyte effect
     vector[nPlot] tau_plot;        // random plot effect
     real<lower=0> sigma_p;          // plot variance
-    real<lower=0> phi;
+    real<lower=0> reciprocal_phi;            // inverse dispersion parameter
+    }
+    transformed parameters{
+    real<lower=0> phi;                    // negative binomial dispersion parameter
+    phi = 1. / reciprocal_phi;
     }
     
     model {
@@ -347,7 +351,8 @@ cat("
     tau_plot ~ normal(0,sigma_p);   // prior for plot random effects
     to_vector(tau_year[1]) ~ normal(0,sigma_e[1]);   // prior for E- year random effects
     to_vector(tau_year[2]) ~ normal(0,sigma_e[2]);   // prior for E+ year random effects
-    
+    reciprocal_phi ~ cauchy(0., 5.);
+
 
     // Likelihood
     for(n in 1:N){
