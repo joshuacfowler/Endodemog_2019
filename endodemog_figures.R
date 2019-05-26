@@ -19,10 +19,9 @@ invlogit<-function(x){exp(x)/(1+exp(x))}
 logit = function(x) { log(x/(1-x)) }
 
 #  source in raw output from models
-
 ## Read in the survival model output for all species
-survPOAL <- readRDS(file = "model_run_MAR7/endodemog_surv_POAL_withplot.rds")
-survPOSY <- readRDS(file = "model_run_MAR7/endodemog_surv_POSY_withplot.rds")
+survPOAL <- read_rds(path = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_surv_POAL_withplot.rds")
+survPOSY <- read_rds(path = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_surv_POSY_withplot.rds")
 survLOAR <- readRDS(file = "model_run_MAR7/endodemog_surv_LOAR_withplot.rds")
 survELVI <- readRDS(file = "model_run_MAR7/endodemog_surv_ELVI_withplot.rds")
 survELRI <- readRDS(file = "model_run_MAR7/endodemog_surv_ELRI_withplot.rds")
@@ -50,10 +49,6 @@ growELRI <- readRDS(file = "model_run_MAR7/endodemog_grow_ELRI_withplot.rds")
 growFESU <- readRDS(file = "model_run_MAR7/endodemog_grow_FESU_withplot.rds")
 growAGPE <- readRDS(file = "model_run_MAR7/endodemog_grow_AGPE_withplot.rds")
 
-# Classic palette BuPu, with 4 colors
-purps = brewer.pal(9, "Purples")
-bupu = brewer.pal(9,"BuPu")
-oran = brewer.pal(9, "Oranges")
 # save posteriors and summaries within dataframes
 params = c("beta", "tau_year", "sigma_e", "tau_plot")
 
@@ -110,7 +105,11 @@ sum_growELRI <- summary(growELRI, pars = params)
 sum_growFESU <- summary(growFESU, pars = params)
 sum_growAGPE <- summary(growAGPE, pars = params)
 
-
+#Looking at different color palettes
+# Classic palette BuPu, with 4 colors
+purps = brewer.pal(9, "Purples")
+bupu = brewer.pal(9,"BuPu")
+oran = brewer.pal(9, "Oranges")
 
 
 brewer.pal(9, "Oranges")

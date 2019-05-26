@@ -1,0 +1,180 @@
+---
+title: "endodemog_figures"
+author: "Joshua and Tom"
+date: "5/24/2019"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## Purpose: 
+Visualizes output of endophyte effect on year variance from model outputs for Survival, Growth, Fertility, and Recruitment models. 
+
+# source in R packages and load model outputs
+```{r model outputs, include=FALSE}
+source('endodemog_model_outputs.R')
+```
+
+```{r colorpalletes, include = FALSE}
+#Looking at different color palettes
+# Classic palette BuPu, with 4 colors
+purps = brewer.pal(9, "Purples")
+bupu = brewer.pal(9,"BuPu")
+oran = brewer.pal(9, "Oranges")
+
+
+brewer.pal(9, "Oranges")
+orrd = brewer.pal(9, "OrRd")
+# I can add more tones to this palette :
+purps = colorRampPalette(purps)(11)
+# pie(rep(1, length(purps)), col = purps , main="")
+bupu = colorRampPalette(bupu)(11)
+# pie(rep(1, length(bupu)), col = bupu , main="")
+oran = colorRampPalette(oran)(11)
+# pie(rep(1, length(oran)), col = oran , main="")
+orrd = colorRampPalette(orrd)(11)
+# pie(rep(1, length(orrd)), col = orrd , main="")
+
+yearcolors <- c("#a6cee3","#1f78b4","#b2df8a","#33a02c","#fb9a99",
+                "#e31a1c","#fdbf6f","#ff7f00","#cab2d6","#6a3d9a",
+                "#ffff99")
+colors2 <- c("#ff7f00","#6a3d9a") #"#ff7f00" = E-, "#e31a1c" = E+
+```
+
+Plots of variance posteriors
+```{r variance histogram gg objects, include=FALSE}
+# Variance posterior distributions by species
+
+# survival
+AGPE_s <- ggplot() +
+  geom_histogram(data = post_survAGPE, aes(`sigma_e[1]`), fill = "#ff7f00", alpha = .4, bins = 200) +
+  geom_histogram(data = post_survAGPE, aes(`sigma_e[2]`), fill = "#6a3d9a", alpha = .4, bins = 200) +
+  labs(x = expression(sig__[year]), y = "Posterior density", title = "Variance Estimate") + theme_classic()
+
+ELRI_s <- ggplot() +
+  geom_histogram(data = post_survELRI, aes(`sigma_e[1]`), fill = "#ff7f00", alpha = .4, bins = 200) +
+  geom_histogram(data = post_survELRI, aes(`sigma_e[2]`), fill = "#6a3d9a", alpha = .4, bins = 200) +
+  labs(x = expression(sig__[year]), y = "Posterior density", title = "Variance Estimate") + theme_classic()
+
+ELVI_s <- ggplot() +
+  geom_histogram(data = post_survELVI, aes(`sigma_e[1]`), fill = "#ff7f00", alpha = .5, bins = 200) +
+  geom_histogram(data = post_survELVI, aes(`sigma_e[2]`), fill = "#6a3d9a", alpha = .5, bins = 200) +
+  labs(x = expression(sig__[year]), y = "Posterior density", title = "Variance Estimate") + theme_classic()
+
+FESU_s <- ggplot() +
+  geom_histogram(data = post_survFESU, aes(`sigma_e[1]`), fill = "#ff7f00", alpha = .5, bins = 200) +
+  geom_histogram(data = post_survFESU, aes(`sigma_e[2]`), fill = "#6a3d9a", alpha = .5, bins = 200) +
+  labs(x = expression(sig__[year]), y = "Posterior density", title = "Variance Estimate") + theme_classic()
+
+LOAR_s <- ggplot() +
+  geom_histogram(data = post_survLOAR, aes(`sigma_e[1]`), fill = "#ff7f00", alpha = .5, bins = 200) +
+  geom_histogram(data = post_survLOAR, aes(`sigma_e[2]`), fill = "#6a3d9a", alpha = .5, bins = 200) +
+  labs(x = expression(sig__[year]), y = "Posterior density", title = "Variance Estimate") + theme_classic()
+
+POAL_s <- ggplot() +
+  geom_histogram(data = post_survPOAL, aes(`sigma_e[1]`), fill = "#ff7f00", alpha = .4, bins = 200) +
+  geom_histogram(data = post_survPOAL, aes(`sigma_e[2]`), fill = "#6a3d9a", alpha = .4, bins = 200) +
+  labs(x = expression(sig__[year]), y = "Posterior density", title = "Variance Estimate") + theme_classic()
+
+
+POSY_s <- ggplot() +
+  geom_histogram(data = post_survPOSY, aes(`sigma_e[1]`), fill = "#ff7f00", alpha = .4, bins = 200) +
+  geom_histogram(data = post_survPOSY, aes(`sigma_e[2]`), fill = "#6a3d9a", alpha = .4, bins = 200) +
+  labs(x = expression(sig__[year]), y = "Posterior density", title = "Variance Estimate") + theme_classic()
+
+
+# flowering
+AGPE_f <- ggplot() +
+  geom_histogram(data = post_flwAGPE, aes(`sigma_e[1]`), fill = "#ff7f00", alpha = .4, bins = 200) +
+  geom_histogram(data = post_flwAGPE, aes(`sigma_e[2]`), fill = "#6a3d9a", alpha = .4, bins = 200) +
+  labs(x = expression(sig__[year]), y = "", title = "AGPE") + theme_classic()
+
+ELRI_f <- ggplot() +
+  geom_histogram(data = post_flwELRI, aes(`sigma_e[1]`), fill = "#ff7f00", alpha = .4, bins = 200) +
+  geom_histogram(data = post_flwELRI, aes(`sigma_e[2]`), fill = "#6a3d9a", alpha = .4, bins = 200) +
+  labs(x = expression(sig__[year]), y = "", title = "ELRI") + theme_classic()
+
+ELVI_f <- ggplot() +
+  geom_histogram(data = post_flwELVI, aes(`sigma_e[1]`), fill = "#ff7f00", alpha = .5, bins = 200) +
+  geom_histogram(data = post_flwELVI, aes(`sigma_e[2]`), fill = "#6a3d9a", alpha = .5, bins = 200) +
+  labs(x = expression(sig__[year]), y = "", title = "ELVI") + theme_classic()
+
+FESU_f <- ggplot() +
+  geom_histogram(data = post_flwFESU, aes(`sigma_e[1]`), fill = "#ff7f00", alpha = .5, bins = 200) +
+  geom_histogram(data = post_flwFESU, aes(`sigma_e[2]`), fill = "#6a3d9a", alpha = .5, bins = 200) +
+  labs(x = expression(sig__[year]), y = "", title = "FESU") + theme_classic()
+
+LOAR_f <- ggplot() +
+  geom_histogram(data = post_flwLOAR, aes(`sigma_e[1]`), fill = "#ff7f00", alpha = .5, bins = 200) +
+  geom_histogram(data = post_flwLOAR, aes(`sigma_e[2]`), fill = "#6a3d9a", alpha = .5, bins = 200) +
+  labs(x = expression(sig__[year]), y = "", title = "LOAR") + theme_classic()
+
+POAL_f <- ggplot() +
+  geom_histogram(data = post_flwPOAL, aes(`sigma_e[1]`), fill = "#ff7f00", alpha = .4, bins = 200) +
+  geom_histogram(data = post_flwPOAL, aes(`sigma_e[2]`), fill = "#6a3d9a", alpha = .4, bins = 200) +
+  labs(x = expression(sig__[year]), y = "", title = "POAL") + theme_classic()
+
+POSY_f <- ggplot() +
+  geom_histogram(data = post_flwPOSY, aes(`sigma_e[1]`), fill = "#ff7f00", alpha = .4, bins = 200) +
+  geom_histogram(data = post_flwPOSY, aes(`sigma_e[2]`), fill = "#6a3d9a", alpha = .4, bins = 200) +
+  labs(x = expression(sig__[year]), y = "", title = "POSY") + theme_classic()
+
+
+# growth
+AGPE_g <- ggplot() +
+  geom_histogram(data = post_growAGPE, aes(`sigma_e[1]`), fill = "#ff7f00", alpha = .4, bins = 200) +
+  geom_histogram(data = post_growAGPE, aes(`sigma_e[2]`), fill = "#6a3d9a", alpha = .4, bins = 200) +
+  labs(x = expression(sig__[year]), y = "", title = "AGPE") + theme_classic()
+
+ELRI_g <- ggplot() +
+  geom_histogram(data = post_growELRI, aes(`sigma_e[1]`), fill = "#ff7f00", alpha = .4, bins = 200) +
+  geom_histogram(data = post_growELRI, aes(`sigma_e[2]`), fill = "#6a3d9a", alpha = .4, bins = 200) +
+  labs(x = expression(sig__[year]), y = "", title = "ELRI") + theme_classic()
+
+ELVI_g <- ggplot() +
+  geom_histogram(data = post_growELVI, aes(`sigma_e[1]`), fill = "#ff7f00", alpha = .5, bins = 200) +
+  geom_histogram(data = post_growELVI, aes(`sigma_e[2]`), fill = "#6a3d9a", alpha = .5, bins = 200) +
+  labs(x = expression(sig__[year]), y = "", title = "ELVI") + theme_classic()
+
+FESU_g <- ggplot() +
+  geom_histogram(data = post_growFESU, aes(`sigma_e[1]`), fill = "#ff7f00", alpha = .5, bins = 200) +
+  geom_histogram(data = post_growFESU, aes(`sigma_e[2]`), fill = "#6a3d9a", alpha = .5, bins = 200) +
+  labs(x = expression(sig__[year]), y = "", title = "FESU") + theme_classic()
+
+LOAR_g <- ggplot() +
+  geom_histogram(data = post_growLOAR, aes(`sigma_e[1]`), fill = "#ff7f00", alpha = .5, bins = 200) +
+  geom_histogram(data = post_growLOAR, aes(`sigma_e[2]`), fill = "#6a3d9a", alpha = .5, bins = 200) +
+  labs(x = expression(sig__[year]), y = "", title = "LOAR") + theme_classic()
+
+POAL_g <- ggplot() +
+  geom_histogram(data = post_growPOAL, aes(`sigma_e[1]`), fill = "#ff7f00", alpha = .4, bins = 200) +
+  geom_histogram(data = post_growPOAL, aes(`sigma_e[2]`), fill = "#6a3d9a", alpha = .4, bins = 200) +
+  labs(x = expression(sig__[year]), y = "", title = "POAL") + theme_classic()
+
+POSY_g <- ggplot() +
+  geom_histogram(data = post_growPOSY, aes(`sigma_e[1]`), fill = "#ff7f00", alpha = .4, bins = 200) +
+  geom_histogram(data = post_growPOSY, aes(`sigma_e[2]`), fill = "#6a3d9a", alpha = .4, bins = 200) +
+  labs(x = expression(sig__[year]), y = "", title = "POSY") + theme_classic()
+
+
+# combining the individual histograms together with grid.arrange and adding labels
+survvar <- grid.arrange(AGPE_s, ELRI_s, ELVI_s, FESU_s, LOAR_s, POAL_s, POSY_s,  ncol= 1)
+titlesurv <- annotate_figure(survvar, top = "Survival", left = "")
+flwrvar <- grid.arrange(AGPE_f, ELRI_f, ELVI_f, FESU_f, LOAR_f, POAL_f, POSY_f, ncol= 1)
+titleflw <- annotate_figure(flwrvar, top = "Flowering", left = "")
+growvar <- grid.arrange(AGPE_g, ELRI_g, ELVI_g, FESU_g, LOAR_g, POAL_g, POSY_g,  ncol= 1)
+titlegrow <- annotate_figure(growvar, top = "Growth", left = "")
+
+var <- grid.arrange(titlesurv, titleflw, titlegrow, ncol = 3)
+titlevar <- annotate_figure(var, top = "Interannual Variance", left = "Posterior Density")
+```
+
+```{r variance histogram plots, echo=FALSE, fig.width = 9, fig.height = 12}
+# plotting the combined figure of all the variance estimates by species and by vital rate
+titlevar
+```
+
+
