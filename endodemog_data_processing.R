@@ -1886,7 +1886,7 @@ AGPErepro <- agpe_seedmerge_ssf %>%
 # View(AGPErepro)
 
 
-
+# I need to update the repro data from the endo_demog_long for the seed estimates. Right now, I have been using a separate flw data frame for the flw and fert model, and then the repro data for the seed means.
 
 ###### Bind together the different species repro datasets and merge with endo_demog_long
 LTREB_repro <- AGPErepro %>% 
@@ -1906,9 +1906,7 @@ LTREB_reprotem <- LTREB_repro %>%
 
 # View(LTREB_reprotem)
 
-table(is.na(LTREB_repro_tem$seed), LTREB_reprotem$year, LTREB_repro$species)
 table(LTREB_reprotem$year, is.na(LTREB_reprotem$mean_seed_per_tiller), LTREB_reprotem$species)
-table(LTREB_repro$year, is.na(LTREB_repro$mean_spike_per_tiller), LTREB_repro$species)
 
 
 
@@ -1930,7 +1928,7 @@ LTREB_repro1 <- LTREB_repro_t1 %>%
   select(-contains("variable")) 
 
 # View(LTREB_repro1)
-LTREB_temp <- merge(x = LTREB_data, y = LTREB_repro1, by.x = c("plot", "pos","id", "endo", "birth", "year_t1", "species"), by.y = c("plot", "pos","tag", "Endo", "Birth Year", "year_t", "species"))
+# LTREB_temp <- merge(x = LTREB_data, y = LTREB_repro1, by.x = c("plot", "pos","id", "endo", "birth", "year_t1", "species"), by.y = c("plot", "pos","tag", "Endo", "Birth Year", "year_t", "species"))
 
 
 
@@ -2071,7 +2069,7 @@ LTREB_tem_merge <- LTREB_tem_t1 %>%
 
 # View(LTREB_tem_merge)
 
-# Now I am going to merge this long data file with the flw tiller data from the other years
+# Now I am going to merge the endo_demog_long data file with the flw tiller data from the other years
 LTREB_f <- merge(x = LTREB_tem_merge, y = flw_tillermerge, by = c("plot", "pos", "tag", "species", "year_t", "year_t1", "Endo"), all = TRUE)
 
 LTREB_f$flw_t1<- ifelse(is.na(LTREB_f$flw_t1.x) & is.na(LTREB_f$flw_t1.y), NA, ifelse(!is.na(LTREB_f$flw_t1.x) & is.na(LTREB_f$flw_t1.y), LTREB_f$flw_t1.x, ifelse(is.na(LTREB_f$flw_t1.x) & !is.na(LTREB_f$flw_t1.y), LTREB_f$flw_t1.y, NA)))
@@ -2090,3 +2088,4 @@ LTREB_flw <- LTREB_f %>%
 table(LTREB_flw$species, LTREB_flw$year_t)
 table(LTREB_flw$flw_stat_t, LTREB_flw$year_t)
 table(LTREB_flw$flw_stat_t1, LTREB_flw$year_t1)
+
