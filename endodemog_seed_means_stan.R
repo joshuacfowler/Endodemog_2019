@@ -334,7 +334,7 @@ return(est)
 
 # calculate POAL seed estimate
 POAL_post <- as.data.frame(smPOAL)
-POAL_seed_est <- est_seed(post = POAL_post, data = POAL_seed_data) %>% 
+POAL_seed_est <- est_seed(post = POAL_post, data = POAL_seed_data)
   select(-seed_a, -seed_b, -seedperspike_est, -spikeperinf_est, -seed_norma, -seed_normb, -seed_normc)
 
 # calculate POSY seed estimate
@@ -389,7 +389,7 @@ ELVI_seed_est <- est_seed_Elymus(post = ELVI_post, data = ELVI_seed_data)%>%
 
 
 
-# Now I am going to merge the seed estimates for the different species into one dataframe.
+# Now I am going to merge the seed estimates for the different species into one dataframe. This will be merged with endo_demog_long for the seed to seedling transition rate.
 seed_est_data <- ELVI_seed_est %>% 
   merge(ELRI_seed_est, by = c("plot","tag", "species", "endo_01", "endo_index", "year", "year_index", "seedperspike", "seedperinf", "spikeperinf", "flw", "samplesize", "plot_index", "seed" ),all = TRUE) %>% 
   merge(AGPE_seed_est, by = c("plot","tag", "species", "endo_01", "endo_index", "year", "year_index", "seedperspike", "seedperinf", "spikeperinf", "flw", "samplesize", "plot_index", "seed" ),all = TRUE) %>% 
@@ -400,6 +400,41 @@ seed_est_data <- ELVI_seed_est %>%
   
 
 # View(seed_est_data)
+# getting a dataframe with seed_t and seed_t1
+seed_est_t1 <-seed_est_data %>%
+  filter(year!= min(year)) %>% 
+  rename(year_t1 = year, seed_t1 = seed, flw_t1 = flw) %>%  
+  mutate(year_t = year_t1 - 1) %>% 
+  select(-samplesize, -seedperinf, -seedperspike, -spikeperinf, -year_index)
+
+seed_est_t <- seed_est_data %>%
+  filter(year != max(year)) %>% 
+  rename(year_t = year, seed_t = seed, flw_t = flw) %>% 
+  mutate(year_t1 = year_t + 1) %>% 
+  select(-samplesize, -seedperinf, -seedperspike, -spikeperinf, -year_index)
+
+
+seed_estmerge <- seed_est_t1 %>% 
+  full_join(seed_est_t, by = c("plot", "tag", "endo_01", "endo_index", "year_t", "year_t1", "species", "plot_index"),
+            all.x = all, all.y = all)
 
 
 
+
+# I'm going to merge this with the main data frame
+LTREB_endodemog <-  read.csv(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Fulldataplusmetadata/endo_demog_long.csv")
+
+LTREB_data_seed_est <- LTREB_endodemog %>% 
+  rename(tag = id) %>% 
+  select(-seed_t, -seed_t1, -flw_t1) %>% 
+  merge(seed_estmerge, by = c("plot", "tag", "species", "year_t", "year_t1"), all = TRUE)
+# View(LTREB_data_seed_est)
+
+
+hist(AGPE_seed_est$seed)
+hist(ELVI_seed_est$seed)
+hist(ELRI_seed_est$seed)
+hist(LOAR_seed_est$seed)
+hist(POAL_seed_est$seed)
+hist(POSY_seed_est$seed)
+hist(FESU_seed_est$seed)
