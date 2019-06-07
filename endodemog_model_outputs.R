@@ -48,6 +48,14 @@ growELRI <- read_rds(path = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Ru
 growFESU <- read_rds(path = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_grow_FESU_withplot.rds")
 growAGPE <- read_rds(path = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_grow_AGPE_withplot.rds")
 
+## Read in the fertility model output for all species
+fertPOAL <- read_rds(path = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_fert_POAL_withplot.rds")
+fertPOSY <- read_rds(path = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_fert_POSY_withplot.rds")
+fertLOAR <- read_rds(path = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_fert_LOAR_withplot.rds")
+fertELVI <- read_rds(path = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_fert_ELVI_withplot.rds")
+fertELRI <- read_rds(path = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_fert_ELRI_withplot.rds")
+fertFESU <- read_rds(path = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_fert_FESU_withplot.rds")
+fertAGPE <- read_rds(path = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_fert_AGPE_withplot.rds")
 
 
 # save posteriors and within dataframes
@@ -76,4 +84,12 @@ post_growELVI <- as.data.frame(growELVI, pars = params)
 post_growELRI <- as.data.frame(growELRI, pars = params)
 post_growFESU <- as.data.frame(growFESU, pars = params)
 post_growAGPE <- as.data.frame(growAGPE, pars = params)
+
+post_fertPOAL <- as.data.frame(fertPOAL, pars = params)
+post_fertPOSY <- as.data.frame(fertPOSY, pars = params)
+post_fertLOAR <- as.data.frame(fertLOAR, pars = params)
+post_fertELVI <- as.data.frame(fertELVI, pars = params)
+post_fertELRI <- as.data.frame(fertELRI, pars = params)
+post_fertFESU <- as.data.frame(fertFESU, pars = params)
+post_fertAGPE <- as.data.frame(fertAGPE, pars = params)
 
