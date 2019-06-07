@@ -18,6 +18,10 @@ Visualizes output of endophyte effect on year variance from model outputs for Su
 source('endodemog_model_outputs.R')
 ```
 
+```{r raw data processing, include=FALSE}
+source('endodemog_data_processing.R')
+```
+
 ```{r colorpalletes, include = FALSE}
 #Looking at different color palettes
 # Classic palette BuPu, with 4 colors
@@ -47,117 +51,58 @@ colors2 <- c("#ff7f00","#6a3d9a") #"#ff7f00" = E-, "#e31a1c" = E+
 Plots of variance posteriors
 ```{r variance histogram gg objects, include=FALSE}
 # Variance posterior distributions by species
-
+variance_histogram <- function(df){
+  require(ggplot2)
+  spp <- ggplot() + 
+    geom_histogram(data = df, aes(`sigma_e[1]`), fill = "#ff7f00", alpha = .4, bins = 200) +
+    geom_histogram(data = df, aes(`sigma_e[2]`), fill = "#6a3d9a", alpha = .4, bins = 200) +
+    labs(x = expression(σ[year]), y = "Posterior density", title = "Variance Estimate") +             theme_classic()
+  return(spp)
+}
 # survival
-AGPE_s <- ggplot() +
-  geom_histogram(data = post_survAGPE, aes(`sigma_e[1]`), fill = "#ff7f00", alpha = .4, bins = 200) +
-  geom_histogram(data = post_survAGPE, aes(`sigma_e[2]`), fill = "#6a3d9a", alpha = .4, bins = 200) +
-  labs(x = expression(sig__[year]), y = "Posterior density", title = "Variance Estimate") + theme_classic()
+AGPE_s <- variance_histogram(post_survAGPE)
 
-ELRI_s <- ggplot() +
-  geom_histogram(data = post_survELRI, aes(`sigma_e[1]`), fill = "#ff7f00", alpha = .4, bins = 200) +
-  geom_histogram(data = post_survELRI, aes(`sigma_e[2]`), fill = "#6a3d9a", alpha = .4, bins = 200) +
-  labs(x = expression(sig__[year]), y = "Posterior density", title = "Variance Estimate") + theme_classic()
+ELRI_s <- variance_histogram(post_survELRI)
 
-ELVI_s <- ggplot() +
-  geom_histogram(data = post_survELVI, aes(`sigma_e[1]`), fill = "#ff7f00", alpha = .5, bins = 200) +
-  geom_histogram(data = post_survELVI, aes(`sigma_e[2]`), fill = "#6a3d9a", alpha = .5, bins = 200) +
-  labs(x = expression(sig__[year]), y = "Posterior density", title = "Variance Estimate") + theme_classic()
+ELVI_s <- variance_histogram(post_survELVI)
 
-FESU_s <- ggplot() +
-  geom_histogram(data = post_survFESU, aes(`sigma_e[1]`), fill = "#ff7f00", alpha = .5, bins = 200) +
-  geom_histogram(data = post_survFESU, aes(`sigma_e[2]`), fill = "#6a3d9a", alpha = .5, bins = 200) +
-  labs(x = expression(sig__[year]), y = "Posterior density", title = "Variance Estimate") + theme_classic()
+FESU_s <- variance_histogram(post_survFESU)
 
-LOAR_s <- ggplot() +
-  geom_histogram(data = post_survLOAR, aes(`sigma_e[1]`), fill = "#ff7f00", alpha = .5, bins = 200) +
-  geom_histogram(data = post_survLOAR, aes(`sigma_e[2]`), fill = "#6a3d9a", alpha = .5, bins = 200) +
-  labs(x = expression(sig__[year]), y = "Posterior density", title = "Variance Estimate") + theme_classic()
+LOAR_s <- variance_histogram(post_survLOAR)
 
-POAL_s <- ggplot() +
-  geom_histogram(data = post_survPOAL, aes(`sigma_e[1]`), fill = "#ff7f00", alpha = .4, bins = 200) +
-  geom_histogram(data = post_survPOAL, aes(`sigma_e[2]`), fill = "#6a3d9a", alpha = .4, bins = 200) +
-  labs(x = expression(sig__[year]), y = "Posterior density", title = "Variance Estimate") + theme_classic()
+POAL_s <- variance_histogram(post_survPOAL)
 
-
-POSY_s <- ggplot() +
-  geom_histogram(data = post_survPOSY, aes(`sigma_e[1]`), fill = "#ff7f00", alpha = .4, bins = 200) +
-  geom_histogram(data = post_survPOSY, aes(`sigma_e[2]`), fill = "#6a3d9a", alpha = .4, bins = 200) +
-  labs(x = expression(sig__[year]), y = "Posterior density", title = "Variance Estimate") + theme_classic()
-
+POSY_s <- variance_histogram(post_survPOSY)
 
 # flowering
-AGPE_f <- ggplot() +
-  geom_histogram(data = post_flwAGPE, aes(`sigma_e[1]`), fill = "#ff7f00", alpha = .4, bins = 200) +
-  geom_histogram(data = post_flwAGPE, aes(`sigma_e[2]`), fill = "#6a3d9a", alpha = .4, bins = 200) +
-  labs(x = expression(sig__[year]), y = "", title = "AGPE") + theme_classic()
+AGPE_f <- variance_histogram(post_flwAGPE)
 
-ELRI_f <- ggplot() +
-  geom_histogram(data = post_flwELRI, aes(`sigma_e[1]`), fill = "#ff7f00", alpha = .4, bins = 200) +
-  geom_histogram(data = post_flwELRI, aes(`sigma_e[2]`), fill = "#6a3d9a", alpha = .4, bins = 200) +
-  labs(x = expression(sig__[year]), y = "", title = "ELRI") + theme_classic()
+ELRI_f <- variance_histogram(post_flwELRI)
 
-ELVI_f <- ggplot() +
-  geom_histogram(data = post_flwELVI, aes(`sigma_e[1]`), fill = "#ff7f00", alpha = .5, bins = 200) +
-  geom_histogram(data = post_flwELVI, aes(`sigma_e[2]`), fill = "#6a3d9a", alpha = .5, bins = 200) +
-  labs(x = expression(sig__[year]), y = "", title = "ELVI") + theme_classic()
+ELVI_f <- variance_histogram(post_flwELVI)
 
-FESU_f <- ggplot() +
-  geom_histogram(data = post_flwFESU, aes(`sigma_e[1]`), fill = "#ff7f00", alpha = .5, bins = 200) +
-  geom_histogram(data = post_flwFESU, aes(`sigma_e[2]`), fill = "#6a3d9a", alpha = .5, bins = 200) +
-  labs(x = expression(sig__[year]), y = "", title = "FESU") + theme_classic()
+FESU_f <- variance_histogram(post_flwFESU)
 
-LOAR_f <- ggplot() +
-  geom_histogram(data = post_flwLOAR, aes(`sigma_e[1]`), fill = "#ff7f00", alpha = .5, bins = 200) +
-  geom_histogram(data = post_flwLOAR, aes(`sigma_e[2]`), fill = "#6a3d9a", alpha = .5, bins = 200) +
-  labs(x = expression(sig__[year]), y = "", title = "LOAR") + theme_classic()
+LOAR_f <- variance_histogram(post_flwLOAR)
 
-POAL_f <- ggplot() +
-  geom_histogram(data = post_flwPOAL, aes(`sigma_e[1]`), fill = "#ff7f00", alpha = .4, bins = 200) +
-  geom_histogram(data = post_flwPOAL, aes(`sigma_e[2]`), fill = "#6a3d9a", alpha = .4, bins = 200) +
-  labs(x = expression(sig__[year]), y = "", title = "POAL") + theme_classic()
+POAL_f <- variance_histogram(post_flwPOAL)
 
-POSY_f <- ggplot() +
-  geom_histogram(data = post_flwPOSY, aes(`sigma_e[1]`), fill = "#ff7f00", alpha = .4, bins = 200) +
-  geom_histogram(data = post_flwPOSY, aes(`sigma_e[2]`), fill = "#6a3d9a", alpha = .4, bins = 200) +
-  labs(x = expression(sig__[year]), y = "", title = "POSY") + theme_classic()
-
+POSY_f <- variance_histogram(post_flwPOSY)
 
 # growth
-AGPE_g <- ggplot() +
-  geom_histogram(data = post_growAGPE, aes(`sigma_e[1]`), fill = "#ff7f00", alpha = .4, bins = 200) +
-  geom_histogram(data = post_growAGPE, aes(`sigma_e[2]`), fill = "#6a3d9a", alpha = .4, bins = 200) +
-  labs(x = expression(sig__[year]), y = "", title = "AGPE") + theme_classic()
+AGPE_g <- variance_histogram(post_growAGPE)
 
-ELRI_g <- ggplot() +
-  geom_histogram(data = post_growELRI, aes(`sigma_e[1]`), fill = "#ff7f00", alpha = .4, bins = 200) +
-  geom_histogram(data = post_growELRI, aes(`sigma_e[2]`), fill = "#6a3d9a", alpha = .4, bins = 200) +
-  labs(x = expression(sig__[year]), y = "", title = "ELRI") + theme_classic()
+ELRI_g <- variance_histogram(post_growELRI)
 
-ELVI_g <- ggplot() +
-  geom_histogram(data = post_growELVI, aes(`sigma_e[1]`), fill = "#ff7f00", alpha = .5, bins = 200) +
-  geom_histogram(data = post_growELVI, aes(`sigma_e[2]`), fill = "#6a3d9a", alpha = .5, bins = 200) +
-  labs(x = expression(sig__[year]), y = "", title = "ELVI") + theme_classic()
+ELVI_g <- variance_histogram(post_growELVI)
 
-FESU_g <- ggplot() +
-  geom_histogram(data = post_growFESU, aes(`sigma_e[1]`), fill = "#ff7f00", alpha = .5, bins = 200) +
-  geom_histogram(data = post_growFESU, aes(`sigma_e[2]`), fill = "#6a3d9a", alpha = .5, bins = 200) +
-  labs(x = expression(sig__[year]), y = "", title = "FESU") + theme_classic()
+FESU_g <- variance_histogram(post_growFESU)
 
-LOAR_g <- ggplot() +
-  geom_histogram(data = post_growLOAR, aes(`sigma_e[1]`), fill = "#ff7f00", alpha = .5, bins = 200) +
-  geom_histogram(data = post_growLOAR, aes(`sigma_e[2]`), fill = "#6a3d9a", alpha = .5, bins = 200) +
-  labs(x = expression(sig__[year]), y = "", title = "LOAR") + theme_classic()
+LOAR_g <- variance_histogram(post_growLOAR)
 
-POAL_g <- ggplot() +
-  geom_histogram(data = post_growPOAL, aes(`sigma_e[1]`), fill = "#ff7f00", alpha = .4, bins = 200) +
-  geom_histogram(data = post_growPOAL, aes(`sigma_e[2]`), fill = "#6a3d9a", alpha = .4, bins = 200) +
-  labs(x = expression(sig__[year]), y = "", title = "POAL") + theme_classic()
+POAL_g <- variance_histogram(post_growPOAL)
 
-POSY_g <- ggplot() +
-  geom_histogram(data = post_growPOSY, aes(`sigma_e[1]`), fill = "#ff7f00", alpha = .4, bins = 200) +
-  geom_histogram(data = post_growPOSY, aes(`sigma_e[2]`), fill = "#6a3d9a", alpha = .4, bins = 200) +
-  labs(x = expression(sig__[year]), y = "", title = "POSY") + theme_classic()
+POSY_g <- variance_histogram(post_growPOSY)
 
 
 # combining the individual histograms together with grid.arrange and adding labels
@@ -174,7 +119,349 @@ titlevar <- annotate_figure(var, top = "Interannual Variance", left = "Posterior
 
 ```{r variance histogram plots, echo=FALSE, fig.width = 9, fig.height = 12}
 # plotting the combined figure of all the variance estimates by species and by vital rate
+# These historgrams can be used indivually as panels for figures with model fits.
 titlevar
 ```
 
+Plots of model fits with data
+```{r observed survival bins, include=FALSE}
+# Function to bin the observed survival data according to endophyte status and size classes for plotting against the fitted model
+surv_data_bins <- function(df_raw){
+  require(tidyverse)
+  surv_bin_minus <- df_raw %>% 
+    select(surv_t1, logsize_t, year_t, endo) %>%
+    mutate(endo = recode(endo, "0" = 0, "1" = 1, minus = 0, plus = 1)) %>% 
+    filter(endo == 0) %>% 
+    mutate(Year = as.factor(as.integer(as.factor(year_t)))) %>% 
+    mutate(size_bin = cut_interval(logsize_t, n = 15)) %>% 
+    group_by(size_bin, Year) %>% 
+    summarise(mean_size = mean((logsize_t),na.rm=T),
+            mean_surv = mean(surv_t1,na.rm=T),
+            samplesize = n())
+  
+  surv_bin_plus <- df_raw %>% 
+    select(surv_t1, logsize_t, year_t, endo) %>%
+    mutate(endo = recode(endo, "0" = 0, "1" = 1, minus = 0, plus = 1)) %>% 
+    filter(endo == 1) %>% 
+    mutate(Year = as.factor(as.integer(as.factor(year_t)))) %>% 
+    mutate(size_bin = cut_interval(logsize_t, n = 15)) %>% 
+    group_by(size_bin, Year) %>% 
+    summarise(mean_size = mean((logsize_t),na.rm=T),
+              mean_surv = mean(surv_t1,na.rm=T),
+              samplesize = n())
+
+  surv_bin_byyear <- df_raw %>% 
+    select(surv_t1, logsize_t, year_t, endo) %>%
+    mutate(endo = recode(endo, "0" = 0, "1" = 1, minus = 0, plus = 1)) %>% 
+    mutate(Year = as.factor(as.integer(as.factor(year_t)))) %>% 
+    mutate(size_bin = cut_interval(logsize_t, n = 15)) %>% 
+    group_by(size_bin, Year, endo) %>% 
+    summarise(mean_size = mean((logsize_t),na.rm=T),
+              mean_surv = mean(surv_t1,na.rm=T),
+              samplesize = n())
+  
+  surv_bin_mean <- df_raw %>% 
+    select(surv_t1, logsize_t, endo) %>%
+    mutate(endo = recode(endo, "0" = "E-", "1" = "E+", minus = "E-", plus = "E+")) %>% 
+    mutate(size_bin = cut_interval(logsize_t, n = 12)) %>% 
+    group_by(size_bin, endo) %>% 
+    summarise(mean_size = mean((logsize_t),na.rm=T),
+              mean_surv = mean(surv_t1,na.rm=T),
+              samplesize = n())
+  
+  surv_bins_list <- list(surv_bin_minus, surv_bin_plus, surv_bin_byyear, surv_bin_mean)
+  return(surv_bins_list)
+}
+
+AGPEsurv_bins <- surv_data_bins(AGPE_surv_data)
+
+ELRIsurv_bins <- surv_data_bins(ELRI_surv_data)
+
+ELVIsurv_bins <- surv_data_bins(ELVI_surv_data)
+
+FESUsurv_bins <- surv_data_bins(FESU_surv_data)
+
+LOARsurv_bins <- surv_data_bins(LOAR_surv_data)
+
+POALsurv_bins <- surv_data_bins(POAL_surv_data)
+
+POSYsurv_bins <- surv_data_bins(POSY_surv_data)
+```
+
+```{r observed flowering bins, include=FALSE}
+# Function to bin the observed flowering data according to endophyte status and size classes for plotting against the fitted model
+flw_data_bins <- function(df_raw){
+  require(tidyverse)
+  flw_bin_minus <- df_raw %>% 
+    select(flw_stat_t1, logsize_t, year_t, endo_01) %>%
+    filter(endo_01 == 0) %>% 
+    mutate(Year = as.factor(as.integer(as.factor(year_t)))) %>% 
+    mutate(size_bin = cut_interval(logsize_t, n = 15)) %>% 
+    group_by(size_bin, Year) %>% 
+    summarise(mean_size = mean((logsize_t),na.rm=T),
+              mean_flw = mean(flw_stat_t1,na.rm=T),
+              samplesize = n())
+
+  flw_bin_plus <- df_raw %>% 
+    select(flw_stat_t1, logsize_t, year_t, endo_01) %>%
+    filter(endo_01 == 1) %>% 
+    mutate(Year = as.factor(as.integer(as.factor(year_t)))) %>% 
+    mutate(size_bin = cut_interval(logsize_t, n = 15)) %>% 
+    group_by(size_bin, Year) %>% 
+    summarise(mean_size = mean((logsize_t),na.rm=T),
+              mean_flw = mean(flw_stat_t1,na.rm=T),
+              samplesize = n())
+  
+  flw_bin_byyear <- df_raw %>% 
+    select(flw_stat_t1, logsize_t, year_t, endo_01) %>%
+    mutate(Year = as.factor(as.integer(as.factor(year_t)))) %>% 
+    mutate(size_bin = cut_interval(logsize_t, n = 15)) %>% 
+    group_by(size_bin, Year, endo_01) %>% 
+    summarise(mean_size = mean((logsize_t),na.rm=T),
+              mean_flw = mean(flw_stat_t1,na.rm=T),
+              samplesize = n())
+
+
+  flw_binmean <- df_raw %>% 
+    select(flw_stat_t1, logsize_t, endo_01) %>%
+    mutate(endo_01 = recode(endo_01, "0" = "E-", "1" = "E+", minus = 'E-', plus = 'E+')) %>% 
+    mutate(size_bin = cut_interval(logsize_t, n = 12)) %>% 
+    group_by(size_bin, endo_01) %>% 
+    summarise(mean_size = mean((logsize_t),na.rm=T),
+              mean_flw = mean(flw_stat_t1,na.rm=T),
+              samplesize = n())
+  flw_bins_list <- list(flw_bin_minus, flw_bin_plus, flw_bin_byyear, flw_bin_mean)
+  return(flw_bins_list)
+}
+
+AGPEflw_bins <- flw_data_bins(AGPE_flw_data)
+
+ELRIflw_bins <- flw_data_bins(ELRI_flw_data)
+
+ELVIflw_bins <- flw_data_bins(ELVI_flw_data)
+
+FESUflw_bins <- flw_data_bins(FESU_flw_data)
+
+LOARflw_bins <- flw_data_bins(LOAR_flw_data)
+
+POALflw_bins <- flw_data_bins(POAL_flw_data)
+
+POSYflw_bins <- flw_data_bins(POSY_flw_data)
+```
+
+```{r observed growth bins, include=FALSE}
+# Function to bin the observed growth data according to endophyte status and size classes for plotting against the fitted model
+grow_data_bins <- function(df_raw){
+  require(tidyverse)
+  grow_bin_minus<- df_raw %>% 
+    select(size_t1, logsize_t, year_t, endo_01) %>%
+    filter(endo_01 == 0) %>% 
+    mutate(Year = as.factor(as.integer(as.factor(year_t)))) %>% 
+    mutate(size_bin = cut_interval(logsize_t, n = 15)) %>% 
+    group_by(size_bin, Year) %>% 
+    summarise(mean_size = mean((logsize_t),na.rm=T),
+              mean_grow = mean(size_t1,na.rm=T),
+              samplesize = n())
+  
+  grow_bin_plus <- df_raw %>% 
+    select(size_t1, logsize_t, year_t, endo_01) %>%
+    filter(endo_01 == 1) %>% 
+    mutate(Year = as.factor(as.integer(as.factor(year_t)))) %>% 
+    mutate(size_bin = cut_interval(logsize_t, n = 15)) %>% 
+    group_by(size_bin, Year) %>% 
+    summarise(mean_size = mean((logsize_t),na.rm=T),
+              mean_grow = mean(size_t1,na.rm=T),
+              samplesize = n())
+  
+  grow_bin_byyear <- df_raw %>% 
+    select(size_t1, logsize_t, year_t, endo_01) %>%
+    mutate(Year = as.factor(as.integer(as.factor(year_t)))) %>% 
+    mutate(size_bin = cut_interval(logsize_t, n = 15)) %>% 
+    group_by(size_bin, Year, endo_01) %>% 
+    summarise(mean_size = mean((logsize_t),na.rm=T),
+              mean_grow = mean(size_t1,na.rm=T),
+              samplesize = n())
+  
+  grow_binmean <- df_raw %>% 
+    select(size_t1, logsize_t, endo_01) %>%
+    mutate(endo_01 = as.character(endo_01)) %>% 
+    mutate(size_bin = cut_interval(logsize_t, n = 12)) %>% 
+    group_by(size_bin, endo_01) %>% 
+    summarise(mean_size = mean((logsize_t),na.rm=T),
+              mean_grow = mean(size_t1,na.rm=T),
+              samplesize = n())
+
+  grow_bins_list <- list(grow_bin_minus, grow_bin_plus, grow_bin_byyear, grow_binmean)
+  return(grow_bins_list)
+}
+
+AGPEgrow_bins <- grow_data_bins(AGPE_grow_data)
+
+ELRIgrow_bins <- grow_data_bins(ELRI_grow_data)
+
+ELVIgrow_bins <- grow_data_bins(ELVI_grow_data)
+
+FESUgrow_bins <- grow_data_bins(FESU_grow_data)
+
+LOARgrow_bins <- grow_data_bins(LOAR_grow_data)
+
+POALgrow_bins <- grow_data_bins(POAL_grow_data)
+
+POSYgrow_bins <- grow_data_bins(POSY_grow_data)
+```
+
+
+```{r observed fertility bins, include=FALSE}
+# Function to bin the observed growth data according to endophyte status and size classes for plotting against the fitted model
+fert_data_bins <- function(df_raw){
+  require(tidyverse)
+  fert_bin_minus<- df_raw %>% 
+    select(flw_t, logsize_t, year_t, endo_01) %>%
+    filter(endo_01 == 0) %>% 
+    mutate(Year = as.factor(as.integer(as.factor(year_t)))) %>% 
+    mutate(size_bin = cut_interval(logsize_t, n = 15)) %>% 
+    group_by(size_bin, Year) %>% 
+    summarise(mean_size = mean((logsize_t),na.rm=T),
+              mean_fert = mean(flw_t,na.rm=T),
+              samplesize = n())
+  
+  fert_bin_plus <- df_raw %>% 
+    select(flw_t, logsize_t, year_t, endo_01) %>%
+    filter(endo_01 == 1) %>% 
+    mutate(Year = as.factor(as.integer(as.factor(year_t)))) %>% 
+    mutate(size_bin = cut_interval(logsize_t, n = 15)) %>% 
+    group_by(size_bin, Year) %>% 
+    summarise(mean_size = mean((logsize_t),na.rm=T),
+              mean_fert = mean(flw_t,na.rm=T),
+              samplesize = n())
+  
+  fert_bin_byyear <- df_raw %>% 
+    select(flw_t, logsize_t, year_t, endo_01) %>%
+    mutate(Year = as.factor(as.integer(as.factor(year_t)))) %>% 
+    mutate(size_bin = cut_interval(logsize_t, n = 15)) %>% 
+    group_by(size_bin, Year, endo_01) %>% 
+    summarise(mean_size = mean((logsize_t),na.rm=T),
+              mean_fert = mean(flw_t,na.rm=T),
+              samplesize = n())
+  
+  fert_binmean <- df_raw %>% 
+    select(flw_t, logsize_t, endo_01) %>%
+    mutate(endo_01 = as.character(endo_01)) %>% 
+    mutate(size_bin = cut_interval(logsize_t, n = 12)) %>% 
+    group_by(size_bin, endo_01) %>% 
+    summarise(mean_size = mean((logsize_t),na.rm=T),
+              mean_fert = mean(flw_t,na.rm=T),
+              samplesize = n())
+
+  fert_bins_list <- list(fert_bin_minus, fert_bin_plus, fert_bin_byyear, fert_binmean)
+  return(fert_bins_list)
+}
+
+AGPEfert_bins <- fert_data_bins(AGPE_fert_data)
+
+ELRIfert_bins <- fert_data_bins(ELRI_fert_data)
+
+ELVIfert_bins <- fert_data_bins(ELVI_fert_data)
+
+FESUfert_bins <- fert_data_bins(FESU_fert_data)
+
+LOARfert_bins <- fert_data_bins(LOAR_fert_data)
+
+POALfert_bins <- fert_data_bins(POAL_fert_data)
+
+POSYfert_bins <- fert_data_bins(POSY_fert_data)
+```
+
+
+
+```{r survival fits, include=FALSE}
+# function to generate the mean, and year and plot specific survival model fits and store for plotting
+surv_fits <- function(df_raw, df_samples){
+  require(tidyverse)
+
+  nvalues <- length(df_raw$logsize_t)
+  xdummy <- seq(min(df_raw$logsize_t), max(df_raw$logsize_t), length.out = nvalues)
+
+  #endophyte negative fits  
+  ydummy_eminus <- as.vector(invlogit(mean(df_samples["beta[1]"]) + mean(df_samples["beta[2]"])*xdummy + mean(df_samples["beta[3]"])*0 + mean(df_samples["beta[4]"])*mean(df_raw$origin_01) + mean(df_samples["beta[5]"])*xdummy*0))
+  ydummy_eminus_y1 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*0 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*0 + mean(df_samples$'tau_year[1,1]')))
+  ydummy_eminus_y2 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*0 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*0 + mean(df_samples$'tau_year[1,2]')))
+  ydummy_eminus_y3 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + + mean(df_samples$'beta[3]')*0  + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*0 + mean(df_samples$'tau_year[1,3]')))
+  ydummy_eminus_y4 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*0 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*0 + mean(df_samples$'tau_year[1,4]'))) 
+  ydummy_eminus_y5 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*0 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*0 + mean(df_samples$'tau_year[1,5]')))
+  ydummy_eminus_y6 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*0 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*0 + mean(df_samples$'tau_year[1,6]')))
+  ydummy_eminus_y7 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*0 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*0 + mean(df_samples$'tau_year[1,7]')))
+  ydummy_eminus_y8 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*0 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*0 + mean(df_samples$'tau_year[1,8]')))
+  ydummy_eminus_y9 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*0 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*0 + mean(df_samples$'tau_year[1,9]')))
+  ydummy_eminus_y10 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*0 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*0 + mean(df_samples$'tau_year[1,10]')))
+  ydummy_eminus_y11 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*0 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*0 + mean(df_samples$'tau_year[1,11]')))
+  
+  # endophyte positive fits
+  ydummy_eplus <- as.vector(invlogit(mean(df_samples["beta[1]"]) + mean(df_samples["beta[2]"])*xdummy + mean(df_samples["beta[3]"])*1 + mean(df_samples["beta[4]"])*mean(df_raw$origin_11) + mean(df_samples["beta[5]"])*xdummy*1))
+  ydummy_eplus_y1 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_11) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[1,1]')))
+  ydummy_eplus_y2 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_11) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[1,2]')))
+  ydummy_eplus_y3 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + + mean(df_samples$'beta[3]')*1  + mean(df_samples$'beta[4]')*mean(df_raw$origin_11) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[1,3]')))
+  ydummy_eplus_y4 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_11) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[1,4]'))) 
+  ydummy_eplus_y5 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_11) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[1,5]')))
+  ydummy_eplus_y6 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_11) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[1,6]')))
+  ydummy_eplus_y7 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_11) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[1,7]')))
+  ydummy_eplus_y8 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_11) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[1,8]')))
+  ydummy_eplus_y9 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_11) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[1,9]')))
+  ydummy_eplus_y11 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_11) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[1,11]')))
+  ydummy_eplus_y11 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_11) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[1,11]')))
+  eminus_fits_list <- list(ydummy_eminus, ydummy_eminus_y1, ydummy_eminus_y2, ydummy_eminus_y3, ydummy_eminus_y4, ydummy_eminus_y5, ydummy_eminus_y6, ydummy_eminus_y7, ydummy_eminus_y8, ydummy_eminus_y9, ydummy_eminus_y10, ydummy_eminus_y11)
+  eplus_fits_list <- list(ydummy_eplus, ydummy_eplus_y1, ydummy_eplus_y2, ydummy_eplus_y3, ydummy_eplus_y4, ydummy_eplus_y5, ydummy_eplus_y6, ydummy_eplus_y7, ydummy_eplus_y8, ydummy_eplus_y9, ydummy_eplus_y10, ydummy_eplus_y11)
+  surv_fits_list <- list(eminus_fits_list, eplus_fits_list)
+  return(surv_fits_list)
+}
+
+AGPEsurv_fits <- surv_fits(AGPE_surv_data, post_survAGPE)
+
+ELRIsurv_fits <- surv_fits(ELRI_surv_data, post_survELRI)
+
+ELVIsurv_fits <- surv_fits(ELVI_surv_data, post_survELVI)
+
+FESUsurv_fits <- surv_fits(FESU_surv_data, post_survFESU)
+
+LOARsurv_fits <- surv_fits(LOAR_surv_data, post_survLOAR)
+
+POALsurv_fits <- surv_fits(POAL_surv_data, post_survPOAL)
+
+POSYsurv_fits <- surv_fits(POSY_surv_data, post_survPOAL)
+
+```
+
+```{r flowering fits, include=FALSE}
+# function to generate the mean, and year and plot specific flowering model fits and store for plotting
+flw_fits <- function(df_raw, df_samples){
+  require(tidyverse)
+
+  nvalues <- length(df_raw$logsize_t)
+  xdummy <- seq(min(df_raw$logsize_t), max(df_raw$logsize_t), length.out = nvalues)
+
+
+}
+```
+```{r growth fits, include=FALSE}
+# function to generate the mean, and year and plot specific growth model fits and store for plotting
+grow_fits <- function(df_raw, df_samples){
+  require(tidyverse)
+
+  nvalues <- length(df_raw$logsize_t)
+  xdummy <- seq(min(df_raw$logsize_t), max(df_raw$logsize_t), length.out = nvalues)
+
+
+}
+```
+```{r fertility fits, include=FALSE}
+# function to generate the mean, and year and plot specific fertility model fits and store for plotting
+fert_fits <- function(df_raw, df_samples){
+  require(tidyverse)
+  
+  nvalues <- length(df_raw$logsize_t)
+  xdummy <- seq(min(df_raw$logsize_t), max(df_raw$logsize_t), length.out = nvalues)
+
+
+}
+```
 
