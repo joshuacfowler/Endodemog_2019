@@ -18,7 +18,7 @@ logit = function(x) { log(x/(1-x)) }
 #############################################################################################
 ## Load in full data frame
 LTREB_endodemog <-read.csv(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Fulldataplusmetadata/endo_demog_long.csv")
-
+LTREB_endodemog <- LTREB_data_seed_est
 
 #"C:/Users/MillerLab/Desktop/Endodemog-master/endo_demog_long.csv"
 #"/Users/joshuacfowler/Dropbox/EndodemogData/Fulldataplusmetadata/endo_demog_long.csv")
@@ -32,6 +32,7 @@ LTREB_data <- LTREB_endodemog %>%
   mutate(surv_t1 = as.integer(recode(surv_t1, "0" = 0, "1" =1, "2" = 1, "4" = 1))) %>% 
   mutate(endo_01 = as.integer(case_when(endo == "0" | endo == "minus" ~ 0,
                                         endo == "1"| endo =="plus" ~ 1))) %>% 
+  filter(!is.na(endo_01)) %>% 
   mutate(endo_index = as.integer(as.factor(endo_01+1)))  %>% 
   mutate(species_index = as.integer(recode_factor(species,                   
                                                   "AGPE" = 1, "ELRI" = 2, "ELVI" = 3, 
@@ -59,33 +60,41 @@ LTREB_data1 <- LTREB_data %>%
   group_by(species, plot_fixed, year_t, year_t_index, year_t1, year_t1_index, endo_01, endo_index) %>% 
   summarize(tot_seed_t = as.integer(round(sum(seed_t, na.rm = TRUE))),
             tot_recruit_t1 = length((origin_01 == "1"& year_t == birth)),
-            samplesize = n()) 
+            samplesize = n()) %>% 
+  filter(tot_seed_t>tot_recruit_t1)
 
 dim(LTREB_data1)
-View(LTREB_data1)
+# View(LTREB_data1)
 
 #########################################################################################################
 # Split up the main dataframe by species and recode plot to be used as an index for each species
 AGPE_data <- LTREB_data1 %>% 
   filter(species == "AGPE") %>% 
+  mutate(year_t_index_new = case_when(year_t_index ==2~1, year_t_index ==3~2, year_t_index ==4~3, year_t_index ==5~4, year_t_index ==6~5, year_t_index ==7~6, year_t_index ==8~7, year_t_index ==9~8)) %>% 
   mutate(plot_index = case_when(plot_fixed == 111 ~ 1, plot_fixed ==112 ~2, plot_fixed ==113 ~ 3, plot_fixed ==114 ~ 4, plot_fixed ==115 ~ 5,plot_fixed == 116 ~ 6, plot_fixed ==117~ 7, plot_fixed ==118 ~ 8, plot_fixed ==119 ~ 9,plot_fixed == 120 ~ 10))
 ELRI_data <- LTREB_data1 %>% 
   filter(species == "ELRI") %>% 
+  mutate(year_t_index_new = case_when(year_t_index ==2~1, year_t_index ==3~2, year_t_index ==4~3, year_t_index ==5~4, year_t_index ==6~5, year_t_index ==7~6, year_t_index ==8~7, year_t_index ==9~8)) %>% 
   mutate(plot_index = case_when(plot_fixed == 101 ~ 1, plot_fixed ==102 ~2, plot_fixed ==103 ~ 3, plot_fixed ==104 ~ 4, plot_fixed ==105 ~ 5,plot_fixed == 106 ~ 6, plot_fixed ==107~ 7, plot_fixed ==108 ~ 8, plot_fixed ==109 ~ 9,plot_fixed == 110 ~ 10)) 
 ELVI_data <- LTREB_data1 %>% 
   filter(species == "ELVI") %>% 
+  mutate(year_t_index_new = case_when(year_t_index ==3~1, year_t_index ==4~2, year_t_index ==5~3, year_t_index ==6~4, year_t_index ==7~5, year_t_index ==8~6, year_t_index ==9~7)) %>% 
   mutate(plot_index = case_when(plot_fixed == 91 ~ 1, plot_fixed ==92 ~2, plot_fixed ==93 ~ 3, plot_fixed ==94 ~ 4, plot_fixed ==95 ~ 5,plot_fixed == 96 ~ 6, plot_fixed ==97~ 7, plot_fixed ==98 ~ 8, plot_fixed ==99 ~ 9,plot_fixed == 100 ~ 10, plot_fixed == 101 ~ 11))
 FESU_data <- LTREB_data1 %>% 
   filter(species == "FESU") %>% 
+  mutate(year_t_index_new = case_when(year_t_index ==3~1, year_t_index ==4~2, year_t_index ==5~3, year_t_index ==6~4, year_t_index ==7~5, year_t_index ==8~6, year_t_index ==9~7)) %>% 
   mutate(plot_index = case_when(plot_fixed == 121 ~ 1, plot_fixed ==122 ~2, plot_fixed ==123 ~ 3, plot_fixed ==124 ~ 4, plot_fixed ==125 ~ 5,plot_fixed == 126 ~ 6, plot_fixed ==127~ 7, plot_fixed ==128 ~ 8, plot_fixed ==129 ~ 9,plot_fixed == 130 ~ 10)) 
 LOAR_data <- LTREB_data1 %>% 
   filter(species == "LOAR") %>% 
+  mutate(year_t_index_new = case_when(year_t_index ==2~1, year_t_index ==3~2, year_t_index ==4~3, year_t_index ==5~4, year_t_index ==6~5, year_t_index ==7~6, year_t_index ==8~7, year_t_index ==9~8)) %>% 
   mutate(plot_index = case_when(plot_fixed == 31 ~ 1, plot_fixed ==32 ~2, plot_fixed ==33 ~ 3, plot_fixed ==34 ~ 4, plot_fixed ==35 ~ 5,plot_fixed == 36 ~ 6, plot_fixed ==37~ 7, plot_fixed ==38 ~ 8, plot_fixed ==39 ~ 9,plot_fixed == 40 ~ 10, plot_fixed == 41 ~11,  plot_fixed == 42 ~12, plot_fixed == 43 ~13, plot_fixed == 44 ~14,)) 
 POAL_data <- LTREB_data1 %>% 
   filter(species == "POAL") %>% 
+  mutate(year_t_index_new = case_when(year_t_index ==2~1, year_t_index ==3~2, year_t_index ==4~3, year_t_index ==5~4, year_t_index ==6~5, year_t_index ==7~6, year_t_index ==8~7, year_t_index ==9~8)) %>% 
   mutate(plot_index = case_when(plot_fixed == 3 ~ 1, plot_fixed ==4 ~2, plot_fixed ==8 ~ 3, plot_fixed ==9 ~ 4, plot_fixed ==10 ~ 5,plot_fixed == 11 ~ 6, plot_fixed ==15~ 7, plot_fixed ==16~ 8, plot_fixed ==17~ 9, plot_fixed ==151 ~ 10, plot_fixed ==152 ~ 11,plot_fixed == 153 ~ 12, plot_fixed == 154 ~13,  plot_fixed == 155 ~14, plot_fixed == 156 ~15, plot_fixed == 157 ~16,plot_fixed == 158 ~17, plot_fixed == 19 ~18, )) 
 POSY_data <- LTREB_data1 %>% 
   filter(species == "POSY") %>% 
+  mutate(year_t_index_new = case_when(year_t_index ==2~1, year_t_index ==3~2, year_t_index ==4~3, year_t_index ==5~4, year_t_index ==6~5, year_t_index ==7~6, year_t_index ==8~7, year_t_index ==9~8)) %>% 
   mutate(plot_index = case_when(plot_fixed == 1 ~ 1, plot_fixed ==2 ~2, plot_fixed ==5 ~ 3, plot_fixed ==6 ~ 4, plot_fixed ==7 ~ 5,plot_fixed == 12 ~ 6, plot_fixed ==13~ 7, plot_fixed ==14 ~ 8, plot_fixed ==18 ~ 9,plot_fixed == 20 ~ 10, plot_fixed == 141 ~ 11, plot_fixed == 142 ~12,  plot_fixed == 143 ~13, plot_fixed == 144 ~14, plot_fixed == 145 ~15,plot_fixed == 146 ~16,plot_fixed == 147 ~17,plot_fixed == 148 ~18,plot_fixed == 149 ~19,plot_fixed == 150 ~20,))
 
 
@@ -95,7 +104,7 @@ AGPE_s_to_s_data_list <- list(tot_recruit_t1 = AGPE_data$tot_recruit_t1,
                             tot_seed_t = AGPE_data$tot_seed_t,
                             endo_01 = AGPE_data$endo_01,
                             endo_index = AGPE_data$endo_index,
-                            year_t = AGPE_data$year_t_index,
+                            year_t = AGPE_data$year_t_index_new,
                             plot = AGPE_data$plot_index,
                             N = nrow(AGPE_data),
                             K = 3L,
@@ -109,7 +118,7 @@ ELRI_s_to_s_data_list <- list(tot_recruit_t1 = ELRI_data$tot_recruit_t1,
                             tot_seed_t = ELRI_data$tot_seed_t,
                             endo_01 = ELRI_data$endo_01,
                             endo_index = ELRI_data$endo_index,
-                            year_t = ELRI_data$year_t_index,
+                            year_t = ELRI_data$year_t_index_new,
                             plot = ELRI_data$plot_index,
                             N = nrow(ELRI_data),
                             K = 3L,
@@ -123,7 +132,7 @@ ELVI_s_to_s_data_list <- list(tot_recruit_t1 = ELVI_data$tot_recruit_t1,
                             tot_seed_t = ELVI_data$tot_seed_t,
                             endo_01 = ELVI_data$endo_01,
                             endo_index = ELVI_data$endo_index,
-                            year_t = ELVI_data$year_t_index,
+                            year_t = ELVI_data$year_t_index_new,
                             plot = ELVI_data$plot_index,
                             N = nrow(ELVI_data),
                             K = 3L,
@@ -137,7 +146,7 @@ FESU_s_to_s_data_list <- list(tot_recruit_t1 = FESU_data$tot_recruit_t1,
                               tot_seed_t = FESU_data$tot_seed_t,
                             endo_01 = FESU_data$endo_01,
                             endo_index = FESU_data$endo_index,
-                            year_t = FESU_data$year_t_index,
+                            year_t = FESU_data$year_t_index_new,
                             plot = FESU_data$plot_index,
                             N = nrow(FESU_data),
                             K = 3L,
@@ -151,7 +160,7 @@ LOAR_s_to_s_data_list <- list(tot_recruit_t1 = LOAR_data$tot_recruit_t1,
                               tot_seed_t = LOAR_data$tot_seed_t,
                             endo_01 = LOAR_data$endo_01,
                             endo_index = LOAR_data$endo_index,
-                            year_t = LOAR_data$year_t_index,
+                            year_t = LOAR_data$year_t_index_new,
                             plot = LOAR_data$plot_index,
                             N = nrow(LOAR_data),
                             K = 3L,
@@ -165,7 +174,7 @@ POAL_s_to_s_data_list <- list(tot_recruit_t1 = POAL_data$tot_recruit_t1,
                               tot_seed_t = POAL_data$tot_seed_t,
                             endo_01 = POAL_data$endo_01,
                             endo_index = POAL_data$endo_index,
-                            year_t = POAL_data$year_t_index,
+                            year_t = POAL_data$year_t_index_new,
                             plot = POAL_data$plot_index,
                             N = nrow(POAL_data),
                             K = 3L,
@@ -179,7 +188,7 @@ POSY_s_to_s_data_list <- list(tot_recruit_t1 = POSY_data$tot_recruit_t1,
                               tot_seed_t = POSY_data$tot_seed_t,
                             endo_01 = POSY_data$endo_01,
                             endo_index = POSY_data$endo_index,
-                            year_t = POSY_data$year_t_index,
+                            year_t = POSY_data$year_t_index_new,
                             plot = POSY_data$plot_index,
                             N = nrow(POSY_data),
                             K = 3L,
@@ -198,9 +207,9 @@ rstan_options(auto_write = TRUE)
 options(mc.cores = parallel::detectCores())
 set.seed(123)
 ## MCMC settings
-ni <- 100
-nb <- 50
-nc <- 1
+ni <- 2000
+nb <- 1000
+nc <- 3
 
 # Stan model -------------
 ## here is the Stan model
