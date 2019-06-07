@@ -406,6 +406,78 @@ smAGPE <- readRDS(file = "model_run_MAR7/endodemog_surv_AGPE_withplot.rds")
 smFESUwithplot <- readRDS(file = "model_run_MAR7/endodemog_surv_FESU_withplot.rds")
 
 
+# A stan model to generate replicated data and calculate residuals
+
+sink("endodemog_surv_for_ppc.stan")
+cat("
+    data { 
+    int<lower=0> N;                       // number of observations
+    int<lower=0> K;                       // number of predictors
+    int<lower=0> nYear;                       // number of years
+    int<lower=0, upper=11> year_t[N];         // year of observation
+    int<lower=0> nEndo;                       // number of endo treatments
+    int<lower=1, upper=2> endo_index[N];          // index for endophyte effect
+    int<lower=0> nPlot;                         // number of plots
+    int<lower=0> plot[N];                   // plot of observation
+    vector<lower=0>[N] logsize_t;             // plant size at time t (predictor)
+    int<lower=0,upper=1> endo_01[N];            // plant endophyte status (predictor)
+    int<lower=0,upper=1> origin_01[N];          // plant origin status (predictor)
+    int<lower=0> N_samples;
+    vector[K] beta[N_samples];                     // predictor parameters
+
+    }
+
+    parameters {
+    }
+    
+    model {
+ 
+    }
+    
+    generated quantities{
+    matrix[N,N_samples] mu;
+    matrix[N,N_samples] y_rep;
+      for(n in 1:N){
+      for(i in 1:N_samples){
+      mu[n,i] = beta[i,1] + beta[i,2]*logsize_t[n] + beta[i,3]*endo_01[n] +beta[i,4]*origin_01[n]
+      + beta[i,5]*logsize_t[n]*endo_01[n]; 
+      
+      y_rep[n,i] = bernoulli_logit_rng(mu[n,i]);
+      }}
+    }
+    ", fill = T)
+sink()
+
+stanmodel <- stanc("endodemog_surv_for_ppc.stan")
+
+
+POALpost <- extract(smPOAL, pars = params)
+
+POAL_surv_list_pred <- list(surv_t1 = POAL_data$surv_t1,
+                              Xs = POAL_Xs,
+                              logsize_t = POAL_data$logsize_t,
+                              origin_01 = POAL_data$origin_01,
+                              endo_01 = POAL_data$endo_01,
+                              endo_index = POAL_data$endo_index,
+                              year_t = POAL_data$year_t_index,
+                              plot = POAL_data$plot_index,
+                              N = nrow(POAL_data),
+                              K = ncol(POAL_Xs),
+                              nYear = length(unique(POAL_data$year_t_index)),
+                              nPlot = length(unique(POAL_data$plot_index)),
+                              nEndo =   length(unique(POAL_data$endo_01)),
+                              beta = POALpost$beta,       
+                              tau_year = POALpost$tau_year,
+                              sigma_e = POALpost$sigma_e,
+                              tau_plot = POALpost$tau_plot,
+                              sigma_p = POALpost$tau_plot,
+                            N_samples = length(POALpost$beta[,1])
+                            )
+pred <- stan(file = "endodemog_surv_for_ppc.stan",
+             data = POAL_surv_list_pred,
+             chains = 1, iter = 100,
+             algorithm = "Fixed_param")
+
 #########################################################################################################
 ###### Perform posterior predictive checks and assess model convergence-------------------------
 #########################################################################################################
