@@ -355,23 +355,23 @@ stanmodel <- stanc("endodemog_fert.stan")
 
 smAGPE<- stan(file = "endodemog_fert.stan", data = AGPE_fert_data_list,
               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-# saveRDS(smAGPE, file = "endodemog_fert_AGPE.rds")
+# saveRDS(smAGPE, file = "endodemog_fert_AGPE_withplot.rds")
 
 smELRI <- stan(file = "endodemog_fert.stan", data = ELRI_fert_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-# saveRDS(smELRI, file = "endodemog_fert_ELRI.rds")
+# saveRDS(smELRI, file = "endodemog_fert_ELRI_withplot.rds")
 
 smELVI <- stan(file = "endodemog_fert.stan", data = ELVI_fert_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-# saveRDS(smELVI, file = "endodemog_fert_ELVI.rds")
+# saveRDS(smELVI, file = "endodemog_fert_ELVI_withplot.rds")
 
 smFESU <- stan(file = "endodemog_fert.stan", data = FESU_fert_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-# saveRDS(smFESU, file = "endodemog_fert_FESU.rds")
+# saveRDS(smFESU, file = "endodemog_fert_FESU_withplot.rds")
 
 smLOAR <- stan(file = "endodemog_fert.stan", data = LOAR_fert_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-# saveRDS(smLOAR, file = "endodemog_fert_LOAR.rds")
+# saveRDS(smLOAR, file = "endodemog_fert_LOAR_withplot.rds")
 
 smPOAL <- stan(file = "endodemog_fert.stan", data = POAL_fert_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
