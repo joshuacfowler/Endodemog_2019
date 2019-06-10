@@ -104,6 +104,22 @@ POAL_g <- variance_histogram(post_growPOAL)
 
 POSY_g <- variance_histogram(post_growPOSY)
 
+# fertility
+
+AGPE_fert <- variance_histogram(post_fertAGPE)
+
+ELRI_fert <- variance_histogram(post_fertELRI)
+
+ELVI_fert <- variance_histogram(post_fertELVI)
+
+FESU_fert <- variance_histogram(post_fertFESU)
+
+LOAR_fert <- variance_histogram(post_fertLOAR)
+
+POAL_fert <- variance_histogram(post_fertPOAL)
+
+POSY_fert <- variance_histogram(post_fertPOSY)
+
 
 # combining the individual histograms together with grid.arrange and adding labels
 survvar <- grid.arrange(AGPE_s, ELRI_s, ELVI_s, FESU_s, LOAR_s, POAL_s, POSY_s,  ncol= 1)
@@ -112,8 +128,10 @@ flwrvar <- grid.arrange(AGPE_f, ELRI_f, ELVI_f, FESU_f, LOAR_f, POAL_f, POSY_f, 
 titleflw <- annotate_figure(flwrvar, top = "Flowering", left = "")
 growvar <- grid.arrange(AGPE_g, ELRI_g, ELVI_g, FESU_g, LOAR_g, POAL_g, POSY_g,  ncol= 1)
 titlegrow <- annotate_figure(growvar, top = "Growth", left = "")
+fertvar <- grid.arrange(AGPE_fert, ELRI_fert, ELVI_fert, FESU_fert, LOAR_fert, POAL_fert, POSY_fert,  ncol= 1)
+titlefert <- annotate_figure(fertvar, top = "Fertility", left = "")
 
-var <- grid.arrange(titlesurv, titleflw, titlegrow, ncol = 3)
+var <- grid.arrange(titlesurv, titlegrow, titleflw, titlefert, ncol = 4)
 titlevar <- annotate_figure(var, top = "Interannual Variance", left = "Posterior Density")
 ```
 
