@@ -1936,7 +1936,7 @@ LTREB_repro <- AGPErepro %>%
 # An example of the latter would be POAL plot 3, tag 41, in year 2013, where the note marks that this tiller was skipped.
 
 LTREB_repro_flw_spike_mismatches <- LTREB_repro %>% 
-  filter(flw==0 & spikelets>0)
+  filter(flw==0 & spikelets>0 | flw > 0 & is.na(spikelets))
 
 ###########################################################################################################################################################################
 ###### Calculating mean seed and spikelet information and merging with LTREB_data to generate seed estimate with endodemog_seed_means_stan.R-----------------
@@ -1944,7 +1944,8 @@ LTREB_repro_flw_spike_mismatches <- LTREB_repro %>%
 LTREB_repro1 <- LTREB_repro %>% 
   rename(endo = Endo) %>% 
   mutate(endo_01 = as.integer(case_when(endo == "0" | endo == "minus" ~ 0,
-                                        endo == "1"| endo =="plus" ~ 1)))
+                                        endo == "1"| endo =="plus" ~ 1))) %>% 
+  mutate(`birth` = as.integer(`Birth Year`))
 
 # Summarizing mean seed/spikelet, mean seed/inflorescence (for Elymus species only), and mean spikelets/inflorescence
 LTREB_repro2 <- LTREB_repro1 %>%
@@ -1956,7 +1957,7 @@ LTREB_repro2 <- LTREB_repro1 %>%
   mutate(seedperinf = case_when(species == "ELVI" | species == "ELRI" ~ seed,
                                 species == "POAL" | species == "POSY" | species == "FESU" | species == "LOAR" ~ NA_real_,
                                 species == "AGPE"~ NA_real_)) %>% 
-  group_by(plot, pos, tag, species, endo_01, `Birth Year`, year, flw) %>% 
+  group_by(plot, pos, tag, species, endo_01, birth, year, flw) %>% 
   summarize(seedperspike = mean(seedperspike, na.rm = TRUE),
             seedperinf = mean(seedperinf, na.rm = TRUE),
             spikeperinf = mean(spikelets,na.rm = TRUE), 
@@ -1970,6 +1971,8 @@ table(!is.na(LTREB_repro2$flw),!is.na(LTREB_repro2$spikeperinf))
 LTREB_repro3 <- ungroup(LTREB_repro2) #sets the groups so that we can filter the resulting dataframe
 
 ## getting a dataframe with time t and t_1
+
+# I can source in the seed_means script, which currently generates a similar t and t1 file with seed estimates, and then merge that here with LTREB_endodemog_long
 LTREB_repro_t1 <-LTREB_repro3 %>%
   filter(year!= min(year)) %>% 
   rename(year_t1 = year, flwtillerno_t1 = flw, spikeperinfl_t1 = spikeperinf, 
@@ -1983,13 +1986,13 @@ LTREB_repro_t <- LTREB_repro3 %>%
   mutate(year_t1 = year_t + 1)
 
 LTREB_repro_t_t1 <- LTREB_repro_t1 %>% 
-  full_join(LTREB_repro_t, by = c("plot", "pos", "tag", "endo_01", "Birth Year", "year_t", "year_t1", "species"),
+  full_join(LTREB_repro_t, by = c("plot", "pos", "tag", "endo_01", "birth", "year_t", "year_t1", "species"),
             all.x = all, all.y = all) 
 
 # View(LTREB_repro_t_t1)
 
 test <- LTREB_repro_t_t1 %>% 
-  filter(is.na(`Birth Year`))
+  filter(is.na(`birth`))
 
 
 # merge this with LTREB long data file for recent data and for size information for the reproductive model
@@ -2004,31 +2007,34 @@ LTREB_data <- LTREB_endodemog %>%
   mutate(origin_01 = as.integer(case_when(origin == "O" ~ 0, 
                                           origin == "R" ~ 1, 
                                           origin != "R" | origin != "O" ~ 1))) %>%   
-  mutate(plot_fixed = (case_when(plot != "R" ~ plot, 
+  mutate(plot_fixed = as.numeric(case_when(plot != "R" ~ plot, 
                                  plot == "R" ~ origin)))                       
 
-
 LTREB_melt <- LTREB_data %>% 
-  melt(id.var = c("plot_fixed","pos", "id","endo_01", "birth", "year_t", "year_t1", "size_t", "logsize_t","size_t1", "logsize_t1", "surv_t1", "origin_01", "species", "flw_t1"),
+  melt(id.var = c("plot_fixed","pos", "id","endo_01", "birth", "year_t", "year_t1", "size_t", "logsize_t","size_t1", "logsize_t1", "surv_t1", "origin_01", "species", "flw_t1", "seed_t1", "seed_t"),
   measure.var = c("spike_a_t1", "spike_b_t1", "spike_c_t1"),
-  value.name = "spikelets")
+  value.name = "spikelets_t1")
 
 LTREB_cast <- LTREB_melt %>% 
-  group_by(plot_fixed, pos, id, species, endo_01, birth, year_t, year_t1, size_t, logsize_t, size_t1, logsize_t1, surv_t1, flw_t1) %>% 
-  summarize(spikeperinf = mean(spikelets),
-            no.repro_tillers_measured = n())
-  
-LTREB_repro_combined<- LTREB_cast %>% 
-  merge(LTREB_repro3, 
-        by.x = c("plot_fixed","pos", "id","endo_01",
-                 "birth", "year_t", "year_t1",
-                  "species"),
-        by.y = c("plot", "pos", "tag", "endo_01", "year_t", "year_t1", "species"))
+  group_by(plot_fixed, pos, id, species, endo_01, origin_01, birth, year_t, year_t1, size_t, logsize_t, size_t1, logsize_t1, surv_t1, flw_t1, seed_t1, seed_t) %>% 
+  summarize(spikeperinf_t1_fromlong = mean(spikelets_t1),
+            no.repro_tillers_measured_fromlong = n()) %>% 
+  rename(seed_t_fromlong = seed_t, seed_t1_fromlong = seed_t1)
 
-  
+LTREB_cast1 <- ungroup(LTREB_cast)
 
 
-dim(LTREB_repro_combined)
+LTREB_repro_combo <- LTREB_cast %>% 
+  full_join(LTREB_repro_t_t1, 
+            by = c("plot_fixed" = "plot", "pos" = "pos",
+                   "id" = "tag", "species" = "species", 
+                   "endo_01" = "endo_01", "birth" = "birth", 
+                   "year_t" = "year_t", "year_t1" = "year_t1")) %>% 
+  rename(flw_no_t1_from_long = flw_t1)
+
+
+# View(LTREB_repro_combo)
+dim(LTREB_repro_combo)
 
 
 
@@ -2036,28 +2042,32 @@ dim(LTREB_repro_combined)
 
 
 # I need to add flw_t for the 2016 and 2017 data which is entered into this main database. 
-LTREB_tem_t <- LTREB_tem %>%
+LTREB_tem_t <- LTREB_cast1 %>%
   filter(year_t1 != max(year_t1)) %>% 
-  rename(surv_t_new = surv_t1, size_t_new = size_t1, flw_t = flw_t1, year_t_new = year_t1,) %>% 
+  rename(surv_t_new = surv_t1, size_t_new = size_t1, flw_t = flw_t1, spikeperinf_t_fromlong = spikeperinf_t1_fromlong, year_t_new = year_t1,) %>% 
   mutate(year_t1_new = year_t_new + 1) %>% 
-  select(-year_t,-size_t, -notes)
+  select(-year_t,-size_t)
 
-LTREB_tem_t1 <- LTREB_tem %>%
+LTREB_tem_t1 <- LTREB_cast1 %>%
   filter(year_t1 != min(year_t1)) %>% 
   rename(surv_t1_new = surv_t1, size_t1_new = size_t1, flw_t1 = flw_t1, year_t1_new = year_t1) %>% 
   mutate(year_t_new = year_t1_new - 1) %>% 
-  select(-year_t, -size_t, -notes)
+  select(-year_t, -size_t)
 
 
 LTREB_tem_merge <- LTREB_tem_t1 %>% 
-  full_join(LTREB_tem_t, by = c("plot", "pos", "tag", "Endo", "origin", "year_t1_new", "year_t_new", "birth", "species"),
-            all.x = all, all.y = all) %>% 
+  full_join(LTREB_tem_t, by = c("plot_fixed", "pos", "id", "species",
+                                "endo_01", "origin_01", "birth",
+                                "year_t1_new", "year_t_new", "species",
+                                "logsize_t", "logsize_t1", 
+                                "seed_t1_fromlong", "seed_t_fromlong"),
+            all.x = all, all.y = all) %>%   
   rename(year_t = year_t_new, year_t1 = year_t1_new)
 
 
 
 
-# View(LTREB_tem_merge)
+View(LTREB_tem_merge)
 
 
 
