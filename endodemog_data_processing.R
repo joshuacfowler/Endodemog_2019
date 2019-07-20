@@ -1,7 +1,7 @@
 ## Authors: Josh and Tom	## Grass endophyte population model
 ## Purpose: Create a script that imports Endodemog data, perform all raw data manipulation to set up data lists for Survival and Growth models and for the flowering tiller and seed production models,	
 ## and create an .RData object that can be loaded for analysis	
-## Last Update: Jul 17, 2019
+## Last Update: Jul 20, 2019
 ######################################################
 library(tidyverse)
 library(reshape2)
@@ -49,36 +49,36 @@ LTREB_data <- LTREB_endodemog %>%
 ##############################################################################
 
 # NA's in survival come from mostly 2017 recruits.
-LTREB_data1 <- LTREB_data %>%
+LTREB_data_forsurv <- LTREB_data %>%
   filter(!is.na(surv_t1)) %>% 
   filter(!is.na(logsize_t)) %>% 
   filter(logsize_t >= 0) %>% 
   filter(!is.na(endo_01))
 
-dim(LTREB_data1)
+dim(LTREB_data_forsurv)
 
 # Creating individual species data lists to be passed to the model
 
 # Split up the main dataframe by species and recode plot to be used as an index for each species
-AGPE_surv_data <- LTREB_data1 %>% 
+AGPE_surv_data <- LTREB_data_forsurv %>% 
   filter(species == "AGPE") %>% 
   mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
-ELRI_surv_data <- LTREB_data1 %>% 
+ELRI_surv_data <- LTREB_data_forsurv %>% 
   filter(species == "ELRI") %>% 
   mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
-ELVI_surv_data <- LTREB_data1 %>% 
+ELVI_surv_data <- LTREB_data_forsurv %>% 
   filter(species == "ELVI") %>% 
   mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
-FESU_surv_data <- LTREB_data1 %>% 
+FESU_surv_data <- LTREB_data_forsurv %>% 
   filter(species == "FESU") %>% 
   mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
-LOAR_surv_data <- LTREB_data1 %>% 
+LOAR_surv_data <- LTREB_data_forsurv %>% 
   filter(species == "LOAR") %>% 
   mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
-POAL_surv_data <- LTREB_data1 %>% 
+POAL_surv_data <- LTREB_data_forsurv %>% 
   filter(species == "POAL") %>% 
   mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
-POSY_surv_data <- LTREB_data1 %>% 
+POSY_surv_data <- LTREB_data_forsurv %>% 
   filter(species == "POSY") %>% 
   mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
 
@@ -233,7 +233,7 @@ str(POSY_surv_data_list)
 ####### Preparing datalists for Growth Kernel ------------------------------
 ##############################################################################
 
-LTREB_data2 <- LTREB_data %>%
+LTREB_data_forgrow <- LTREB_data %>%
   filter(!is.na(logsize_t1)) %>%
   filter(!is.na(logsize_t)) %>% 
   filter(logsize_t >= 0) %>% 
@@ -241,30 +241,30 @@ LTREB_data2 <- LTREB_data %>%
   filter(!is.na(endo_01)) %>% 
   mutate(size_t1 = as.integer(size_t1))
 
-dim(LTREB_data2)
+dim(LTREB_data_forgrow)
 
 # Creating individual species data lists to be passed to the model
 
 # Split up the main dataframe by species and recode plot to be used as an index for each species
-AGPE_grow_data <- LTREB_data2 %>% 
+AGPE_grow_data <- LTREB_data_forgrow %>% 
   filter(species == "AGPE") %>% 
   mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
-ELRI_grow_data <- LTREB_data2 %>% 
+ELRI_grow_data <- LTREB_data_forgrow %>% 
   filter(species == "ELRI") %>% 
   mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
-ELVI_grow_data <- LTREB_data2 %>% 
+ELVI_grow_data <- LTREB_data_forgrow %>% 
   filter(species == "ELVI") %>% 
   mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
-FESU_grow_data <- LTREB_data2 %>% 
+FESU_grow_data <- LTREB_data_forgrow %>% 
   filter(species == "FESU") %>% 
   mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
-LOAR_grow_data <- LTREB_data2 %>% 
+LOAR_grow_data <- LTREB_data_forgrow %>% 
   filter(species == "LOAR") %>% 
   mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
-POAL_grow_data <- LTREB_data2 %>% 
+POAL_grow_data <- LTREB_data_forgrow %>% 
   filter(species == "POAL") %>% 
   mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
-POSY_grow_data <- LTREB_data2 %>% 
+POSY_grow_data <- LTREB_data_forgrow %>% 
   filter(species == "POSY") %>% 
   mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
 
@@ -1939,7 +1939,7 @@ LTREB_repro_flw_spike_mismatches <- LTREB_repro %>%
   filter(flw==0 & spikelets>0 | flw > 0 & is.na(spikelets))
 
 ###########################################################################################################################################################################
-###### Calculating mean seed and spikelet information and merging with LTREB_data to generate seed estimate with endodemog_seed_means_stan.R-----------------
+###### Calculating mean seed and spikelet information and merging with LTREB_data to generate seed estimate with endodemog_seed_means_stan.R and endodemog_seed_to_seedling_stan.R-----------------
 ###########################################################################################################################################################################
 LTREB_repro1 <- LTREB_repro %>% 
   rename(endo = Endo) %>% 
@@ -1972,7 +1972,6 @@ LTREB_repro3 <- ungroup(LTREB_repro2) #sets the groups so that we can filter the
 
 ## getting a dataframe with time t and t_1
 
-# I can source in the seed_means script, which currently generates a similar t and t1 file with seed estimates, and then merge that here with LTREB_endodemog_long
 LTREB_repro_t1 <-LTREB_repro3 %>%
   filter(year!= min(year)) %>% 
   rename(year_t1 = year, flwtillerno_t1 = flw, spikeperinfl_t1 = spikeperinf, 
@@ -1991,38 +1990,84 @@ LTREB_repro_t_t1 <- LTREB_repro_t1 %>%
 
 # View(LTREB_repro_t_t1)
 
-test <- LTREB_repro_t_t1 %>% 
+# three of these  records don't have a birth year recorded.
+na_Birthyear <- LTREB_repro_t_t1 %>% 
   filter(is.na(`birth`))
 
 
-# merge this with LTREB long data file for recent data and for size information for the reproductive model
-LTREB_endodemog <- 
-  read.csv(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Fulldataplusmetadata/endo_demog_long.csv")
-LTREB_data <- LTREB_endodemog %>% 
-  mutate(size_t, logsize_t = log(size_t)) %>% 
-  mutate(size_t1, logsize_t1 = log(size_t1)) %>%  
-  mutate(surv_t1 = as.integer(recode(surv_t1, "0" = 0, "1" =1, "2" = 1, "4" = 1))) %>% 
-  mutate(endo_01 = as.integer(case_when(endo == "0" | endo == "minus" ~ 0,
-                                        endo == "1"| endo =="plus" ~ 1))) %>% 
-  mutate(origin_01 = as.integer(case_when(origin == "O" ~ 0, 
-                                          origin == "R" ~ 1, 
-                                          origin != "R" | origin != "O" ~ 1))) %>%   
-  mutate(plot_fixed = as.numeric(case_when(plot != "R" ~ plot, 
-                                 plot == "R" ~ origin)))                       
+# merge the reproductive data with LTREB long data file for recent data and for size information for the reproductive model
+# This is endodemoglong which is stored in LTREB_data
+head(LTREB_data)
 
 LTREB_melt <- LTREB_data %>% 
-  melt(id.var = c("plot_fixed","pos", "id","endo_01", "birth", "year_t", "year_t1", "size_t", "logsize_t","size_t1", "logsize_t1", "surv_t1", "origin_01", "species", "flw_t1", "seed_t1", "seed_t"),
+  melt(id.var = c("plot_fixed","pos", "id", "species", "species_index", "endo_01", "endo_index", "origin_01", "birth", "year_t", "year_t_index", "year_t1", "year_t1_index", "surv_t1", "size_t", "logsize_t","size_t1", "logsize_t1", "flw_t1", "seed_t1", "seed_t"),
   measure.var = c("spike_a_t1", "spike_b_t1", "spike_c_t1"),
   value.name = "spikelets_t1")
 
 LTREB_cast <- LTREB_melt %>% 
-  group_by(plot_fixed, pos, id, species, endo_01, origin_01, birth, year_t, year_t1, size_t, logsize_t, size_t1, logsize_t1, surv_t1, flw_t1, seed_t1, seed_t) %>% 
+  group_by(plot_fixed, pos, id, species, species_index, endo_01, endo_index, origin_01, birth, year_t, year_t_index, year_t1, year_t1_index, surv_t1, size_t, logsize_t, size_t1, logsize_t1, flw_t1, seed_t1, seed_t) %>% 
   summarize(spikeperinf_t1_fromlong = mean(spikelets_t1),
             no.repro_tillers_measured_fromlong = n()) %>% 
   rename(seed_t_fromlong = seed_t, seed_t1_fromlong = seed_t1)
 
 LTREB_cast1 <- ungroup(LTREB_cast)
 
+
+# I need to add flw_t and spikeperinf_t for the 2016 and 2017 data which is entered into this main database. 
+LTREB_tem_t1 <- LTREB_cast1 %>%
+  select(-contains("_index"), -contains("seed"), -contains("spike")) %>% 
+  filter(year_t1 != min(year_t1)) %>% 
+  rename(year_t1_new = year_t1, size_t1_new = size_t1, 
+         flw_t1_fromlong = flw_t1) %>% 
+  mutate(year_t_new = year_t1_new - 1) %>% 
+  select(-year_t,)
+
+LTREB_tem_t <- LTREB_cast1 %>% 
+  select(-contains("_index"), -contains("seed"), -contains("spike")) %>% 
+  filter(year_t1 != max(year_t1)) %>% 
+  rename(year_t_new = year_t1, size_t_new = size_t1, 
+         flw_t_fromlong = flw_t1) %>% 
+  mutate(year_t1_new = year_t_new + 1)
+
+LTREB_tem_merge <- LTREB_tem_t1 %>% 
+  full_join(LTREB_tem_t, by = c("plot_fixed", "pos", "id", 
+                                "species", 
+                                "endo_01", 
+                                "origin_01", "birth", 
+                                "year_t_new",
+                                "year_t1_new"),
+            all.x = all, all.y = all) %>%   
+  rename(year_t = year_t_new, year_t1 = year_t1_new)
+
+
+# View(LTREB_tem_merge)
+
+#example from further down of generating the flw_t and flw_t1 
+
+flw_tiller_t1 <-flwtiller1 %>%
+  filter(year!= min(year)) %>% 
+  rename(year_t1 = year, flw_t1 = flw) %>%  
+  mutate(year_t = year_t1 - 1)
+
+flw_tiller_t <- flwtiller1 %>%
+  filter(year != max(year)) %>% 
+  rename(year_t = year, flw_t = flw) %>% 
+  mutate(year_t1 = year_t + 1)
+
+flw_tillermerge <- flw_tiller_t1 %>% 
+  full_join(flw_tiller_t, by = c("plot", "pos", "tag", "Endo", "year_t", "year_t1", "species"),
+            all.x = all, all.y = all) %>% 
+  select(-contains("variable")) 
+
+# 
+
+
+
+
+
+
+
+# now we can merge the two datasets together.
 
 LTREB_repro_combo <- LTREB_cast %>% 
   full_join(LTREB_repro_t_t1, 
@@ -2032,7 +2077,6 @@ LTREB_repro_combo <- LTREB_cast %>%
                    "year_t" = "year_t", "year_t1" = "year_t1")) %>% 
   rename(flw_no_t1_from_long = flw_t1)
 
-
 # View(LTREB_repro_combo)
 dim(LTREB_repro_combo)
 
@@ -2040,65 +2084,8 @@ dim(LTREB_repro_combo)
 
 
 
-
-# I need to add flw_t for the 2016 and 2017 data which is entered into this main database. 
-LTREB_tem_t <- LTREB_cast1 %>%
-  filter(year_t1 != max(year_t1)) %>% 
-  rename(surv_t_new = surv_t1, size_t_new = size_t1, flw_t = flw_t1, spikeperinf_t_fromlong = spikeperinf_t1_fromlong, year_t_new = year_t1,) %>% 
-  mutate(year_t1_new = year_t_new + 1) %>% 
-  select(-year_t,-size_t)
-
-LTREB_tem_t1 <- LTREB_cast1 %>%
-  filter(year_t1 != min(year_t1)) %>% 
-  rename(surv_t1_new = surv_t1, size_t1_new = size_t1, flw_t1 = flw_t1, year_t1_new = year_t1) %>% 
-  mutate(year_t_new = year_t1_new - 1) %>% 
-  select(-year_t, -size_t)
-
-
-LTREB_tem_merge <- LTREB_tem_t1 %>% 
-  full_join(LTREB_tem_t, by = c("plot_fixed", "pos", "id", "species",
-                                "endo_01", "origin_01", "birth",
-                                "year_t1_new", "year_t_new", "species",
-                                "logsize_t", "logsize_t1", 
-                                "seed_t1_fromlong", "seed_t_fromlong"),
-            all.x = all, all.y = all) %>%   
-  rename(year_t = year_t_new, year_t1 = year_t1_new)
-
-
-
-
-View(LTREB_tem_merge)
-
-
-
-
-
-
-## This section needs to be moved______________
-## getting a dataframe with time t and t_1
-LTREB_repro_t1 <-LTREB_repro %>%
-  filter(year!= min(year)) %>% 
-  rename(year_t1 = year, flwtillerno_t1 = flw, spikeperinfl_t1 = spikelets, seedperinfl_t1 = seed) %>%  
-  mutate(year_t = year_t1 - 1)
-
-LTREB_repro_t <- LTREB_repro %>%
-  filter(year != max(year)) %>% 
-  rename(year_t = year, flwtillerno_t = flw, spikeperinfl_t = spikelets, seedperinfl_t = seed) %>% 
-  mutate(year_t1 = year_t + 1)
-
-LTREB_repro1 <- LTREB_repro_t1 %>% 
-  full_join(LTREB_repro_t, by = c("plot", "pos", "tag", "Endo", "year_t", "year_t1", "species"),
-            all.x = all, all.y = all) %>% 
-  select(-contains("variable")) 
-
-
-
-
-
-
-
 #____________________________________________________
-
+# This flw data frame was used originally for the flw model development but will be replaced by the combined endodemog dataframe.
 # getting flw tiller info to merge with endodemoglong
 # agpeflw, agpe_rflw, elriflw, elri_rflw, elviflw, elvi_rflw,fflw,f_rflw, lflw, l_rflw, po_flw, po_rflw, po_oldflw, po_roldflw, pflw, poldflw, rflw, roldflw
 agpeflw <- agpeflw %>% 
