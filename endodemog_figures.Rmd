@@ -56,7 +56,8 @@ variance_histogram <- function(df){
   spp <- ggplot() + 
     geom_histogram(data = df, aes(`sigma_e[1]`), fill = "#ff7f00", alpha = .4, bins = 200) +
     geom_histogram(data = df, aes(`sigma_e[2]`), fill = "#6a3d9a", alpha = .4, bins = 200) +
-    labs(x = expression(σ[year]), y = "Posterior density", title = "Variance Estimate") +             theme_classic()
+    labs(x = expression(σ[year]), y = "Posterior density",
+         title = deparse(substitute(df))) + theme_classic()
   return(spp)
 }
 # survival
@@ -401,7 +402,7 @@ surv_fits <- function(df_raw, df_samples){
   xdummy <- seq(min(df_raw$logsize_t), max(df_raw$logsize_t), length.out = nvalues)
 
   #endophyte negative fits  
-  ydummy_eminus <- as.vector(invlogit(mean(df_samples["beta[1]"]) + mean(df_samples["beta[2]"])*xdummy + mean(df_samples["beta[3]"])*0 + mean(df_samples["beta[4]"])*mean(df_raw$origin_01) + mean(df_samples["beta[5]"])*xdummy*0))
+  ydummy_eminus <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*0 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*0))
   ydummy_eminus_y1 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*0 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*0 + mean(df_samples$'tau_year[1,1]')))
   ydummy_eminus_y2 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*0 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*0 + mean(df_samples$'tau_year[1,2]')))
   ydummy_eminus_y3 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + + mean(df_samples$'beta[3]')*0  + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*0 + mean(df_samples$'tau_year[1,3]')))
@@ -415,21 +416,27 @@ surv_fits <- function(df_raw, df_samples){
   ydummy_eminus_y11 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*0 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*0 + mean(df_samples$'tau_year[1,11]')))
   
   # endophyte positive fits
-  ydummy_eplus <- as.vector(invlogit(mean(df_samples["beta[1]"]) + mean(df_samples["beta[2]"])*xdummy + mean(df_samples["beta[3]"])*1 + mean(df_samples["beta[4]"])*mean(df_raw$origin_11) + mean(df_samples["beta[5]"])*xdummy*1))
-  ydummy_eplus_y1 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_11) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[1,1]')))
-  ydummy_eplus_y2 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_11) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[1,2]')))
-  ydummy_eplus_y3 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + + mean(df_samples$'beta[3]')*1  + mean(df_samples$'beta[4]')*mean(df_raw$origin_11) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[1,3]')))
-  ydummy_eplus_y4 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_11) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[1,4]'))) 
-  ydummy_eplus_y5 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_11) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[1,5]')))
-  ydummy_eplus_y6 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_11) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[1,6]')))
-  ydummy_eplus_y7 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_11) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[1,7]')))
-  ydummy_eplus_y8 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_11) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[1,8]')))
-  ydummy_eplus_y9 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_11) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[1,9]')))
-  ydummy_eplus_y11 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_11) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[1,11]')))
-  ydummy_eplus_y11 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_11) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[1,11]')))
+  ydummy_eplus <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*1))
+  ydummy_eplus_y1 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[2,1]')))
+  ydummy_eplus_y2 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[2,2]')))
+  ydummy_eplus_y3 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + + mean(df_samples$'beta[3]')*1  + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[2,3]')))
+  ydummy_eplus_y4 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[2,4]'))) 
+  ydummy_eplus_y5 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[2,5]')))
+  ydummy_eplus_y6 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[2,6]')))
+  ydummy_eplus_y7 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[2,7]')))
+  ydummy_eplus_y8 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[2,8]')))
+  ydummy_eplus_y9 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[2,9]')))
+  ydummy_eplus_y10 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[2,10]')))
+  ydummy_eplus_y11 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[2,11]')))
+  
   eminus_fits_list <- list(ydummy_eminus, ydummy_eminus_y1, ydummy_eminus_y2, ydummy_eminus_y3, ydummy_eminus_y4, ydummy_eminus_y5, ydummy_eminus_y6, ydummy_eminus_y7, ydummy_eminus_y8, ydummy_eminus_y9, ydummy_eminus_y10, ydummy_eminus_y11)
+  names(eminus_fits_list) <- c("ydummy_eminus", "ydummy_eminus_y1", "ydummy_eminus_y2", "ydummy_eminus_y3", "ydummy_eminus_y4", "ydummy_eminus_y5", "ydummy_eminus_y6", "ydummy_eminus_y7", "ydummy_eminus_y8", "ydummy_eminus_y9", "ydummy_eminus_y10", "ydummy_eminus_y11")
+  
   eplus_fits_list <- list(ydummy_eplus, ydummy_eplus_y1, ydummy_eplus_y2, ydummy_eplus_y3, ydummy_eplus_y4, ydummy_eplus_y5, ydummy_eplus_y6, ydummy_eplus_y7, ydummy_eplus_y8, ydummy_eplus_y9, ydummy_eplus_y10, ydummy_eplus_y11)
+  names(eplus_fits_list) <- c("ydummy_eplus", "ydummy_eplus_y1", "ydummy_eplus_y2", "ydummy_eplus_y3", "ydummy_eplus_y4", "ydummy_eplus_y5", "ydummy_eplus_y6", "ydummy_eplus_y7", "ydummy_eplus_y8", "ydummy_eplus_y9", "ydummy_eplus_y10", "ydummy_eplus_y11")  
+  
   surv_fits_list <- list(eminus_fits_list, eplus_fits_list)
+  names(surv_fits_list) <- c("eminus_fits_list", "eplus_fits_list")
   return(surv_fits_list)
 }
 
