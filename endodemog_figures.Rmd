@@ -189,6 +189,7 @@ surv_data_bins <- function(df_raw){
               samplesize = n())
   
   surv_bins_list <- list(surv_bin_minus, surv_bin_plus, surv_bin_byyear, surv_bin_mean)
+  names(surv_bins_list) <- c("surv_bins_minus", "surv_bins_plus", "surv_bin_byyear", "surv_bin_mean")
   return(surv_bins_list)
 }
 
@@ -429,14 +430,14 @@ surv_fits <- function(df_raw, df_samples){
   ydummy_eplus_y10 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[2,10]')))
   ydummy_eplus_y11 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[2,11]')))
   
-  eminus_fits_list <- list(ydummy_eminus, ydummy_eminus_y1, ydummy_eminus_y2, ydummy_eminus_y3, ydummy_eminus_y4, ydummy_eminus_y5, ydummy_eminus_y6, ydummy_eminus_y7, ydummy_eminus_y8, ydummy_eminus_y9, ydummy_eminus_y10, ydummy_eminus_y11)
-  names(eminus_fits_list) <- c("ydummy_eminus", "ydummy_eminus_y1", "ydummy_eminus_y2", "ydummy_eminus_y3", "ydummy_eminus_y4", "ydummy_eminus_y5", "ydummy_eminus_y6", "ydummy_eminus_y7", "ydummy_eminus_y8", "ydummy_eminus_y9", "ydummy_eminus_y10", "ydummy_eminus_y11")
+  eminus <- list(ydummy_eminus, ydummy_eminus_y1, ydummy_eminus_y2, ydummy_eminus_y3, ydummy_eminus_y4, ydummy_eminus_y5, ydummy_eminus_y6, ydummy_eminus_y7, ydummy_eminus_y8, ydummy_eminus_y9, ydummy_eminus_y10, ydummy_eminus_y11)
+  names(eminus) <- c("mean", "y1", "y2", "y3", "y4", "y5", "y6", "y7", "y8", "y9", "y10", "y11")
   
-  eplus_fits_list <- list(ydummy_eplus, ydummy_eplus_y1, ydummy_eplus_y2, ydummy_eplus_y3, ydummy_eplus_y4, ydummy_eplus_y5, ydummy_eplus_y6, ydummy_eplus_y7, ydummy_eplus_y8, ydummy_eplus_y9, ydummy_eplus_y10, ydummy_eplus_y11)
-  names(eplus_fits_list) <- c("ydummy_eplus", "ydummy_eplus_y1", "ydummy_eplus_y2", "ydummy_eplus_y3", "ydummy_eplus_y4", "ydummy_eplus_y5", "ydummy_eplus_y6", "ydummy_eplus_y7", "ydummy_eplus_y8", "ydummy_eplus_y9", "ydummy_eplus_y10", "ydummy_eplus_y11")  
+  eplus <- list(ydummy_eplus, ydummy_eplus_y1, ydummy_eplus_y2, ydummy_eplus_y3, ydummy_eplus_y4, ydummy_eplus_y5, ydummy_eplus_y6, ydummy_eplus_y7, ydummy_eplus_y8, ydummy_eplus_y9, ydummy_eplus_y10, ydummy_eplus_y11)
+  names(eplus) <- c("mean", "y1", "y2", "y3", "y4", "y5", "y6", "y7", "y8", "y9", "y10", "y11")  
   
-  surv_fits_list <- list(eminus_fits_list, eplus_fits_list)
-  names(surv_fits_list) <- c("eminus_fits_list", "eplus_fits_list")
+  surv_fits_list <- list(eminus, eplus, xdummy)
+  names(surv_fits_list) <- c("eminus", "eplus", "xdummy")
   return(surv_fits_list)
 }
 
@@ -467,6 +468,7 @@ flw_fits <- function(df_raw, df_samples){
 
 }
 ```
+
 ```{r growth fits, include=FALSE}
 # function to generate the mean, and year and plot specific growth model fits and store for plotting
 grow_fits <- function(df_raw, df_samples){
@@ -478,6 +480,7 @@ grow_fits <- function(df_raw, df_samples){
 
 }
 ```
+
 ```{r fertility fits, include=FALSE}
 # function to generate the mean, and year and plot specific fertility model fits and store for plotting
 fert_fits <- function(df_raw, df_samples){
@@ -489,4 +492,93 @@ fert_fits <- function(df_raw, df_samples){
 
 }
 ```
+
+
+```{r survival raw and fits, include = FALSE}
+# Putting together the raw, binned data and the fitted models so that they can be visualized together.
+surv_minus_byyear <- function(fits, bins, title){
+  require(ggplot2)
+  fits_df <- as.data.frame(fits)
+  fits_df <- melt(fits_df, id = "xdummy",
+                      measure.vars = c("eminus.y1","eminus.y2", 
+                                       "eminus.y3", "eminus.y4", 
+                                       "eminus.y5", "eminus.y6", 
+                                       "eminus.y7", "eminus.y8", 
+                                       "eminus.y9", "eminus.y10",
+                                       "eminus.y11")) %>% 
+  mutate(Year = recode(variable, "eminus.y1" = '1',"eminus.y2" = "2", 
+                       "eminus.y3" = "3", "eminus.y4" = "4", 
+                       "eminus.y5" = "5", "eminus.y6" = "6", 
+                       "eminus.y7" = "7", "eminus.y8" = "8", 
+                       "eminus.y9" = "9", "eminus.y10" = "10",
+                       "eminus.y11" = "11")) 
+  bins_df <- as.data.frame(bins[["surv_bins_minus"]])
+  Eminusbyyear <- ggplot(data = fits_df) +
+  geom_line(aes(x = xdummy, y = value, color = Year),  lwd = .8) +
+  geom_point(data = bins_df, aes(x = mean_size, y = mean_surv, color = Year, lwd = samplesize)) +  
+  labs(title = title, subtitle = "E-", xlab = "log(size_t)", ylab = "Prob. of Survival") +
+  scale_color_brewer(palette = "Paired") + guides(lwd = "none") + theme_classic()
+return(Eminusbyyear)  
+}
+surv_plus_byyear <- function(fits, bins, title){
+  require(ggplot2)
+  fits_df <- as.data.frame(fits)
+    fits_df <- melt(fits_df, id = "xdummy",
+                      measure.vars = c("eplus.y1","eplus.y2", 
+                                       "eplus.y3", "eplus.y4", 
+                                       "eplus.y5", "eplus.y6", 
+                                       "eplus.y7", "eplus.y8", 
+                                       "eplus.y9", "eplus.y10",
+                                       "eplus.y11")) %>% 
+  mutate(Year = recode(variable, "eplus.y1" = '1',"eplus.y2" = "2", 
+                       "eplus.y3" = "3", "eplus.y4" = "4", 
+                       "eplus.y5" = "5", "eplus.y6" = "6", 
+                       "eplus.y7" = "7", "eplus.y8" = "8", 
+                       "eplus.y9" = "9", "eplus.y10" = "10",
+                       "eplus.y11" = "11")) 
+  bins_df <- as.data.frame(bins[["surv_bins_plus"]])
+  Eplusbyyear <- ggplot(data = fits_df) +
+  geom_line(aes(x = xdummy, y = value, color = Year), lwd = .8) +
+  geom_point(data = bins_df, aes(x = mean_size, y = mean_surv, color = Year, lwd = samplesize)) +  
+  labs(title = title, subtitle = "E+", xlab = "log(size_t)", ylab = "Prob. of Survival") +
+  scale_color_brewer(palette = "Paired") + guides(lwd = "none") +theme_classic()
+return(Eplusbyyear)  
+}
+
+AGPEsurv_minus_byyear <- surv_minus_byyear(AGPEsurv_fits, AGPEsurv_bins, title = "AGPE")
+AGPEsurv_plus_byyear <- surv_plus_byyear(AGPEsurv_fits, AGPEsurv_bins, title = "AGPE")
+
+AGPEsurv_fits <- surv_fits(AGPE_surv_data, post_survAGPE)
+
+ELRIsurv_fits <- surv_fits(ELRI_surv_data, post_survELRI)
+
+ELVIsurv_fits <- surv_fits(ELVI_surv_data, post_survELVI)
+
+FESUsurv_fits <- surv_fits(FESU_surv_data, post_survFESU)
+
+LOARsurv_fits <- surv_fits(LOAR_surv_data, post_survLOAR)
+
+POALsurv_fits <- surv_fits(POAL_surv_data, post_survPOAL)
+
+POSYsurv_fits <- surv_fits(POSY_surv_data, post_survPOAL)
+
+
+AGPEsurv_bins <- surv_data_bins(AGPE_surv_data)
+
+ELRIsurv_bins <- surv_data_bins(ELRI_surv_data)
+
+ELVIsurv_bins <- surv_data_bins(ELVI_surv_data)
+
+FESUsurv_bins <- surv_data_bins(FESU_surv_data)
+
+LOARsurv_bins <- surv_data_bins(LOAR_surv_data)
+
+POALsurv_bins <- surv_data_bins(POAL_surv_data)
+
+POSYsurv_bins <- surv_data_bins(POSY_surv_data)
+
+
+
+```
+
 
