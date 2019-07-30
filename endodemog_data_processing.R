@@ -39,10 +39,10 @@ LTREB_data <- LTREB_endodemog %>%
                                           origin == "R" ~ 1, 
                                           origin != "R" | origin != "O" ~ 1))) %>%   
   mutate(plot_fixed = (case_when(plot != "R" ~ plot, 
-                                 plot == "R" ~ origin)))                       
+                                 plot == "R" ~ origin)))  %>% 
+  filter(duplicated(.) == FALSE)
 
 # dim(LTREB_data)
-
 
 ##############################################################################
 ####### Preparing datalists for Survival Kernel ------------------------------
@@ -2019,13 +2019,12 @@ LTREB_tem_t1 <- LTREB_cast1 %>%
   filter(year_t1 != min(year_t1)) %>% 
   rename(year_t1_new = year_t1, size_t1_new = size_t1, 
          flw_t1_fromlong = flw_t1) %>% 
-  mutate(year_t_new = year_t1_new - 1) %>% 
-  select(-year_t,)
+  mutate(year_t_new = year_t1_new - 1) 
 
 LTREB_tem_t <- LTREB_cast1 %>% 
   select(-contains("_index"), -contains("seed"), -contains("spike")) %>% 
   filter(year_t1 != max(year_t1)) %>% 
-  rename(year_t_new = year_t1, size_t_new = size_t1, 
+  rename(year_t_new = year_t1, size_t_new = size_t, 
          flw_t_fromlong = flw_t1) %>% 
   mutate(year_t1_new = year_t_new + 1)
 
@@ -2035,9 +2034,9 @@ LTREB_tem_merge <- LTREB_tem_t1 %>%
                                 "endo_01", 
                                 "origin_01", "birth", 
                                 "year_t_new",
-                                "year_t1_new"),
-            all.x = all, all.y = all) %>%   
-  rename(year_t = year_t_new, year_t1 = year_t1_new)
+                                "year_t1_new",
+                                "surv_t1"),
+            all.x = all, all.y = all)
 
 
 # View(LTREB_tem_merge)
@@ -2069,16 +2068,16 @@ flw_tillermerge <- flw_tiller_t1 %>%
 
 # now we can merge the two datasets together.
 
-LTREB_repro_combo <- LTREB_cast %>% 
-  full_join(LTREB_repro_t_t1, 
-            by = c("plot_fixed" = "plot", "pos" = "pos",
-                   "id" = "tag", "species" = "species", 
-                   "endo_01" = "endo_01", "birth" = "birth", 
-                   "year_t" = "year_t", "year_t1" = "year_t1")) %>% 
-  rename(flw_no_t1_from_long = flw_t1)
+# LTREB_repro_combo <- LTREB_cast %>% 
+#   full_join(LTREB_repro_t_t1, 
+#            by = c("plot_fixed" = "plot", "pos" = "pos",
+#                   "id" = "tag", "species" = "species", 
+#                   "endo_01" = "endo_01", "birth" = "birth", 
+#                   "year_t" = "year_t", "year_t1" = "year_t1")) %>% 
+#   rename(flw_no_t1_from_long = flw_t1)
 
 # View(LTREB_repro_combo)
-dim(LTREB_repro_combo)
+#dim(LTREB_repro_combo)
 
 
 
@@ -2182,7 +2181,7 @@ flw_tiller_t <- flwtiller1 %>%
 flw_tillermerge <- flw_tiller_t1 %>% 
   full_join(flw_tiller_t, by = c("plot", "pos", "tag", "Endo", "year_t", "year_t1", "species"),
             all.x = all, all.y = all) %>% 
-  select(-contains("variable")) 
+  select(-contains("variable"))
 
 
 # merge this with LTREB for flower model
@@ -2233,8 +2232,8 @@ LTREB_flw <- LTREB_f %>%
   mutate(flw_stat_t = case_when(flw_t == 0 ~ 0,
                                 flw_t >0 ~1)) %>% 
   mutate(flw_stat_t1 = case_when(flw_t1 == 0 ~ 0,
-                                 flw_t1 > 0 ~ 1))
-       
+                                 flw_t1 > 0 ~ 1)) 
+
 # View(LTREB_flw)
 table(LTREB_flw$species, LTREB_flw$year_t)
 table(LTREB_flw$flw_stat_t, LTREB_flw$year_t)
