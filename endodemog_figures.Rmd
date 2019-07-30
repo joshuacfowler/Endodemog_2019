@@ -494,7 +494,7 @@ fert_fits <- function(df_raw, df_samples){
 ```
 
 
-```{r survival raw and fits, include = FALSE}
+```{r survival raw and fits ggobjects, include = FALSE}
 # Putting together the raw, binned data and the fitted models so that they can be visualized together.
 surv_minus_byyear <- function(fits, bins, title){
   require(ggplot2)
@@ -517,7 +517,7 @@ surv_minus_byyear <- function(fits, bins, title){
   geom_line(aes(x = xdummy, y = value, color = Year),  lwd = .8) +
   geom_point(data = bins_df, aes(x = mean_size, y = mean_surv, color = Year, lwd = samplesize)) +  
   labs(title = title, subtitle = "E-", xlab = "log(size_t)", ylab = "Prob. of Survival") +
-  scale_color_brewer(palette = "Paired") + guides(lwd = "none") + theme_classic()
+  scale_color_manual(values = yearcolors) + guides(lwd = "none") + theme_classic()
 return(Eminusbyyear)  
 }
 surv_plus_byyear <- function(fits, bins, title){
@@ -541,43 +541,48 @@ surv_plus_byyear <- function(fits, bins, title){
   geom_line(aes(x = xdummy, y = value, color = Year), lwd = .8) +
   geom_point(data = bins_df, aes(x = mean_size, y = mean_surv, color = Year, lwd = samplesize)) +  
   labs(title = title, subtitle = "E+", xlab = "log(size_t)", ylab = "Prob. of Survival") +
-  scale_color_brewer(palette = "Paired") + guides(lwd = "none") +theme_classic()
+  scale_color_manual(values = yearcolors) + guides(lwd = "none") +theme_classic()
 return(Eplusbyyear)  
+}
+surv_mean <- function(fits, bins, title){
+fits_df <- as.data.frame(fits)
+bins_df <- as.data.frame(bins[["surv_bin_mean"]])
+survmean <- ggplot(data = fits_df) +
+  geom_line(aes(x = xdummy, y = eplus.mean), color = "#6a3d9a")+
+  geom_line(aes(x = xdummy, y = eminus.mean), color = "#ff7f00") +
+  geom_point(data = bins_df, aes(x = mean_size, y = mean_surv, color = endo, lwd = samplesize)) +
+  labs(title = title, subtitle = "Mean Survival Probability", xlab = "log(size_t)", ylab = "Prob. of Survival") +
+  scale_color_manual(values = colors2) + theme_classic() + guides(lwd = "none")
+return(survmean)
 }
 
 AGPEsurv_minus_byyear <- surv_minus_byyear(AGPEsurv_fits, AGPEsurv_bins, title = "AGPE")
 AGPEsurv_plus_byyear <- surv_plus_byyear(AGPEsurv_fits, AGPEsurv_bins, title = "AGPE")
+AGPEsurv_mean <- surv_mean(AGPEsurv_fits, AGPEsurv_bins, title = "AGPE")
 
-AGPEsurv_fits <- surv_fits(AGPE_surv_data, post_survAGPE)
+ELRIsurv_minus_byyear <- surv_minus_byyear(ELRIsurv_fits, ELRIsurv_bins, title = "ELRI")
+ELRIsurv_plus_byyear <- surv_plus_byyear(ELRIsurv_fits, ELRIsurv_bins, title = "ELRI")
+ELRIsurv_mean <- surv_mean(ELRIsurv_fits, ELRIsurv_bins, title = "ELRI")
 
-ELRIsurv_fits <- surv_fits(ELRI_surv_data, post_survELRI)
+ELVIsurv_minus_byyear <- surv_minus_byyear(ELVIsurv_fits, ELVIsurv_bins, title = "ELVI")
+ELVIsurv_plus_byyear <- surv_plus_byyear(ELVIsurv_fits, ELVIsurv_bins, title = "ELVI")
+ELVIsurv_mean <- surv_mean(ELVIsurv_fits, ELVIsurv_bins, title = "ELVI")
 
-ELVIsurv_fits <- surv_fits(ELVI_surv_data, post_survELVI)
+FESUsurv_minus_byyear <- surv_minus_byyear(FESUsurv_fits, FESUsurv_bins, title = "FESU")
+FESUsurv_plus_byyear <- surv_plus_byyear(FESUsurv_fits, FESUsurv_bins, title = "FESU")
+FESUsurv_mean <- surv_mean(FESUsurv_fits, FESUsurv_bins, title = "FESU")
 
-FESUsurv_fits <- surv_fits(FESU_surv_data, post_survFESU)
+LOARsurv_minus_byyear <- surv_minus_byyear(LOARsurv_fits, LOARsurv_bins, title = "LOAR")
+LOARsurv_plus_byyear <- surv_plus_byyear(LOARsurv_fits, LOARsurv_bins, title = "LOAR")
+LOARsurv_mean <- surv_mean(LOARsurv_fits, LOARsurv_bins, title = "LOAR")
 
-LOARsurv_fits <- surv_fits(LOAR_surv_data, post_survLOAR)
+POALsurv_minus_byyear <- surv_minus_byyear(POALsurv_fits, POALsurv_bins, title = "POAL")
+POALsurv_plus_byyear <- surv_plus_byyear(POALsurv_fits, POALsurv_bins, title = "POAL")
+POALsurv_mean <- surv_mean(POALsurv_fits, POALsurv_bins, title = "POAL")
 
-POALsurv_fits <- surv_fits(POAL_surv_data, post_survPOAL)
-
-POSYsurv_fits <- surv_fits(POSY_surv_data, post_survPOAL)
-
-
-AGPEsurv_bins <- surv_data_bins(AGPE_surv_data)
-
-ELRIsurv_bins <- surv_data_bins(ELRI_surv_data)
-
-ELVIsurv_bins <- surv_data_bins(ELVI_surv_data)
-
-FESUsurv_bins <- surv_data_bins(FESU_surv_data)
-
-LOARsurv_bins <- surv_data_bins(LOAR_surv_data)
-
-POALsurv_bins <- surv_data_bins(POAL_surv_data)
-
-POSYsurv_bins <- surv_data_bins(POSY_surv_data)
-
-
+POSYsurv_minus_byyear <- surv_minus_byyear(POSYsurv_fits, POSYsurv_bins, title = "POSY")
+POSYsurv_plus_byyear <- surv_plus_byyear(POSYsurv_fits, POSYsurv_bins, title = "POSY")
+POSYsurv_mean <- surv_mean(POSYsurv_fits, POSYsurv_bins, title = "POSY")
 
 ```
 
