@@ -148,9 +148,9 @@ Plots of model fits with data
 surv_data_bins <- function(df_raw){
   require(tidyverse)
   surv_bin_minus <- df_raw %>% 
-    select(surv_t1, logsize_t, year_t, endo) %>%
-    mutate(endo = recode(endo, "0" = 0, "1" = 1, minus = 0, plus = 1)) %>% 
-    filter(endo == 0) %>% 
+    select(surv_t1, logsize_t, year_t, endo_01) %>%
+    filter(endo_01 == 0) %>%
+    rename(Endo = endo_01) %>% 
     mutate(Year = as.factor(as.integer(as.factor(year_t)))) %>% 
     mutate(size_bin = cut_interval(logsize_t, n = 15)) %>% 
     group_by(size_bin, Year) %>% 
@@ -159,9 +159,9 @@ surv_data_bins <- function(df_raw){
             samplesize = n())
   
   surv_bin_plus <- df_raw %>% 
-    select(surv_t1, logsize_t, year_t, endo) %>%
-    mutate(endo = recode(endo, "0" = 0, "1" = 1, minus = 0, plus = 1)) %>% 
-    filter(endo == 1) %>% 
+    select(surv_t1, logsize_t, year_t, endo_01) %>%
+    filter(endo_01 == 1) %>% 
+    rename(Endo = endo_01) %>% 
     mutate(Year = as.factor(as.integer(as.factor(year_t)))) %>% 
     mutate(size_bin = cut_interval(logsize_t, n = 15)) %>% 
     group_by(size_bin, Year) %>% 
@@ -170,20 +170,20 @@ surv_data_bins <- function(df_raw){
               samplesize = n())
 
   surv_bin_byyear <- df_raw %>% 
-    select(surv_t1, logsize_t, year_t, endo) %>%
-    mutate(endo = recode(endo, "0" = 0, "1" = 1, minus = 0, plus = 1)) %>% 
+    select(surv_t1, logsize_t, year_t, endo_01) %>%
     mutate(Year = as.factor(as.integer(as.factor(year_t)))) %>% 
+    rename(Endo = endo_01) %>% 
     mutate(size_bin = cut_interval(logsize_t, n = 15)) %>% 
-    group_by(size_bin, Year, endo) %>% 
+    group_by(size_bin, Year, Endo) %>% 
     summarise(mean_size = mean((logsize_t),na.rm=T),
               mean_surv = mean(surv_t1,na.rm=T),
               samplesize = n())
   
   surv_bin_mean <- df_raw %>% 
-    select(surv_t1, logsize_t, endo) %>%
-    mutate(endo = recode(endo, "0" = "E-", "1" = "E+", minus = "E-", plus = "E+")) %>% 
+    select(surv_t1, logsize_t, endo_01) %>%
+    mutate(Endo = recode(endo_01, "0" = "E-", "1" = "E+")) %>% 
     mutate(size_bin = cut_interval(logsize_t, n = 12)) %>% 
-    group_by(size_bin, endo) %>% 
+    group_by(size_bin, Endo) %>% 
     summarise(mean_size = mean((logsize_t),na.rm=T),
               mean_surv = mean(surv_t1,na.rm=T),
               samplesize = n())
@@ -251,6 +251,8 @@ flw_data_bins <- function(df_raw){
               mean_flw = mean(flw_stat_t1,na.rm=T),
               samplesize = n())
   flw_bins_list <- list(flw_bin_minus, flw_bin_plus, flw_bin_byyear, flw_bin_mean)
+  names(flw_bins_list) <- c("flw_bins_minus", "flw_bins_plus", "flw_bin_byyear", "flw_bin_mean")
+
   return(flw_bins_list)
 }
 
@@ -275,7 +277,8 @@ grow_data_bins <- function(df_raw){
   require(tidyverse)
   grow_bin_minus<- df_raw %>% 
     select(size_t1, logsize_t, year_t, endo_01) %>%
-    filter(endo_01 == 0) %>% 
+    filter(endo_01 == 0) %>%     
+    rename(Endo = endo_01) %>% 
     mutate(Year = as.factor(as.integer(as.factor(year_t)))) %>% 
     mutate(size_bin = cut_interval(logsize_t, n = 15)) %>% 
     group_by(size_bin, Year) %>% 
@@ -286,6 +289,7 @@ grow_data_bins <- function(df_raw){
   grow_bin_plus <- df_raw %>% 
     select(size_t1, logsize_t, year_t, endo_01) %>%
     filter(endo_01 == 1) %>% 
+    rename(Endo = endo_01) %>% 
     mutate(Year = as.factor(as.integer(as.factor(year_t)))) %>% 
     mutate(size_bin = cut_interval(logsize_t, n = 15)) %>% 
     group_by(size_bin, Year) %>% 
@@ -304,14 +308,16 @@ grow_data_bins <- function(df_raw){
   
   grow_binmean <- df_raw %>% 
     select(size_t1, logsize_t, endo_01) %>%
-    mutate(endo_01 = as.character(endo_01)) %>% 
+    mutate(endo_01 = as.character(endo_01)) %>%
+    mutate(Endo = recode(endo_01, "0" = "E-", "1" = "E+")) %>% 
     mutate(size_bin = cut_interval(logsize_t, n = 12)) %>% 
-    group_by(size_bin, endo_01) %>% 
+    group_by(size_bin, Endo) %>% 
     summarise(mean_size = mean((logsize_t),na.rm=T),
               mean_grow = mean(size_t1,na.rm=T),
               samplesize = n())
 
   grow_bins_list <- list(grow_bin_minus, grow_bin_plus, grow_bin_byyear, grow_binmean)
+  names(grow_bins_list) <- c("grow_bins_minus", "grow_bins_plus", "grow_bin_byyear", "grow_bin_mean")
   return(grow_bins_list)
 }
 
@@ -424,7 +430,8 @@ surv_fits <- function(df_raw, df_samples){
   meanminusCI <- as.data.frame(t(apply(meanminussamps,1, quantile, prob = c(.1,.9)))) %>% 
     rename(lower ='10%', upper = '90%') 
 
-
+ meanminus500samps <- as.data.frame(meanminussamps[,sample(ncol(meanminussamps), 500)]) %>% 
+   cbind(xdummy)
   
       
   # endophyte positive fits
@@ -448,7 +455,6 @@ surv_fits <- function(df_raw, df_samples){
  
   meanplusCI <- as.data.frame(t(apply(meanplussamps,1, quantile, prob = c(.1,.9)))) %>% 
     rename(lower ='10%', upper = '90%') 
-
 
 
   eminus <- list(ydummy_eminus, ydummy_eminus_y1, ydummy_eminus_y2, ydummy_eminus_y3, ydummy_eminus_y4, ydummy_eminus_y5, ydummy_eminus_y6, ydummy_eminus_y7, ydummy_eminus_y8, ydummy_eminus_y9, ydummy_eminus_y10, ydummy_eminus_y11, meanminusCI)
@@ -576,7 +582,6 @@ POALgrow_fits <- grow_fits(POAL_grow_data, post_growPOAL)
 
 POSYgrow_fits <- grow_fits(POSY_grow_data, post_growPOSY)
 
-
 ```
 
 ```{r fertility fits, include=FALSE}
@@ -645,12 +650,16 @@ return(Eplusbyyear)
 surv_mean <- function(fits, bins, title){
 fits_df <- as.data.frame(fits)
 bins_df <- as.data.frame(bins[["surv_bin_mean"]])
+minus_samps_df <- as.data.frame(fits$eminus$samps) %>% 
+  melt(id = "xdummy")
+plus_samps_df <- as.data.frame(fits$eplus$samps) %>% 
+  melt(id = "xdummy")
 survmean <- ggplot(data = fits_df) +
   geom_line(aes(x = xdummy, y = eplus.mean), color = "#6a3d9a")+
   geom_line(aes(x = xdummy, y = eminus.mean), color = "#ff7f00") +
   geom_ribbon(aes(x = xdummy, ymin = eplus.CI.lower, ymax = eplus.CI.upper), fill = "#6a3d9a", alpha = .3) +
   geom_ribbon(aes(x = xdummy, ymin = eminus.CI.lower, ymax = eminus.CI.upper), fill = "#ff7f00", alpha = .3) +
-  geom_point(data = bins_df, aes(x = mean_size, y = mean_surv, color = endo, lwd = samplesize)) +
+  geom_point(data = bins_df, aes(x = mean_size, y = mean_surv, color = Endo, lwd = samplesize)) +
   labs(title = title, subtitle = "Mean Survival Probability", x = "log(size_t)", y = "Prob. of Survival") +
   scale_color_manual(values = colors2) + theme_classic() + guides(lwd = "none")
 return(survmean)
@@ -703,4 +712,117 @@ titlesurvivalfits <- annotate_figure(survivalfits, top = "Survival", left = "")
 
 ```{r survival figures, echo=FALSE, fig.width = 9, fig.height = 12}
 titlesurvivalfits
+```
+
+```{r growth raw and fits ggobjects, include = FALSE}
+# Putting together the raw, binned data and the fitted models so that they can be visualized together.
+grow_minus_byyear <- function(fits, bins, title){
+  require(ggplot2)
+  fits_df <- as.data.frame(fits)
+  fits_df <- melt(fits_df, id = "xdummy",
+                      measure.vars = c("eminus.y1","eminus.y2", 
+                                       "eminus.y3", "eminus.y4", 
+                                       "eminus.y5", "eminus.y6", 
+                                       "eminus.y7", "eminus.y8", 
+                                       "eminus.y9", "eminus.y10",
+                                       "eminus.y11")) %>% 
+  mutate(Year = recode(variable, "eminus.y1" = '1',"eminus.y2" = "2", 
+                       "eminus.y3" = "3", "eminus.y4" = "4", 
+                       "eminus.y5" = "5", "eminus.y6" = "6", 
+                       "eminus.y7" = "7", "eminus.y8" = "8", 
+                       "eminus.y9" = "9", "eminus.y10" = "10",
+                       "eminus.y11" = "11")) 
+  bins_df <- as.data.frame(bins[["grow_bins_minus"]])
+  Eminusbyyear <- ggplot(data = fits_df) +
+  geom_line(aes(x = xdummy, y = value, color = Year),  lwd = .8) +
+  geom_point(data = bins_df, aes(x = mean_size, y = mean_grow, color = Year, lwd = samplesize)) +  
+  labs(title = title, subtitle = "E-", x = "log(size_t)", y = "Prob. of growth") +
+  scale_color_manual(values = yearcolors) + guides(lwd = "none") + theme_classic()
+return(Eminusbyyear)  
+}
+grow_plus_byyear <- function(fits, bins, title){
+  require(ggplot2)
+  fits_df <- as.data.frame(fits)
+    fits_df <- melt(fits_df, id = "xdummy",
+                      measure.vars = c("eplus.y1","eplus.y2", 
+                                       "eplus.y3", "eplus.y4", 
+                                       "eplus.y5", "eplus.y6", 
+                                       "eplus.y7", "eplus.y8", 
+                                       "eplus.y9", "eplus.y10",
+                                       "eplus.y11")) %>% 
+  mutate(Year = recode(variable, "eplus.y1" = '1',"eplus.y2" = "2", 
+                       "eplus.y3" = "3", "eplus.y4" = "4", 
+                       "eplus.y5" = "5", "eplus.y6" = "6", 
+                       "eplus.y7" = "7", "eplus.y8" = "8", 
+                       "eplus.y9" = "9", "eplus.y10" = "10",
+                       "eplus.y11" = "11")) 
+  bins_df <- as.data.frame(bins[["grow_bins_plus"]])
+  Eplusbyyear <- ggplot(data = fits_df) +
+  geom_line(aes(x = xdummy, y = value, color = Year), lwd = .8) +
+  geom_point(data = bins_df, aes(x = mean_size, y = mean_grow, color = Year, lwd = samplesize)) +  
+  labs(title = title, subtitle = "E+", x = "log(size_t)", y = "Prob. of growth") +
+  scale_color_manual(values = yearcolors) + guides(lwd = "none") +theme_classic()
+return(Eplusbyyear)  
+}
+grow_mean <- function(fits, bins, title){
+fits_df <- as.data.frame(fits)
+bins_df <- as.data.frame(bins[["grow_bin_mean"]])
+growmean <- ggplot(data = fits_df) +
+  geom_line(aes(x = xdummy, y = eplus.mean), color = "#6a3d9a")+
+  geom_line(aes(x = xdummy, y = eminus.mean), color = "#ff7f00") +
+  geom_ribbon(aes(x = xdummy, ymin = eplus.CI.lower, ymax = eplus.CI.upper), fill = "#6a3d9a", alpha = .3) +
+  geom_ribbon(aes(x = xdummy, ymin = eminus.CI.lower, ymax = eminus.CI.upper), fill = "#ff7f00", alpha = .3) +
+  geom_point(data = bins_df, aes(x = mean_size, y = mean_grow, color = Endo, lwd = samplesize)) +
+  labs(title = title, subtitle = "Mean growth Probability", x = "log(size_t)", y = "Prob. of growth") +
+  scale_color_manual(values = colors2) + theme_classic() + guides(lwd = "none")
+return(growmean)
+}
+
+AGPEgrow_minus_byyear <- grow_minus_byyear(AGPEgrow_fits, AGPEgrow_bins, title = "AGPE")
+AGPEgrow_plus_byyear <- grow_plus_byyear(AGPEgrow_fits, AGPEgrow_bins, title = "AGPE")
+AGPEgrow_mean <- grow_mean(AGPEgrow_fits, AGPEgrow_bins, title = "AGPE")
+
+ELRIgrow_minus_byyear <- grow_minus_byyear(ELRIgrow_fits, ELRIgrow_bins, title = "ELRI")
+ELRIgrow_plus_byyear <- grow_plus_byyear(ELRIgrow_fits, ELRIgrow_bins, title = "ELRI")
+ELRIgrow_mean <- grow_mean(ELRIgrow_fits, ELRIgrow_bins, title = "ELRI")
+
+ELVIgrow_minus_byyear <- grow_minus_byyear(ELVIgrow_fits, ELVIgrow_bins, title = "ELVI")
+ELVIgrow_plus_byyear <- grow_plus_byyear(ELVIgrow_fits, ELVIgrow_bins, title = "ELVI")
+ELVIgrow_mean <- grow_mean(ELVIgrow_fits, ELVIgrow_bins, title = "ELVI")
+
+FESUgrow_minus_byyear <- grow_minus_byyear(FESUgrow_fits, FESUgrow_bins, title = "FESU")
+FESUgrow_plus_byyear <- grow_plus_byyear(FESUgrow_fits, FESUgrow_bins, title = "FESU")
+FESUgrow_mean <- grow_mean(FESUgrow_fits, FESUgrow_bins, title = "FESU")
+
+LOARgrow_minus_byyear <- grow_minus_byyear(LOARgrow_fits, LOARgrow_bins, title = "LOAR")
+LOARgrow_plus_byyear <- grow_plus_byyear(LOARgrow_fits, LOARgrow_bins, title = "LOAR")
+LOARgrow_mean <- grow_mean(LOARgrow_fits, LOARgrow_bins, title = "LOAR")
+
+POALgrow_minus_byyear <- grow_minus_byyear(POALgrow_fits, POALgrow_bins, title = "POAL")
+POALgrow_plus_byyear <- grow_plus_byyear(POALgrow_fits, POALgrow_bins, title = "POAL")
+POALgrow_mean <- grow_mean(POALgrow_fits, POALgrow_bins, title = "POAL")
+
+POSYgrow_minus_byyear <- grow_minus_byyear(POSYgrow_fits, POSYgrow_bins, title = "POSY")
+POSYgrow_plus_byyear <- grow_plus_byyear(POSYgrow_fits, POSYgrow_bins, title = "POSY")
+POSYgrow_mean <- grow_mean(POSYgrow_fits, POSYgrow_bins, title = "POSY")
+
+```
+
+```{r growth raw and fits plot annotations, include = FALSE}
+growmean <- grid.arrange(AGPEgrow_mean, ELRIgrow_mean, ELVIgrow_mean, FESUgrow_mean, LOARgrow_mean, POALgrow_mean, POSYgrow_mean, ncol = 1)
+titlegrowmean <- annotate_figure(growmean, top = "Mean growth", left = "")
+
+growminus <- grid.arrange(AGPEgrow_minus_byyear, ELRIgrow_minus_byyear, ELVIgrow_minus_byyear, FESUgrow_minus_byyear, LOARgrow_minus_byyear, POALgrow_minus_byyear, POSYgrow_minus_byyear, ncol = 1)
+titlegrowminus <- annotate_figure(growminus, top = "E- growth by Year", left = "")
+
+growplus <- grid.arrange(AGPEgrow_plus_byyear, ELRIgrow_plus_byyear, ELVIgrow_plus_byyear, FESUgrow_plus_byyear, LOARgrow_plus_byyear, POALgrow_plus_byyear, POSYgrow_plus_byyear, ncol = 1)
+titlegrowplus <- annotate_figure(growplus, top = "E+ growth by Year", left = "")
+
+growthfits <- grid.arrange(titlegrowmean, titlegrowminus, titlegrowplus, ncol = 3)
+titlegrowthfits <- annotate_figure(growthfits, top = "growth", left = "")
+
+```
+
+```{r growth figures, echo=FALSE, fig.width = 9, fig.height = 12}
+titlegrowthfits
 ```
