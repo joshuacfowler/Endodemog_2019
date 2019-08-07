@@ -415,7 +415,18 @@ surv_fits <- function(df_raw, df_samples){
   ydummy_eminus_y9 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*0 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*0 + mean(df_samples$'tau_year[1,9]')))
   ydummy_eminus_y10 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*0 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*0 + mean(df_samples$'tau_year[1,10]')))
   ydummy_eminus_y11 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*0 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*0 + mean(df_samples$'tau_year[1,11]')))
+
+    meanminussamps<- matrix(nrow = length(xdummy), ncol = 10000)
+  for(i in 1:10000){
+    meanminussamps[,i] <- invlogit(sample(df_samples$'beta[1]', size = 1) + sample(df_samples$'beta[2]', size = 1)*xdummy + sample(df_samples$'beta[3]', size = 1)*0 + sample(df_samples$'beta[4]', size = 1)*mean(df_raw$origin_01) + sample(df_samples$'beta[5]', size = 1)*xdummy*0)
+}
+ 
+  meanminusCI <- as.data.frame(t(apply(meanminussamps,1, quantile, prob = c(.1,.9)))) %>% 
+    rename(lower ='10%', upper = '90%') 
+
+
   
+      
   # endophyte positive fits
   ydummy_eplus <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*1))
   ydummy_eplus_y1 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[2,1]')))
@@ -429,12 +440,24 @@ surv_fits <- function(df_raw, df_samples){
   ydummy_eplus_y9 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[2,9]')))
   ydummy_eplus_y10 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[2,10]')))
   ydummy_eplus_y11 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[2,11]')))
+
+    meanplussamps<- matrix(nrow = length(xdummy), ncol = 10000)
+  for(i in 1:10000){
+    meanplussamps[,i] <- invlogit(sample(df_samples$'beta[1]', size = 1) + sample(df_samples$'beta[2]', size = 1)*xdummy + sample(df_samples$'beta[3]', size = 1)*1 + sample(df_samples$'beta[4]', size = 1)*mean(df_raw$origin_01) + sample(df_samples$'beta[5]', size = 1)*xdummy*1)
+}
+ 
+  meanplusCI <- as.data.frame(t(apply(meanplussamps,1, quantile, prob = c(.1,.9)))) %>% 
+    rename(lower ='10%', upper = '90%') 
+
+
+
+  eminus <- list(ydummy_eminus, ydummy_eminus_y1, ydummy_eminus_y2, ydummy_eminus_y3, ydummy_eminus_y4, ydummy_eminus_y5, ydummy_eminus_y6, ydummy_eminus_y7, ydummy_eminus_y8, ydummy_eminus_y9, ydummy_eminus_y10, ydummy_eminus_y11, meanminusCI)
+  names(eminus) <- c("mean", "y1", "y2", "y3", "y4", "y5", "y6", "y7", "y8", "y9", "y10", "y11", "CI")
   
-  eminus <- list(ydummy_eminus, ydummy_eminus_y1, ydummy_eminus_y2, ydummy_eminus_y3, ydummy_eminus_y4, ydummy_eminus_y5, ydummy_eminus_y6, ydummy_eminus_y7, ydummy_eminus_y8, ydummy_eminus_y9, ydummy_eminus_y10, ydummy_eminus_y11)
-  names(eminus) <- c("mean", "y1", "y2", "y3", "y4", "y5", "y6", "y7", "y8", "y9", "y10", "y11")
+  eplus <- list(ydummy_eplus, ydummy_eplus_y1, ydummy_eplus_y2, ydummy_eplus_y3, ydummy_eplus_y4, ydummy_eplus_y5, ydummy_eplus_y6, ydummy_eplus_y7, ydummy_eplus_y8, ydummy_eplus_y9, ydummy_eplus_y10, ydummy_eplus_y11, meanplusCI)
+  names(eplus) <- c("mean", "y1", "y2", "y3", "y4", "y5", "y6", "y7", "y8", "y9", "y10", "y11", "CI")  
   
-  eplus <- list(ydummy_eplus, ydummy_eplus_y1, ydummy_eplus_y2, ydummy_eplus_y3, ydummy_eplus_y4, ydummy_eplus_y5, ydummy_eplus_y6, ydummy_eplus_y7, ydummy_eplus_y8, ydummy_eplus_y9, ydummy_eplus_y10, ydummy_eplus_y11)
-  names(eplus) <- c("mean", "y1", "y2", "y3", "y4", "y5", "y6", "y7", "y8", "y9", "y10", "y11")  
+
   
   surv_fits_list <- list(eminus, eplus, xdummy)
   names(surv_fits_list) <- c("eminus", "eplus", "xdummy")
@@ -453,7 +476,7 @@ LOARsurv_fits <- surv_fits(LOAR_surv_data, post_survLOAR)
 
 POALsurv_fits <- surv_fits(POAL_surv_data, post_survPOAL)
 
-POSYsurv_fits <- surv_fits(POSY_surv_data, post_survPOAL)
+POSYsurv_fits <- surv_fits(POSY_surv_data, post_survPOSY)
 
 ```
 
@@ -477,8 +500,83 @@ grow_fits <- function(df_raw, df_samples){
   nvalues <- length(df_raw$logsize_t)
   xdummy <- seq(min(df_raw$logsize_t), max(df_raw$logsize_t), length.out = nvalues)
 
+  #endophyte negative fits  
+  ydummy_eminus <- as.vector(exp(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*0 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*0))
+  ydummy_eminus_y1 <- as.vector(exp(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*0 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*0 + mean(df_samples$'tau_year[1,1]')))
+  ydummy_eminus_y2 <- as.vector(exp(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*0 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*0 + mean(df_samples$'tau_year[1,2]')))
+  ydummy_eminus_y3 <- as.vector(exp(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + + mean(df_samples$'beta[3]')*0  + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*0 + mean(df_samples$'tau_year[1,3]')))
+  ydummy_eminus_y4 <- as.vector(exp(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*0 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*0 + mean(df_samples$'tau_year[1,4]'))) 
+  ydummy_eminus_y5 <- as.vector(exp(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*0 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*0 + mean(df_samples$'tau_year[1,5]')))
+  ydummy_eminus_y6 <- as.vector(exp(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*0 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*0 + mean(df_samples$'tau_year[1,6]')))
+  ydummy_eminus_y7 <- as.vector(exp(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*0 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*0 + mean(df_samples$'tau_year[1,7]')))
+  ydummy_eminus_y8 <- as.vector(exp(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*0 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*0 + mean(df_samples$'tau_year[1,8]')))
+  ydummy_eminus_y9 <- as.vector(exp(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*0 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*0 + mean(df_samples$'tau_year[1,9]')))
+  ydummy_eminus_y10 <- as.vector(exp(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*0 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*0 + mean(df_samples$'tau_year[1,10]')))
+  ydummy_eminus_y11 <- as.vector(exp(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*0 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*0 + mean(df_samples$'tau_year[1,11]')))
 
+    meanminussamps<- matrix(nrow = length(xdummy), ncol = 10000)
+  for(i in 1:10000){
+    meanminussamps[,i] <- exp(sample(df_samples$'beta[1]', size = 1) + sample(df_samples$'beta[2]', size = 1)*xdummy + sample(df_samples$'beta[3]', size = 1)*0 + sample(df_samples$'beta[4]', size = 1)*mean(df_raw$origin_01) + sample(df_samples$'beta[5]', size = 1)*xdummy*0)
 }
+ 
+  meanminusCI <- as.data.frame(t(apply(meanminussamps,1, quantile, prob = c(.1,.9)))) %>% 
+    rename(lower ='10%', upper = '90%') 
+
+
+  
+      
+  # endophyte positive fits
+  ydummy_eplus <- as.vector(exp(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*1))
+  ydummy_eplus_y1 <- as.vector(exp(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[2,1]')))
+  ydummy_eplus_y2 <- as.vector(exp(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[2,2]')))
+  ydummy_eplus_y3 <- as.vector(exp(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + + mean(df_samples$'beta[3]')*1  + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[2,3]')))
+  ydummy_eplus_y4 <- as.vector(exp(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[2,4]'))) 
+  ydummy_eplus_y5 <- as.vector(exp(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[2,5]')))
+  ydummy_eplus_y6 <- as.vector(exp(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[2,6]')))
+  ydummy_eplus_y7 <- as.vector(exp(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[2,7]')))
+  ydummy_eplus_y8 <- as.vector(exp(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[2,8]')))
+  ydummy_eplus_y9 <- as.vector(exp(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[2,9]')))
+  ydummy_eplus_y10 <- as.vector(exp(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[2,10]')))
+  ydummy_eplus_y11 <- as.vector(exp(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[2,11]')))
+
+    meanplussamps<- matrix(nrow = length(xdummy), ncol = 10000)
+  for(i in 1:10000){
+    meanplussamps[,i] <- exp(sample(df_samples$'beta[1]', size = 1) + sample(df_samples$'beta[2]', size = 1)*xdummy + sample(df_samples$'beta[3]', size = 1)*1 + sample(df_samples$'beta[4]', size = 1)*mean(df_raw$origin_01) + sample(df_samples$'beta[5]', size = 1)*xdummy*1)
+}
+ 
+  meanplusCI <- as.data.frame(t(apply(meanplussamps,1, quantile, prob = c(.1,.9)))) %>% 
+    rename(lower ='10%', upper = '90%') 
+
+
+
+  eminus <- list(ydummy_eminus, ydummy_eminus_y1, ydummy_eminus_y2, ydummy_eminus_y3, ydummy_eminus_y4, ydummy_eminus_y5, ydummy_eminus_y6, ydummy_eminus_y7, ydummy_eminus_y8, ydummy_eminus_y9, ydummy_eminus_y10, ydummy_eminus_y11, meanminusCI)
+  names(eminus) <- c("mean", "y1", "y2", "y3", "y4", "y5", "y6", "y7", "y8", "y9", "y10", "y11", "CI")
+  
+  eplus <- list(ydummy_eplus, ydummy_eplus_y1, ydummy_eplus_y2, ydummy_eplus_y3, ydummy_eplus_y4, ydummy_eplus_y5, ydummy_eplus_y6, ydummy_eplus_y7, ydummy_eplus_y8, ydummy_eplus_y9, ydummy_eplus_y10, ydummy_eplus_y11, meanplusCI)
+  names(eplus) <- c("mean", "y1", "y2", "y3", "y4", "y5", "y6", "y7", "y8", "y9", "y10", "y11", "CI")  
+  
+
+  
+  grow_fits_list <- list(eminus, eplus, xdummy)
+  names(grow_fits_list) <- c("eminus", "eplus", "xdummy")
+  return(grow_fits_list)
+}
+
+AGPEgrow_fits <- grow_fits(AGPE_grow_data, post_growAGPE)
+
+ELRIgrow_fits <- grow_fits(ELRI_grow_data, post_growELRI)
+
+ELVIgrow_fits <- grow_fits(ELVI_grow_data, post_growELVI)
+
+FESUgrow_fits <- grow_fits(FESU_grow_data, post_growFESU)
+
+LOARgrow_fits <- grow_fits(LOAR_grow_data, post_growLOAR)
+
+POALgrow_fits <- grow_fits(POAL_grow_data, post_growPOAL)
+
+POSYgrow_fits <- grow_fits(POSY_grow_data, post_growPOSY)
+
+
 ```
 
 ```{r fertility fits, include=FALSE}
@@ -516,7 +614,7 @@ surv_minus_byyear <- function(fits, bins, title){
   Eminusbyyear <- ggplot(data = fits_df) +
   geom_line(aes(x = xdummy, y = value, color = Year),  lwd = .8) +
   geom_point(data = bins_df, aes(x = mean_size, y = mean_surv, color = Year, lwd = samplesize)) +  
-  labs(title = title, subtitle = "E-", xlab = "log(size_t)", ylab = "Prob. of Survival") +
+  labs(title = title, subtitle = "E-", x = "log(size_t)", y = "Prob. of Survival") +
   scale_color_manual(values = yearcolors) + guides(lwd = "none") + theme_classic()
 return(Eminusbyyear)  
 }
@@ -540,7 +638,7 @@ surv_plus_byyear <- function(fits, bins, title){
   Eplusbyyear <- ggplot(data = fits_df) +
   geom_line(aes(x = xdummy, y = value, color = Year), lwd = .8) +
   geom_point(data = bins_df, aes(x = mean_size, y = mean_surv, color = Year, lwd = samplesize)) +  
-  labs(title = title, subtitle = "E+", xlab = "log(size_t)", ylab = "Prob. of Survival") +
+  labs(title = title, subtitle = "E+", x = "log(size_t)", y = "Prob. of Survival") +
   scale_color_manual(values = yearcolors) + guides(lwd = "none") +theme_classic()
 return(Eplusbyyear)  
 }
@@ -550,8 +648,10 @@ bins_df <- as.data.frame(bins[["surv_bin_mean"]])
 survmean <- ggplot(data = fits_df) +
   geom_line(aes(x = xdummy, y = eplus.mean), color = "#6a3d9a")+
   geom_line(aes(x = xdummy, y = eminus.mean), color = "#ff7f00") +
+  geom_ribbon(aes(x = xdummy, ymin = eplus.CI.lower, ymax = eplus.CI.upper), fill = "#6a3d9a", alpha = .3) +
+  geom_ribbon(aes(x = xdummy, ymin = eminus.CI.lower, ymax = eminus.CI.upper), fill = "#ff7f00", alpha = .3) +
   geom_point(data = bins_df, aes(x = mean_size, y = mean_surv, color = endo, lwd = samplesize)) +
-  labs(title = title, subtitle = "Mean Survival Probability", xlab = "log(size_t)", ylab = "Prob. of Survival") +
+  labs(title = title, subtitle = "Mean Survival Probability", x = "log(size_t)", y = "Prob. of Survival") +
   scale_color_manual(values = colors2) + theme_classic() + guides(lwd = "none")
 return(survmean)
 }
@@ -586,4 +686,21 @@ POSYsurv_mean <- surv_mean(POSYsurv_fits, POSYsurv_bins, title = "POSY")
 
 ```
 
+```{r survival raw and fits plot annotations, include = FALSE}
+survmean <- grid.arrange(AGPEsurv_mean, ELRIsurv_mean, ELVIsurv_mean, FESUsurv_mean, LOARsurv_mean, POALsurv_mean, POSYsurv_mean, ncol = 1)
+titlesurvmean <- annotate_figure(survmean, top = "Mean Survival", left = "")
 
+survminus <- grid.arrange(AGPEsurv_minus_byyear, ELRIsurv_minus_byyear, ELVIsurv_minus_byyear, FESUsurv_minus_byyear, LOARsurv_minus_byyear, POALsurv_minus_byyear, POSYsurv_minus_byyear, ncol = 1)
+titlesurvminus <- annotate_figure(survminus, top = "E- Survival by Year", left = "")
+
+survplus <- grid.arrange(AGPEsurv_plus_byyear, ELRIsurv_plus_byyear, ELVIsurv_plus_byyear, FESUsurv_plus_byyear, LOARsurv_plus_byyear, POALsurv_plus_byyear, POSYsurv_plus_byyear, ncol = 1)
+titlesurvplus <- annotate_figure(survplus, top = "E+ Survival by Year", left = "")
+
+survivalfits <- grid.arrange(titlesurvmean, titlesurvminus, titlesurvplus, ncol = 3)
+titlesurvivalfits <- annotate_figure(survivalfits, top = "Survival", left = "")
+
+```
+
+```{r survival figures, echo=FALSE, fig.width = 9, fig.height = 12}
+titlesurvivalfits
+```
