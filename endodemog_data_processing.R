@@ -518,7 +518,7 @@ pspike1 <- pspike %>%
 
 pflw <- POAL_data %>% 
   mutate("Birth Year" = year(as.character(`Planted Date`))) %>% 
-  mutate(flw2007 = NA) %>% 
+  mutate(flw2007 = 0) %>% 
   melt(id.var = c("plot","pos", "tag", "Endo", "Birth Year"), 
        measure.var = c("flw2007", "Flwtillers1", "FlwTillers2", "FlwTillers3", 
                        "FlwTillers4", "FlwTillers5", "FlwTillers6", 
@@ -644,7 +644,7 @@ poldflw <- POAL_data_old %>%
   mutate("Birth Year" = case_when(!is.na(Date) ~ year(as.character(Date)),
                                   is.na(Date) ~ 2007)) %>% 
   rename("plot" = "PLOT", "pos" = "POS", "tag" = "TAG") %>% 
-  mutate(flw2007 = NA) %>% 
+  mutate(flw2007 = 0) %>% 
   melt(id.var = c("plot", "pos", "tag", "Endo", "Birth Year"), 
        measure.var = c("flw2007", "Flwtillers1", "FlwTillers3", "FlwTillers4", 
                        "FlwTillers5", "FlwTillers6", "FlwTillers7", 
@@ -795,7 +795,7 @@ po_spike1 <- po_spike %>%
 
 po_flw <- POSY_data %>% 
   mutate("Birth Year" = year(as.character(`Planted Date`))) %>% 
-  mutate(flw2007 = NA, flw2016 = NA) %>% 
+  mutate(flw2007 = 0, flw2016 = NA) %>% 
   melt(id.var = c("plot","pos", "tag", "Endo", "Birth Year"), 
        measure.var = c("flw2007", "Flwtillers1", "FlwTillers2", "FlwTillers3", 
                        "FlwTillers4", "FlwTillers5", "FlwTillers6", 
@@ -861,7 +861,7 @@ po_rspike1 <- po_rspike %>%
 
 po_rflw <- POSY_data_r %>%
   rename("Birth Year" = "Date", "tag" = "Tag", "plot" = "Plot", "pos" = "RecruitNo") %>%
-  mutate(flw2007 = NA, flw2008 = NA, flw2009 = NA) %>% 
+  mutate(flw2007 = 0, flw2008 = NA, flw2009 = NA) %>% 
   melt(id.var = c("plot", "pos", "tag", "Endo", "Birth Year"),
        measure.var = c("flw2007", "flw2008", "flw2009", "FLWtiller10","FLWtiller11", "FLWtiller12", 
                        "FLWtiller13", "FLWtiller14", "FLWtiller15",
@@ -940,7 +940,7 @@ po_oldflw <- POSY_data_old %>%
   rename("plot" = "PLOT", "pos" = "POS", "tag" = "TAG") %>%
   mutate("Birth Year" = case_when(!is.na(Date) ~ year(as.character(Date)),
                                   is.na(Date) ~ 2007)) %>% 
-  mutate(flw2007 = NA) %>% 
+  mutate(flw2007 = 0) %>% 
   melt(id.var = c("plot","pos", "tag", "Endo", "Loc'n",
                   "Birth Year", "TRT", "Plant"), 
        measure.var = c("flw2007", "FlwTillers1", "FlwTillers3", "FlwTillers4", 
@@ -1161,7 +1161,7 @@ lflw <- LOAR_data %>%
          "tag" = "TAG") %>%
   mutate("Birth Year" = case_when(!is.na(Date) ~ year(as.character(Date)),
                                   is.na(Date) ~ 2007)) %>% 
-  mutate(flw2007 = NA) %>% 
+  mutate(flw2007 = 0) %>% 
   melt(id.var = c("plot","pos", "tag", "Endo", "Birth Year"), 
        measure.var = c("flw2007", "FlwTillers1", "FLWTiller2", "FLWTillers3", "FLWTillers4",
                        "FLWTillers5", "FLWTillers6", "FLWTillers7", 
@@ -1320,7 +1320,7 @@ fflw <- FESU_data %>%
   rename("Birth Year" = "Planteddate", "plot" = "PLOT", "pos" = "POS", 
          "tag" = "TAG") %>%
   mutate("Birth Year" = year(as.character(`Birth Year`))) %>% 
-  mutate(flw2007 = NA, flw2008 = NA) %>% 
+  mutate(flw2007 = 0, flw2008 = NA) %>% 
   melt(id.var = c("plot","pos", "tag", "Endo", "Loc'n", "Birth Year", 
                   "TRT", "Plant"), 
        measure.var = c("flw2007", "flw2008", "FlwTillers2", "FlwTillers3", 
@@ -1494,7 +1494,7 @@ elviflw <- ELVI_seed_tiller %>%
   rename("Birth Year" = "Planted Date", "plot" = "PLOT", "pos" = "POS", 
          "tag" = "TAG") %>%
   mutate("Birth Year" = year(as.character(`Birth Year`))) %>% 
-  mutate(flw2007 = NA) %>% 
+  mutate(flw2007 = 0) %>% 
  melt(id.var = c("plot","pos", "tag", "Endo", "Loc'n", "Birth Year", 
                   "TRT", "Plant"), 
        measure.var = c("flw2007", "FlwTillers08", "FlwTillers09", "FlwTillers10", 
@@ -1670,7 +1670,7 @@ elriflw <- ELRI_seed_tiller %>%
   rename("Birth Year" = "Planted Date", "plot" = "PLOT", "pos" = "POS", 
          "tag" = "TAG", "Endo" = "ENDO") %>%
   mutate("Birth Year" = year(as.character(`Birth Year`))) %>% 
-  mutate(flw2007 = NA) %>% 
+  mutate(flw2007 = 0) %>% 
   melt(id.var = c("plot","pos", "tag", "Endo", "Loc'n", "Birth Year", 
                   "TRT", "Plant"), 
        measure.var = c("flw2007", "FlwTillers08", "FlwTillers09.x", "FLwTillers10", 
@@ -1825,7 +1825,7 @@ agpeflw <- AGPE_data %>%
   rename("Birth Year" = "PlantedDate", "plot" = "PLOT", "pos" = "POS", 
          "tag" = "TAG") %>%
   mutate("Birth Year" = year(as.character(`Birth Year`))) %>% 
-  mutate(flw2007 = NA) %>% 
+  mutate(flw2007 = 0) %>% 
   melt(id.var = c("plot","pos", "tag", "Endo", "Loc'n", "Birth Year", 
                   "TRT", "Plant"), 
        measure.var = c("flw2007", "Flwtillers1", "FlwTillers2", "FLWTiller3", 
@@ -1949,8 +1949,6 @@ LTREB_repro1 <- LTREB_repro %>%
 
 # Summarizing mean seed/spikelet, mean seed/inflorescence (for Elymus species only), and mean spikelets/inflorescence
 LTREB_repro2 <- LTREB_repro1 %>%
-  filter(!is.na(flw)) %>% 
-  filter(flw!=0) %>% 
   mutate(seedperspike = case_when(species == "ELVI" | species == "ELRI" ~ NA_real_,
                                   species == "POAL" | species == "POSY" | species == "FESU" | species == "LOAR" ~ seed/spikelets, # for these species, they are recorded as seeds/infl (collected for a few years) and spikelets/infl (collected for all year), so we are calculating avg seed/spike to be able to multiply byspiklets/infl in years without seed counts 
                                   species == "AGPE" ~ seed)) %>% 
@@ -1968,36 +1966,36 @@ table(LTREB_repro2$species, LTREB_repro2$year, !is.na(LTREB_repro2$flw), !is.na(
 table(is.na(LTREB_repro1$flw), LTREB_repro1$flw>0, !is.na(LTREB_repro1$spikelets))
 table(!is.na(LTREB_repro2$flw),!is.na(LTREB_repro2$spikeperinf))
 
-LTREB_repro3 <- ungroup(LTREB_repro2) #sets the groups so that we can filter the resulting dataframe
+LTREB_repro3 <- ungroup(LTREB_repro2) # sets the groups so that we can filter the resulting dataframe
 
 ## getting a dataframe with time t and t_1
+LTREB_repro_lag <- LTREB_repro3 %>% 
+group_by(tag) %>% 
+  mutate(flw_t = dplyr::lag(flw, n = 1, default = NA),
+         year_t = dplyr::lag(year, n = 1, default = NA),
+         seedperspike_t = dplyr::lag(seedperspike, n = 1, default = NA),
+         seedperinf_t = dplyr::lag(seedperinf, n = 1, default = NA),
+         spikeperinf_t = dplyr::lag(spikeperinf, n = 1, default = NA)) %>% 
+  mutate(flw_t1 = flw,
+         year_t1 = year,
+         seedperspike_t1 = seedperspike,
+         seedperinf_t1 = seedperinf,
+         spikeperinf_t1 = spikeperinf
+         ) %>% 
+  filter(!is.na(flw_t))
 
-LTREB_repro_t1 <-LTREB_repro3 %>%
-  filter(year!= min(year)) %>% 
-  rename(year_t1 = year, flwtillerno_t1 = flw, spikeperinfl_t1 = spikeperinf, 
-         seedperinfl_t1 = seedperinf, seedperspike_t1 = seedperspike, no.repro_tillers_measured_t1 = no.repro_tillers_measured) %>%  
-  mutate(year_t = year_t1 - 1)
-
-LTREB_repro_t <- LTREB_repro3 %>%
-  filter(year != max(year)) %>% 
-  rename(year_t = year, flwtillerno_t = flw, spikeperinfl_t = spikeperinf,
-         seedperinfl_t = seedperinf, seedperspike_t = seedperspike, no.repro_tillers_measured_t = no.repro_tillers_measured) %>% 
-  mutate(year_t1 = year_t + 1)
-
-LTREB_repro_t_t1 <- LTREB_repro_t1 %>% 
-  full_join(LTREB_repro_t, by = c("plot", "pos", "tag", "endo_01", "birth", "year_t", "year_t1", "species"),
-            all.x = all, all.y = all) 
-
-# View(LTREB_repro_t_t1)
+         
+# View(LTREB_repro_lag)
 
 # three of these  records don't have a birth year recorded.
-na_Birthyear <- LTREB_repro_t_t1 %>% 
+na_Birthyear <- LTREB_repro_lag %>% 
   filter(is.na(`birth`))
 
 
 # merge the reproductive data with LTREB long data file for recent data and for size information for the reproductive model
 # This is endodemoglong which is stored in LTREB_data
 head(LTREB_data)
+
 
 LTREB_melt <- LTREB_data %>% 
   melt(id.var = c("plot_fixed","pos", "id", "species", "species_index", "endo_01", "endo_index", "origin_01", "birth", "year_t", "year_t_index", "year_t1", "year_t1_index", "surv_t1", "size_t", "logsize_t","size_t1", "logsize_t1", "flw_t1", "seed_t1", "seed_t"),
@@ -2006,61 +2004,24 @@ LTREB_melt <- LTREB_data %>%
 
 LTREB_cast <- LTREB_melt %>% 
   group_by(plot_fixed, pos, id, species, species_index, endo_01, endo_index, origin_01, birth, year_t, year_t_index, year_t1, year_t1_index, surv_t1, size_t, logsize_t, size_t1, logsize_t1, flw_t1, seed_t1, seed_t) %>% 
-  summarize(spikeperinf_t1_fromlong = mean(spikelets_t1),
+  summarize(spikeperinf_t1_fromlong = mean(spikelets_t1, na.rm = TRUE),
             no.repro_tillers_measured_fromlong = n()) %>% 
   rename(seed_t_fromlong = seed_t, seed_t1_fromlong = seed_t1)
 
 LTREB_cast1 <- ungroup(LTREB_cast)
 
+LTREB_cast_justrepro <- LTREB_cast1 %>% 
+  select(plot_fixed, pos, id, species, species_index, endo_01, 
+         endo_index, origin_01, birth, year_t, year_t_index,
+         year_t1, year_t1_index, flw_t1, seed_t1_fromlong, seed_t_fromlong, spikeperinf_t1_fromlong, no.repro_tillers_measured_fromlong)
 
 # I need to add flw_t and spikeperinf_t for the 2016 and 2017 data which is entered into this main database. 
-LTREB_tem_t1 <- LTREB_cast1 %>%
-  select(-contains("_index"), -contains("seed"), -contains("spike")) %>% 
-  filter(year_t1 != min(year_t1)) %>% 
-  rename(year_t1_new = year_t1, size_t1_new = size_t1, 
-         flw_t1_fromlong = flw_t1) %>% 
-  mutate(year_t_new = year_t1_new - 1) 
+LTREB_lag <- LTREB_cast1%>%
+  group_by(id) %>% 
+  mutate(flw_t = dplyr::lag(flw_t1, n = 1, default = NA),
+         spikeperinf_t_fromlong = dplyr::lag(spikeperinf_t1_fromlong, n = 1, default = NA))
 
-LTREB_tem_t <- LTREB_cast1 %>% 
-  select(-contains("_index"), -contains("seed"), -contains("spike")) %>% 
-  filter(year_t1 != max(year_t1)) %>% 
-  rename(year_t_new = year_t1, size_t_new = size_t, 
-         flw_t_fromlong = flw_t1) %>% 
-  mutate(year_t1_new = year_t_new + 1)
-
-LTREB_tem_merge <- LTREB_tem_t1 %>% 
-  full_join(LTREB_tem_t, by = c("plot_fixed", "pos", "id", 
-                                "species", 
-                                "endo_01", 
-                                "origin_01", "birth", 
-                                "year_t_new",
-                                "year_t1_new",
-                                "surv_t1"),
-            all.x = all, all.y = all)
-
-
-# View(LTREB_tem_merge)
-
-#example from further down of generating the flw_t and flw_t1 
-
-flw_tiller_t1 <-flwtiller1 %>%
-  filter(year!= min(year)) %>% 
-  rename(year_t1 = year, flw_t1 = flw) %>%  
-  mutate(year_t = year_t1 - 1)
-
-flw_tiller_t <- flwtiller1 %>%
-  filter(year != max(year)) %>% 
-  rename(year_t = year, flw_t = flw) %>% 
-  mutate(year_t1 = year_t + 1)
-
-flw_tillermerge <- flw_tiller_t1 %>% 
-  full_join(flw_tiller_t, by = c("plot", "pos", "tag", "Endo", "year_t", "year_t1", "species"),
-            all.x = all, all.y = all) %>% 
-  select(-contains("variable")) 
-
-# 
-
-
+# View(LTREB_lag)
 
 
 
