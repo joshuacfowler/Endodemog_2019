@@ -38,8 +38,11 @@ LTREB_data <- LTREB_endodemog %>%
   mutate(origin_01 = as.integer(case_when(origin == "O" ~ 0, 
                                           origin == "R" ~ 1, 
                                           origin != "R" | origin != "O" ~ 1))) %>%   
-  mutate(plot_fixed = (case_when(plot != "R" ~ plot, 
-                                 plot == "R" ~ origin)))  %>% 
+  mutate(plot_fixed = case_when(plot != "R" ~ plot, 
+                                 plot == "R" ~ origin)) %>% 
+  mutate(surv_t1 = case_when(surv_t1 == 1 ~ 1,
+                                   surv_t1 == 0 ~ 0,
+                                   is.na(surv_t1) & birth == year_t1 ~ 1)) %>% 
   filter(duplicated(.) == FALSE)
 
 # dim(LTREB_data)
@@ -449,7 +452,7 @@ ELVI_data <- read_xlsx("/Users/joshuacfowler/Dropbox/EndodemogData/rawdatafilesb
 ELVI_data_r <- read_xlsx("/Users/joshuacfowler/Dropbox/EndodemogData/rawdatafilesbyspecies/ELVI (IN) FINAL 3 10 16 updated and checked.xlsx", sheet = "ELVI recruits")
 ELVI_data_seed <- read_xlsx("/Users/joshuacfowler/Dropbox/EndodemogData/rawdatafilesbyspecies/ELVI (IN) FINAL 3 10 16 updated and checked.xlsx", sheet = "ELVISeeds")
 ELVI_data_r <- ELVI_data_r %>% 
-  mutate(tag = paste(Plot, RecruitNo, sep = "-")) 
+  mutate(tag = paste(Plot, RecruitNo, sep = "_")) 
   
 
 # Read in data from ELRI
@@ -457,7 +460,7 @@ ELRI_data <- read_xlsx("/Users/joshuacfowler/Dropbox/EndodemogData/rawdatafilesb
 ELRI_data_r <- read_xlsx("/Users/joshuacfowler/Dropbox/EndodemogData/rawdatafilesbyspecies/ELRI data up to 2016.xlsx", sheet = "ELRI recruits")
 ELRI_data_seed2009 <- read_xlsx("/Users/joshuacfowler/Dropbox/EndodemogData/rawdatafilesbyspecies/ELRI data up to 2016.xlsx", sheet = "ELRI infl 09")
 ELRI_data_r <- ELRI_data_r %>% 
-  mutate(tag = paste(PLOT, RecruitNo, sep = "-")) 
+  mutate(tag = paste(PLOT, RecruitNo, sep = "_")) 
 # Read in data from POSY
 AGPE_data <- read_xlsx("/Users/joshuacfowler/Dropbox/EndodemogData/rawdatafilesbyspecies/AGPE2016_final.xlsx", sheet = "AGPE")
 AGPE_data_r <- read_xlsx("/Users/joshuacfowler/Dropbox/EndodemogData/rawdatafilesbyspecies/AGPE2016_final.xlsx", sheet = "AGPE recruits")
@@ -1945,7 +1948,8 @@ LTREB_repro1 <- LTREB_repro %>%
   rename(endo = Endo) %>% 
   mutate(endo_01 = as.integer(case_when(endo == "0" | endo == "minus" ~ 0,
                                         endo == "1"| endo =="plus" ~ 1))) %>% 
-  mutate(`birth` = as.integer(`Birth Year`))
+  mutate(`birth` = as.integer(`Birth Year`)) %>% 
+  mutate(plot_fixed = as.factor(plot))
 
 # Summarizing mean seed/spikelet, mean seed/inflorescence (for Elymus species only), and mean spikelets/inflorescence
 LTREB_repro2 <- LTREB_repro1 %>%
@@ -1955,7 +1959,7 @@ LTREB_repro2 <- LTREB_repro1 %>%
   mutate(seedperinf = case_when(species == "ELVI" | species == "ELRI" ~ seed,
                                 species == "POAL" | species == "POSY" | species == "FESU" | species == "LOAR" ~ NA_real_,
                                 species == "AGPE"~ NA_real_)) %>% 
-  group_by(plot, pos, tag, species, endo_01, birth, year, flw) %>% 
+  group_by(plot_fixed, pos, tag, species, endo_01, birth, year, flw) %>% 
   summarize(seedperspike = mean(seedperspike, na.rm = TRUE),
             seedperinf = mean(seedperinf, na.rm = TRUE),
             spikeperinf = mean(spikelets,na.rm = TRUE), 
@@ -1982,13 +1986,13 @@ group_by(tag) %>%
          seedperinf_t1 = seedperinf,
          spikeperinf_t1 = spikeperinf
          ) %>% 
-  filter(!is.na(flw_t))
+  filter(!is.na(flw_t)) %>% 
+  select(-flw, -year, -seedperspike, -spikeperinf, -seedperinf)
 
-         
 # View(LTREB_repro_lag)
-
+LTREB_repro_lag1 <- ungroup(LTREB_repro_lag)
 # three of these  records don't have a birth year recorded.
-na_Birthyear <- LTREB_repro_lag %>% 
+na_Birthyear <- LTREB_repro_lag1 %>% 
   filter(is.na(`birth`))
 
 
@@ -2010,17 +2014,18 @@ LTREB_cast <- LTREB_melt %>%
 
 LTREB_cast1 <- ungroup(LTREB_cast)
 
-LTREB_cast_justrepro <- LTREB_cast1 %>% 
-  select(plot_fixed, pos, id, species, species_index, endo_01, 
-         endo_index, origin_01, birth, year_t, year_t_index,
-         year_t1, year_t1_index, flw_t1, seed_t1_fromlong, seed_t_fromlong, spikeperinf_t1_fromlong, no.repro_tillers_measured_fromlong)
+# LTREB_cast_justrepro <- LTREB_cast1 %>% 
+  # select(plot_fixed, pos, id, species, species_index, endo_01, 
+         # endo_index, origin_01, birth, year_t, year_t_index,
+         # year_t1, year_t1_index, flw_t1, seed_t1_fromlong, seed_t_fromlong, spikeperinf_t1_fromlong, no.repro_tillers_measured_fromlong)
 
 # I need to add flw_t and spikeperinf_t for the 2016 and 2017 data which is entered into this main database. 
 LTREB_lag <- LTREB_cast1%>%
   group_by(id) %>% 
-  mutate(flw_t = dplyr::lag(flw_t1, n = 1, default = NA),
-         spikeperinf_t_fromlong = dplyr::lag(spikeperinf_t1_fromlong, n = 1, default = NA))
-
+  mutate(flw_t_fromlong = dplyr::lag(flw_t1, n = 1, default = NA),
+         spikeperinf_t_fromlong = dplyr::lag(spikeperinf_t1_fromlong, n = 1, default = NA)) %>% 
+  rename(flw_t1_fromlong = flw_t1)
+LTREB_lag1 <- ungroup(LTREB_lag) 
 # View(LTREB_lag)
 
 
@@ -2029,20 +2034,66 @@ LTREB_lag <- LTREB_cast1%>%
 
 # now we can merge the two datasets together.
 
-# LTREB_repro_combo <- LTREB_cast %>% 
-#   full_join(LTREB_repro_t_t1, 
-#            by = c("plot_fixed" = "plot", "pos" = "pos",
-#                   "id" = "tag", "species" = "species", 
-#                   "endo_01" = "endo_01", "birth" = "birth", 
-#                   "year_t" = "year_t", "year_t1" = "year_t1")) %>% 
-#   rename(flw_no_t1_from_long = flw_t1)
+LTREB_repro_combo <- LTREB_lag1 %>%
+  left_join(LTREB_repro_lag1,
+           by = c("plot_fixed" = "plot_fixed", "pos" = "pos",
+                  "id" = "tag", "species" = "species",
+                  "endo_01" = "endo_01", "birth" = "birth",
+                  "year_t" = "year_t", "year_t1" = "year_t1"))
 
 # View(LTREB_repro_combo)
-#dim(LTREB_repro_combo)
+# dim(LTREB_repro_combo)
 
+# These are tag id's that are not shared between the repro data and the long data. 
+# These result from plants that either arrived after 2016, or didn't reproduce during the 2016. 
+# Those cases should be included in the long data. 
+# If there are cases within the repro data that are unique, that is a bigger problem. Maybe due to different label schemes
+setdiff(LTREB_lag1$id,LTREB_repro_lag1$tag)
+setdiff(LTREB_repro_lag1$tag,LTREB_lag1$id)
+setdiff(LTREB_repro_lag1$tag, LTREB_repro_combo$id)
 
+# I'm going to pull out those id's that are missing from the combined file. 
+# The ID's for POSY are marked within the excel file as red, so they are probably okay to not include because they don't actually have data. 
+# They only have the flw data that I included for 2007 (0), which was not pulled from the excel files but added by my to make a year_t for the original plants
+# The ID's for the POAL are a little bit less clear, but they also seem to be commented or marked as questionable in the raw data files and so are probably okay to not include.
+LTREB_repro_lag1_missing <- LTREB_repro_lag1 %>% 
+  filter(tag %in% setdiff(LTREB_repro_lag1$tag,LTREB_lag1$id))
 
+# View(LTREB_repro_lag1_missing)
 
+# Now select the correct repro data from long or from the raw files into new master columns
+LTREB_full <- LTREB_repro_combo %>% 
+  mutate(FLW_T1 = case_when(is.na(flw_t1) & !is.na(flw_t1_fromlong) ~ as.integer(flw_t1_fromlong),
+                            !is.na(flw_t1) & is.na(flw_t1_fromlong) ~ as.integer(flw_t1),
+                            !is.na(flw_t1) & !is.na(flw_t1_fromlong) ~ as.integer(flw_t1)),    # In this case, where both datasets had data entered, spot checking showed that they have they were identical
+          FLW_T = case_when(is.na(flw_t) & !is.na(flw_t_fromlong) ~ as.integer(flw_t_fromlong),
+                            !is.na(flw_t) & is.na(flw_t_fromlong) ~ as.integer(flw_t),                                                                          
+                            !is.na(flw_t) & !is.na(flw_t_fromlong) ~ as.integer(flw_t)),
+         SPIKEPERINF_T = case_when(is.na(spikeperinf_t) & !is.na(spikeperinf_t_fromlong) ~ as.numeric(spikeperinf_t_fromlong),
+                                   !is.na(spikeperinf_t) & is.na(spikeperinf_t_fromlong) ~ as.numeric(spikeperinf_t),                                                                          
+                                   !is.na(spikeperinf_t) & !is.na(spikeperinf_t_fromlong) ~ as.numeric(spikeperinf_t)),
+         SPIKEPERINF_T1 = case_when(is.na(spikeperinf_t1) & !is.na(spikeperinf_t1_fromlong) ~ as.numeric(spikeperinf_t1_fromlong),
+                                    !is.na(spikeperinf_t1) & is.na(spikeperinf_t1_fromlong) ~ as.numeric(spikeperinf_t1),                                                                          
+                                    !is.na(spikeperinf_t1) & !is.na(spikeperinf_t1_fromlong) ~ as.numeric(spikeperinf_t1)),
+         SEEDPERINF_T = case_when(is.na(seedperinf_t) & !is.na(seed_t_fromlong) & species == "ELVI" | species == "ELRI" & FLW_T == 0 ~ NA_real_,
+                                  is.na(seedperinf_t) & !is.na(seed_t_fromlong) & species == "ELVI" | species == "ELRI" & FLW_T > 0 ~ as.numeric(seed_t_fromlong), #seed per infl data should be only for ELVI and ELRI, so I only want to trust the seed data for these from the long data
+                                  !is.na(seedperinf_t) & is.na(seed_t_fromlong) ~ as.numeric(seedperinf_t),                                                                          
+                                  !is.na(seedperinf_t) & !is.na(seed_t_fromlong) ~ as.numeric(seedperinf_t)),
+         SEEDPERINF_T1 = case_when(is.na(seedperinf_t1) & !is.na(seed_t1_fromlong) & species == "ELVI" | species == "ELRI" & FLW_T == 0 ~ NA_real_,
+                                    is.na(seedperinf_t1) & !is.na(seed_t1_fromlong) & species == "ELVI" | species == "ELRI" & FLW_T > 0 ~ as.numeric(seed_t1_fromlong), #seed per infl data should be only for ELVI and ELRI, so I only want to trust the seed data for these from the long data
+                                   !is.na(seedperinf_t1) & is.na(seed_t1_fromlong) ~ as.numeric(seedperinf_t1),                                                                          
+                                   !is.na(seedperinf_t1) & !is.na(seed_t1_fromlong) ~ as.numeric(seedperinf_t1)),
+         SEEDPERSPIKE_T = case_when(is.na(seedperspike_t) & !is.na(seed_t_fromlong) & species != "ELVI" | species != "ELRI" & FLW_T == 0 ~ NA_real_,
+                                    is.na(seedperspike_t) & !is.na(seed_t_fromlong) & species != "ELVI" | species != "ELRI" & FLW_T > 0 ~ as.numeric(seedperspike_t), 
+                                    !is.na(seedperspike_t) & is.na(seed_t_fromlong) ~ as.numeric(seedperspike_t),                                                                          
+                                    !is.na(seedperspike_t) & !is.na(seed_t_fromlong) ~ as.numeric(seedperspike_t)),
+         SEEDPERSPIKE_T1 = case_when(is.na(seedperspike_t1) & !is.na(seed_t1_fromlong) & species != "ELVI" | species != "ELRI" & FLW_T == 0 ~ NA_real_,
+                                     is.na(seedperspike_t1) & !is.na(seed_t1_fromlong) & species != "ELVI" | species != "ELRI" & FLW_T > 0 ~ as.numeric(seedperspike_t1), 
+                                     !is.na(seedperspike_t1) & is.na(seed_t1_fromlong) ~ as.numeric(seedperspike_t1),                                                                          
+                                     !is.na(seedperspike_t1) & !is.na(seed_t1_fromlong) ~ as.numeric(seedperspike_t1)),
+         NO_REPRO_TILLERS_MEASURED = case_when(SPIKEPERINF_T1 == spikeperinf_t1 ~ no.repro_tillers_measured,
+                                               SPIKEPERINF_T1 == spikeperinf_t1_fromlong ~ no.repro_tillers_measured_fromlong))
+  
 
 #____________________________________________________
 # This flw data frame was used originally for the flw model development but will be replaced by the combined endodemog dataframe.
