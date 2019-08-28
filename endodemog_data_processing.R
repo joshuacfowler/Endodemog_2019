@@ -1590,7 +1590,7 @@ LTREB_repro1 <- LTREB_repro %>%
   mutate(endo_01 = as.integer(case_when(endo == "0" | endo == "minus" ~ 0,
                                         endo == "1"| endo =="plus" ~ 1))) %>% 
   mutate(`birth` = as.integer(`Birth Year`)) %>% 
-  mutate(plot_fixed = as.factor(plot))
+  mutate(plot_fixed = as.integer(plot))
 
 # Summarizing mean seed/spikelet, mean seed/inflorescence (for Elymus species only), and mean spikelets/inflorescence
 LTREB_repro2 <- LTREB_repro1 %>%
