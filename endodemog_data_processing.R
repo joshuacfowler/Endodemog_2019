@@ -27,6 +27,13 @@ LTREB_data <- LTREB_endodemog %>%
   mutate(endo_01 = as.integer(case_when(endo == "0" | endo == "minus" ~ 0,
                                         endo == "1"| endo =="plus" ~ 1))) %>% 
   mutate(endo_index = as.integer(as.factor(endo_01+1)))  %>% 
+  mutate(species = case_when(species == "ELVI" & plot == 101 ~ "ELRI", species == "ELVI" & plot != 101 ~ "ELVI",  # This is for the compiled data where a ELRI data point in plot 101, tag 2004 is labelled as ELVI
+                                   species == "ELRI" ~ "ELRI",
+                                   species == "FESU" ~ "FESU",
+                                   species == "AGPE" ~ "AGPE",
+                                   species == "POAL" ~ "POAL",
+                                   species == "POSY" ~ "POSY",
+                                   species == "LOAR" ~ "LOAR"))  %>%    
   mutate(species_index = as.integer(recode_factor(species,                   
                                                   "AGPE" = 1, "ELRI" = 2, "ELVI" = 3, 
                                                   "FESU" = 4, "LOAR" = 5, "POAL" = 6, 
@@ -43,9 +50,10 @@ LTREB_data <- LTREB_endodemog %>%
                                            '2017' = 11, '2018' = 12))) %>%               
   mutate(origin_01 = as.integer(case_when(origin == "O" ~ 0, 
                                           origin == "R" ~ 1, 
-                                          origin != "R" | origin != "O" ~ 1))) %>%   
-  mutate(plot_fixed = case_when(plot != "R" ~ plot, 
-                                 plot == "R" ~ origin)) %>% 
+                                          origin != "R" | origin != "O" ~ 1))) %>%
+  mutate(plot_fixed = as.integer(case_when(species == "LOAR" & id == "39_1B" ~ "39", # This is for a copy error with LOAR individual 39_1B, which assigned it to plots 41-44
+                                 plot != "R" ~ as.character(plot), 
+                                 plot == "R" ~ as.character(origin)))) %>% 
   mutate(surv_t1 = as.integer(case_when(surv_t1 == 1 ~ 1,
                                    surv_t1 == 0 ~ 0,
                                    is.na(surv_t1) & birth == year_t1 ~ 1))) %>% 
@@ -1575,7 +1583,7 @@ LTREB_repro_flw_spike_mismatches <- LTREB_repro %>%
   filter(flw==0 & spikelets>0 | flw > 0 & is.na(spikelets))
 
 ###########################################################################################################################################################################
-###### Calculating mean seed and spikelet information and merging with LTREB_data that will be used in the seed estimates -----------------
+###### Calculating mean seed and spikelet information and merging with LTREB_data that will be used in the reproductive kernels -----------------
 ###########################################################################################################################################################################
 LTREB_repro1 <- LTREB_repro %>% 
   rename(endo = Endo) %>% 
@@ -2514,162 +2522,143 @@ str(POSY_fert_data_list)
 
 
 
-
-
-
-#____________________________________________________
-# This flw data frame was used originally for the flw model development but will be replaced by the combined endodemog dataframe.
-# getting flw tiller info to merge with endodemoglong
-# agpeflw, agpe_rflw, elriflw, elri_rflw, elviflw, elvi_rflw,fflw,f_rflw, lflw, l_rflw, po_flw, po_rflw, po_oldflw, po_roldflw, pflw, poldflw, rflw, roldflw
-agpeflw <- agpeflw %>% 
-  mutate(species = "AGPE") %>% 
-  select(plot, pos, tag, Endo, flw, year, species, variable)
-agpe_rflw <- agpe_rflw %>% 
-  mutate(species = "AGPE") %>% 
-  select(plot, pos, tag, Endo, flw, year, species, variable)
-elriflw <- elriflw%>% 
-  mutate(species = "ELRI") %>% 
-  select(plot, pos, tag, Endo, flw, year, species, variable)
-elri_rflw <- elri_rflw%>% 
-  mutate(species = "ELRI") %>% 
-  select(plot, pos, tag, Endo, flw, year, species, variable)
-elviflw <- elviflw%>% 
-  mutate(species = "ELVI") %>% 
-  select(plot, pos, tag, Endo, flw, year, species, variable)
-elvi_rflw <- elvi_rflw%>% 
-  mutate(species = "ELVI") %>% 
-  select(plot, pos, tag, Endo, flw, year, species, variable)
-fflw <- fflw%>% 
-  mutate(species = "FESU") %>% 
-  select(plot, pos, tag, Endo, flw, year, species, variable)
-f_rflw <- f_rflw%>% 
-  mutate(species = "FESU") %>% 
-  select(plot, pos, tag, Endo, flw, year, species, variable)
-lflw <- lflw%>% 
-  mutate(species = "LOAR") %>% 
-  select(plot, pos, tag, Endo, flw, year, species, variable)
-l_rflw <- l_rflw%>% 
-  mutate(species = "LOAR") %>% 
-  select(plot, pos, tag, Endo, flw, year, species, variable)
-po_flw <- po_flw%>% 
-  mutate(species = "POSY") %>% 
-  select(plot, pos, tag, Endo, flw, year, species, variable)
-po_rflw <- po_rflw%>% 
-  mutate(species = "POSY") %>% 
-  select(plot, pos, tag, Endo, flw, year, species, variable)
-po_oldflw <- po_oldflw%>% 
-  mutate(species = "POSY") %>% 
-  select(plot, pos, tag, Endo, flw, year, species, variable)
-po_roldflw <- po_roldflw%>% 
-  mutate(species = "POSY") %>% 
-  select(plot, pos, tag, Endo, flw, year, species, variable)
-pflw <- pflw%>% 
-  mutate(species = "POAL") %>% 
-  select(plot, pos, tag, Endo, flw, year, species, variable)
-poldflw <- poldflw%>% 
-  mutate(species = "POAL") %>% 
-  select(plot, pos, tag, Endo, flw, year, species, variable)
-rflw <- rflw%>% 
-  mutate(species = "POAL") %>% 
-  select(plot, pos, tag, Endo, flw, year, species, variable)
-roldflw <- roldflw%>% 
-  mutate(species = "POAL") %>% 
-  select(plot, pos, tag, Endo, flw, year, species, variable)
-
-
-flwtiller <- agpeflw %>%  
-  merge(agpe_rflw, by = c("plot", "pos","tag", "Endo", "flw", "year", "species", "variable"),all = TRUE) %>% 
-  merge(elriflw, by = c("plot", "pos","tag", "Endo", "flw", "year", "species", "variable"),all = TRUE) %>%  
-  merge(elri_rflw, by = c("plot", "pos","tag", "Endo", "flw", "year", "species", "variable"),all = TRUE) %>% 
-  merge(elviflw, by = c("plot", "pos","tag", "Endo", "flw", "year", "species", "variable"),all = TRUE) %>% 
-  merge(elvi_rflw, by = c("plot", "pos","tag", "Endo", "flw", "year", "species", "variable"),all = TRUE) %>%  
-  merge(fflw, by = c("plot", "pos","tag", "Endo", "flw", "year", "species", "variable"),all = TRUE) %>% 
-  merge(f_rflw, by = c("plot", "pos","tag", "Endo", "flw", "year", "species", "variable"),all = TRUE) %>% 
-  merge(lflw, by = c("plot", "pos","tag", "Endo", "flw", "year", "species", "variable"),all = TRUE) %>% 
-  merge(l_rflw, by = c("plot", "pos","tag", "Endo", "flw", "year", "species", "variable"),all = TRUE) %>%  
-  merge(po_flw, by = c("plot", "pos","tag", "Endo", "flw", "year", "species", "variable"),all = TRUE) %>% 
-  merge(po_rflw, by = c("plot", "pos","tag", "Endo", "flw", "year", "species", "variable"),all = TRUE) %>% 
-  merge(po_oldflw, by = c("plot", "pos","tag", "Endo", "flw", "year", "species", "variable"),all = TRUE) %>% 
-  merge(po_roldflw, by = c("plot", "pos","tag", "Endo", "flw", "year", "species", "variable"),all = TRUE) %>% 
-  merge(pflw, by = c("plot", "pos","tag", "Endo", "flw", "year", "species", "variable"),all = TRUE) %>% 
-  merge(poldflw, by = c("plot", "pos","tag", "Endo", "flw", "year", "species", "variable"),all = TRUE) %>% 
-  merge(rflw, by = c("plot", "pos","tag", "Endo", "flw", "year", "species", "variable"),all = TRUE)  %>% 
-  merge(roldflw, by = c("plot", "pos","tag", "Endo", "flw", "year", "species", "variable"),all = TRUE) 
-
-flwtiller1 <- flwtiller %>% 
-  filter(is.na(flw) | flw != "?") %>% 
-  filter(is.na(flw) | flw != "check tag")
-
-
-## getting a dataframe with time t and t_1
-flw_tiller_t1 <-flwtiller1 %>%
-  filter(year!= min(year)) %>% 
-  rename(year_t1 = year, flw_t1 = flw) %>%  
-  mutate(year_t = year_t1 - 1)
-
-flw_tiller_t <- flwtiller1 %>%
-  filter(year != max(year)) %>% 
-  rename(year_t = year, flw_t = flw) %>% 
-  mutate(year_t1 = year_t + 1)
-
-flw_tillermerge <- flw_tiller_t1 %>% 
-  full_join(flw_tiller_t, by = c("plot", "pos", "tag", "Endo", "year_t", "year_t1", "species"),
-            all.x = all, all.y = all) %>% 
-  select(-contains("variable"))
-
-
-# merge this with LTREB for flower model
-LTREB_endodemog <- 
-  read.csv(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Fulldataplusmetadata/endo_demog_long.csv")
-LTREB_tem <- LTREB_endodemog %>% 
-  select(-seed_t, -seed_t1, -contains("spike")) %>% 
-  rename("tag" = "id", "Endo" = "endo") %>% 
-  mutate(Endo = case_when(Endo == "0" | Endo == "minus" ~ 0,
-                             Endo == "1"| Endo =="plus" ~ 1)) 
-
-
-
-# I need to add flw_t for the 2016 and 2017 data which is entered into this main database. 
-LTREB_tem_t <- LTREB_tem %>%
-  filter(year_t1 != max(year_t1)) %>% 
-  rename(surv_t_new = surv_t1, size_t_new = size_t1, flw_t = flw_t1, year_t_new = year_t1,) %>% 
-  mutate(year_t1_new = year_t_new + 1) %>% 
-  select(-year_t,-size_t, -notes)
-
-LTREB_tem_t1 <- LTREB_tem %>%
-  filter(year_t1 != min(year_t1)) %>% 
-  rename(surv_t1_new = surv_t1, size_t1_new = size_t1, flw_t1 = flw_t1, year_t1_new = year_t1) %>% 
-  mutate(year_t_new = year_t1_new - 1) %>% 
-  select(-year_t, -size_t, -notes)
-
-
-LTREB_tem_merge <- LTREB_tem_t1 %>% 
-  full_join(LTREB_tem_t, by = c("plot", "pos", "tag", "Endo", "origin", "year_t1_new", "year_t_new", "birth", "species"),
-            all.x = all, all.y = all) %>% 
-  rename(year_t = year_t_new, year_t1 = year_t1_new)
+##############################################################################
+####### Preparing datalists for Seed Means and seed-to-seedling Kernel ------------------------------
+##############################################################################
 
 
 
 
-# View(LTREB_tem_merge)
+LTREB_data_for_seedmeans <- LTREB_full %>%
+  filter(!is.na(FLW_T)) %>% 
+  filter(FLW_T>0)
 
-# Now I am going to merge the endo_demog_long data file with the flw tiller data from the other years
-LTREB_f <- merge(x = LTREB_tem_merge, y = flw_tillermerge, by = c("plot", "pos", "tag", "species", "year_t", "year_t1", "Endo"), all = TRUE)
+dim(LTREB_data_for_seedmeans)
+# View(LTREB_data_for_seedmeans)
 
-LTREB_f$flw_t1<- ifelse(is.na(LTREB_f$flw_t1.x) & is.na(LTREB_f$flw_t1.y), NA, ifelse(!is.na(LTREB_f$flw_t1.x) & is.na(LTREB_f$flw_t1.y), LTREB_f$flw_t1.x, ifelse(is.na(LTREB_f$flw_t1.x) & !is.na(LTREB_f$flw_t1.y), LTREB_f$flw_t1.y, NA)))
-LTREB_f$flw_t<- ifelse(is.na(LTREB_f$flw_t.x) & is.na(LTREB_f$flw_t.y), NA, ifelse(!is.na(LTREB_f$flw_t.x) & is.na(LTREB_f$flw_t.y), LTREB_f$flw_t.x, ifelse(is.na(LTREB_f$flw_t.x) & !is.na(LTREB_f$flw_t.y), LTREB_f$flw_t.y, NA)))
+# Creating individual species data lists to be passed to the model
 
-# View(LTREB_f)
-LTREB_flw <- LTREB_f %>% 
-  select(-surv_t_new, -flw_t.x, -flw_t.y, -flw_t1.x, -flw_t1.y) %>% 
-  rename(size_t = size_t_new, size_t1 = size_t1_new, surv_t1 = surv_t1_new) %>% 
-  mutate(flw_stat_t = case_when(flw_t == 0 ~ 0,
-                                flw_t >0 ~1)) %>% 
-  mutate(flw_stat_t1 = case_when(flw_t1 == 0 ~ 0,
-                                 flw_t1 > 0 ~ 1)) 
+# Split up the main dataframe by species and recode plot to be used as an index for each species
+AGPE_seed_data <- LTREB_data_for_seedmeans %>% 
+  filter(species == "AGPE")
+ELRI_seed_data <- LTREB_data_for_seedmeans %>% 
+  filter(species == "ELRI")
+ELVI_seed_data <- LTREB_data_for_seedmeans %>% 
+  filter(species == "ELVI")  
+FESU_seed_data <- LTREB_data_for_seedmeans %>% 
+  filter(species == "FESU") 
+LOAR_seed_data <- LTREB_data_for_seedmeans %>% 
+  filter(species == "LOAR") 
+POAL_seed_data <- LTREB_data_for_seedmeans %>% 
+  filter(species == "POAL") 
+POSY_seed_data <- LTREB_data_for_seedmeans %>% 
+  filter(species == "POSY") 
 
-# View(LTREB_flw)
-table(LTREB_flw$species, LTREB_flw$year_t)
-table(LTREB_flw$flw_stat_t, LTREB_flw$year_t)
-table(LTREB_flw$flw_stat_t1, LTREB_flw$year_t1, LTREB_flw$Endo, LTREB_flw$species)
+
+
+# Create data lists to be used for the Stan model
+AGPE_seed_data_list <- list(seed = na.omit(AGPE_seed_data$seedperspike),
+                            spike = na.omit(AGPE_seed_data$spikeperinf),
+                            endo_01 = AGPE_seed_data$endo_01,
+                            endo_index = AGPE_seed_data$endo_index,
+                            year = AGPE_seed_data$year_index,
+                            plot = AGPE_seed_data$plot_index,
+                            Nseed = length(na.omit(AGPE_seed_data$seedperspike)),
+                            Nspike = length(na.omit(AGPE_seed_data$spikeperinf)),
+                            K = 2,
+                            nYear = length(unique(AGPE_seed_data$year_index)),
+                            nPlot = length(unique(AGPE_seed_data$plot_index)),
+                            nEndo =   length(unique(AGPE_seed_data$endo_01)))
+str(AGPE_seed_data_list)
+
+ELRI_seed_data_list <- list(seed = na.omit(ELRI_seed_data$seedperinf),
+                            spike = na.omit(ELRI_seed_data$spikeperinf),
+                            endo_01 = na.omit(ELRI_seed_data$endo_01),
+                            endo_index = ELRI_seed_data$endo_index,
+                            year = ELRI_seed_data$year_index,
+                            plot = ELRI_seed_data$plot_index,
+                            Nseed = length(na.omit(ELRI_seed_data$seedperinf)),
+                            Nspike = length(na.omit(ELRI_seed_data$spikeperinf)),
+                            N = nrow(ELRI_seed_data),
+                            K = 2,
+                            nYear = length(unique(ELRI_seed_data$year_index)),
+                            nPlot = length(unique(ELRI_seed_data$plot_index)),
+                            nEndo =   length(unique(ELRI_seed_data$endo_01)))
+str(ELRI_seed_data_list)
+
+ELVI_seed_data_list <- list(seed = na.omit(ELVI_seed_data$seedperinf),
+                            spike = na.omit(ELVI_seed_data$spikeperinf),
+                            endo_01 = na.omit(ELVI_seed_data$endo_01),
+                            endo_index = ELVI_seed_data$endo_index,
+                            year = ELVI_seed_data$year_index,
+                            plot = ELVI_seed_data$plot_index,
+                            Nseed = length(na.omit(ELVI_seed_data$seedperinf)),
+                            Nspike = length(na.omit(ELVI_seed_data$spikeperinf)),
+                            N = nrow(ELVI_seed_data),
+                            K = 2,
+                            nYear = length(unique(ELVI_seed_data$year_index)),
+                            nPlot = length(unique(ELVI_seed_data$plot_index)),
+                            nEndo =   length(unique(ELVI_seed_data$endo_01)))
+str(ELVI_seed_data_list)
+
+FESU_seed_data_list <- list(seed = na.omit(FESU_seed_data$seedperspike),
+                            spike = na.omit(FESU_seed_data$spikeperinf),
+                            endo_01 = na.omit(FESU_seed_data$endo_01),
+                            endo_index = FESU_seed_data$endo_index,
+                            year = FESU_seed_data$year_index,
+                            plot = FESU_seed_data$plot_index,
+                            Nseed = length(na.omit(FESU_seed_data$seedperspike)),
+                            Nspike = length(na.omit(FESU_seed_data$spikeperinf)),
+                            K = 2,
+                            nYear = length(unique(FESU_seed_data$year_index)),
+                            nPlot = length(unique(FESU_seed_data$plot_index)),
+                            nEndo =   length(unique(FESU_seed_data$endo_01)))
+str(FESU_seed_data_list)
+
+LOAR_seed_data_list <- list(seed = na.omit(LOAR_seed_data$seedperspike),
+                            spike = na.omit(LOAR_seed_data$spikeperinf),
+                            endo_01 = na.omit(LOAR_seed_data$endo_01),
+                            endo_index = LOAR_seed_data$endo_index,
+                            year = LOAR_seed_data$year_index,
+                            plot = LOAR_seed_data$plot_index,
+                            Nseed = length(na.omit(LOAR_seed_data$seedperspike)),
+                            Nspike = length(na.omit(LOAR_seed_data$spikeperinf)),
+                            K = 2,
+                            nYear = length(unique(LOAR_seed_data$year_index)),
+                            nPlot = length(unique(LOAR_seed_data$plot_index)),
+                            nEndo =   length(unique(LOAR_seed_data$endo_01)))
+str(LOAR_seed_data_list)
+
+POAL_seed_data_list <- list(seed = na.omit(POAL_seed_data$seedperspike),
+                            spike = na.omit(POAL_seed_data$spikeperinf),
+                            endo_01 = na.omit(POAL_seed_data$endo_01),
+                            endo_index = POAL_seed_data$endo_index,
+                            year = POAL_seed_data$year_index,
+                            plot = POAL_seed_data$plot_index,
+                            Nseed = length(na.omit(POAL_seed_data$seedperspike)),
+                            Nspike = length(na.omit(POAL_seed_data$spikeperinf)),
+                            K = 2,
+                            nYear = length(unique(POAL_seed_data$year_index)),
+                            nPlot = length(unique(POAL_seed_data$plot_index)),
+                            nEndo =   length(unique(POAL_seed_data$endo_01)))
+str(POAL_seed_data_list)
+
+POSY_seed_data_list <- list(seed = na.omit(POSY_seed_data$seedperspike),
+                            spike = na.omit(POSY_seed_data$spikeperinf),
+                            endo_01 = na.omit(POSY_seed_data$endo_01),
+                            endo_index = POSY_seed_data$endo_index,
+                            year = POSY_seed_data$year_index,
+                            plot = POSY_seed_data$plot_index,
+                            Nseed = length(na.omit(POSY_seed_data$seedperspike)),
+                            Nspike = length(na.omit(POSY_seed_data$spikeperinf)),
+                            K = 2,
+                            nYear = length(unique(POSY_seed_data$year_index)),
+                            nPlot = length(unique(POSY_seed_data$plot_index)),
+                            nEndo =   length(unique(POSY_seed_data$endo_01)))
+str(POSY_seed_data_list)
+
+
+
+
+
 
