@@ -16,7 +16,7 @@ library(readxl)
 
 # This is the main compiled data sheet that we will merge with the flowering and seed data
 LTREB_endodemog <- 
-  read.csv(file = "endo_demog_long.csv")
+  read.csv(file = "~/Dropbox/EndodemogData/Fulldataplusmetadata/endo_demog_long.csv")
 
 
 ## Clean up the main data frame for NA's, other small data entry errors, and change standardize the coding for variables.
@@ -1736,7 +1736,7 @@ LTREB_full_to2018 <- LTREB_repro_combo %>%
                                                SPIKEPERINF_T1 == spikeperinf_t1_fromlong ~ no.repro_tillers_measured_fromlong))
 # Now selecting the cleaned up columns only
 # This is the dataset I'm using for models up until I merge in 2019 data, or find issues that I missed - 8-14-19
-LTREB_full <- LTREB_full_to2018 %>% 
+LTREB_full_1 <- LTREB_full_to2018 %>% 
   select(plot_fixed, pos, id, species, species_index, 
          endo_01, endo_index, origin_01, birth,
          year_t1, year_t1_index,
@@ -1753,6 +1753,45 @@ LTREB_full <- LTREB_full_to2018 %>%
 ##############################################################################
 
 
+##############################################################################
+####### Merging in the endophyte checks ------------------------------
+##############################################################################
+
+LTREB_endo_check <- read_csv(file = "~/Dropbox/Endodemogdata/Fulldataplusmetadata/endo_demog_status.csv") %>% 
+  select(-recno,-check, -X11) %>% 
+  rename("origin_from_check" = "origin", "endo_status_from_check" = "status", "plot_endo_for_check" = "endo") %>% 
+  mutate(plot_endo_for_check = as.integer(recode(plot_endo_for_check, "plus" = 1, "minus" = 0))) %>% 
+  mutate(endo_mismatch = plot_endo_for_check - endo_status_from_check) # 0 = no change, >0 = loss of endophyte from positive plot, <0 = gain of endophyte in negative plot
+  # Metadata from Jenn
+#   recno:	unique record number
+#   species:	four letter species code
+#   origin:	"O" = original plant from greenhouse, "R" = recruit
+#   plot:	plot number
+#   pos:	for "O" = position of plant in plot, for "R" = recruit number on tag
+#   id:	unique identifier for each plant, "O" = single unique number, "R" = concatenation of plot number and tag number separated by "_"
+#   status:	0= no endophyte found via microscopy on leaf peel at 200X, 1= endophyte detected
+#   date_status:	year leaf peel was taken
+#   endo:	plot level endophyte status: "minus" = no endophyte in original planting, "plus" = endophyte present in original planting
+#   check:	"x" indicates the incorrect status was detected given original plot level treatment
+
+# There are two plants that are checked but are not present in the endo_demog_long dataset
+setdiff(LTREB_endo_check$id,LTREB_full_1$id)
+
+LTREB_full <- LTREB_full_1 %>% 
+  left_join(LTREB_endo_check, by = c("plot_fixed" = "plot", "pos" = "pos", "id" = "id", "species" = "species"))
+
+# here are sum summaries of the amount of changes in endophyte status
+LTREB_status_changes <- LTREB_full %>% 
+  group_by(species, plot_fixed) %>% 
+  summarize(same = sum(endo_mismatch == 0, na.rm = TRUE),
+            lose_endo = sum(endo_mismatch > 0, na.rm = TRUE),
+            gain_endo = sum(endo_mismatch <0, na.rm = TRUE)) %>% 
+  mutate(percent_gain = (gain_endo/same)*100, percent_lose = (lose_endo/same)*100)
+  
+
+##############################################################################
+####### Merging in the location data ------------------------------
+##############################################################################
 
 
 
@@ -2525,10 +2564,6 @@ str(POSY_fert_data_list)
 ##############################################################################
 ####### Preparing datalists for Seed Means and seed-to-seedling Kernel ------------------------------
 ##############################################################################
-
-
-
-
 LTREB_data_for_seedmeans <- LTREB_full %>%
   filter(!is.na(FLW_T)) %>% 
   filter(FLW_T>0)
