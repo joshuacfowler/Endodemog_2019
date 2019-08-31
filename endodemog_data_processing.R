@@ -21,6 +21,8 @@ LTREB_endodemog <-
 
 ## Clean up the main data frame for NA's, other small data entry errors, and change standardize the coding for variables.
 LTREB_data <- LTREB_endodemog %>% 
+  mutate(size_t = na_if(size_t, 0)) %>% 
+  mutate(size_t1 = na_if(size_t1, 0)) %>%  
   mutate(size_t, logsize_t = log(size_t)) %>% 
   mutate(size_t1, logsize_t1 = log(size_t1)) %>%  
   mutate(surv_t1 = as.integer(recode(surv_t1, "0" = 0, "1" =1, "2" = 1, "4" = 1))) %>% 
@@ -58,7 +60,6 @@ LTREB_data <- LTREB_endodemog %>%
                                    surv_t1 == 0 ~ 0,
                                    is.na(surv_t1) & birth == year_t1 ~ 1))) %>% 
   filter(duplicated(.) == FALSE)
-
 # dim(LTREB_data)
 
 
@@ -1777,11 +1778,11 @@ LTREB_endo_check <- read_csv(file = "~/Dropbox/Endodemogdata/Fulldataplusmetadat
 # There are two plants that are checked but are not present in the endo_demog_long dataset
 setdiff(LTREB_endo_check$id,LTREB_full_1$id)
 
-LTREB_full <- LTREB_full_1 %>% 
-  left_join(LTREB_endo_check, by = c("plot_fixed" = "plot", "pos" = "pos", "id" = "id", "species" = "species"))
+LTREB_full_2 <- LTREB_full_1 %>% 
+  left_join(LTREB_endo_check, by = c("species" = "species", "plot_fixed" = "plot", "pos" = "pos", "id" = "id"))
 
-# here are sum summaries of the amount of changes in endophyte status
-LTREB_status_changes <- LTREB_full %>% 
+# here are some summaries of the amount of changes in endophyte status
+LTREB_status_changes <- LTREB_full_2 %>% 
   group_by(species, plot_fixed) %>% 
   summarize(same = sum(endo_mismatch == 0, na.rm = TRUE),
             lose_endo = sum(endo_mismatch > 0, na.rm = TRUE),
@@ -1793,6 +1794,28 @@ LTREB_status_changes <- LTREB_full %>%
 ####### Merging in the location data ------------------------------
 ##############################################################################
 
+LTREB_distances <- read_csv(file = "~/Dropbox/Endodemogdata/Fulldataplusmetadata/endo_distance_tubeid.csv",
+                            col_types = cols( species = col_character(),
+                            origin = col_character(),
+                            plot = col_integer(),
+                            pos = col_character(),
+                            id = col_character(),
+                            dist_a = col_double(),
+                            dist_b = col_double(),
+                            tubeid = col_character(),
+                            notes = col_character(),
+                            date_dist = col_character())) %>% 
+  select(species, origin, plot, pos, id, dist_a, dist_b, date_dist) %>% 
+  rename("origin_from_distance" = "origin") %>% 
+  filter(!is.na(dist_a), !is.na(dist_b)) 
+
+# Here are the plant id's that are in the distance file but not the long file
+setdiff(LTREB_distances$id, LTREB_full_2$id)
+
+
+LTREB_full <- LTREB_full_2 %>% 
+  left_join(LTREB_distances, by = c("species" = "species","plot_fixed" = "plot", "pos" = "pos", "id" = "id")) %>% 
+  select(id, plot_fixed, year_t, species, dist_a, dist_b, logsize_t, surv_t1)
 
 
 ##############################################################################
