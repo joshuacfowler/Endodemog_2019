@@ -213,28 +213,24 @@ options(mc.cores = parallel::detectCores())
 set.seed(123)
 
 ## MCMC settings
-ni <-2000
-nb <- 1000
+ni <-10000
+nb <- 5000
 nc <- 3
 
 # Stan model -------------
-## here is the Stan model with a model matrix and species effects ##
+## here is the Stan model ##
 
 sink("endodemog_seed_mean.stan")
 cat("
     data { 
     int<lower=0> Nseed;                       // number of observations of seed/spikelet
-    int<lower=0> Nspike;                       // number of observations of spikelets/inf
     real<lower=0> seed[Nseed];               // number of seeds per spikelet
-    real<lower=0> spike[Nspike];
     }
     
     
     parameters {
     real<lower=0> mu_seed;
     real<lower=0> sigma_seed;
-    real<lower=0> mu_spike;
-    real<lower=0> sigma_spike;
     }
     
     model {
@@ -242,10 +238,8 @@ cat("
     // Priors
     // Likelihood
       seed ~ normal(mu_seed,sigma_seed);
-      spike ~ normal(mu_spike, sigma_spike);
     }
 
-  
     ", fill = T)
 sink()
 
@@ -280,7 +274,6 @@ sink("endodemog_seed_mean_elymus.stan")
 cat("
     data { 
     int<lower=0> Nseed;                       // number of observations of seed/infl
-    int<lower=0> K;                       // number of predictors
     real<lower=0> seed[Nseed];               // number of  seeds per inflorescence
     }
     
@@ -334,12 +327,12 @@ return(est)
 
 # calculate POAL seed estimate
 POAL_post <- as.data.frame(smPOAL)
-POAL_seed_est <- est_seed(post = POAL_post, data = POAL_seed_data)
+POAL_seed_est <- est_seed(post = POAL_post, data = POAL_seed_data) %>% 
   select(-seed_a, -seed_b, -seedperspike_est, -spikeperinf_est, -seed_norma, -seed_normb, -seed_normc)
 
 # calculate POSY seed estimate
 POSY_post <- as.data.frame(smPOSY)
-POSY_seed_est <- est_seed(post = POSY_post, data = POSY_seed_data)%>% 
+POSY_seed_est <- est_seed(post = POSY_post, data = POSY_seed_data) %>% 
   select(-seed_a, -seed_b, -seedperspike_est, -spikeperinf_est, -seed_norma, -seed_normb, -seed_normc)
 
 
@@ -422,6 +415,7 @@ seed_estmerge <- seed_est_t1 %>%
 
 
 # I'm going to merge this with the main data frame
+# This needs to be merged with the rest of the flower data.
 LTREB_endodemog <-  read.csv(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Fulldataplusmetadata/endo_demog_long.csv")
 
 LTREB_data_seed_est <- LTREB_endodemog %>% 
