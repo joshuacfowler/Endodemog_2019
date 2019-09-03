@@ -1646,13 +1646,17 @@ head(LTREB_data)
 LTREB_melt <- LTREB_data %>% 
   melt(id.var = c("plot_fixed","pos", "id", "species", "species_index", "endo_01", "endo_index", "origin_01", "birth", "year_t", "year_t_index", "year_t1", "year_t1_index", "surv_t1", "size_t", "logsize_t","size_t1", "logsize_t1", "flw_t1", "seed_t1", "seed_t"),
   measure.var = c("spike_a_t1", "spike_b_t1", "spike_c_t1"),
-  value.name = "spikelets_t1")
+  value.name = "spikelets_t1") %>% 
+  mutate(for_spikelet_count = case_when(!is.na(spikelets_t1) ~ 1,
+                                        is.na(spikelets_t1) ~ NA_real_))
 
 LTREB_cast <- LTREB_melt %>% 
   group_by(plot_fixed, pos, id, species, species_index, endo_01, endo_index, origin_01, birth, year_t, year_t_index, year_t1, year_t1_index, surv_t1, size_t, logsize_t, size_t1, logsize_t1, flw_t1, seed_t1, seed_t) %>% 
   summarize(spikeperinf_t1_fromlong = mean(spikelets_t1, na.rm = TRUE),
-            no.repro_tillers_measured_fromlong = n()) %>% 
-  rename(seed_t_fromlong = seed_t, seed_t1_fromlong = seed_t1)
+            no.repro_tillers_measured_fromlong = sum(for_spikelet_count)) %>% 
+  rename(seed_t_fromlong = seed_t, seed_t1_fromlong = seed_t1)%>% 
+  mutate(seedperinf_t1_fromlong = seed_t1_fromlong/flw_t1,
+         seedperspike_t1_fromlong = seed_t1_fromlong/no.repro_tillers_measured_fromlong)
 
 LTREB_cast1 <- ungroup(LTREB_cast)
 
