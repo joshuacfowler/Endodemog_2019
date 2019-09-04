@@ -1627,7 +1627,7 @@ group_by(tag) %>%
          seedperspike_t1 = seedperspike,
          seedperinf_t1 = seedperinf,
          spikeperinf_t1 = spikeperinf,
-         no.repro_tillers_measured_t1 = no.repro_tillers_measured
+         no.repro_tillers_measured = no.repro_tillers_measured
          ) %>% 
   filter(!is.na(flw_t)) %>% 
   select(-flw, -year, -seedperspike, -spikeperinf, -seedperinf)
@@ -1739,12 +1739,19 @@ LTREB_full_to2018 <- LTREB_repro_combo %>%
          SPIKEPERINF_T1 = case_when(is.na(spikeperinf_t1) & !is.na(spikeperinf_t1_fromlong) ~ as.numeric(spikeperinf_t1_fromlong),
                                     !is.na(spikeperinf_t1) & is.na(spikeperinf_t1_fromlong) ~ as.numeric(spikeperinf_t1),                                                                          
                                     !is.na(spikeperinf_t1) & !is.na(spikeperinf_t1_fromlong) ~ as.numeric(spikeperinf_t1)),
-         SEEDPERINF_T = seedperinf_t, # Seed per inf data is collected from ELVI and ELRI, and I am not including seed data from endodemoglong in this because the data in there are just estimates of total seed production.
-         SEEDPERINF_T1 = seedperinf_t1,
+         SEEDPERINF_T = case_when(species == "ELRI" | species == "ELVI" & is.na(seedperinf_t) & !is.na(SPIKEPERINF_T) ~ as.numeric(SPIKEPERINF_T),
+                                  species == "ELRI" | species == "ELVI" & !is.na(seedperinf_t) & is.na(SPIKEPERINF_T) ~ as.numeric(seedperinf_t),
+                                  species != "ELRI" | species != "ELVI" ~ seedperinf_t,
+                                  ), # Seed per inf data is collected from ELVI and ELRI, and I am not including seed data from endodemoglong in this because the data in there are just estimates of total seed production. I am treating spike data as a seed count for Elymus
+         SEEDPERINF_T1 = case_when(species == "ELRI" | species == "ELVI" & !is.na(seedperinf_t1) & is.na(SPIKEPERINF_T1) ~ as.numeric(seedperinf_t1),
+                                   species == "ELRI" | species == "ELVI" & is.na(seedperinf_t1) & !is.na(SPIKEPERINF_T1) ~ as.numeric(SPIKEPERINF_T1),
+                                   species != "ELRI" | species != "ELVI" ~ seedperinf_t1),
          SEEDPERSPIKE_T = seedperspike_t, # Seed per spike data are for all other species, and I am not including seed data from the endodemoglong in this because the data in there are just estimates of total seed production.
          SEEDPERSPIKE_T1 = seedperspike_t1,
-         NO_REPRO_TILLERS_MEASURED_T1 = case_when(SPIKEPERINF_T1 == spikeperinf_t1 ~ as.numeric(no.repro_tillers_measured_t1),
-                                               SPIKEPERINF_T1 == spikeperinf_t1_fromlong ~ as.numeric(no.repro_tillers_measured_fromlong)))
+         NO_REPRO_TILLERS_MEASURED_T1 = case_when(FLW_STAT_T1 == 1 & is.na(no.repro_tillers_measured_fromlong) & !is.na(no.repro_tillers_measured) ~ as.numeric(no.repro_tillers_measured),
+                                                  FLW_STAT_T1 == 1 & !is.na(no.repro_tillers_measured_fromlong) & is.na(no.repro_tillers_measured) ~ as.numeric(no.repro_tillers_measured_fromlong))) 
+
+
 # Now selecting the cleaned up columns only
 # This is the dataset I'm using for models up until I merge in 2019 data, or find issues that I missed - 8-14-19
 LTREB_full_1 <- LTREB_full_to2018 %>% 
@@ -2616,10 +2623,10 @@ dim(LTREB_data_for_seedmeans)
 AGPE_seed_data <- LTREB_data_for_seedmeans %>% 
   filter(species == "AGPE") %>% 
   filter(!is.na(SEEDPERSPIKE_T)) 
-ELRI_seed_data <- LTREB_data_for_seedmeans %>% 
+ELRI_seed_data <- LTREB_data_for_seedmeans %>% #Elymus species are seed/inf
   filter(species == "ELRI") %>% 
   filter(!is.na(SEEDPERINF_T))
-ELVI_seed_data <- LTREB_data_for_seedmeans %>% 
+ELVI_seed_data <- LTREB_data_for_seedmeans %>% #Elymus species are seed/inf
   filter(species == "ELVI") %>%
   filter(!is.na(SEEDPERINF_T))
 FESU_seed_data <- LTREB_data_for_seedmeans %>% 

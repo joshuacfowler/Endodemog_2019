@@ -269,39 +269,12 @@ smAGPE<- stan(file = "endodemog_seed_mean.stan", data = AGPE_seed_data_list,
 # saveRDS(smAGPE, file = "endodemog_seed_mean_AGPE.rds")
 
 
-# ELRI and ELVI had data collected in a slightly different way. They recorded seeds/inflorescence
-sink("endodemog_seed_mean_elymus.stan")
-cat("
-    data { 
-    int<lower=0> Nseed;                       // number of observations of seed/infl
-    real<lower=0> seed[Nseed];               // number of  seeds per inflorescence
-    }
-    
-    
-    parameters {
-    real<lower=0> mu_seed;
-    real<lower=0> sigma_seed;
-    }
-    
-    model {
-
-    // Priors
-    // Likelihood
-      seed ~ normal(mu_seed,sigma_seed);
-    }
-
-  
-    ", fill = T)
-sink()
-
-stanmodel <- stanc("endodemog_seed_mean_elymus.stan")
-
-
-smELRI <- stan(file = "endodemog_seed_mean_elymus.stan", data = ELRI_seed_data_list,
+# ELRI and ELVI had data collected in a slightly different way. They recorded seeds/inflorescence, so this is our calculation for the mean seeds/infl
+smELRI <- stan(file = "endodemog_seed_mean.stan", data = ELRI_seed_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
 # saveRDS(smELRI, file = "endodemog_seed_mean_ELRI.rds")
 
-smELVI <- stan(file = "endodemog_seed_mean_elymus.stan", data = ELVI_seed_data_list,
+smELVI <- stan(file = "endodemog_seed_mean.stan", data = ELVI_seed_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
 # saveRDS(smELVI, file = "endodemog_seed_mean_ELVI.rds")
 
