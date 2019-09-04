@@ -1626,7 +1626,8 @@ group_by(tag) %>%
          year_t1 = year,
          seedperspike_t1 = seedperspike,
          seedperinf_t1 = seedperinf,
-         spikeperinf_t1 = spikeperinf
+         spikeperinf_t1 = spikeperinf,
+         no.repro_tillers_measured_t1 = no.repro_tillers_measured
          ) %>% 
   filter(!is.na(flw_t)) %>% 
   select(-flw, -year, -seedperspike, -spikeperinf, -seedperinf)
@@ -1677,13 +1678,30 @@ LTREB_lag1 <- ungroup(LTREB_lag)
 
 
 # now we can merge the two datasets together.
+agpe_lag1 <- LTREB_lag1 %>% 
+  filter(species == "AGPE")
+length(unique(agpe_repro_lag1$tag))
+dim(agpe_repro_lag1)
+agpe_repro_lag1 <- LTREB_repro_lag1 %>% 
+  filter(species == "AGPE")
+
+setdiff(agpe_repro_lag1$pos, agpe_lag1$pos)
+agpe_combo <- agpe_lag1 %>% 
+  left_join(agpe_repro_lag1,
+            by = c("plot_fixed" = "plot_fixed", "pos" = "pos",
+                   "id" = "tag", "species" = "species",
+                   "endo_01" = "endo_01",
+                   "year_t" = "year_t", "year_t1" = "year_t1")) %>% 
+  select(birth.x, birth.y)
+
 
 LTREB_repro_combo <- LTREB_lag1 %>%
   left_join(LTREB_repro_lag1,
            by = c("plot_fixed" = "plot_fixed", "pos" = "pos",
                   "id" = "tag", "species" = "species",
-                  "endo_01" = "endo_01", "birth" = "birth",
-                  "year_t" = "year_t", "year_t1" = "year_t1"))
+                  "endo_01" = "endo_01",
+                  "year_t" = "year_t", "year_t1" = "year_t1")) %>% 
+  rename("birth" = "birth.x", "birth_fromrepro" = "birth.y")
 
 # View(LTREB_repro_combo)
 # dim(LTREB_repro_combo)
@@ -1709,7 +1727,7 @@ LTREB_repro_lag1_missing <- LTREB_repro_lag1 %>%
 LTREB_full_to2018 <- LTREB_repro_combo %>% 
   mutate(FLW_T1 = as.integer(case_when(is.na(flw_t1) & !is.na(flw_t1_fromlong) ~ as.integer(flw_t1_fromlong),
                             !is.na(flw_t1) & is.na(flw_t1_fromlong) ~ as.integer(flw_t1),
-                            !is.na(flw_t1) & !is.na(flw_t1_fromlong) ~ as.integer(flw_t1))),    # In this case, where both datasets had data entered, spot checking showed that they have they were identical
+                            !is.na(flw_t1) & !is.na(flw_t1_fromlong) ~ as.integer(flw_t1))),   # In this case, where both datasets had data entered, spot checking showed that they have they were identical
           FLW_T = as.integer(case_when(is.na(flw_t) & !is.na(flw_t_fromlong) ~ as.integer(flw_t_fromlong),
                             !is.na(flw_t) & is.na(flw_t_fromlong) ~ as.integer(flw_t),                                                                          
                             !is.na(flw_t) & !is.na(flw_t_fromlong) ~ as.integer(flw_t))),
@@ -1721,26 +1739,12 @@ LTREB_full_to2018 <- LTREB_repro_combo %>%
          SPIKEPERINF_T1 = case_when(is.na(spikeperinf_t1) & !is.na(spikeperinf_t1_fromlong) ~ as.numeric(spikeperinf_t1_fromlong),
                                     !is.na(spikeperinf_t1) & is.na(spikeperinf_t1_fromlong) ~ as.numeric(spikeperinf_t1),                                                                          
                                     !is.na(spikeperinf_t1) & !is.na(spikeperinf_t1_fromlong) ~ as.numeric(spikeperinf_t1)),
-         SEEDPERINF_T = case_when(is.na(seedperinf_t) & !is.na(seed_t_fromlong) & species == "ELVI" | species == "ELRI" & FLW_T == 0 ~ NA_real_,
-                                  is.na(seedperinf_t) & !is.na(seed_t_fromlong) & species == "ELVI" | species == "ELRI" & FLW_T > 0 ~ as.numeric(seed_t_fromlong), #seed per infl data should be only for ELVI and ELRI, so I only want to trust the seed data for these from the long data
-                                  !is.na(seedperinf_t) & is.na(seed_t_fromlong) ~ as.numeric(seedperinf_t),                                                                          
-                                  !is.na(seedperinf_t) & !is.na(seed_t_fromlong) ~ as.numeric(seedperinf_t)),
-         SEEDPERINF_T1 = case_when(is.na(seedperinf_t1) & !is.na(seed_t1_fromlong) & species == "ELVI" | species == "ELRI" & FLW_T == 0 ~ NA_real_,
-                                    is.na(seedperinf_t1) & !is.na(seed_t1_fromlong) & species == "ELVI" | species == "ELRI" & FLW_T > 0 ~ as.numeric(seed_t1_fromlong), #seed per infl data should be only for ELVI and ELRI, so I only want to trust the seed data for these from the long data
-                                   !is.na(seedperinf_t1) & is.na(seed_t1_fromlong) ~ as.numeric(seedperinf_t1),                                                                          
-                                   !is.na(seedperinf_t1) & !is.na(seed_t1_fromlong) ~ as.numeric(seedperinf_t1)),
-         SEEDPERSPIKE_T = case_when(is.na(seedperspike_t) & !is.na(seed_t_fromlong) & species != "ELVI" | species != "ELRI" & FLW_T == 0 ~ NA_real_,
-                                    is.na(seedperspike_t) & !is.na(seed_t_fromlong) & species != "ELVI" | species != "ELRI" & FLW_T > 0 ~ as.numeric(seedperspike_t), 
-                                    !is.na(seedperspike_t) & is.na(seed_t_fromlong) ~ as.numeric(seedperspike_t),                                                                          
-                                    !is.na(seedperspike_t) & !is.na(seed_t_fromlong) ~ as.numeric(seedperspike_t)),
-         SEEDPERSPIKE_T1 = case_when(is.na(seedperspike_t1) & !is.na(seed_t1_fromlong) & species != "ELVI" | species != "ELRI" & FLW_T == 0 ~ NA_real_,
-                                     is.na(seedperspike_t1) & !is.na(seed_t1_fromlong) & species != "ELVI" | species != "ELRI" & FLW_T > 0 ~ as.numeric(seedperspike_t1), 
-                                     !is.na(seedperspike_t1) & is.na(seed_t1_fromlong) ~ as.numeric(seedperspike_t1),                                                                          
-                                     !is.na(seedperspike_t1) & !is.na(seed_t1_fromlong) ~ as.numeric(seedperspike_t1)),
-         NO_REPRO_TILLERS_MEASURED_T1 = case_when(SPIKEPERINF_T1 == spikeperinf_t1 ~ no.repro_tillers_measured,
-                                               SPIKEPERINF_T1 == spikeperinf_t1_fromlong ~ no.repro_tillers_measured_fromlong)) %>% 
-  filter(species == "ELRI") %>% 
-  select(plot_fixed, id, year_t, logsize_t, SEEDPERSPIKE_T, SEEDPERINF_T, seedperspike_t, seedperinf_t, seed_t_fromlong)
+         SEEDPERINF_T = seedperinf_t, # Seed per inf data is collected from ELVI and ELRI, and I am not including seed data from endodemoglong in this because the data in there are just estimates of total seed production.
+         SEEDPERINF_T1 = seedperinf_t1,
+         SEEDPERSPIKE_T = seedperspike_t, # Seed per spike data are for all other species, and I am not including seed data from the endodemoglong in this because the data in there are just estimates of total seed production.
+         SEEDPERSPIKE_T1 = seedperspike_t1,
+         NO_REPRO_TILLERS_MEASURED_T1 = case_when(SPIKEPERINF_T1 == spikeperinf_t1 ~ as.numeric(no.repro_tillers_measured_t1),
+                                               SPIKEPERINF_T1 == spikeperinf_t1_fromlong ~ as.numeric(no.repro_tillers_measured_fromlong)))
 # Now selecting the cleaned up columns only
 # This is the dataset I'm using for models up until I merge in 2019 data, or find issues that I missed - 8-14-19
 LTREB_full_1 <- LTREB_full_to2018 %>% 
@@ -2600,7 +2604,7 @@ str(POSY_fert_data_list)
 ####### Preparing datalists for Seed Means Kernel ------------------------------
 ##############################################################################
 LTREB_data_for_seedmeans <- LTREB_full %>%
-  filter(!is.na(FLW_T))
+  filter(!is.na(FLW_T)) %>% 
   filter(FLW_T>0)
 
 dim(LTREB_data_for_seedmeans)
@@ -2611,7 +2615,7 @@ dim(LTREB_data_for_seedmeans)
 # Split up the main dataframe by species and recode plot to be used as an index for each species
 AGPE_seed_data <- LTREB_data_for_seedmeans %>% 
   filter(species == "AGPE") %>% 
-  filter(!is.na(SEEDPERSPIKE_T)) #There is an issue with this data, it should be here but isn't for AGPE
+  filter(!is.na(SEEDPERSPIKE_T)) 
 ELRI_seed_data <- LTREB_data_for_seedmeans %>% 
   filter(species == "ELRI") %>% 
   filter(!is.na(SEEDPERINF_T))
