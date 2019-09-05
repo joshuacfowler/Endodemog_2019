@@ -1506,7 +1506,9 @@ agpe_rseed <- AGPE_data_r %>%
        measure.var = c("seed2007", "seed2008", "seed2009", "seed2010", "seed2011", "seed2012", "seed2013", "seed2014", 
                        "seed2015", "seed2016"),
        value.name = "seed")  %>% 
-  mutate(tillerid = NA)
+  mutate(tillerid = case_when(grepl("A", variable) ~ "A", 
+                              grepl("B",variable) ~ "B",
+                              grepl("C", variable) ~ "C"))
 agpe_rseed$year<- ifelse(agpe_rseed$variable == "seed2007", 2007, ifelse(agpe_rseed$variable == "seed2008", 2008, ifelse(agpe_rseed$variable == "seed2009", 2009, ifelse(agpe_rseed$variable == "seed2010", 2010, ifelse(agpe_rseed$variable == "seed2011", 2011, ifelse(agpe_rseed$variable  == "seed2012", 2012, ifelse(agpe_rseed$variable  == "seed2013", 2013, ifelse(agpe_rseed$variable  == "seed2014", 2014, ifelse(agpe_rseed$variable  == "seed2015", 2015, ifelse(agpe_rseed$variable == "seed2016", 2016, NA))))))))))
 agpe_rseed1 <- agpe_rseed %>% 
   filter(!is.na(seed))
@@ -1525,7 +1527,7 @@ agpe_rspike <- AGPE_data_r %>%
        value.name = "spikelets")  %>% 
   mutate(tillerid = case_when(grepl("A", variable) ~ "A", 
                               grepl("B",variable) ~ "B",
-                              grepl("C", variable) ~ "C",)
+                              grepl("C", variable) ~ "C"))
 agpe_rspike$year<-  ifelse(agpe_rspike$variable == "spike2007", 2007, ifelse(agpe_rspike$variable == "spike2008", 2008, ifelse(agpe_rspike$variable == "spike2009", 2009, ifelse(agpe_rspike$variable == "spike2010", 2010, ifelse(agpe_rspike$variable == "TotSpikelets11", 2011, ifelse(agpe_rspike$variable  == "SpikeletsA12", 2012, ifelse(agpe_rspike$variable  == "avgspike13", 2013, ifelse(agpe_rspike$variable  == "avgspikepertiller14", 2014, ifelse(agpe_rspike$variable  == "spikepertillerA15", 2015, ifelse(agpe_rspike$variable  == "spikepertillerB15", 2015,ifelse(agpe_rspike$variable == "spikepertillerA16", 2016, ifelse(agpe_rspike$variable == "spikepertillerB16", 2016, NA))))))))))))
 agpe_rspike1 <- agpe_rspike %>% 
   filter(!is.na(spikelets))
@@ -1633,8 +1635,8 @@ group_by(tag) %>%
          spikeperinf_t1 = spikeperinf,
          no.repro_tillers_measured = no.repro_tillers_measured
          ) %>% 
-  filter(!is.na(flw_t)) %>% 
-  select(-flw, -year, -seedperspike, -spikeperinf, -seedperinf)
+  # filter(!is.na(flw_t)) %>% 
+  select(-year, -seedperspike, -spikeperinf, -seedperinf)
 
 # View(LTREB_repro_lag)
 LTREB_repro_lag1 <- ungroup(LTREB_repro_lag)
@@ -1712,12 +1714,12 @@ LTREB_repro_lag1_missing <- LTREB_repro_lag1 %>%
 
 # Now select the correct repro data from long or from the raw files into new master columns
 LTREB_full_to2018 <- LTREB_repro_combo %>% 
-  mutate(FLW_T1 = as.integer(case_when(is.na(flw_t1) & !is.na(flw_t1_fromlong) ~ as.integer(flw_t1_fromlong),
-                            !is.na(flw_t1) & is.na(flw_t1_fromlong) ~ as.integer(flw_t1),
-                            !is.na(flw_t1) & !is.na(flw_t1_fromlong) ~ as.integer(flw_t1))),   # In this case, where both datasets had data entered, spot checking showed that they have they were identical
-          FLW_T = as.integer(case_when(is.na(flw_t) & !is.na(flw_t_fromlong) ~ as.integer(flw_t_fromlong),
-                            !is.na(flw_t) & is.na(flw_t_fromlong) ~ as.integer(flw_t),                                                                          
-                            !is.na(flw_t) & !is.na(flw_t_fromlong) ~ as.integer(flw_t))),
+  mutate(FLW_T1 = as.integer(case_when(!is.na(flw_t1) & !is.na(flw_t1_fromlong) ~ as.integer(flw_t1),
+                                        is.na(flw_t1) & !is.na(flw_t1_fromlong) ~ as.integer(flw_t1_fromlong),
+                                        !is.na(flw_t1) & is.na(flw_t1_fromlong) ~ as.integer(flw_t1))),   # In this case, where both datasets had data entered, spot checking showed that they have they were identical
+          FLW_T = as.integer(case_when(!is.na(flw_t) & !is.na(flw_t_fromlong) ~ as.integer(flw_t),
+                                       is.na(flw_t) & !is.na(flw_t_fromlong) ~ as.integer(flw_t_fromlong),
+                                      !is.na(flw_t) & is.na(flw_t_fromlong) ~ as.integer(flw_t))),
          FLW_STAT_T = as.integer(case_when(FLW_T == 0 ~ 0, FLW_T > 0 ~ 1)),
          FLW_STAT_T1 = as.integer(case_when(FLW_T1 == 0 ~ 0, FLW_T1 > 0 ~ 1)),
          SPIKEPERINF_T = case_when(is.na(spikeperinf_t) & !is.na(spikeperinf_t_fromlong) ~ as.numeric(spikeperinf_t_fromlong),
@@ -1739,7 +1741,8 @@ LTREB_full_to2018 <- LTREB_repro_combo %>%
          SEEDPERSPIKE_T = seedperspike_t, # Seed per spike data are for all other species, and I am not including seed data from the endodemoglong in this because the data in there are just estimates of total seed production.
          SEEDPERSPIKE_T1 = seedperspike_t1,
          NO_REPRO_TILLERS_MEASURED_T1 = case_when(FLW_STAT_T1 == 1 & is.na(no.repro_tillers_measured_fromlong) & !is.na(no.repro_tillers_measured) ~ as.numeric(no.repro_tillers_measured),
-                                                  FLW_STAT_T1 == 1 & !is.na(no.repro_tillers_measured_fromlong) & is.na(no.repro_tillers_measured) ~ as.numeric(no.repro_tillers_measured_fromlong))) 
+                                                  FLW_STAT_T1 == 1 & !is.na(no.repro_tillers_measured_fromlong) & is.na(no.repro_tillers_measured) ~ as.numeric(no.repro_tillers_measured_fromlong))) %>% 
+  select(id, year_t, year_t1, flw_t_fromlong, flw_t1_fromlong, flw_t, flw_t1, FLW_T, FLW_T1, SPIKEPERINF_T, SPIKEPERINF_T1)
 
 
 # Now selecting the cleaned up columns only
@@ -2656,7 +2659,7 @@ AGPE_spike_data_list <- list(spike_t = AGPE_spike_data$SPIKEPERINF_T,
                              plot = AGPE_spike_data$plot_index,
                              N = length(na.omit(AGPE_spike_data$SPIKEPERINF_T)),
                              K = 5L,
-                             nYear = length(unique(AGPE_spike_data$year_t_index)),
+                             nYear = 11L,
                              nPlot = length(unique(AGPE_spike_data$plot_index)),
                              nEndo =   length(unique(AGPE_spike_data$endo_01)))
 str(AGPE_spike_data_list)
