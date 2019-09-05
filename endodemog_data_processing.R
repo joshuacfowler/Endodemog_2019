@@ -1496,7 +1496,8 @@ agpe_seedmerge_ssf <- merge(agpe_seedmerge_ss, agpeflw, by = c("plot", "pos", "t
 ## recoding for the year of measurement
 ## merging these measurements into one dataframe
 ### The spikelets data is also reported in Total spikelets for several years. The first two years there aren't any flwing tillers, and then in 2011 there are only single tillers, so this could essentially be spikelets/infl
-### 2013 and 2014 have lots of spikelet data, but this it is recorded as totals for the plant within an equatio, so I not including it right now.
+### 2013 has lots of spikelet data, but this it is recorded as totals for the plant within an equatio, so I am calculating avgs from it with the number of flw tillers
+### 2014 has data recorded as avg spikelets
 agpe_rseed <- AGPE_data_r %>%
   rename("Birth Year" = "birth", "plot" = "Plot", 
          "pos" = "RecruitNo", "Endo" = "endo", "tag" = "Tag") %>%
@@ -1514,15 +1515,18 @@ agpe_rseed1 <- agpe_rseed %>%
 agpe_rspike <- AGPE_data_r %>%
   rename("Birth Year" = "birth", "plot" = "Plot", 
          "pos" = "RecruitNo", "Endo" = "endo", "tag" = "Tag") %>%
-  mutate(spike2007 = NA, spike2008 = NA, spike2009 = NA, spike2010 = NA, spike2013 = NA, spike2014 = NA) %>% 
+  mutate(spike2007 = NA, spike2008 = NA, spike2009 = NA, spike2010 = NA, spike2013 = NA) %>% 
+  mutate(avgspike13 = TotSpikelets13/FlwTillers13) %>% 
   melt(id.var = c("plot", "pos", "tag", "Endo", "Birth Year"),
        measure.var = c("spike2007", "spike2008", "spike2009", 
                        "spike2010","TotSpikelets11", "SpikeletsA12", 
-                       "spike2013", "spike2014", "spikepertillerA15","spikepertillerB15",
+                       "avgspike13", "avgspikepertiller14", "spikepertillerA15","spikepertillerB15",
                        "spikepertillerA16","spikepertillerB16"),
        value.name = "spikelets")  %>% 
-  mutate(tillerid = NA)
-agpe_rspike$year<-  ifelse(agpe_rspike$variable == "spike2007", 2007, ifelse(agpe_rspike$variable == "spike2008", 2008, ifelse(agpe_rspike$variable == "spike2009", 2009, ifelse(agpe_rspike$variable == "spike2010", 2010, ifelse(agpe_rspike$variable == "TotSpikelets11", 2011, ifelse(agpe_rspike$variable  == "SpikeletsA12", 2012, ifelse(agpe_rspike$variable  == "spike2013", 2013, ifelse(agpe_rspike$variable  == "spike2014", 2014, ifelse(agpe_rspike$variable  == "spikepertillerA15", 2015, ifelse(agpe_rspike$variable  == "spikepertillerB15", 2015,ifelse(agpe_rspike$variable == "spikepertillerA16", 2016, ifelse(agpe_rspike$variable == "spikepertillerB16", 2016, NA))))))))))))
+  mutate(tillerid = case_when(grepl("A", variable) ~ "A", 
+                              grepl("B",variable) ~ "B",
+                              grepl("C", variable) ~ "C",)
+agpe_rspike$year<-  ifelse(agpe_rspike$variable == "spike2007", 2007, ifelse(agpe_rspike$variable == "spike2008", 2008, ifelse(agpe_rspike$variable == "spike2009", 2009, ifelse(agpe_rspike$variable == "spike2010", 2010, ifelse(agpe_rspike$variable == "TotSpikelets11", 2011, ifelse(agpe_rspike$variable  == "SpikeletsA12", 2012, ifelse(agpe_rspike$variable  == "avgspike13", 2013, ifelse(agpe_rspike$variable  == "avgspikepertiller14", 2014, ifelse(agpe_rspike$variable  == "spikepertillerA15", 2015, ifelse(agpe_rspike$variable  == "spikepertillerB15", 2015,ifelse(agpe_rspike$variable == "spikepertillerA16", 2016, ifelse(agpe_rspike$variable == "spikepertillerB16", 2016, NA))))))))))))
 agpe_rspike1 <- agpe_rspike %>% 
   filter(!is.na(spikelets))
 # View(agpe_rspike1)
@@ -1678,23 +1682,6 @@ LTREB_lag1 <- ungroup(LTREB_lag)
 
 
 # now we can merge the two datasets together.
-agpe_lag1 <- LTREB_lag1 %>% 
-  filter(species == "AGPE")
-length(unique(agpe_repro_lag1$tag))
-dim(agpe_repro_lag1)
-agpe_repro_lag1 <- LTREB_repro_lag1 %>% 
-  filter(species == "AGPE")
-
-setdiff(agpe_repro_lag1$pos, agpe_lag1$pos)
-agpe_combo <- agpe_lag1 %>% 
-  left_join(agpe_repro_lag1,
-            by = c("plot_fixed" = "plot_fixed", "pos" = "pos",
-                   "id" = "tag", "species" = "species",
-                   "endo_01" = "endo_01",
-                   "year_t" = "year_t", "year_t1" = "year_t1")) %>% 
-  select(birth.x, birth.y)
-
-
 LTREB_repro_combo <- LTREB_lag1 %>%
   left_join(LTREB_repro_lag1,
            by = c("plot_fixed" = "plot_fixed", "pos" = "pos",
@@ -1739,13 +1726,16 @@ LTREB_full_to2018 <- LTREB_repro_combo %>%
          SPIKEPERINF_T1 = case_when(is.na(spikeperinf_t1) & !is.na(spikeperinf_t1_fromlong) ~ as.numeric(spikeperinf_t1_fromlong),
                                     !is.na(spikeperinf_t1) & is.na(spikeperinf_t1_fromlong) ~ as.numeric(spikeperinf_t1),                                                                          
                                     !is.na(spikeperinf_t1) & !is.na(spikeperinf_t1_fromlong) ~ as.numeric(spikeperinf_t1)),
-         SEEDPERINF_T = case_when(species == "ELRI" | species == "ELVI" & is.na(seedperinf_t) & !is.na(SPIKEPERINF_T) ~ as.numeric(SPIKEPERINF_T),
-                                  species == "ELRI" | species == "ELVI" & !is.na(seedperinf_t) & is.na(SPIKEPERINF_T) ~ as.numeric(seedperinf_t),
-                                  species != "ELRI" | species != "ELVI" ~ seedperinf_t,
-                                  ), # Seed per inf data is collected from ELVI and ELRI, and I am not including seed data from endodemoglong in this because the data in there are just estimates of total seed production. I am treating spike data as a seed count for Elymus
-         SEEDPERINF_T1 = case_when(species == "ELRI" | species == "ELVI" & !is.na(seedperinf_t1) & is.na(SPIKEPERINF_T1) ~ as.numeric(seedperinf_t1),
-                                   species == "ELRI" | species == "ELVI" & is.na(seedperinf_t1) & !is.na(SPIKEPERINF_T1) ~ as.numeric(SPIKEPERINF_T1),
-                                   species != "ELRI" | species != "ELVI" ~ seedperinf_t1),
+         SEEDPERINF_T = case_when(species == "ELRI" & !is.na(seedperinf_t)  ~ as.numeric(seedperinf_t),
+                                  species == "ELRI" & is.na(seedperinf_t) ~ as.numeric(SPIKEPERINF_T),
+                                  species == "ELVI" & !is.na(seedperinf_t)  ~ as.numeric(seedperinf_t),
+                                  species == "ELVI" & !is.na(seedperinf_t)  ~ as.numeric(SPIKEPERINF_T),
+                                  species != "ELRI" | species != "ELVI" ~ as.numeric(seedperinf_t1)), # Seed per inf data is collected from ELVI and ELRI, and I am not including seed data from endodemoglong in this because the data in there are just estimates of total seed production. I am treating spike data as a seed count for Elymus
+         SEEDPERINF_T1 = case_when(species == "ELRI" & !is.na(seedperinf_t1)  ~ as.numeric(seedperinf_t1),
+                                   species == "ELRI" & is.na(seedperinf_t1) ~ as.numeric(SPIKEPERINF_T1),
+                                   species == "ELVI" & !is.na(seedperinf_t1)  ~ as.numeric(seedperinf_t1),
+                                   species == "ELVI" & is.na(seedperinf_t1) ~ as.numeric(SPIKEPERINF_T1),
+                                   species != "ELRI" | species != "ELVI" ~ as.numeric(seedperinf_t1)),
          SEEDPERSPIKE_T = seedperspike_t, # Seed per spike data are for all other species, and I am not including seed data from the endodemoglong in this because the data in there are just estimates of total seed production.
          SEEDPERSPIKE_T1 = seedperspike_t1,
          NO_REPRO_TILLERS_MEASURED_T1 = case_when(FLW_STAT_T1 == 1 & is.na(no.repro_tillers_measured_fromlong) & !is.na(no.repro_tillers_measured) ~ as.numeric(no.repro_tillers_measured),
@@ -2605,6 +2595,161 @@ POSY_fert_data_list <- list(flw_t = POSY_fert_data$FLW_T,
                             nEndo =   length(unique(POSY_fert_data$endo_01)))
 str(POSY_fert_data_list)
 
+##############################################################################
+####### Preparing datalists for Spikelet/inflorescence Kernel ------------------------------
+##############################################################################
+LTREB_data_for_spike <- LTREB_full %>%
+  filter(!is.na(FLW_T)) %>% 
+  filter(FLW_T>0)
+
+dim(LTREB_data_for_seedmeans)
+
+# Creating individual species data lists to be passed to the model
+
+# Split up the main dataframe by species and recode plot to be used as an index for each species
+AGPE_spike_data <- LTREB_data_for_spike %>% 
+  filter(species == "AGPE") %>% 
+  filter(!is.na(SPIKEPERINF_T)) %>% 
+  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed))))) 
+  
+
+ELRI_spike_data <- LTREB_data_for_spike %>% #Elymus species are seed/inf
+  filter(species == "ELRI") %>% 
+  filter(!is.na(SEEDPERINF_T)) %>% 
+  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed))))) 
+  
+ELVI_spike_data <- LTREB_data_for_spike %>% #Elymus species are seed/inf
+  filter(species == "ELVI") %>%
+  filter(!is.na(SEEDPERINF_T)) %>% 
+  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed))))) 
+  
+
+FESU_spike_data <- LTREB_data_for_spike %>% 
+  filter(species == "FESU") %>% 
+  filter(!is.na(SPIKEPERINF_T)) %>% 
+  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))  
+  
+LOAR_spike_data <- LTREB_data_for_spike %>% 
+  filter(species == "LOAR") %>% 
+  filter(!is.na(SPIKEPERINF_T)) %>% 
+  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed))))) 
+  
+POAL_spike_data <- LTREB_data_for_spike %>% 
+  filter(species == "POAL") %>% 
+  filter(!is.na(SPIKEPERINF_T)) %>% 
+  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))  
+  
+POSY_spike_data <- LTREB_data_for_spike %>% 
+  filter(species == "POSY") %>% 
+  filter(!is.na(SPIKEPERINF_T)) %>% 
+  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed))))) 
+  
+
+
+# Create data lists to be used for the Stan model
+AGPE_spike_data_list <- list(spike_t = AGPE_spike_data$SPIKEPERINF_T,
+                             logsize_t = AGPE_spike_data$logsize_t,
+                             origin_01 = AGPE_spike_data$origin_01,
+                             endo_01 = AGPE_spike_data$endo_01,
+                             endo_index = AGPE_spike_data$endo_index,
+                             year_t = AGPE_spike_data$year_t_index,
+                             plot = AGPE_spike_data$plot_index,
+                             N = length(na.omit(AGPE_spike_data$SPIKEPERINF_T)),
+                             K = 5L,
+                             nYear = length(unique(AGPE_spike_data$year_t_index)),
+                             nPlot = length(unique(AGPE_spike_data$plot_index)),
+                             nEndo =   length(unique(AGPE_spike_data$endo_01)))
+str(AGPE_spike_data_list)
+
+ELRI_spike_data_list <- list(spike_t = (ELRI_spike_data$SEEDPERINF_T),
+                             logsize_t = ELRI_spike_data$logsize_t,
+                             origin_01 = ELRI_spike_data$origin_01,
+                            endo_01 = ELRI_spike_data$endo_01,
+                            endo_index = ELRI_spike_data$endo_index,
+                            year_t = ELRI_spike_data$year_t_index,
+                            plot = ELRI_spike_data$plot_index,
+                            N = length((ELRI_spike_data$SEEDPERINF_T)),
+                            N = nrow(ELRI_spike_data),
+                            K = 5L,
+                            nYear = length(unique(ELRI_spike_data$year_t_index)),
+                            nPlot = length(unique(ELRI_spike_data$plot_index)),
+                            nEndo =   length(unique(ELRI_spike_data$endo_01)))
+str(ELRI_spike_data_list)
+
+ELVI_spike_data_list <- list(spike_t = (ELVI_spike_data$SEEDPERINF_T),
+                             logsize_t = ELRI_spike_data$logsize_t,
+                             origin_01 = ELRI_spike_data$origin_01,
+                            endo_01 = ELVI_spike_data$endo_01,
+                            endo_index = ELVI_spike_data$endo_index,
+                            year_t = ELVI_spike_data$year_t_index,
+                            plot = ELVI_spike_data$plot_index,
+                            N = length((ELVI_spike_data$SEEDPERINF_T)),
+                            N = nrow(ELVI_spike_data),
+                            K = 5L,
+                            nYear = length(unique(ELVI_spike_data$year_t_index)),
+                            nPlot = length(unique(ELVI_spike_data$plot_index)),
+                            nEndo =   length(unique(ELVI_spike_data$endo_01)))
+str(ELVI_spike_data_list)
+
+FESU_spike_data_list <- list(spike_t = (FESU_spike_data$SPIKEPERINF_T),
+                             logsize_t = FESU_spike_data$logsize_t,
+                             origin_01 = FESU_spike_data$origin_01,
+                            endo_01 = FESU_spike_data$endo_01,
+                            endo_index = FESU_spike_data$endo_index,
+                            year_t = FESU_spike_data$year_t_index,
+                            plot = FESU_spike_data$plot_index,
+                            N = length((FESU_spike_data$SPIKEPERINF_T)),
+                            K = 5L,
+                            nYear = length(unique(FESU_spike_data$year_t_index)),
+                            nPlot = length(unique(FESU_spike_data$plot_index)),
+                            nEndo =   length(unique(FESU_spike_data$endo_01)))
+str(FESU_spike_data_list)
+
+LOAR_spike_data_list <- list(spike_t = (LOAR_spike_data$SPIKEPERINF_T),
+                             logsize_t = LOAR_spike_data$logsize_t,
+                             origin_01 = LOAR_spike_data$origin_01,
+                            endo_01 = LOAR_spike_data$endo_01,
+                            endo_index = LOAR_spike_data$endo_index,
+                            year_t = LOAR_spike_data$year_t_index,
+                            plot = LOAR_spike_data$plot_index,
+                            N = length((LOAR_spike_data$SPIKEPERINF_T)),
+                            K = 5L,
+                            nYear = length(unique(LOAR_spike_data$year_t_index)),
+                            nPlot = length(unique(LOAR_spike_data$plot_index)),
+                            nEndo =   length(unique(LOAR_spike_data$endo_01)))
+str(LOAR_spike_data_list)
+
+POAL_spike_data_list <- list(spike_t = (POAL_spike_data$SPIKEPERINF_T),
+                             logsize_t = POAL_spike_data$logsize_t,
+                             origin_01 = POAL_spike_data$origin_01,
+                            endo_01 = POAL_spike_data$endo_01,
+                            endo_index = POAL_spike_data$endo_index,
+                            year_t = POAL_spike_data$year_t_index,
+                            plot = POAL_spike_data$plot_index,
+                            N = length((POAL_spike_data$SPIKEPERINF_T)),
+                            K = 5L,
+                            nYear = length(unique(POAL_spike_data$year_t_index)),
+                            nPlot = length(unique(POAL_spike_data$plot_index)),
+                            nEndo =   length(unique(POAL_spike_data$endo_01)))
+str(POAL_spike_data_list)
+
+POSY_spike_data_list <- list(spike_t = (POSY_spike_data$SPIKEPERINF_T),
+                             logsize_t = POSY_spike_data$logsize_t,
+                             origin_01 = POSY_spike_data$origin_01,
+                            endo_01 = POSY_spike_data$endo_01,
+                            endo_index = POSY_spike_data$endo_index,
+                            year_t = POSY_spike_data$year_t_index,
+                            plot = POSY_spike_data$plot_index,
+                            N = length(POSY_spike_data$SPIKEPERINF_T),
+                            K = 5L,
+                            nYear = length(unique(POSY_spike_data$year_t_index)),
+                            nPlot = length(unique(POSY_spike_data$plot_index)),
+                            nEndo =   length(unique(POSY_spike_data$endo_01)))
+str(POSY_spike_data_list)
+
+
+
+
 
 
 ##############################################################################
@@ -2730,11 +2875,6 @@ POSY_seed_data_list <- list(seed = na.omit(POSY_seed_data$SEEDPERSPIKE_T),
                             nPlot = length(unique(POSY_seed_data$plot_fixed)),
                             nEndo =   length(unique(POSY_seed_data$endo_01)))
 str(POSY_seed_data_list)
-
-
-##############################################################################
-####### Preparing datalists for Spikelet/inflorescence Kernel ------------------------------
-##############################################################################
 
 
 
