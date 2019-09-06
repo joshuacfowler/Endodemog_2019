@@ -1619,7 +1619,16 @@ table(is.na(LTREB_repro1$flw), LTREB_repro1$flw>0, !is.na(LTREB_repro1$spikelets
 table(!is.na(LTREB_repro2$flw),!is.na(LTREB_repro2$spikeperinf))
 
 LTREB_repro3 <- ungroup(LTREB_repro2) # sets the groups so that we can filter the resulting dataframe
+# I am going to try to merge and then add the lagged repro variables which will hopefully remove some of the na's in flwing
+LTREB_repro_3_t1 <- LTREB_repro3%>% 
+  rename(flw_t1 = flw,
+         year_t1 = year,
+         seedperspike_t1 = seedperspike,
+         seedperinf_t1 = seedperinf,
+         spikeperinf_t1 = spikeperinf,
+         no.repro_tillers_measured_t1 = no.repro_tillers_measured)
 
+# After I change how this merges, this section will be removed
 ## getting a dataframe with time t and t_1
 LTREB_repro_lag <- LTREB_repro3 %>% 
 group_by(tag) %>% 
@@ -1661,8 +1670,8 @@ LTREB_cast <- LTREB_melt %>%
   group_by(plot_fixed, pos, id, species, species_index, endo_01, endo_index, origin_01, birth, year_t, year_t_index, year_t1, year_t1_index, surv_t1, size_t, logsize_t, size_t1, logsize_t1, flw_t1, seed_t1, seed_t) %>% 
   summarize(spikeperinf_t1_fromlong = mean(spikelets_t1, na.rm = TRUE),
             no.repro_tillers_measured_fromlong = sum(for_spikelet_count)) %>% 
-  rename(seed_t_fromlong = seed_t, seed_t1_fromlong = seed_t1)%>% 
-  mutate(seedperinf_t1_fromlong = seed_t1_fromlong/flw_t1,
+  rename(seed_t_fromlong = seed_t, seed_t1_fromlong = seed_t1, flw_t1_fromlong = flw_t1)%>% 
+  mutate(seedperinf_t1_fromlong = seed_t1_fromlong/flw_t1_fromlong,
          seedperspike_t1_fromlong = seed_t1_fromlong/no.repro_tillers_measured_fromlong)
 
 LTREB_cast1 <- ungroup(LTREB_cast)
@@ -1671,6 +1680,7 @@ LTREB_cast1 <- ungroup(LTREB_cast)
   # select(plot_fixed, pos, id, species, species_index, endo_01, 
          # endo_index, origin_01, birth, year_t, year_t_index,
          # year_t1, year_t1_index, flw_t1, seed_t1_fromlong, seed_t_fromlong, spikeperinf_t1_fromlong, no.repro_tillers_measured_fromlong)
+
 
 # I need to add flw_t and spikeperinf_t for the 2016 and 2017 data which is entered into this main database. 
 LTREB_lag <- LTREB_cast1%>%
@@ -1691,6 +1701,43 @@ LTREB_repro_combo <- LTREB_lag1 %>%
                   "endo_01" = "endo_01",
                   "year_t" = "year_t", "year_t1" = "year_t1")) %>% 
   rename("birth" = "birth.x", "birth_fromrepro" = "birth.y")
+
+# I'm going to do the new merge here and then replace the stuff above.
+LTREB_repro_combo_new <- LTREB_cast1 %>% 
+  left_join(LTREB_repro_3_t1,
+            by = c("plot_fixed" = "plot_fixed", "pos" = "pos",
+                   "id" = "tag", "species" = "species",
+                   "endo_01" = "endo_01",
+                   "year_t1" = "year_t1")) %>% 
+  rename("birth" = "birth.x", "birth_fromrepro" = "birth.y")
+
+# Now select the correct repro data from long or from the raw files into new master columns
+LTREB_full_to2018_new <- LTREB_repro_combo_new %>% 
+  mutate(FLW_T1_raw = as.integer(case_when(!is.na(flw_t1) & !is.na(flw_t1_fromlong) ~ as.integer(flw_t1),
+                                       is.na(flw_t1) & !is.na(flw_t1_fromlong) ~ as.integer(flw_t1_fromlong),
+                                       !is.na(flw_t1) & is.na(flw_t1_fromlong) ~ as.integer(flw_t1))),   # In this case, where both datasets had data entered, spot checking showed that they have they were identical
+         FLW_STAT_T1 = as.integer(case_when(FLW_T1_raw > 0 & surv_t1 == 1 ~ 1, FLW_T1_raw == 0 & surv_t1 == 1 ~ 0, is.na(FLW_T1_raw) & surv_t1 == 1 ~ 0)),
+         SPIKEPERINF_T1 = case_when(is.na(spikeperinf_t1) & !is.na(spikeperinf_t1_fromlong) ~ as.numeric(spikeperinf_t1_fromlong),
+                                    !is.na(spikeperinf_t1) & is.na(spikeperinf_t1_fromlong) ~ as.numeric(spikeperinf_t1),                                                                          
+                                    !is.na(spikeperinf_t1) & !is.na(spikeperinf_t1_fromlong) ~ as.numeric(spikeperinf_t1)),
+         SEEDPERINF_T1 = case_when(species == "ELRI" & !is.na(seedperinf_t1)  ~ as.numeric(seedperinf_t1),
+                                   species == "ELRI" & is.na(seedperinf_t1) ~ as.numeric(SPIKEPERINF_T1),
+                                   species == "ELVI" & !is.na(seedperinf_t1)  ~ as.numeric(seedperinf_t1),
+                                   species == "ELVI" & is.na(seedperinf_t1) ~ as.numeric(SPIKEPERINF_T1),
+                                   species != "ELRI" | species != "ELVI" ~ as.numeric(seedperinf_t1)),
+         SEEDPERSPIKE_T1 = seedperspike_t1,# Seed per spike data are for all other species, and I am not including seed data from the endodemoglong in this because the data in there are just estimates of total seed production.
+         NO_REPRO_TILLERS_MEASURED_T1 = case_when(FLW_STAT_T1 == 1 & is.na(no.repro_tillers_measured_fromlong) & !is.na(no.repro_tillers_measured_t1) ~ as.numeric(no.repro_tillers_measured_t1),
+                                                  FLW_STAT_T1 == 1 & !is.na(no.repro_tillers_measured_fromlong) & is.na(no.repro_tillers_measured_t1) ~ as.numeric(no.repro_tillers_measured_fromlong))) %>% 
+  mutate(FLW_T1 = case_when(FLW_T1_raw > 0 ~ FLW_T1_raw,FLW_T1_raw == 0 ~ NA_integer_))# There are some instances where flw_t1 is recorded as 0 but should be NA
+
+
+# There are 10 individual plant/year where there are spike data but 0 for flw data from the repro data. All from AGPE and POSY
+# This is places where we have flw_stat_t1 = 0, with spike data and no flw_t1 data. 
+# Checking AGPE tag 2205 and 2220 shows a place where there may have been a few packets of seeds mislabelled, so I will assume that the flowering data is correct
+# The POSY data is less clear as far as the error. for 14_99 has no notes, 0 for flw and spikelet data. I will still assume for now that the flowering data is correct, although this is less clear in this case.
+
+# Then we will add lagged variables to have the measurements in time t
+
 
 # View(LTREB_repro_combo)
 # dim(LTREB_repro_combo)
