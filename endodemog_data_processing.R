@@ -1804,25 +1804,25 @@ dim(LTREB_data_forsurv)
 # Split up the main dataframe by species and recode plot to be used as an index for each species
 AGPE_surv_data <- LTREB_data_forsurv %>% 
   filter(species == "AGPE") %>% 
-  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
+  mutate(plot_index = as.integer(as.character(recode(as.factor(plot_fixed),"111"="1", "112"="2", "113"="3", "114"="4", "115"="5", "116"="6", "117"="7", "118"="8","119"="9", "120"="10"))))
 ELRI_surv_data <- LTREB_data_forsurv %>% 
   filter(species == "ELRI") %>% 
-  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
+  mutate(plot_index = as.integer(as.character(recode(as.factor(plot_fixed),"101"="1", "102"="2", "103"="3", "104"="4", "105"="5", "106"="6", "107"="7", "108"="8","109"="9", "110"="10"))))
 ELVI_surv_data <- LTREB_data_forsurv %>% 
   filter(species == "ELVI") %>% 
-  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed))))) #There is one ELVI recorded in plot 101, need to fix, probably data entry error for ELRI
+  mutate(plot_index = as.integer(as.character(recode(as.factor(plot_fixed),"91"="1", "92"="2", "93"="3", "94"="4", "95"="5", "96"="6", "97"="7", "98"="8","99"="9", "100"="10"))))
 FESU_surv_data <- LTREB_data_forsurv %>% 
   filter(species == "FESU") %>% 
-  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
+  mutate(plot_index = as.integer(as.character(recode(as.factor(plot_fixed),"121"="1", "122"="2", "123"="3", "124"="4", "125"="5", "126"="6", "127"="7", "128"="8","129"="9", "130"="10"))))
 LOAR_surv_data <- LTREB_data_forsurv %>% 
   filter(species == "LOAR") %>% 
-  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed))))) #also need to check LOAR plots and POAL
+  mutate(plot_index = as.integer(as.character(recode(as.factor(plot_fixed),"31"="1", "32"="2", "33"="3", "34"="4", "35"="5", "36"="6", "37"="7", "38"="8","39"="9", "40"="10"))))
 POAL_surv_data <- LTREB_data_forsurv %>% 
   filter(species == "POAL") %>% 
-  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
+  mutate(plot_index = as.integer(as.character(recode(as.factor(plot_fixed),"3"="1", "4"="2", "8"="3", "9"="4", "10"="5", "11"="6", "15"="7", "16"="8","17"="9", "19"="10","151"="11","152"="12","153"="13","154"="14","155"="15","156"="16","157"="17","158"="18"))))
 POSY_surv_data <- LTREB_data_forsurv %>% 
   filter(species == "POSY") %>% 
-  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
+  mutate(plot_index = as.integer(as.character(recode(as.factor(plot_fixed),"1"="1", "2"="2", "5"="3", "6"="4", "7"="5", "12"="6", "13"="7", "14"="8","18"="9", "20"="10","141"="11","142"="12","143"="13","144"="14","145"="15","146"="16","147"="17","148"="18", "149"="19", "150"="20"))))
 
 
 # Create model matrices for each species
@@ -1873,7 +1873,7 @@ AGPE_surv_data_list <- list(surv_t1 = AGPE_surv_data$surv_t1,
                             N = nrow(AGPE_surv_data),
                             K = ncol(AGPE_surv_matrix),
                             nYear = length(unique(AGPE_surv_data$year_t_index)),
-                            nPlot = length(unique(AGPE_surv_data$plot_index)),
+                            nPlot = 10L,
                             nEndo =   length(unique(AGPE_surv_data$endo_01)))
 str(AGPE_surv_data_list)
 
@@ -1888,7 +1888,7 @@ ELRI_surv_data_list <- list(surv_t1 = ELRI_surv_data$surv_t1,
                             N = nrow(ELRI_surv_data),
                             K = ncol(ELRI_surv_matrix),
                             nYear = length(unique(ELRI_surv_data$year_t_index)),
-                            nPlot = length(unique(ELRI_surv_data$plot_index)),
+                            nPlot = 10L,
                             nEndo =   length(unique(ELRI_surv_data$endo_01)))
 str(ELRI_surv_data_list)
 
@@ -1903,7 +1903,7 @@ ELVI_surv_data_list <- list(surv_t1 = ELVI_surv_data$surv_t1,
                             N = nrow(ELVI_surv_data),
                             K = ncol(ELVI_surv_matrix),
                             nYear = length(unique(ELVI_surv_data$year_t_index)),
-                            nPlot = length(unique(ELVI_surv_data$plot_index)),
+                            nPlot = 10L,
                             nEndo =   length(unique(ELVI_surv_data$endo_01)))
 str(ELVI_surv_data_list)
 
@@ -1918,7 +1918,7 @@ FESU_surv_data_list <- list(surv_t1 = FESU_surv_data$surv_t1,
                             N = nrow(FESU_surv_data),
                             K = ncol(FESU_surv_matrix),
                             nYear = length(unique(FESU_surv_data$year_t_index)),
-                            nPlot = length(unique(FESU_surv_data$plot_index)),
+                            nPlot = 10L,
                             nEndo =   length(unique(FESU_surv_data$endo_01)))
 str(FESU_surv_data_list)
 
@@ -1933,7 +1933,7 @@ LOAR_surv_data_list <- list(surv_t1 = LOAR_surv_data$surv_t1,
                             N = nrow(LOAR_surv_data),
                             K = ncol(LOAR_surv_matrix),
                             nYear = length(unique(LOAR_surv_data$year_t_index)),
-                            nPlot = length(unique(LOAR_surv_data$plot_index)),
+                            nPlot = 10L,
                             nEndo =   length(unique(LOAR_surv_data$endo_01)))
 str(LOAR_surv_data_list)
 
@@ -1948,7 +1948,7 @@ POAL_surv_data_list <- list(surv_t1 = POAL_surv_data$surv_t1,
                             N = nrow(POAL_surv_data),
                             K = ncol(POAL_surv_matrix),
                             nYear = length(unique(POAL_surv_data$year_t_index)),
-                            nPlot = length(unique(POAL_surv_data$plot_index)),
+                            nPlot = 18L,
                             nEndo =   length(unique(POAL_surv_data$endo_01)))
 str(POAL_surv_data_list)
 
@@ -1963,7 +1963,7 @@ POSY_surv_data_list <- list(surv_t1 = POSY_surv_data$surv_t1,
                             N = nrow(POSY_surv_data),
                             K = ncol(POSY_surv_matrix),
                             nYear = length(unique(POSY_surv_data$year_t_index)),
-                            nPlot = length(unique(POSY_surv_data$plot_index)),
+                            nPlot = 20L,
                             nEndo =   length(unique(POSY_surv_data$endo_01)))
 str(POSY_surv_data_list)
 
@@ -1988,25 +1988,25 @@ dim(LTREB_data_forgrow)
 # Split up the main dataframe by species and recode plot to be used as an index for each species
 AGPE_grow_data <- LTREB_data_forgrow %>% 
   filter(species == "AGPE") %>% 
-  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
+  mutate(plot_index = as.integer(as.character(recode(as.factor(plot_fixed),"111"="1", "112"="2", "113"="3", "114"="4", "115"="5", "116"="6", "117"="7", "118"="8","119"="9", "120"="10"))))
 ELRI_grow_data <- LTREB_data_forgrow %>% 
   filter(species == "ELRI") %>% 
-  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
+  mutate(plot_index = as.integer(as.character(recode(as.factor(plot_fixed),"101"="1", "102"="2", "103"="3", "104"="4", "105"="5", "106"="6", "107"="7", "108"="8","109"="9", "110"="10"))))
 ELVI_grow_data <- LTREB_data_forgrow %>% 
   filter(species == "ELVI") %>% 
-  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
+  mutate(plot_index = as.integer(as.character(recode(as.factor(plot_fixed),"91"="1", "92"="2", "93"="3", "94"="4", "95"="5", "96"="6", "97"="7", "98"="8","99"="9", "100"="10"))))
 FESU_grow_data <- LTREB_data_forgrow %>% 
   filter(species == "FESU") %>% 
-  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
+  mutate(plot_index = as.integer(as.character(recode(as.factor(plot_fixed),"121"="1", "122"="2", "123"="3", "124"="4", "125"="5", "126"="6", "127"="7", "128"="8","129"="9", "130"="10"))))
 LOAR_grow_data <- LTREB_data_forgrow %>% 
   filter(species == "LOAR") %>% 
-  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
+  mutate(plot_index = as.integer(as.character(recode(as.factor(plot_fixed),"31"="1", "32"="2", "33"="3", "34"="4", "35"="5", "36"="6", "37"="7", "38"="8","39"="9", "40"="10"))))
 POAL_grow_data <- LTREB_data_forgrow %>% 
   filter(species == "POAL") %>% 
-  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
+  mutate(plot_index = as.integer(as.character(recode(as.factor(plot_fixed),"3"="1", "4"="2", "8"="3", "9"="4", "10"="5", "11"="6", "15"="7", "16"="8","17"="9", "19"="10","151"="11","152"="12","153"="13","154"="14","155"="15","156"="16","157"="17","158"="18"))))
 POSY_grow_data <- LTREB_data_forgrow %>% 
   filter(species == "POSY") %>% 
-  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
+  mutate(plot_index = as.integer(as.character(recode(as.factor(plot_fixed),"1"="1", "2"="2", "5"="3", "6"="4", "7"="5", "12"="6", "13"="7", "14"="8","18"="9", "20"="10","141"="11","142"="12","143"="13","144"="14","145"="15","146"="16","147"="17","148"="18", "149"="19", "150"="20"))))
 
 
 # Create model matrices for each species
@@ -2058,7 +2058,7 @@ AGPE_grow_data_list <- list(size_t1 = AGPE_grow_data$size_t1,
                             K = ncol(AGPE_grow_matrix),
                             lowerlimit = as.integer(min(AGPE_grow_data$size_t1)),
                             nYear = length(unique(AGPE_grow_data$year_t_index)),
-                            nPlot = length(unique(AGPE_grow_data$plot_index)),
+                            nPlot = 10L,
                             nEndo =   length(unique(AGPE_grow_data$endo_01)))
 str(AGPE_grow_data_list)
 
@@ -2074,7 +2074,7 @@ ELRI_grow_data_list <- list(size_t1 = ELRI_grow_data$size_t1,
                             K = ncol(ELRI_grow_matrix),
                             lowerlimit = as.integer(min(ELRI_grow_data$size_t1)),
                             nYear = length(unique(ELRI_grow_data$year_t_index)),
-                            nPlot = length(unique(ELRI_grow_data$plot_index)),
+                            nPlot = 10L,
                             nEndo =   length(unique(ELRI_grow_data$endo_01)))
 str(ELRI_grow_data_list)
 
@@ -2090,7 +2090,7 @@ ELVI_grow_data_list <- list(size_t1 = ELVI_grow_data$size_t1,
                             K = ncol(ELVI_grow_matrix),
                             lowerlimit = as.integer(min(ELVI_grow_data$size_t1)),
                             nYear = length(unique(ELVI_grow_data$year_t_index)),
-                            nPlot = length(unique(ELVI_grow_data$plot_index)),
+                            nPlot = 10L,
                             nEndo =   length(unique(ELVI_grow_data$endo_01)))
 str(ELVI_grow_data_list)
 
@@ -2106,7 +2106,7 @@ FESU_grow_data_list <- list(size_t1 = FESU_grow_data$size_t1,
                             K = ncol(FESU_grow_matrix),
                             lowerlimit = as.integer(min(FESU_grow_data$size_t1)),
                             nYear = length(unique(FESU_grow_data$year_t_index)),
-                            nPlot = length(unique(FESU_grow_data$plot_index)),
+                            nPlot = 10L,
                             nEndo =   length(unique(FESU_grow_data$endo_01)))
 str(FESU_grow_data_list)
 
@@ -2122,7 +2122,7 @@ LOAR_grow_data_list <- list(size_t1 = LOAR_grow_data$size_t1,
                             K = ncol(LOAR_grow_matrix),            
                             lowerlimit = as.integer(min(LOAR_grow_data$size_t1)),
                             nYear = length(unique(LOAR_grow_data$year_t_index)),
-                            nPlot = length(unique(LOAR_grow_data$plot_index)),
+                            nPlot = 10L,
                             nEndo =   length(unique(LOAR_grow_data$endo_01)))
 str(LOAR_grow_data_list)
 
@@ -2138,7 +2138,7 @@ POAL_grow_data_list <- list(size_t1 = POAL_grow_data$size_t1,
                             K = ncol(POAL_grow_matrix),
                             lowerlimit = as.integer(min(POAL_grow_data$size_t1)),
                             nYear = length(unique(POAL_grow_data$year_t_index)),
-                            nPlot = length(unique(POAL_grow_data$plot_index)),
+                            nPlot = 18L,
                             nEndo =   length(unique(POAL_grow_data$endo_01)))
 str(POAL_grow_data_list)
 
@@ -2154,7 +2154,7 @@ POSY_grow_data_list <- list(size_t1 = POSY_grow_data$size_t1,
                             K = ncol(POSY_grow_matrix),
                             lowerlimit = as.integer(min(POSY_grow_data$size_t1)),
                             nYear = length(unique(POSY_grow_data$year_t_index)),
-                            nPlot = length(unique(POSY_grow_data$plot_index)),
+                            nPlot = 20L,
                             nEndo =   length(unique(POSY_grow_data$endo_01)))
 str(POSY_grow_data_list)
 
@@ -2175,34 +2175,28 @@ dim(LTREB_data_forflw)
 
 # Creating individual species data lists to be passed to the model
 # Split up the main dataframe by species and recode plot to be used as an index for each species
+
 AGPE_flw_data <- LTREB_data_forflw %>% 
   filter(species == "AGPE") %>% 
-  mutate(year_t_index = as.integer(as.factor(as.integer(as.character(year_t_index))))) %>% #This year thing was an issue where we had years with no data, so I had to recode, but I need to see if that is still a problem
-  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
+  mutate(plot_index = as.integer(as.character(recode(as.factor(plot_fixed),"111"="1", "112"="2", "113"="3", "114"="4", "115"="5", "116"="6", "117"="7", "118"="8","119"="9", "120"="10"))))
 ELRI_flw_data <- LTREB_data_forflw %>% 
   filter(species == "ELRI") %>% 
-  mutate(year_t_index = as.integer(as.factor(as.integer(as.character(year_t_index))))) %>% 
-  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
+  mutate(plot_index = as.integer(as.character(recode(as.factor(plot_fixed),"101"="1", "102"="2", "103"="3", "104"="4", "105"="5", "106"="6", "107"="7", "108"="8","109"="9", "110"="10"))))
 ELVI_flw_data <- LTREB_data_forflw %>% 
   filter(species == "ELVI") %>% 
-  mutate(year_t_index = as.integer(as.factor(as.integer(as.character(year_t_index))))) %>% 
-  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
+  mutate(plot_index = as.integer(as.character(recode(as.factor(plot_fixed),"91"="1", "92"="2", "93"="3", "94"="4", "95"="5", "96"="6", "97"="7", "98"="8","99"="9", "100"="10"))))
 FESU_flw_data <- LTREB_data_forflw %>% 
   filter(species == "FESU") %>% 
-  mutate(year_t_index = as.integer(as.factor(as.integer(as.character(year_t_index))))) %>% 
-  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
+  mutate(plot_index = as.integer(as.character(recode(as.factor(plot_fixed),"121"="1", "122"="2", "123"="3", "124"="4", "125"="5", "126"="6", "127"="7", "128"="8","129"="9", "130"="10"))))
 LOAR_flw_data <- LTREB_data_forflw %>% 
   filter(species == "LOAR") %>% 
-  mutate(year_t_index = as.integer(as.factor(as.integer(as.character(year_t_index))))) %>% 
-  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
+  mutate(plot_index = as.integer(as.character(recode(as.factor(plot_fixed),"31"="1", "32"="2", "33"="3", "34"="4", "35"="5", "36"="6", "37"="7", "38"="8","39"="9", "40"="10"))))
 POAL_flw_data <- LTREB_data_forflw %>% 
   filter(species == "POAL") %>% 
-  mutate(year_t_index = as.integer(as.factor(as.integer(as.character(year_t_index))))) %>% 
-  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
+  mutate(plot_index = as.integer(as.character(recode(as.factor(plot_fixed),"3"="1", "4"="2", "8"="3", "9"="4", "10"="5", "11"="6", "15"="7", "16"="8","17"="9", "19"="10","151"="11","152"="12","153"="13","154"="14","155"="15","156"="16","157"="17","158"="18"))))
 POSY_flw_data <- LTREB_data_forflw %>% 
   filter(species == "POSY") %>% 
-  mutate(year_t_index = as.integer(as.factor(as.integer(as.character(year_t_index))))) %>% 
-  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
+  mutate(plot_index = as.integer(as.character(recode(as.factor(plot_fixed),"1"="1", "2"="2", "5"="3", "6"="4", "7"="5", "12"="6", "13"="7", "14"="8","18"="9", "20"="10","141"="11","142"="12","143"="13","144"="14","145"="15","146"="16","147"="17","148"="18", "149"="19", "150"="20"))))
 
 
 # Create model matrices for each species
@@ -2254,8 +2248,8 @@ AGPE_flw_data_list <- list(flw_t = AGPE_flw_data$FLW_STAT_T,
                            plot = AGPE_flw_data$plot_index,
                            N = nrow(AGPE_flw_data),
                            K = ncol(AGPE_flw_matrix),
-                           nYear = length(unique(AGPE_flw_data$year_t_index)),
-                           nPlot = length(unique(AGPE_flw_data$plot_index)),
+                           nYear = 11L,
+                           nPlot = 10L,
                            nEndo =   length(unique(AGPE_flw_data$endo_01)))
 str(AGPE_flw_data_list)
 
@@ -2269,8 +2263,8 @@ ELRI_flw_data_list <- list(flw_t = ELRI_flw_data$FLW_STAT_T,
                            plot = ELRI_flw_data$plot_index,
                            N = nrow(ELRI_flw_data),
                            K = ncol(ELRI_flw_matrix),
-                           nYear = length(unique(ELRI_flw_data$year_t_index)),
-                           nPlot = length(unique(ELRI_flw_data$plot_index)),
+                           nYear = 11L,
+                           nPlot = 10L,
                            nEndo =   length(unique(ELRI_flw_data$endo_01)))
 str(ELRI_flw_data_list)
 
@@ -2284,8 +2278,8 @@ ELVI_flw_data_list <- list(flw_t = ELVI_flw_data$FLW_STAT_T,
                            plot = ELVI_flw_data$plot_index,
                            N = nrow(ELVI_flw_data),
                            K = ncol(ELVI_flw_matrix),
-                           nYear = length(unique(ELVI_flw_data$year_t_index)),
-                           nPlot = length(unique(ELVI_flw_data$plot_index)),
+                           nYear = 11L,
+                           nPlot = 10L,
                            nEndo =   length(unique(ELVI_flw_data$endo_01)))
 str(ELVI_flw_data_list)
 
@@ -2299,8 +2293,8 @@ FESU_flw_data_list <- list(flw_t = FESU_flw_data$FLW_STAT_T,
                            plot = FESU_flw_data$plot_index,
                            N = nrow(FESU_flw_data),
                            K = ncol(FESU_flw_matrix),
-                           nYear = length(unique(FESU_flw_data$year_t_index)),
-                           nPlot = length(unique(FESU_flw_data$plot_index)),
+                           nYear = 11L,
+                           nPlot = 10L,
                            nEndo =   length(unique(FESU_flw_data$endo_01)))
 str(FESU_flw_data_list)
 
@@ -2314,8 +2308,8 @@ LOAR_flw_data_list <- list(flw_t = LOAR_flw_data$FLW_STAT_T,
                            plot = LOAR_flw_data$plot_index,
                            N = nrow(LOAR_flw_data),
                            K = ncol(LOAR_flw_matrix),
-                           nYear = length(unique(LOAR_flw_data$year_t_index)),
-                           nPlot = length(unique(LOAR_flw_data$plot_index)),
+                           nYear = 11L,
+                           nPlot = 10L,
                            nEndo =   length(unique(LOAR_flw_data$endo_01)))
 str(LOAR_flw_data_list)
 
@@ -2329,8 +2323,8 @@ POAL_flw_data_list <- list(flw_t = POAL_flw_data$FLW_STAT_T,
                            plot = POAL_flw_data$plot_index,
                            N = nrow(POAL_flw_data),
                            K = ncol(POAL_flw_matrix),
-                           nYear = length(unique(POAL_flw_data$year_t_index)),
-                           nPlot = length(unique(POAL_flw_data$plot_index)),
+                           nYear = 11L,
+                           nPlot = 18L,
                            nEndo =   length(unique(POAL_flw_data$endo_01)))
 str(POAL_flw_data_list)
 
@@ -2344,8 +2338,8 @@ POSY_flw_data_list <- list(flw_t = POSY_flw_data$FLW_STAT_T,
                            plot = POSY_flw_data$plot_index,
                            N = nrow(POSY_flw_data),
                            K = ncol(POSY_flw_matrix),
-                           nYear = length(unique(POSY_flw_data$year_t_index)),
-                           nPlot = length(unique(POSY_flw_data$plot_index)),
+                           nYear = 11L,
+                           nPlot = 20L,
                            nEndo =   length(unique(POSY_flw_data$endo_01)))
 str(POSY_flw_data_list)
 
@@ -2372,32 +2366,25 @@ dim(LTREB_data_forfert)
 # Split up the main dataframe by species and recode plot to be used as an index for each species
 AGPE_fert_data <- LTREB_data_forfert %>% 
   filter(species == "AGPE") %>% 
-  mutate(year_t_index = as.integer(as.factor(as.character(year_t_index)))) %>% 
-  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
+  mutate(plot_index = as.integer(as.character(recode(as.factor(plot_fixed),"111"="1", "112"="2", "113"="3", "114"="4", "115"="5", "116"="6", "117"="7", "118"="8","119"="9", "120"="10"))))
 ELRI_fert_data <- LTREB_data_forfert %>% 
   filter(species == "ELRI") %>% 
-  mutate(year_t_index = as.integer(as.factor(as.character(year_t_index)))) %>% 
-  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
+  mutate(plot_index = as.integer(as.character(recode(as.factor(plot_fixed),"101"="1", "102"="2", "103"="3", "104"="4", "105"="5", "106"="6", "107"="7", "108"="8","109"="9", "110"="10"))))
 ELVI_fert_data <- LTREB_data_forfert %>% 
   filter(species == "ELVI") %>% 
-  mutate(year_t_index = as.integer(as.factor(as.character(year_t_index)))) %>% 
-  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
+  mutate(plot_index = as.integer(as.character(recode(as.factor(plot_fixed),"91"="1", "92"="2", "93"="3", "94"="4", "95"="5", "96"="6", "97"="7", "98"="8","99"="9", "100"="10"))))
 FESU_fert_data <- LTREB_data_forfert %>% 
   filter(species == "FESU") %>% 
-  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed))))) %>% 
-  mutate(year_t_index = as.integer(as.factor(as.integer(as.character(year_t_index))))) 
+  mutate(plot_index = as.integer(as.character(recode(as.factor(plot_fixed),"121"="1", "122"="2", "123"="3", "124"="4", "125"="5", "126"="6", "127"="7", "128"="8","129"="9", "130"="10"))))
 LOAR_fert_data <- LTREB_data_forfert %>% 
   filter(species == "LOAR") %>% 
-  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed))))) %>% 
-  mutate(year_t_index = as.integer(as.factor(as.integer(as.character(year_t_index))))) 
+  mutate(plot_index = as.integer(as.character(recode(as.factor(plot_fixed),"31"="1", "32"="2", "33"="3", "34"="4", "35"="5", "36"="6", "37"="7", "38"="8","39"="9", "40"="10"))))
 POAL_fert_data <- LTREB_data_forfert %>% 
   filter(species == "POAL") %>% 
-  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed))))) %>%
-  mutate(year_t_index = as.integer(as.factor(as.integer(as.character(year_t_index))))) 
+  mutate(plot_index = as.integer(as.character(recode(as.factor(plot_fixed),"3"="1", "4"="2", "8"="3", "9"="4", "10"="5", "11"="6", "15"="7", "16"="8","17"="9", "19"="10","151"="11","152"="12","153"="13","154"="14","155"="15","156"="16","157"="17","158"="18"))))
 POSY_fert_data <- LTREB_data_forfert %>% 
   filter(species == "POSY") %>% 
-  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed))))) %>% 
-  mutate(year_t_index = as.integer(as.factor(as.integer(as.character(year_t_index))))) 
+  mutate(plot_index = as.integer(as.character(recode(as.factor(plot_fixed),"1"="1", "2"="2", "5"="3", "6"="4", "7"="5", "12"="6", "13"="7", "14"="8","18"="9", "20"="10","141"="11","142"="12","143"="13","144"="14","145"="15","146"="16","147"="17","148"="18", "149"="19", "150"="20"))))
 
 
 # Create model matrices for each species
@@ -2450,8 +2437,8 @@ AGPE_fert_data_list <- list(flw_t = AGPE_fert_data$FLW_T,
                             N = nrow(AGPE_fert_data),
                             K = ncol(AGPE_fert_matrix),
                             lowerlimit = as.integer(min(AGPE_fert_data$FLW_T)),
-                            nYear = length(unique(AGPE_fert_data$year_t_index)),
-                            nPlot = length(unique(AGPE_fert_data$plot_index)),
+                            nYear = 11L,
+                            nPlot = 10L,
                             nEndo =   length(unique(AGPE_fert_data$endo_01)))
 str(AGPE_fert_data_list)
 
@@ -2466,8 +2453,8 @@ ELRI_fert_data_list <- list(flw_t = ELRI_fert_data$FLW_T,
                             N = nrow(ELRI_fert_data),
                             K = ncol(ELRI_fert_matrix),
                             lowerlimit = as.integer(min(ELRI_fert_data$FLW_T)),
-                            nYear = length(unique(ELRI_fert_data$year_t_index)),
-                            nPlot = length(unique(ELRI_fert_data$plot_index)),
+                            nYear = 11L,
+                            nPlot = 10L,
                             nEndo =   length(unique(ELRI_fert_data$endo_01)))
 str(ELRI_fert_data_list)
 
@@ -2482,8 +2469,8 @@ ELVI_fert_data_list <- list(flw_t = ELVI_fert_data$FLW_T,
                             N = nrow(ELVI_fert_data),
                             K = ncol(ELVI_fert_matrix),
                             lowerlimit = as.integer(min(ELVI_fert_data$FLW_T)),
-                            nYear = length(unique(ELVI_fert_data$year_t_index)),
-                            nPlot = length(unique(ELVI_fert_data$plot_index)),
+                            nYear = 11L,
+                            nPlot = 10L,
                             nEndo =   length(unique(ELVI_fert_data$endo_01)))
 str(ELVI_fert_data_list)
 
@@ -2498,8 +2485,8 @@ FESU_fert_data_list <- list(flw_t = FESU_fert_data$FLW_T,
                             N = nrow(FESU_fert_data),
                             K = ncol(FESU_fert_matrix),
                             lowerlimit = as.integer(min(FESU_fert_data$FLW_T)),
-                            nYear = length(unique(FESU_fert_data$year_t_index)),
-                            nPlot = length(unique(FESU_fert_data$plot_index)),
+                            nYear = 11L,
+                            nPlot = 10L,
                             nEndo =   length(unique(FESU_fert_data$endo_01)))
 str(FESU_fert_data_list)
 
@@ -2514,8 +2501,8 @@ LOAR_fert_data_list <- list(flw_t = LOAR_fert_data$FLW_T,
                             N = nrow(LOAR_fert_data),
                             K = ncol(LOAR_fert_matrix),
                             lowerlimit = as.integer(min(LOAR_fert_data$FLW_T)),
-                            nYear = length(unique(LOAR_fert_data$year_t_index)),
-                            nPlot = length(unique(LOAR_fert_data$plot_index)),
+                            nYear = 11L,
+                            nPlot = 10L,
                             nEndo =   length(unique(LOAR_fert_data$endo_01)))
 str(LOAR_fert_data_list)
 POAL_fert_data_list <- list(flw_t = POAL_fert_data$FLW_T,
@@ -2529,8 +2516,8 @@ POAL_fert_data_list <- list(flw_t = POAL_fert_data$FLW_T,
                             N = nrow(POAL_fert_data),
                             K = ncol(POAL_fert_matrix),
                             lowerlimit = as.integer(min(POAL_fert_data$FLW_T)),
-                            nYear = length(unique(POAL_fert_data$year_t_index)),
-                            nPlot = length(unique(POAL_fert_data$plot_index)),
+                            nYear = 11L,
+                            nPlot = 18L,
                             nEndo =   length(unique(POAL_fert_data$endo_01)))
 str(POAL_fert_data_list)
 
@@ -2545,8 +2532,8 @@ POSY_fert_data_list <- list(flw_t = POSY_fert_data$FLW_T,
                             N = nrow(POSY_fert_data),
                             K = ncol(POSY_fert_matrix),
                             lowerlimit = as.integer(min(POSY_fert_data$FLW_T)),
-                            nYear = length(unique(POSY_fert_data$year_t_index)),
-                            nPlot = length(unique(POSY_fert_data$plot_index)),
+                            nYear = 11L,
+                            nPlot = 20L,
                             nEndo =   length(unique(POSY_fert_data$endo_01)))
 str(POSY_fert_data_list)
 
@@ -2565,41 +2552,39 @@ dim(LTREB_data_for_seedmeans)
 AGPE_spike_data <- LTREB_data_for_spike %>% 
   filter(species == "AGPE") %>% 
   filter(!is.na(SPIKEPERINF_T)) %>% 
-  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed))))) 
-  
+  mutate(plot_index = as.integer(as.character(recode(as.factor(plot_fixed),"111"="1", "112"="2", "113"="3", "114"="4", "115"="5", "116"="6", "117"="7", "118"="8","119"="9", "120"="10"))))
+
 
 ELRI_spike_data <- LTREB_data_for_spike %>% #Elymus species are seed/inf
   filter(species == "ELRI") %>% 
   filter(!is.na(SEEDPERINF_T)) %>% 
-  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed))))) 
-  
+  mutate(plot_index = as.integer(as.character(recode(as.factor(plot_fixed),"101"="1", "102"="2", "103"="3", "104"="4", "105"="5", "106"="6", "107"="7", "108"="8","109"="9", "110"="10"))))
+
 ELVI_spike_data <- LTREB_data_for_spike %>% #Elymus species are seed/inf
   filter(species == "ELVI") %>%
   filter(!is.na(SEEDPERINF_T)) %>% 
-  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed))))) 
-  
+  mutate(plot_index = as.integer(as.character(recode(as.factor(plot_fixed),"91"="1", "92"="2", "93"="3", "94"="4", "95"="5", "96"="6", "97"="7", "98"="8","99"="9", "100"="10"))))
+
 
 FESU_spike_data <- LTREB_data_for_spike %>% 
   filter(species == "FESU") %>% 
   filter(!is.na(SPIKEPERINF_T)) %>% 
-  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))  
-  
+  mutate(plot_index = as.integer(as.character(recode(as.factor(plot_fixed),"121"="1", "122"="2", "123"="3", "124"="4", "125"="5", "126"="6", "127"="7", "128"="8","129"="9", "130"="10"))))
+
 LOAR_spike_data <- LTREB_data_for_spike %>% 
   filter(species == "LOAR") %>% 
   filter(!is.na(SPIKEPERINF_T)) %>% 
-  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed))))) 
-  
+  mutate(plot_index = as.integer(as.character(recode(as.factor(plot_fixed),"31"="1", "32"="2", "33"="3", "34"="4", "35"="5", "36"="6", "37"="7", "38"="8","39"="9", "40"="10"))))
+
 POAL_spike_data <- LTREB_data_for_spike %>% 
   filter(species == "POAL") %>% 
   filter(!is.na(SPIKEPERINF_T)) %>% 
-  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))  
-  
+  mutate(plot_index = as.integer(as.character(recode(as.factor(plot_fixed),"3"="1", "4"="2", "8"="3", "9"="4", "10"="5", "11"="6", "15"="7", "16"="8","17"="9", "19"="10","151"="11","152"="12","153"="13","154"="14","155"="15","156"="16","157"="17","158"="18"))))
+
 POSY_spike_data <- LTREB_data_for_spike %>% 
   filter(species == "POSY") %>% 
   filter(!is.na(SPIKEPERINF_T)) %>% 
-  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed))))) 
-  
-
+  mutate(plot_index = as.integer(as.character(recode(as.factor(plot_fixed),"1"="1", "2"="2", "5"="3", "6"="4", "7"="5", "12"="6", "13"="7", "14"="8","18"="9", "20"="10","141"="11","142"="12","143"="13","144"="14","145"="15","146"="16","147"="17","148"="18", "149"="19", "150"="20"))))
 
 # Create data lists to be used for the Stan model
 AGPE_spike_data_list <- list(spike_t = AGPE_spike_data$SPIKEPERINF_T,
@@ -2612,7 +2597,7 @@ AGPE_spike_data_list <- list(spike_t = AGPE_spike_data$SPIKEPERINF_T,
                              N = length(na.omit(AGPE_spike_data$SPIKEPERINF_T)),
                              K = 5L,
                              nYear = 11L,
-                             nPlot = length(unique(AGPE_spike_data$plot_index)),
+                             nPlot = 10L,
                              nEndo =   length(unique(AGPE_spike_data$endo_01)))
 str(AGPE_spike_data_list)
 
@@ -2626,8 +2611,8 @@ ELRI_spike_data_list <- list(spike_t = (ELRI_spike_data$SEEDPERINF_T),
                             N = length((ELRI_spike_data$SEEDPERINF_T)),
                             N = nrow(ELRI_spike_data),
                             K = 5L,
-                            nYear = length(unique(ELRI_spike_data$year_t_index)),
-                            nPlot = length(unique(ELRI_spike_data$plot_index)),
+                            nYear = 11L,
+                            nPlot = 10L,
                             nEndo =   length(unique(ELRI_spike_data$endo_01)))
 str(ELRI_spike_data_list)
 
@@ -2641,8 +2626,8 @@ ELVI_spike_data_list <- list(spike_t = (ELVI_spike_data$SEEDPERINF_T),
                             N = length((ELVI_spike_data$SEEDPERINF_T)),
                             N = nrow(ELVI_spike_data),
                             K = 5L,
-                            nYear = length(unique(ELVI_spike_data$year_t_index)),
-                            nPlot = length(unique(ELVI_spike_data$plot_index)),
+                            nYear = 11L,
+                            nPlot = 10L,
                             nEndo =   length(unique(ELVI_spike_data$endo_01)))
 str(ELVI_spike_data_list)
 
@@ -2655,8 +2640,8 @@ FESU_spike_data_list <- list(spike_t = (FESU_spike_data$SPIKEPERINF_T),
                             plot = FESU_spike_data$plot_index,
                             N = length((FESU_spike_data$SPIKEPERINF_T)),
                             K = 5L,
-                            nYear = length(unique(FESU_spike_data$year_t_index)),
-                            nPlot = length(unique(FESU_spike_data$plot_index)),
+                            nYear = 11L,
+                            nPlot = 10L,
                             nEndo =   length(unique(FESU_spike_data$endo_01)))
 str(FESU_spike_data_list)
 
@@ -2669,8 +2654,8 @@ LOAR_spike_data_list <- list(spike_t = (LOAR_spike_data$SPIKEPERINF_T),
                             plot = LOAR_spike_data$plot_index,
                             N = length((LOAR_spike_data$SPIKEPERINF_T)),
                             K = 5L,
-                            nYear = length(unique(LOAR_spike_data$year_t_index)),
-                            nPlot = length(unique(LOAR_spike_data$plot_index)),
+                            nYear = 11L,
+                            nPlot = 10L,
                             nEndo =   length(unique(LOAR_spike_data$endo_01)))
 str(LOAR_spike_data_list)
 
@@ -2683,8 +2668,8 @@ POAL_spike_data_list <- list(spike_t = (POAL_spike_data$SPIKEPERINF_T),
                             plot = POAL_spike_data$plot_index,
                             N = length((POAL_spike_data$SPIKEPERINF_T)),
                             K = 5L,
-                            nYear = length(unique(POAL_spike_data$year_t_index)),
-                            nPlot = length(unique(POAL_spike_data$plot_index)),
+                            nYear = 11L,
+                            nPlot = 18L,
                             nEndo =   length(unique(POAL_spike_data$endo_01)))
 str(POAL_spike_data_list)
 
@@ -2697,8 +2682,8 @@ POSY_spike_data_list <- list(spike_t = (POSY_spike_data$SPIKEPERINF_T),
                             plot = POSY_spike_data$plot_index,
                             N = length(POSY_spike_data$SPIKEPERINF_T),
                             K = 5L,
-                            nYear = length(unique(POSY_spike_data$year_t_index)),
-                            nPlot = length(unique(POSY_spike_data$plot_index)),
+                            nYear = 11L,
+                            nPlot = 20L,
                             nEndo =   length(unique(POSY_spike_data$endo_01)))
 str(POSY_spike_data_list)
 
