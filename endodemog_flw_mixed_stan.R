@@ -17,245 +17,10 @@ logit = function(x) { log(x/(1-x)) }
 #############################################################################################
 ####### Data manipulation to prepare data as lists for Stan models------------------
 #############################################################################################
-## Load in full data frame
-# LTREB_endodemog <- 
-  # read.csv(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Fulldataplusmetadata/endo_demog_long.csv")
 
-
-#"C:/Users/MillerLab/Desktop/Endodemog-master/endo_demog_long.csv"
-#"/Users/joshuacfowler/Dropbox/EndodemogData/Fulldataplusmetadata/endo_demog_long.csv")
-str(LTREB_endodemog)
-dim(LTREB_endodemog)
-
-
-# ####### Run Endodemog data processing script to get this data frame, which we will clean up!
-# This is pulled from the raw data files for flw tiller status, and then merged with LTREB_endodemog
-LTREB_flw
-
-
-## Clean up the main data frame for NA's, other small data entry errors, and change standardize the coding for variables.
-LTREB_data <- LTREB_flw %>% 
-  rename(endo = Endo) %>% 
-  mutate(size_t, logsize_t = log(size_t)) %>% 
-  mutate(size_t1, logsize_t1 = log(size_t1)) %>%  
-  mutate(surv_t1 = as.integer(recode(surv_t1, "0" = 0, "1" =1, "2" = 1, "4" = 1))) %>% 
-  mutate(endo_01 = as.integer(case_when(endo == "0" | endo == "minus" ~ 0,
-                                        endo == "1"| endo =="plus" ~ 1))) %>% 
-  mutate(endo_index = as.integer(as.factor(endo_01+1)))  %>% 
-  mutate(species_index = as.integer(recode_factor(species,                   
-                                                  "AGPE" = 1, "ELRI" = 2, "ELVI" = 3, 
-                                                  "FESU" = 4, "LOAR" = 5, "POAL" = 6, 
-                                                  "POSY" = 7))) %>% 
-  mutate(year_t_index = as.integer(recode(year_t, 
-                                          '2007' = 1, '2008' = 2, '2009' = 3, 
-                                          '2010' = 4, '2011' = 5, '2012' = 6, 
-                                          '2013' = 7, '2014' = 8, '2015' = 9, 
-                                          '2016' = 10, '2017' = 11))) %>%             
-  mutate(year_t1_index = as.integer(recode(year_t1, 
-                                           '2008' = 2, '2009' = 3, '2010' = 4, 
-                                           '2011' = 5, '2012' = 6, '2013' = 7, 
-                                           '2014' = 8, '2015' = 9, '2016' = 10, 
-                                           '2017' = 11, '2018' = 12))) %>%               
-  mutate(origin_01 = as.integer(case_when(origin == "O" ~ 0, 
-                                          origin == "R" ~ 1, 
-                                          origin != "R" | origin != "O" ~ 1))) %>%   
-  mutate(plot_fixed = (case_when(plot != "R" ~ plot, 
-                                 plot == "R" ~ origin)))                       
-
-dim(LTREB_data)
-
-# NA's in survival come from mostly 2017 recruits.
-LTREB_data1 <- LTREB_data %>%
-  mutate(flw_stat_t1 = as.integer(flw_stat_t1)) %>% 
-  mutate(flw_stat_t = as.integer(flw_stat_t)) %>% 
-  mutate(flw_t1 = as.integer(flw_t1)) %>% 
-  mutate(flw_t = as.integer(flw_t)) %>% 
-  filter(!is.na(flw_stat_t)) %>% 
-  filter(!is.na(logsize_t)) %>% 
-  filter(logsize_t >= 0) %>% 
-  filter(!is.na(endo_01))
-
-
-dim(LTREB_data1)
-
-#########################################################################################################
-# Creating individual species data lists to be passed to the model------------------------------
-#########################################################################################################
-# Split up the main dataframe by species and recode plot to be used as an index for each species
-AGPE_data <- LTREB_data1 %>% 
-  filter(species == "AGPE") %>% 
-  mutate(year_t_index = as.integer(as.factor(as.integer(as.character(year_t_index))))) %>% 
-  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
-ELRI_data <- LTREB_data1 %>% 
-  filter(species == "ELRI") %>% 
-  mutate(year_t_index = as.integer(as.factor(as.integer(as.character(year_t_index))))) %>% 
-  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
-ELVI_data <- LTREB_data1 %>% 
-  filter(species == "ELVI") %>% 
-  mutate(year_t_index = as.integer(as.factor(as.integer(as.character(year_t_index))))) %>% 
-  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
-FESU_data <- LTREB_data1 %>% 
-  filter(species == "FESU") %>% 
-  mutate(year_t_index = as.integer(as.factor(as.integer(as.character(year_t_index))))) %>% 
-  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
-
-LOAR_data <- LTREB_data1 %>% 
-  filter(species == "LOAR") %>% 
-  mutate(year_t_index = as.integer(as.factor(as.integer(as.character(year_t_index))))) %>% 
-  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
-POAL_data <- LTREB_data1 %>% 
-  filter(species == "POAL") %>% 
-  mutate(year_t_index = as.integer(as.factor(as.integer(as.character(year_t_index))))) %>% 
-  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
-POSY_data <- LTREB_data1 %>% 
-  filter(species == "POSY") %>% 
-  mutate(year_t_index = as.integer(as.factor(as.integer(as.character(year_t_index))))) %>% 
-  mutate(plot_index = as.integer(as.factor(as.integer(as.character(plot_fixed)))))
-
-
-# Create model matrices for each species
-AGPE_for_matrix <- model.frame(flw_t ~ (logsize_t + endo_01)^2 + origin_01
-                               , data = AGPE_data)
-AGPE_Xs <- model.matrix(flw_t ~ (logsize_t + endo_01)^2 + origin_01
-                        , data =AGPE_for_matrix)
-
-ELRI_for_matrix <- model.frame(flw_t ~ (logsize_t + endo_01)^2 + origin_01
-                               , data = ELRI_data)
-ELRI_Xs <- model.matrix(flw_t ~ (logsize_t + endo_01)^2 + origin_01
-                        , data =ELRI_for_matrix)
-
-ELVI_for_matrix <- model.frame(flw_t ~ (logsize_t + endo_01)^2 + origin_01
-                               , data = ELVI_data)
-ELVI_Xs <- model.matrix(flw_t ~ (logsize_t + endo_01)^2 + origin_01
-                        , data =ELVI_for_matrix)
-
-FESU_for_matrix <- model.frame(flw_t ~ (logsize_t + endo_01)^2 + origin_01
-                               , data = FESU_data)
-FESU_Xs <- model.matrix(flw_t ~ (logsize_t + endo_01)^2 + origin_01
-                        , data =FESU_for_matrix)
-
-LOAR_for_matrix <- model.frame(flw_t ~ (logsize_t + endo_01)^2 + origin_01
-                               , data = LOAR_data)
-LOAR_Xs <- model.matrix(flw_t ~ (logsize_t + endo_01)^2 + origin_01
-                        , data =LOAR_for_matrix)
-
-POAL_for_matrix <- model.frame(flw_t ~ (logsize_t + endo_01)^2 + origin_01
-                               , data = POAL_data)
-POAL_Xs <- model.matrix(flw_t ~ (logsize_t + endo_01)^2 + origin_01
-                        , data =POAL_for_matrix)
-
-POSY_for_matrix <- model.frame(flw_t ~ (logsize_t + endo_01)^2 + origin_01
-                               , data = POSY_data)
-POSY_Xs <- model.matrix(flw_t ~ (logsize_t + endo_01)^2 + origin_01
-                        , data =POSY_for_matrix)
-
-
-
-# Create data lists to be used for the Stan model
-AGPE_flw_data_list <- list(flw_t = AGPE_data$flw_stat_t,
-                            Xs = AGPE_Xs,
-                            logsize_t = AGPE_data$logsize_t,
-                            origin_01 = AGPE_data$origin_01,
-                            endo_01 = AGPE_data$endo_01,
-                            endo_index = AGPE_data$endo_index,
-                            year_t = AGPE_data$year_t_index,
-                            plot = AGPE_data$plot_index,
-                            N = nrow(AGPE_data),
-                            K = ncol(AGPE_Xs),
-                            nYear = length(unique(AGPE_data$year_t_index)),
-                            nPlot = length(unique(AGPE_data$plot_index)),
-                            nEndo =   length(unique(AGPE_data$endo_01)))
-str(AGPE_flw_data_list)
-
-ELRI_flw_data_list <- list(flw_t = ELRI_data$flw_stat_t,
-                            Xs = ELRI_Xs,
-                            logsize_t = ELRI_data$logsize_t,
-                            origin_01 = ELRI_data$origin_01,
-                            endo_01 = ELRI_data$endo_01,
-                            endo_index = ELRI_data$endo_index,
-                            year_t = ELRI_data$year_t_index,
-                            plot = ELRI_data$plot_index,
-                            N = nrow(ELRI_data),
-                            K = ncol(ELRI_Xs),
-                            nYear = length(unique(ELRI_data$year_t_index)),
-                            nPlot = length(unique(ELRI_data$plot_index)),
-                            nEndo =   length(unique(ELRI_data$endo_01)))
-str(ELRI_flw_data_list)
-
-ELVI_flw_data_list <- list(flw_t = ELVI_data$flw_stat_t,
-                            Xs = ELVI_Xs,
-                            logsize_t = ELVI_data$logsize_t,
-                            origin_01 = ELVI_data$origin_01,
-                            endo_01 = ELVI_data$endo_01,
-                            endo_index = ELVI_data$endo_index,
-                            year_t = ELVI_data$year_t_index,
-                            plot = ELVI_data$plot_index,
-                            N = nrow(ELVI_data),
-                            K = ncol(ELVI_Xs),
-                            nYear = length(unique(ELVI_data$year_t_index)),
-                            nPlot = length(unique(ELVI_data$plot_index)),
-                            nEndo =   length(unique(ELVI_data$endo_01)))
-str(ELVI_flw_data_list)
-
-FESU_flw_data_list <- list(flw_t = FESU_data$flw_stat_t,
-                            Xs = FESU_Xs,
-                            logsize_t = FESU_data$logsize_t,
-                            origin_01 = FESU_data$origin_01,
-                            endo_01 = FESU_data$endo_01,
-                            endo_index = FESU_data$endo_index,
-                            year_t = FESU_data$year_t_index,
-                            plot = FESU_data$plot_index,
-                            N = nrow(FESU_data),
-                            K = ncol(FESU_Xs),
-                            nYear = length(unique(FESU_data$year_t_index)),
-                            nPlot = length(unique(FESU_data$plot_index)),
-                            nEndo =   length(unique(FESU_data$endo_01)))
-str(FESU_flw_data_list)
-
-LOAR_flw_data_list <- list(flw_t = LOAR_data$flw_stat_t,
-                            Xs = LOAR_Xs,
-                            logsize_t = LOAR_data$logsize_t,
-                            origin_01 = LOAR_data$origin_01,
-                            endo_01 = LOAR_data$endo_01,
-                            endo_index = LOAR_data$endo_index,
-                            year_t = LOAR_data$year_t_index,
-                            plot = LOAR_data$plot_index,
-                            N = nrow(LOAR_data),
-                            K = ncol(LOAR_Xs),
-                            nYear = length(unique(LOAR_data$year_t_index)),
-                            nPlot = length(unique(LOAR_data$plot_index)),
-                            nEndo =   length(unique(LOAR_data$endo_01)))
-str(LOAR_flw_data_list)
-
-POAL_flw_data_list <- list(flw_t = POAL_data$flw_stat_t,
-                            Xs = POAL_Xs,
-                            logsize_t = POAL_data$logsize_t,
-                            origin_01 = POAL_data$origin_01,
-                            endo_01 = POAL_data$endo_01,
-                            endo_index = POAL_data$endo_index,
-                            year_t = POAL_data$year_t_index,
-                            plot = POAL_data$plot_index,
-                            N = nrow(POAL_data),
-                            K = ncol(POAL_Xs),
-                            nYear = length(unique(POAL_data$year_t_index)),
-                            nPlot = length(unique(POAL_data$plot_index)),
-                            nEndo =   length(unique(POAL_data$endo_01)))
-str(POAL_flw_data_list)
-
-POSY_flw_data_list <- list(flw_t = POSY_data$flw_stat_t,
-                            Xs = POSY_Xs,
-                            logsize_t = POSY_data$logsize_t,
-                            origin_01 = POSY_data$origin_01,
-                            endo_01 = POSY_data$endo_01,
-                            endo_index = POSY_data$endo_index,
-                            year_t = POSY_data$year_t_index,
-                            plot = POSY_data$plot_index,
-                            N = nrow(POSY_data),
-                            K = ncol(POSY_Xs),
-                            nYear = length(unique(POSY_data$year_t_index)),
-                            nPlot = length(unique(POSY_data$plot_index)),
-                            nEndo =   length(unique(POSY_data$endo_01)))
-str(POSY_flw_data_list)
+# FLower data lists are generated in the endodemog_data_processing.R file
+# within the section titled "Preparing datalists for Flower Kernel"
+source("endodemog_data_processing.R")
 
 #########################################################################################################
 # GLMM for Surv~ size +Endo + Origin  with year random effects-------------------------
@@ -267,8 +32,8 @@ options(mc.cores = parallel::detectCores())
 set.seed(123)
 
 ## MCMC settings
-ni <- 500
-nb <- 250
+ni <- 10000
+nb <- 5000
 nc <- 3
 
 
@@ -344,31 +109,31 @@ stanmodel <- stanc("endodemog_flw.stan")
 
 smAGPE<- stan(file = "endodemog_flw.stan", data = AGPE_flw_data_list,
               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-# saveRDS(smAGPE, file = "endodemog_flw_AGPE.rds")
+saveRDS(smAGPE, file = "endodemog_flw_AGPE.rds")
 
 smELRI <- stan(file = "endodemog_flw.stan", data = ELRI_flw_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-# saveRDS(smELRI, file = "endodemog_flw_ELRI.rds")
+saveRDS(smELRI, file = "endodemog_flw_ELRI.rds")
 
 smELVI <- stan(file = "endodemog_flw.stan", data = ELVI_flw_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-# saveRDS(smELVI, file = "endodemog_flw_ELVI.rds")
+saveRDS(smELVI, file = "endodemog_flw_ELVI.rds")
 
 smFESU <- stan(file = "endodemog_flw.stan", data = FESU_flw_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-# saveRDS(smFESU, file = "endodemog_flw_FESU.rds")
+saveRDS(smFESU, file = "endodemog_flw_FESU.rds")
 
 smLOAR <- stan(file = "endodemog_flw.stan", data = LOAR_flw_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-# saveRDS(smLOAR, file = "endodemog_flw_LOAR.rds")
+saveRDS(smLOAR, file = "endodemog_flw_LOAR.rds")
 
 smPOAL <- stan(file = "endodemog_flw.stan", data = POAL_flw_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-# saveRDS(smPOAL, file = "endodemog_flw_POAL.rds")
+saveRDS(smPOAL, file = "endodemog_flw_POAL.rds")
 
 smPOSY <- stan(file = "endodemog_flw.stan", data = POSY_flw_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-# saveRDS(smPOSY, file = "endodemog_flw_POSY.rds")
+saveRDS(smPOSY, file = "endodemog_flw_POSY.rds")
 
 
 
