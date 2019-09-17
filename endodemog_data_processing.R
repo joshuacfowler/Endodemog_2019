@@ -1628,36 +1628,10 @@ LTREB_repro_3_t1 <- LTREB_repro3%>%
          spikeperinf_t1 = spikeperinf,
          no.repro_tillers_measured_t1 = no.repro_tillers_measured)
 
-# After I change how this merges, this section will be removed
-## getting a dataframe with time t and t_1
-LTREB_repro_lag <- LTREB_repro3 %>% 
-group_by(tag) %>% 
-  mutate(flw_t = dplyr::lag(flw, n = 1, default = NA),
-         year_t = dplyr::lag(year, n = 1, default = NA),
-         seedperspike_t = dplyr::lag(seedperspike, n = 1, default = NA),
-         seedperinf_t = dplyr::lag(seedperinf, n = 1, default = NA),
-         spikeperinf_t = dplyr::lag(spikeperinf, n = 1, default = NA)) %>% 
-  mutate(flw_t1 = flw,
-         year_t1 = year,
-         seedperspike_t1 = seedperspike,
-         seedperinf_t1 = seedperinf,
-         spikeperinf_t1 = spikeperinf,
-         no.repro_tillers_measured = no.repro_tillers_measured
-         ) %>% 
-  # filter(!is.na(flw_t)) %>% 
-  select(-year, -seedperspike, -spikeperinf, -seedperinf)
-
-# View(LTREB_repro_lag)
-LTREB_repro_lag1 <- ungroup(LTREB_repro_lag)
-# three of these  records don't have a birth year recorded.
-na_Birthyear <- LTREB_repro_lag1 %>% 
-  filter(is.na(`birth`))
-
 
 # merge the reproductive data with LTREB long data file for recent data and for size information for the reproductive model
 # This is endodemoglong which is stored in LTREB_data
 head(LTREB_data)
-
 
 LTREB_melt <- LTREB_data %>% 
   melt(id.var = c("plot_fixed","pos", "id", "species", "species_index", "endo_01", "endo_index", "origin_01", "birth", "year_t", "year_t_index", "year_t1", "year_t1_index", "surv_t1", "size_t", "logsize_t","size_t1", "logsize_t1", "flw_t1", "seed_t1", "seed_t"),
@@ -1682,28 +1656,9 @@ LTREB_cast1 <- ungroup(LTREB_cast)
          # year_t1, year_t1_index, flw_t1, seed_t1_fromlong, seed_t_fromlong, spikeperinf_t1_fromlong, no.repro_tillers_measured_fromlong)
 
 
-# I need to add flw_t and spikeperinf_t for the 2016 and 2017 data which is entered into this main database. 
-LTREB_lag <- LTREB_cast1%>%
-  group_by(id) %>% 
-  mutate(flw_t_fromlong = dplyr::lag(flw_t1, n = 1, default = NA),
-         spikeperinf_t_fromlong = dplyr::lag(spikeperinf_t1_fromlong, n = 1, default = NA)) %>% 
-  rename(flw_t1_fromlong = flw_t1)
-LTREB_lag1 <- ungroup(LTREB_lag) 
-# View(LTREB_lag)
-
-
 
 # now we can merge the two datasets together.
-LTREB_repro_combo <- LTREB_lag1 %>%
-  left_join(LTREB_repro_lag1,
-           by = c("plot_fixed" = "plot_fixed", "pos" = "pos",
-                  "id" = "tag", "species" = "species",
-                  "endo_01" = "endo_01",
-                  "year_t" = "year_t", "year_t1" = "year_t1")) %>% 
-  rename("birth" = "birth.x", "birth_fromrepro" = "birth.y")
-
-# I'm going to do the new merge here and then replace the stuff above.
-LTREB_repro_combo_new <- LTREB_cast1 %>% 
+LTREB_repro_combo <- LTREB_cast1 %>% 
   left_join(LTREB_repro_3_t1,
             by = c("plot_fixed" = "plot_fixed", "pos" = "pos",
                    "id" = "tag", "species" = "species",
@@ -1712,7 +1667,7 @@ LTREB_repro_combo_new <- LTREB_cast1 %>%
   rename("birth" = "birth.x", "birth_fromrepro" = "birth.y")
 
 # Now select the correct repro data from long or from the raw files into new master columns
-LTREB_full_to2018_new <- LTREB_repro_combo_new %>% 
+LTREB_full_to2018 <- LTREB_repro_combo %>% 
   mutate(FLW_T1_raw = as.integer(case_when(!is.na(flw_t1) & !is.na(flw_t1_fromlong) ~ as.integer(flw_t1),
                                        is.na(flw_t1) & !is.na(flw_t1_fromlong) ~ as.integer(flw_t1_fromlong),
                                        !is.na(flw_t1) & is.na(flw_t1_fromlong) ~ as.integer(flw_t1))),   # In this case, where both datasets had data entered, spot checking showed that they have they were identical
@@ -1737,74 +1692,24 @@ LTREB_full_to2018_new <- LTREB_repro_combo_new %>%
 # The POSY data is less clear as far as the error. for 14_99 has no notes, 0 for flw and spikelet data. I will still assume for now that the flowering data is correct, although this is less clear in this case.
 
 # Then we will add lagged variables to have the measurements in time t
-
-
-# View(LTREB_repro_combo)
-# dim(LTREB_repro_combo)
-
-# These are tag id's that are not shared between the repro data and the long data. 
-# These result from plants that either arrived after 2016, or didn't reproduce during the 2016. 
-# Those cases should be included in the long data. 
-# If there are cases within the repro data that are unique, that is a bigger problem. Maybe due to different label schemes
-setdiff(LTREB_lag1$id,LTREB_repro_lag1$tag)
-setdiff(LTREB_repro_lag1$tag,LTREB_lag1$id)
-setdiff(LTREB_repro_lag1$tag, LTREB_repro_combo$id)
-
-# I'm going to pull out those id's that are missing from the combined file. 
-# The ID's for POSY are marked within the excel file as red, so they are probably okay to not include because they don't actually have data. 
-# They only have the flw data that I included for 2007 (0), which was not pulled from the excel files but added by my to make a year_t for the original plants
-# The ID's for the POAL are a little bit less clear, but they also seem to be commented or marked as questionable in the raw data files and so are probably okay to not include.
-LTREB_repro_lag1_missing <- LTREB_repro_lag1 %>% 
-  filter(tag %in% setdiff(LTREB_repro_lag1$tag,LTREB_lag1$id))
-
-# View(LTREB_repro_lag1_missing)
-
-# Now select the correct repro data from long or from the raw files into new master columns
-LTREB_full_to2018 <- LTREB_repro_combo %>% 
-  mutate(FLW_T1 = as.integer(case_when(!is.na(flw_t1) & !is.na(flw_t1_fromlong) ~ as.integer(flw_t1),
-                                        is.na(flw_t1) & !is.na(flw_t1_fromlong) ~ as.integer(flw_t1_fromlong),
-                                        !is.na(flw_t1) & is.na(flw_t1_fromlong) ~ as.integer(flw_t1))),   # In this case, where both datasets had data entered, spot checking showed that they have they were identical
-          FLW_T = as.integer(case_when(!is.na(flw_t) & !is.na(flw_t_fromlong) ~ as.integer(flw_t),
-                                       is.na(flw_t) & !is.na(flw_t_fromlong) ~ as.integer(flw_t_fromlong),
-                                      !is.na(flw_t) & is.na(flw_t_fromlong) ~ as.integer(flw_t))),
-         FLW_STAT_T = as.integer(case_when(FLW_T == 0 ~ 0, FLW_T > 0 ~ 1)),
-         FLW_STAT_T1 = as.integer(case_when(FLW_T1 == 0 ~ 0, FLW_T1 > 0 ~ 1)),
-         SPIKEPERINF_T = case_when(is.na(spikeperinf_t) & !is.na(spikeperinf_t_fromlong) ~ as.numeric(spikeperinf_t_fromlong),
-                                   !is.na(spikeperinf_t) & is.na(spikeperinf_t_fromlong) ~ as.numeric(spikeperinf_t),                                                                          
-                                   !is.na(spikeperinf_t) & !is.na(spikeperinf_t_fromlong) ~ as.numeric(spikeperinf_t)),
-         SPIKEPERINF_T1 = case_when(is.na(spikeperinf_t1) & !is.na(spikeperinf_t1_fromlong) ~ as.numeric(spikeperinf_t1_fromlong),
-                                    !is.na(spikeperinf_t1) & is.na(spikeperinf_t1_fromlong) ~ as.numeric(spikeperinf_t1),                                                                          
-                                    !is.na(spikeperinf_t1) & !is.na(spikeperinf_t1_fromlong) ~ as.numeric(spikeperinf_t1)),
-         SEEDPERINF_T = case_when(species == "ELRI" & !is.na(seedperinf_t)  ~ as.numeric(seedperinf_t),
-                                  species == "ELRI" & is.na(seedperinf_t) ~ as.numeric(SPIKEPERINF_T),
-                                  species == "ELVI" & !is.na(seedperinf_t)  ~ as.numeric(seedperinf_t),
-                                  species == "ELVI" & !is.na(seedperinf_t)  ~ as.numeric(SPIKEPERINF_T),
-                                  species != "ELRI" | species != "ELVI" ~ as.numeric(seedperinf_t1)), # Seed per inf data is collected from ELVI and ELRI, and I am not including seed data from endodemoglong in this because the data in there are just estimates of total seed production. I am treating spike data as a seed count for Elymus
-         SEEDPERINF_T1 = case_when(species == "ELRI" & !is.na(seedperinf_t1)  ~ as.numeric(seedperinf_t1),
-                                   species == "ELRI" & is.na(seedperinf_t1) ~ as.numeric(SPIKEPERINF_T1),
-                                   species == "ELVI" & !is.na(seedperinf_t1)  ~ as.numeric(seedperinf_t1),
-                                   species == "ELVI" & is.na(seedperinf_t1) ~ as.numeric(SPIKEPERINF_T1),
-                                   species != "ELRI" | species != "ELVI" ~ as.numeric(seedperinf_t1)),
-         SEEDPERSPIKE_T = seedperspike_t, # Seed per spike data are for all other species, and I am not including seed data from the endodemoglong in this because the data in there are just estimates of total seed production.
-         SEEDPERSPIKE_T1 = seedperspike_t1,
-         NO_REPRO_TILLERS_MEASURED_T1 = case_when(FLW_STAT_T1 == 1 & is.na(no.repro_tillers_measured_fromlong) & !is.na(no.repro_tillers_measured) ~ as.numeric(no.repro_tillers_measured),
-                                                  FLW_STAT_T1 == 1 & !is.na(no.repro_tillers_measured_fromlong) & is.na(no.repro_tillers_measured) ~ as.numeric(no.repro_tillers_measured_fromlong))) %>% 
-  select(id, year_t, year_t1, flw_t_fromlong, flw_t1_fromlong, flw_t, flw_t1, FLW_T, FLW_T1, SPIKEPERINF_T, SPIKEPERINF_T1)
-
-
-# Now selecting the cleaned up columns only
-# This is the dataset I'm using for models up until I merge in 2019 data, or find issues that I missed - 8-14-19
-LTREB_full_1 <- LTREB_full_to2018 %>% 
+LTREB_full_to2018_lag <- LTREB_full_to2018 %>% 
+  group_by(id) %>% 
+  mutate(FLW_T = dplyr::lag(FLW_T1, n = 1, default = NA),
+         FLW_STAT_T = dplyr::lag(FLW_STAT_T1, n = 1, default = NA),
+         SPIKEPERINF_T = dplyr::lag(SPIKEPERINF_T1, n = 1, default = NA),
+         SEEDPERSPIKE_T = dplyr::lag(SEEDPERSPIKE_T1, n = 1, default = NA),
+         SEEDPERINF_T = dplyr::lag(SEEDPERINF_T1, n = 1, default = NA),
+         NO_REPRO_TILLERS_MEASURED_T = dplyr::lag(NO_REPRO_TILLERS_MEASURED_T1, n = 1, default = NA)) %>% 
   select(plot_fixed, pos, id, species, species_index, 
          endo_01, endo_index, origin_01, birth,
          year_t1, year_t1_index,
          surv_t1, size_t1, logsize_t1,
          FLW_T1, FLW_STAT_T1, 
          SPIKEPERINF_T1,  SEEDPERINF_T1,
-         SEEDPERSPIKE_T1, NO_REPRO_TILLERS_MEASURED_T1, 
+         SEEDPERSPIKE_T1, NO_REPRO_TILLERS_MEASURED_T1,
          year_t, year_t_index, size_t, logsize_t, FLW_T, 
-         FLW_STAT_T,SPIKEPERINF_T,SEEDPERINF_T,SEEDPERSPIKE_T)
-
+         FLW_STAT_T,SPIKEPERINF_T,
+         SEEDPERINF_T,SEEDPERSPIKE_T, NO_REPRO_TILLERS_MEASURED_T,)
 
 ##############################################################################
 ####### This would be a good place to merge in 2019 data ------------------------------
@@ -1837,7 +1742,7 @@ LTREB_endo_check <- read_csv(file = "~/Dropbox/Endodemogdata/Fulldataplusmetadat
 # There are two plants that are checked but are not present in the endo_demog_long dataset
 setdiff(LTREB_endo_check$id,LTREB_full_1$id)
 
-LTREB_full_2 <- LTREB_full_1 %>% 
+LTREB_full_2 <- LTREB_full_to2018_lag %>% 
   left_join(LTREB_endo_check, by = c("species" = "species", "plot_fixed" = "plot", "pos" = "pos", "origin_01" = "origin_01", "id" = "id"))
 
 # here are some summaries of the amount of changes in endophyte status
