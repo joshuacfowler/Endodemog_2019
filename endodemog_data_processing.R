@@ -578,7 +578,7 @@ po_oldspike <- POSY_data_old %>%
 
 po_oldspike$year<- ifelse(po_oldspike$variable == "spike2007", 2007, ifelse(po_oldspike$variable == "Spikelets_InflA1", 2008,  ifelse(po_oldspike$variable == "Spikelets_InflB1", 2008, ifelse(po_oldspike$variable  == "spikelets_InflA3", 2009, ifelse(po_oldspike$variable  == "spikelets_InflB3", 2009, ifelse(po_oldspike$variable  == "spikelets_InflA4", 2010, ifelse(po_oldspike$variable  == "spikelets_inflB4", 2010, ifelse(po_oldspike$variable  == "spikelets_InflA5", 2011, ifelse(po_oldspike$variable  == "spikelets_inflB5", 2011, ifelse(po_oldspike$variable  == "spikelets_inflA6", 2012, ifelse(po_oldspike$variable  == "spikelets_inflA7", 2013, ifelse(po_oldspike$variable  == "spikelets_InflB7", 2013, ifelse(po_oldspike$variable  == "spikelets_inflC7", 2013, ifelse(po_oldspike$variable == "spikelets_inflA8", 2014, ifelse(po_oldspike$variable == "spikelets_InflB8", 2014, ifelse(po_oldspike$variable == "spikelets_inflC8", 2014, ifelse(po_oldspike$variable == "spikelets_inflA9", 2015,ifelse(po_oldspike$variable == "spikelets_InflB9", 2015, ifelse(po_oldspike$variable == "spikelets_inflC9", 2015, ifelse(po_oldspike$variable  == "spikelets_inflA10", 2016, ifelse(po_oldspike$variable  == "spikelets_InflB10", 2016, ifelse(po_oldspike$variable  == "spikelets_inflC10", 2016,NA))))))))))))))))))))))
 po_oldspike1 <- po_oldspike %>% 
-  filter(!is.na(spikelets))
+  filter(!is.na(spikelets), spikelets != 0)
 # View(po_oldspike1)
 
 po_oldflw <- POSY_data_old %>% 
@@ -619,9 +619,9 @@ po_roldseed <- POSY_data_old_r %>%
                        "seed2010", "seed2011", "seed2012", "seed2013", "seed2014", 
                        "seed2015", "seed2016"),
        value.name = "seed") %>% 
-  mutate(tillerid = case_when(grepl("spike1", variable) ~ "A", 
-                              grepl("spike2",variable) ~ "B",
-                              grepl("spike3", variable) ~ "C"))
+  mutate(tillerid = case_when(grepl("seed1", variable) ~ "A", 
+                              grepl("seed2",variable) ~ "B",
+                              grepl("seed3", variable) ~ "C"))
 po_roldseed$year<- ifelse(po_roldseed$variable == "seed2007", 2007, ifelse(po_roldseed$variable == "seed2008", 2008, ifelse(po_roldseed$variable == "seed2009", 2009, ifelse(po_roldseed$variable == "seed2010", 2010, ifelse(po_roldseed$variable == "seed2011", 2011, ifelse(po_roldseed$variable  == "seed2012", 2012, ifelse(po_roldseed$variable  == "seed2013", 2013, ifelse(po_roldseed$variable  == "seed2014", 2014, ifelse(po_roldseed$variable  == "seed2015", 2015, ifelse(po_roldseed$variable  == "seed2016", 2016, NA))))))))))
 po_roldseed1 <- po_roldseed %>% 
   filter(!is.na(seed))
@@ -634,14 +634,17 @@ po_roldspike <- POSY_data_old_r %>%
   melt(id.var = c("plot", "pos", "tag", "Endo", "Birth Year"),
        measure.var = c("spike2007", "spike2008", "spike2009", "spike2010", 
                        "spike2011", "spikelets_inflA12","spikelets_inflA13",
-                       "spikelets_inflb13","spikelets_inflb13",
+                       "spikelets_inflb13","spikelets_inflc13",
                        "spike1", "spike2", "spike3",
                        "spike1__1", "spike2__1", "spike3__1",
                        "spike1__2", "spike2__2", "spike3__2"),
        value.name = "spikelets") %>% 
     mutate(tillerid = case_when(grepl("spike1", variable) ~ "A", 
                                 grepl("spike2",variable) ~ "B",
-                                grepl("spike3", variable) ~ "C"))
+                                grepl("spike3", variable) ~ "C",
+                                grepl("inflA", variable) ~ "A",
+                                grepl("inflb", variable) ~ "B",
+                                grepl("inflc", variable) ~ "C"))
   
 po_roldspike$year<- ifelse(po_roldspike$variable == "spike2007", 2007, ifelse(po_roldspike$variable == "spike2008", 2008, ifelse(po_roldspike$variable == "spike2009", 2009, ifelse(po_roldspike$variable == "spike2010", 2010, ifelse(po_roldspike$variable == "spike2011", 2011, ifelse(po_roldspike$variable  == "spikelets_inflA12", 2012, ifelse(po_roldspike$variable  == "spikelets_inflA13", 2013, ifelse(po_roldspike$variable  == "spikelets_inflb13", 2013, ifelse(po_roldspike$variable  == "spikelets_inflc13", 2013, ifelse(po_roldspike$variable  == "spike1", 2014, ifelse(po_roldspike$variable  == "spike2", 2014, ifelse(po_roldspike$variable  == "spike3", 2014, ifelse(po_roldspike$variable  == "spike1__1", 2015, ifelse(po_roldspike$variable  == "spike2__1", 2015, ifelse(po_roldspike$variable  == "spike3__1", 2015, ifelse(po_roldspike$variable  == "spike1__2", 2016, ifelse(po_roldspike$variable  == "spike2__2", 2016,ifelse(po_roldspike$variable  == "spike3__2", 2016,NA))))))))))))))))))
 po_roldspike1 <- po_roldspike %>% 
@@ -655,7 +658,8 @@ po_roldflw <- POSY_data_old_r %>%
        measure.var = c("flw2007", "flw2008", "flw2009", "FLWtiller10","FLWtiller11", "FLWTiller12", 
                        "FLWTiller13", "FLWtiller14", "FLWtiller15",
                        "FLWtiller16"),
-       value.name = "flw") 
+       value.name = "flw") %>% 
+  distinct() # there are a couple of tag ids that are duplicated
 po_roldflw$year<- ifelse(po_roldflw$variable == "flw2007", 2007, ifelse(po_roldflw$variable == "flw2008", 2008, ifelse(po_roldflw$variable == "flw2009", 2009, ifelse(po_roldflw$variable == "FLWtiller10", 2010, ifelse(po_roldflw$variable == "FLWtiller11", 2011, ifelse(po_roldflw$variable  == "FLWTiller12", 2012, ifelse(po_roldflw$variable  == "FLWTiller13", 2013, ifelse(po_roldflw$variable  == "FLWtiller14", 2014, ifelse(po_roldflw$variable  == "FLWtiller15", 2015, ifelse(po_roldflw$variable  == "FLWtiller16", 2016, NA))))))))))
 # View(po_roldflw)
 
@@ -709,7 +713,7 @@ POSYrepro <- po_seedmerge_ssf %>%
 LOAR_data_seed2008_long <- LOAR_data_seed2008 %>% 
   select(-contains("__1"), -contains("Avg"), -PropClaviceps1, -X__2, -X__3, -contains("Bug"), -tag2, -Notes,-SeedNotes1, -totunfilled) %>% 
   filter(!is.na(Tag), Spikelets != "-") %>% 
-  group_by(Tag) %>% mutate(tillerid2008 = as.character(row_number()),  year = 2008) %>% 
+  group_by(Tag) %>% mutate(tillerid2008 = as.character(LETTERS[row_number()]),  year = 2008) %>% 
   mutate(seed2008 = as.numeric(`Unfilled Green`) + as.numeric(`Unfilled Brown`) + Filled) %>% 
   rename(spikelets2008 = Spikelets)
 
@@ -721,7 +725,7 @@ LOAR_data_seed2008_spike <- LOAR_data_seed2008_long %>%
 LOAR_data_seed2009_long <-LOAR_data_seed2009 %>% 
   select(-contains("__1"), -contains("Avg"), -contains("__2"), -contains("Bug"), -Notes, -TOTunfilled, -TOTUnfilled) %>% 
   filter(!is.na(Tag)) %>% 
-  group_by(Tag) %>% mutate(tillerid2009 = as.character(row_number()), year = 2009) %>% 
+  group_by(Tag) %>% mutate(tillerid2009 = as.character(LETTERS[row_number()]), year = 2009) %>% 
   mutate(seed2009 = `Unfilled Green` + `Unfilled Brown` + Filled) %>% 
   rename(spikelets2009 = Spikelets)
 
@@ -785,7 +789,7 @@ lspike <- LOAR_data %>%
        value.name = "spikelets")  %>% 
   mutate(tillerid = case_when(grepl("A", variable) ~ "A", 
                               grepl("B",variable) ~ "B",
-                              grepl("C", variable) ~ "C",))
+                              grepl("C", variable) ~ "C"))
 lspike$year<- ifelse(lspike$variable == "spike2007", 2007, ifelse(lspike$variable == "spike2008", 2008,  ifelse(lspike$variable == "spike2009", 2009, ifelse(lspike$variable  == "spikelets_inflA3", 2010, ifelse(lspike$variable  == "spikelets_inflB3", 2010, ifelse(lspike$variable  == "spikelets_inflA5", 2012, ifelse(lspike$variable  == "spikelets_inflB5", 2012, ifelse(lspike$variable  == "spikelets_inflA6", 2013, ifelse(lspike$variable  == "spikelets_inflB6", 2013, ifelse(lspike$variable  == "spikelets_inflA7", 2014, ifelse(lspike$variable  == "spikelets_inflB7", 2014, ifelse(lspike$variable == "spikelets_inflA8", 2015, ifelse(lspike$variable == "spikelets_inflB8", 2015, ifelse(lspike$variable == "spikelets_inflA9", 2016, ifelse(lspike$variable == "spikelets_inflB9", 2016, NA)))))))))))))))
 
 # View(lspike)
@@ -1020,9 +1024,9 @@ f_rspike <- FESU_data_r %>%
                        "spikelets_inflc16"
                        ),
        value.name = "spikelets")   %>% 
-  mutate(tillerid = case_when(grepl("A", variable) ~ "A", 
-                              grepl("B",variable) ~ "B",
-                              grepl("C", variable) ~ "C"))
+  mutate(tillerid = case_when(grepl("a", variable) ~ "A", 
+                              grepl("b",variable) ~ "B",
+                              grepl("c", variable) ~ "C"))
 
 f_rspike$year<- ifelse(f_rspike$variable == "spike2007", 2007, ifelse(f_rspike$variable == "spike2008", 2008, ifelse(f_rspike$variable == "spike2009", 2009, ifelse(f_rspike$variable == "spike2010", 2010, ifelse(f_rspike$variable == "spike2011", 2011, ifelse(f_rspike$variable  == "spike2012", 2012, ifelse(f_rspike$variable  == "spikelets_infla13", 2013, ifelse(f_rspike$variable  == "spikelets_inflb13", 2013, ifelse(f_rspike$variable  == "spikelets_infla14", 2014, ifelse(f_rspike$variable  == "spikelets_inflb14", 2014, ifelse(f_rspike$variable  == "spikelets_infla15", 2015, ifelse(f_rspike$variable  == "spikelets_inflb15", 2015, ifelse(f_rspike$variable  == "spikelets_infla16", 2016, ifelse(f_rspike$variable  == "spikelets_inflb16", 2016, ifelse(f_rspike$variable  == "spikelets_inflc16", 2016,NA)))))))))))))))
 f_rspike1 <- f_rspike %>% 
@@ -1036,7 +1040,8 @@ f_rflw <- FESU_data_r %>%
        measure.var = c("flw2007", "flw2008", "flw2009", "FLW10", "FLW11", "FLW12", 
                        "FLW13", "FLW14", "FLW15",
                        "FLW16"),
-       value.name = "flw") 
+       value.name = "flw") %>% 
+  distinct() # There are a few duplicated rows of tag id's
 f_rflw$year<- ifelse(f_rflw$variable == "flw2007", 2007, ifelse(f_rflw$variable == "flw2008", 2008,ifelse(f_rflw$variable == "flw2009", 2009,ifelse(f_rflw$variable == "FLW10", 2010, ifelse(f_rflw$variable == "FLW11", 2011, ifelse(f_rflw$variable  == "FLW12", 2012, ifelse(f_rflw$variable  == "FLW13", 2013, ifelse(f_rflw$variable  == "FLW14", 2014, ifelse(f_rflw$variable  == "FLW15", 2015, ifelse(f_rflw$variable  == "FLW16", 2016, NA))))))))))
 # View(f_rflw)
 
@@ -1101,10 +1106,13 @@ elviseed <- ELVI_seed_tiller %>%
   mutate(tillerid = case_when(grepl("A", variable) ~ "A", 
                               grepl("B",variable) ~ "B",
                               grepl("C", variable) ~ "C",
-                              grepl("fl1", variable) ~ "A", 
-                              grepl("fl2",variable) ~ "B",
-                              grepl("fl3", variable) ~ "C",
-                              grepl("fl4", variable) ~ "D"))
+                              grepl("fl1S", variable) ~ "A", 
+                              grepl("fl2S",variable) ~ "B",
+                              grepl("fl3S", variable) ~ "C",
+                              grepl("fl4S", variable) ~ "D",
+                              grepl("Seeds_", variable) ~ "A",
+                              grepl("Seeds1", variable) ~ "A",
+                              grepl("Seeds2", variable) ~ "B"))
 
 elviseed$year<- ifelse(elviseed$variable == "seed2007", 2007, ifelse(elviseed$variable == "Seeds_Infl08", 2008, ifelse(elviseed$variable  == "INfl1Seeds09", 2009, ifelse(elviseed$variable  == "Infl2Seeds09", 2009, ifelse(elviseed$variable  == "Infl3Seeds09", 2009, ifelse(elviseed$variable  == "Infl4Seeds09", 2009, ifelse(elviseed$variable  == "Infl1Seeds10", 2010, ifelse(elviseed$variable  == "Infl2Seeds10", 2010,ifelse(elviseed$variable  == "Infl1Seeds11", 2011,ifelse(elviseed$variable  == "Infl2Seeds11", 2011, ifelse(elviseed$variable  ==  "Seeds1_Infl12", 2012, ifelse(elviseed$variable  ==  "Seeds2_Infl12", 2012, ifelse(elviseed$variable  ==  "Seeds1_Infl13", 2013, ifelse(elviseed$variable  ==  "Seeds2_Infl13", 2013, ifelse(elviseed$variable =="Seeds1_Infl14", 2014, ifelse(elviseed$variable =="Seeds2_Infl14", 2014, ifelse(elviseed$variable == "Seeds1_Infl15", 2015, ifelse(elviseed$variable == "Seeds2_Infl15", 2015, ifelse(elviseed$variable  =="Seeds1_Infl16", 2016, ifelse(elviseed$variable  =="Seeds2_Infl16", 2016, NA))))))))))))))))))))
 elviseed1 <- elviseed %>% 
@@ -1178,9 +1186,7 @@ elvi_rseed <- ELVI_data_r %>%
                               grepl("B",variable) ~ "B",
                               grepl("C", variable) ~ "C",
                               grepl("fl1", variable) ~ "A", 
-                              grepl("fl2",variable) ~ "B",
-                              grepl("fl3", variable) ~ "C",
-                              grepl("fl4", variable) ~ "D"))
+                              grepl("fl2",variable) ~ "B"))
 
 elvi_rseed$year<- ifelse(elvi_rseed$variable == "seed2007", 2007,ifelse(elvi_rseed$variable == "seed2008", 2008,ifelse(elvi_rseed$variable == "seed2009", 2009, ifelse(elvi_rseed$variable == "seed2010", 2010, ifelse(elvi_rseed$variable == "seed2011", 2011, ifelse(elvi_rseed$variable  == "seed2012", 2012, ifelse(elvi_rseed$variable  == "seed2013", 2013, ifelse(elvi_rseed$variable  == "seed2014", 2014, ifelse(elvi_rseed$variable  == "seeds/infl1/15", 2015, ifelse(elvi_rseed$variable  == "seeds/infl2/15", 2015, ifelse(elvi_rseed$variable == "seed2016", 2016, NA)))))))))))
 elvi_rseed1 <- elvi_rseed %>% 
@@ -1277,14 +1283,15 @@ elriseed <- ELRI_seed_tiller %>%
                               grepl("Seeds2_",variable) ~ "B",
                               grepl("_1_", variable) ~ "A",
                               grepl("_2_", variable) ~ "B", 
-                              grepl("fl1",variable) ~ "A",
-                              grepl("fl2",variable)~ "B",
-                              grepl("fl3", variable) ~ "C",
-                              grepl("fl4", variable) ~ "D"))
+                              grepl("fl1S",variable) ~ "A",
+                              grepl("fl2S",variable)~ "B",
+                              grepl("fl3S", variable) ~ "C",
+                              grepl("fl4S", variable) ~ "D",
+                              grepl("Infl10", variable) ~ "A"))
 
 elriseed$year<- ifelse(elriseed$variable == "seed2007", 2007, ifelse(elriseed$variable == "seed2008", 2008, ifelse(elriseed$variable  == "Infl1Seeds2", 2009, ifelse(elriseed$variable  == "Infl2Seeds2", 2009, ifelse(elriseed$variable  == "Infl3Seeds2", 2009, ifelse(elriseed$variable  == "Infl4Seeds2", 2009, ifelse(elriseed$variable  == "Seeds_Infl10", 2010, ifelse(elriseed$variable  == "seeds_1_11", 2011, ifelse(elriseed$variable  == "seeds_2_11", 2011, ifelse(elriseed$variable  == "seeds_1_12", 2012, ifelse(elriseed$variable  == "seeds_2_12", 2012,ifelse(elriseed$variable  == "seeds_1_13", 2013,ifelse(elriseed$variable  == "seeds_2_13", 2013, ifelse(elriseed$variable == "seeds_1_14", 2014,ifelse(elriseed$variable == "seeds_2_14", 2014, ifelse(elriseed$variable == "seeds_1_15", 2015, ifelse(elriseed$variable == "seeds_2_15", 2015,ifelse(elriseed$variable  == "Seeds1_Infl16", 2016,ifelse(elriseed$variable  == "Seeds2_Infl16", 2016, NA)))))))))))))))))))
 elriseed1 <- elriseed %>% 
-  filter(!is.na(seed))
+  filter(!is.na(seed), seed != ".")
 # View(elriseed1)
 
 elrispike <- ELRI_seed_tiller %>% 
@@ -1412,7 +1419,6 @@ elri_rseedmerge_ssf <- elri_rseedmerge_ssf[c("plot", "pos", "tag", "Endo", "Birt
 ELRIrepro <- elri_seedmerge_ssf %>% 
   rbind(elri_rseedmerge_ssf) %>% 
   mutate(species = "ELRI")
-ELRIrepro$seed <- ifelse(ELRIrepro$seed == ".", NA, ELRIrepro$seed)
 
 # ELRIrepro <- ELRIrepro[!(is.na(ELRIrepro$flw)),]
 
@@ -1442,7 +1448,7 @@ agpeseed <- AGPE_data %>%
                        "seeds_spikelet3", "seed2011",  "seed2012", "seed2013", 
                        "seed2014", "seed2015", "seed2016"),
        value.name = "seed") %>% 
-  mutate(tillerid = NA)
+  mutate(tillerid = "multitillermean")
 agpeseed$year<-  ifelse(agpeseed$variable == "seed2007", 2007, ifelse(agpeseed$variable == "seeds_spikelet1", 2008, ifelse(agpeseed$variable  == "seeds_spikelet2", 2009, ifelse(agpeseed$variable  == "seeds_spikelet3", 2010, ifelse(agpeseed$variable  == "seed2011", 2011, ifelse(agpeseed$variable  == "seed2012", 2012, ifelse(agpeseed$variable  == "seed2013", 2013,ifelse(agpeseed$variable == "seed2014", 2014,ifelse(agpeseed$variable == "seed2015", 2015,ifelse(agpeseed$variable  == "seed2016", 2016, NA))))))))))
 agpeseed1 <- agpeseed %>% 
   filter(!is.na(seed))
@@ -1459,7 +1465,7 @@ agpespike <- AGPE_data %>%
                        "avg_spikelets4", "avg_spikelets5", "avg_spikelets6", 
                        "avg_spikelets7", "spike_infl8", "TotSpikelets9"), 
        value.name = "spikelets")  %>% 
-  mutate(tillerid = NA)
+  mutate(tillerid = "multitillermean")
 agpespike$year<- ifelse(agpespike$variable == "spike2007", 2007, ifelse(agpespike$variable == "Spikelets_tiller1", 2008, ifelse(agpespike$variable  == "Spikelets_Infl2", 2009, ifelse(agpespike$variable  == "no_total_spikelets_infl3", 2010, ifelse(agpespike$variable  == "avg_spikelets4", 2011, ifelse(agpespike$variable  == "avg_spikelets5", 2012, ifelse(agpespike$variable  == "avg_spikelets6", 2013, ifelse(agpespike$variable == "avg_spikelets7", 2014, ifelse(agpespike$variable == "spike_infl8", 2015, ifelse(agpespike$variable  == "TotSpikelets9", 2016, NA))))))))))
 agpespike1 <- agpespike %>% 
   filter(!is.na(spikelets))
@@ -1506,9 +1512,7 @@ agpe_rseed <- AGPE_data_r %>%
        measure.var = c("seed2007", "seed2008", "seed2009", "seed2010", "seed2011", "seed2012", "seed2013", "seed2014", 
                        "seed2015", "seed2016"),
        value.name = "seed")  %>% 
-  mutate(tillerid = case_when(grepl("A", variable) ~ "A", 
-                              grepl("B",variable) ~ "B",
-                              grepl("C", variable) ~ "C"))
+  mutate(tillerid = "multitillermean")
 agpe_rseed$year<- ifelse(agpe_rseed$variable == "seed2007", 2007, ifelse(agpe_rseed$variable == "seed2008", 2008, ifelse(agpe_rseed$variable == "seed2009", 2009, ifelse(agpe_rseed$variable == "seed2010", 2010, ifelse(agpe_rseed$variable == "seed2011", 2011, ifelse(agpe_rseed$variable  == "seed2012", 2012, ifelse(agpe_rseed$variable  == "seed2013", 2013, ifelse(agpe_rseed$variable  == "seed2014", 2014, ifelse(agpe_rseed$variable  == "seed2015", 2015, ifelse(agpe_rseed$variable == "seed2016", 2016, NA))))))))))
 agpe_rseed1 <- agpe_rseed %>% 
   filter(!is.na(seed))
@@ -1517,7 +1521,7 @@ agpe_rseed1 <- agpe_rseed %>%
 agpe_rspike <- AGPE_data_r %>%
   rename("Birth Year" = "birth", "plot" = "Plot", 
          "pos" = "RecruitNo", "Endo" = "endo", "tag" = "Tag") %>%
-  mutate(spike2007 = NA, spike2008 = NA, spike2009 = NA, spike2010 = NA, spike2013 = NA) %>% 
+  mutate(spike2007 = NA, spike2008 = NA, spike2009 = NA, spike2010 = NA) %>% 
   mutate(avgspike13 = TotSpikelets13/FlwTillers13) %>% 
   melt(id.var = c("plot", "pos", "tag", "Endo", "Birth Year"),
        measure.var = c("spike2007", "spike2008", "spike2009", 
@@ -1527,7 +1531,8 @@ agpe_rspike <- AGPE_data_r %>%
        value.name = "spikelets")  %>% 
   mutate(tillerid = case_when(grepl("A", variable) ~ "A", 
                               grepl("B",variable) ~ "B",
-                              grepl("C", variable) ~ "C"))
+                              grepl("avg", variable) ~ "multitillermean",
+                              grepl("Spikelets", variable) ~ "multitillermean"))
 agpe_rspike$year<-  ifelse(agpe_rspike$variable == "spike2007", 2007, ifelse(agpe_rspike$variable == "spike2008", 2008, ifelse(agpe_rspike$variable == "spike2009", 2009, ifelse(agpe_rspike$variable == "spike2010", 2010, ifelse(agpe_rspike$variable == "TotSpikelets11", 2011, ifelse(agpe_rspike$variable  == "SpikeletsA12", 2012, ifelse(agpe_rspike$variable  == "avgspike13", 2013, ifelse(agpe_rspike$variable  == "avgspikepertiller14", 2014, ifelse(agpe_rspike$variable  == "spikepertillerA15", 2015, ifelse(agpe_rspike$variable  == "spikepertillerB15", 2015,ifelse(agpe_rspike$variable == "spikepertillerA16", 2016, ifelse(agpe_rspike$variable == "spikepertillerB16", 2016, NA))))))))))))
 agpe_rspike1 <- agpe_rspike %>% 
   filter(!is.na(spikelets))
@@ -1580,12 +1585,12 @@ LTREB_repro <- AGPErepro %>%
   merge(POALrepro, by = c("plot", "pos","tag", "Endo", "Birth Year", "year", "species", "flw", "seed", "spikelets", "tillerid"), all = TRUE) %>% 
   merge(POSYrepro, by = c("plot", "pos","tag", "Endo", "Birth Year", "year", "species", "flw", "seed", "spikelets", "tillerid"), all = TRUE) %>% 
   mutate(flw = as.numeric(flw), seed = as.numeric(seed), spikelets = as.numeric(spikelets))
-
+  
 # There are a few instances within the reproductive data where there is a 0 flw measurement with spikelet data. Often these are recorded in the raw data with a note about how seeds were possibly mislabeled.
 # There are more instances where there is a flw measurement but spikelet data is not recorded. In some instances, this is likely due to forgetting to collect the data, and there are sometimes in the raw data 
 # files where I tried to extract the spikelet count and there were only opaque seed estimates and no specific spikelet counts recorded (although they possibly were at some point to generate the seed estimate). 
 # An example of the latter would be POAL plot 3, tag 41, in year 2013, where the note marks that this tiller was skipped.
-
+# I'm going to filter out cases where seeds or spikelet > 0 and flw = 0
 LTREB_repro_flw_spike_mismatches <- LTREB_repro %>% 
   filter(flw==0 & spikelets>0 | flw > 0 & is.na(spikelets))
 
@@ -1597,10 +1602,29 @@ LTREB_repro1 <- LTREB_repro %>%
   mutate(endo_01 = as.integer(case_when(endo == "0" | endo == "minus" ~ 0,
                                         endo == "1"| endo =="plus" ~ 1))) %>% 
   mutate(`birth` = as.integer(`Birth Year`)) %>% 
-  mutate(plot_fixed = as.integer(plot))
+  mutate(plot_fixed = as.integer(plot)) %>% 
+  mutate(spikelets_fixed = as.numeric(case_when(flw > 0 & !is.na(spikelets) ~ as.character(spikelets),
+                                     flw == 0 & spikelets == 0 ~ NA_character_,
+                                     flw == 0 & !is.na(spikelets) ~ as.character(spikelets),
+                                     flw == 0 & is.na(spikelets) ~ NA_character_))) %>% 
+  mutate(tillerid_fixed = case_when(!is.na(tillerid) & spikelets_fixed >= 0 ~ tillerid,
+                                    !is.na(tillerid) & seed >= 0 ~ tillerid,
+                               is.na(tillerid) & !is.na(spikelets_fixed) ~ "A",
+                               is.na(tillerid) & is.na(spikelets_fixed) ~ NA_character_)) %>% 
+  filter(seed > 0)
+  select(plot, plot_fixed, pos, tag, endo, endo_01, birth, 'Birth Year', year, species, flw, seed, spikelets_fixed, tillerid_fixed, tillerid)
 
 # Summarizing mean seed/spikelet, mean seed/inflorescence (for Elymus species only), and mean spikelets/inflorescence
 LTREB_repro2 <- LTREB_repro1 %>%
+  spread(key = tillerid_fixed, value = spikelets_fixed)
+  
+  
+View(LTREB_repro2)
+  
+  
+
+
+  
   mutate(seedperspike = case_when(species == "ELVI" | species == "ELRI" ~ NA_real_,
                                   species == "POAL" | species == "POSY" | species == "FESU" | species == "LOAR" ~ seed/spikelets, # for these species, they are recorded as seeds/infl (collected for a few years) and spikelets/infl (collected for all year), so we are calculating avg seed/spike to be able to multiply byspiklets/infl in years without seed counts 
                                   species == "AGPE" ~ seed)) %>% 
@@ -1608,25 +1632,21 @@ LTREB_repro2 <- LTREB_repro1 %>%
                                 species == "POAL" | species == "POSY" | species == "FESU" | species == "LOAR" ~ NA_real_,
                                 species == "AGPE"~ NA_real_)) %>% 
   group_by(plot_fixed, pos, tag, species, endo_01, birth, year, flw) %>% 
-  summarize(seedperspike = mean(seedperspike, na.rm = TRUE),
-            seedperinf = mean(seedperinf, na.rm = TRUE),
-            spikeperinf = mean(spikelets,na.rm = TRUE), 
+  summarize(meanseedperspike = mean(seedperspike, na.rm = TRUE),
+            meanseedperinf = mean(seedperinf, na.rm = TRUE),
+            meanspikeperinf = mean(spikelets,na.rm = TRUE), 
             no.repro_tillers_measured = n())
 
 dim(LTREB_repro2)
 table(LTREB_repro2$species, LTREB_repro2$year, !is.na(LTREB_repro2$flw), !is.na(LTREB_repro2$spikeperinf))
 table(is.na(LTREB_repro1$flw), LTREB_repro1$flw>0, !is.na(LTREB_repro1$spikelets))
-table(!is.na(LTREB_repro2$flw),!is.na(LTREB_repro2$spikeperinf))
+table(!is.na(LTREB_repro2$flw),!is.na(LTREB_repro2$meanspikeperinf))
 
 LTREB_repro3 <- ungroup(LTREB_repro2) # sets the groups so that we can filter the resulting dataframe
 # I am going to try to merge and then add the lagged repro variables which will hopefully remove some of the na's in flwing
 LTREB_repro_3_t1 <- LTREB_repro3%>% 
   rename(flw_t1 = flw,
-         year_t1 = year,
-         seedperspike_t1 = seedperspike,
-         seedperinf_t1 = seedperinf,
-         spikeperinf_t1 = spikeperinf,
-         no.repro_tillers_measured_t1 = no.repro_tillers_measured)
+         year_t1 = year)
 
 
 # merge the reproductive data with LTREB long data file for recent data and for size information for the reproductive model
@@ -1740,7 +1760,7 @@ LTREB_endo_check <- read_csv(file = "~/Dropbox/Endodemogdata/Fulldataplusmetadat
 #   check:	"x" indicates the incorrect status was detected given original plot level treatment
 
 # There are two plants that are checked but are not present in the endo_demog_long dataset
-setdiff(LTREB_endo_check$id,LTREB_full_1$id)
+setdiff(LTREB_endo_check$id,LTREB_full_to2018_lag$id)
 
 LTREB_full_2 <- LTREB_full_to2018_lag %>% 
   left_join(LTREB_endo_check, by = c("species" = "species", "plot_fixed" = "plot", "pos" = "pos", "origin_01" = "origin_01", "id" = "id"))
@@ -1819,11 +1839,25 @@ LOAR_surv_data <- LTREB_data_forsurv %>%
   mutate(plot_index = as.integer(as.character(recode(as.factor(plot_fixed),"31"="1", "32"="2", "33"="3", "34"="4", "35"="5", "36"="6", "37"="7", "38"="8","39"="9", "40"="10"))))
 POAL_surv_data <- LTREB_data_forsurv %>% 
   filter(species == "POAL") %>% 
-  mutate(plot_index = as.integer(as.character(recode(as.factor(plot_fixed),"3"="1", "4"="2", "8"="3", "9"="4", "10"="5", "11"="6", "15"="7", "16"="8","17"="9", "19"="10","151"="11","152"="12","153"="13","154"="14","155"="15","156"="16","157"="17","158"="18"))))
+  mutate(plot_index = as.integer(as.character(recode(as.factor(plot_fixed),"3"="1", "4"="2", "8"="3", "9"="4", "10"="5", "11"="6", "15"="7", "16"="8","17"="9", "19"="10","151"="11","152"="12","153"="13","154"="14","155"="15","156"="16","157"="17","158"="18")))) 
 POSY_surv_data <- LTREB_data_forsurv %>% 
   filter(species == "POSY") %>% 
   mutate(plot_index = as.integer(as.character(recode(as.factor(plot_fixed),"1"="1", "2"="2", "5"="3", "6"="4", "7"="5", "12"="6", "13"="7", "14"="8","18"="9", "20"="10","141"="11","142"="12","143"="13","144"="14","145"="15","146"="16","147"="17","148"="18", "149"="19", "150"="20"))))
 
+
+POAL_yearendo_Xs <- POAL_surv_data %>% 
+  select(id, endo_01, year_t) %>% 
+  unite("year_endo", year_t:endo_01, remove = FALSE) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = year_endo, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id, - endo_01, -year_t)
+
+POAL_plot_Xs <- POAL_surv_data %>% 
+  select(id, plot_index) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = plot_index, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id)
+  
 
 # Create model matrices for each species
 AGPE_surv_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01)^2 + origin_01
@@ -1831,7 +1865,7 @@ AGPE_surv_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01)^2 + origin_0
 AGPE_surv_matrix <- model.matrix(surv_t1 ~ (logsize_t + endo_01)^2 + origin_01
                                  , data =AGPE_surv_for_matrix)
 
-ELRI_surv_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01)^2 + origin_01
+ELRI_surv_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01)^2 + origin_01 
                                     , data = ELRI_surv_data)
 ELRI_surv_matrix <- model.matrix(surv_t1 ~ (logsize_t + endo_01)^2 + origin_01
                                  , data =ELRI_surv_for_matrix)
@@ -1851,10 +1885,23 @@ LOAR_surv_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01)^2 + origin_0
 LOAR_surv_matrix <- model.matrix(surv_t1 ~ (logsize_t + endo_01)^2 + origin_01
                                  , data =LOAR_surv_for_matrix)
 
-POAL_surv_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01)^2 + origin_01
+POAL_surv_for_matrix <- model.frame(surv_t1 ~ 0 +(logsize_t + endo_01)^2 + origin_01 
                                     , data = POAL_surv_data)
-POAL_surv_matrix <- model.matrix(surv_t1 ~ (logsize_t + endo_01)^2 + origin_01
+POAL_surv_matrix <- model.matrix(surv_t1 ~ 0 + (logsize_t + endo_01)^2 + origin_01 
                                  , data =POAL_surv_for_matrix)
+POAL_year_formatrix <- model.frame(surv_t1 ~ 0 + as.factor(year_t), data = POAL_surv_data)
+POAL_year_matrix <- model.matrix(surv_t1 ~ 0 + as.factor(year_t), data = POAL_year_formatrix)
+
+POAL_endo_formatrix <- model.frame(surv_t1 ~ 0 + as.factor(endo_01), data = POAL_surv_data)
+POAL_endo_matrix <- model.matrix(surv_t1 ~ 0 + as.factor(endo_01), data = POAL_endo_formatrix)
+
+
+POAL_yearendo_formatrix <- model.frame(surv_t1 ~ 0 + as.factor(year_t)*as.factor(endo_01), data = POAL_surv_data)
+POAL_yearendo_matrix <- model.matrix(surv_t1 ~ 0 + as.factor(year_t)*as.factor(endo_01), data = POAL_yearendo_formatrix)
+
+POAL_plot_formatrix <- model.frame(surv_t1 ~ 0 + as.factor(plot_index), data = POAL_surv_data)
+POAL_plot_matrix <- model.matrix(surv_t1 ~ 0 + as.factor(plot_index), data = POAL_plot_formatrix)
+POAL_surv_Xs <- cbind(POAL_surv_matrix, POAL_endo_matrix, POAL_year_matrix, POAL_plot_matrix)
 
 POSY_surv_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01)^2 + origin_01
                                     , data = POSY_surv_data)
@@ -1938,7 +1985,8 @@ LOAR_surv_data_list <- list(surv_t1 = LOAR_surv_data$surv_t1,
 str(LOAR_surv_data_list)
 
 POAL_surv_data_list <- list(surv_t1 = POAL_surv_data$surv_t1,
-                            Xs = POAL_surv_matrix,
+                            yearendo_Xs = POAL_yearendo_Xs,
+                            plot_Xs = POAL_plot_Xs,
                             logsize_t = POAL_surv_data$logsize_t,
                             origin_01 = POAL_surv_data$origin_01,
                             endo_01 = POAL_surv_data$endo_01,
