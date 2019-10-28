@@ -30,8 +30,8 @@ rstan_options(auto_write = TRUE)
 options(mc.cores = parallel::detectCores())
 set.seed(123)
 ## MCMC settings
-ni <- 10000
-nb <- 5000
+ni <- 2000
+nb <- 500
 nc <- 3
 
 # Stan model -------------
@@ -132,15 +132,13 @@ print(sm, pars = "sigma_e")
 
 
 ## to read in model output without rerunning models
-smPOAL <- readRDS(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_surv_POAL_withplot.rds")
-smPOSY <- readRDS(file = "model_run_MAR7/endodemog_surv_POSY_withplot.rds")
-smLOAR <- readRDS(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_surv_LOAR_withplot.rds")
-smELVI <- readRDS(file = "model_run_MAR7/endodemog_surv_ELVI_withplot.rds")
-smELRI <- readRDS(file = "model_run_MAR7/endodemog_surv_ELRI_withplot.rds")
-smFESU <- readRDS(file = "model_run_MAR7/endodemog_surv_FESU_withplot.rds")
-smAGPE <- readRDS(file = "model_run_MAR7/endodemog_surv_AGPE_withplot.rds")
-
-smFESUwithplot <- readRDS(file = "model_run_MAR7/endodemog_surv_FESU_withplot.rds")
+smAGPE <- readRDS(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_surv_AGPE.rds")
+smELRI <- readRDS(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_surv_ELRI.rds")
+smELVI <- readRDS(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_surv_ELVI.rds")
+smFESU <- readRDS(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_surv_FESU.rds")
+smLOAR <- readRDS(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_surv_LOAR.rds")
+smPOAL <- readRDS(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_surv_POAL.rds")
+smPOSY <- readRDS(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_surv_POSY.rds")
 
 
 # A stan model to generate replicated data and calculate residuals
@@ -218,27 +216,166 @@ pred <- stan(file = "endodemog_surv_for_ppc.stan",
 #########################################################################################################
 ###### Perform posterior predictive checks and assess model convergence-------------------------
 #########################################################################################################
-params <- c("beta", "tau_year", "tau_plot", "sigma_e", "sigma_p", "mu")
+params <- c("beta", "tau_year[1,1]", "tau_plot[1]", "sigma_e", "sigma_p")
 
 ##### POAL - survival
 print(smPOAL)
 # summary(smPOAL)
 
 ## plot traceplots of chains for select parameters
-traceplot(smPOAL, pars = params)
-
+traceplot(smAGPE, pars = params)
+traceplot(smELRI, pars = params)
+traceplot(smELVI, pars = params)
+traceplot(smFESU, pars = params)
+traceplot(smLOAR, pars = params)
+traceplot(smPOSY, pars = params)
+traceplot(smPOSY, pars = params)
 
 
 # Pull out the posteriors
+post_survAGPE <- extract(smAGPE)
+post_survELRI <- extract(smELRI)
+post_survELVI <- extract(smELVI)
+post_survFESU <- extract(smFESU)
+post_survLOAR <- extract(smLOAR)
 post_survPOAL <- extract(smPOAL)
+post_survPOSY <- extract(smPOSY)
 
 
-beta1_post <- POALpost$`beta[1]`
-beta2_post <- POALpost$`beta[2]`
-beta3_post <- POALpost$`beta[3]`
-beta4_post <- POALpost$`beta[4]`
-beta5_post <- POALpost$`beta[5]`
-mu_samples <- POALpost$mu[1:7500]
+
+# This function generates replicate data for each given data point using the model matrix within the datalist for the random effects
+prediction<- function(x, fit, reps) {
+  post <- extract(fit)
+  beta_post <- post$beta
+  tau_plot_post <- post$tau_plot
+  tau_year_post <- post$tau_year
+  dim(tau_year_post) <- c(15000,22)
+  lin_comb <- matrix(nrow = x$N, ncol = reps)
+  yrep <- matrix(nrow = x$N, ncol = reps)
+  for(n in 1:reps){
+  lin_comb[,n] <- sample(beta_post[,1], size = x$N)+ x$logsize_t*sample(beta_post[,2], size = x$N) 
+  + x$endo_01*sample(beta_post[,3], size = x$N) + x$origin_01*sample(beta_post[,4], size = x$N) 
+  + x$logsize_t*x$endo_01*sample(beta_post[,5], size = x$N) 
+  + x$plot_Xs[]*sample(tau_plot_post[], size = x$N) 
+  + x$yearendo_Xs[]*sample(tau_year_post[], size = x$N)
+  
+  prob <- invlogit(lin_comb)
+  yrep[,n] <- rbinom(x$N, 1, prob[,n])
+  print(paste("rep", n, "of", reps))
+  
+  }
+  out <- list(yrep, prob, lin_comb) 
+  names(out) <- c("yrep", "prob", "lin_comb")
+
+  return(out)
+}
+
+# apply the function for each species
+AGPE_surv_yrep <- prediction(AGPE_surv_data_list, smAGPE, 500)
+ELRI_surv_yrep <- prediction(ELRI_surv_data_list, smELRI, 500)
+ELVI_surv_yrep <- prediction(ELVI_surv_data_list, smELVI, 500)
+FESU_surv_yrep <- prediction(FESU_surv_data_list, smFESU, 500)
+LOAR_surv_yrep <- prediction(LOAR_surv_data_list, smLOAR, 500)
+POAL_surv_yrep <- prediction(POAL_surv_data_list, smPOAL, 500)
+POSY_surv_yrep <- prediction(POSY_surv_data_list, smPOSY, 500)
+
+
+# overlay 100 replicates over the actual dataset
+msurv_yrep_AGPE <- t(AGPE_surv_yrep$yrep)
+ppc_dens_overlay( y = AGPE_surv_data_list$surv_t1, yrep = msurv_yrep_AGPE[1:100,])+ xlab("prob. of y") + ggtitle("AGPE")
+
+msurv_yrep_ELRI <- t(ELRI_surv_yrep$yrep)
+ppc_dens_overlay( y = ELRI_surv_data_list$surv_t1, yrep = msurv_yrep_ELRI[1:100,])+ xlab("prob. of y") + ggtitle("ELRI")
+
+msurv_yrep_ELVI <- t(ELVI_surv_yrep$yrep)
+ppc_dens_overlay( y = ELVI_surv_data_list$surv_t1, yrep = msurv_yrep_ELVI[1:100,]) + xlab("prob. of y") + ggtitle("ELVI")
+
+msurv_yrep_FESU <- t(FESU_surv_yrep$yrep)
+ppc_dens_overlay( y = FESU_surv_data_list$surv_t1, yrep = msurv_yrep_FESU[1:100,]) + xlab("prob. of y") + ggtitle("FESU")
+
+msurv_yrep_LOAR <- t(LOAR_surv_yrep$yrep)
+ppc_dens_overlay( y = LOAR_surv_data_list$surv_t1, yrep = msurv_yrep_LOAR[1:100,]) + xlab("prob. of y") + ggtitle("LOAR")
+
+msurv_yrep_POAL <- t(POAL_surv_yrep$yrep)
+ppc_dens_overlay( y = POAL_surv_data_list$surv_t1, yrep = msurv_yrep_POAL[1:100,]) + xlab("prob. of y") + ggtitle("POAL")
+
+msurv_yrep_POSY <- t(POSY_surv_yrep$yrep)
+ppc_dens_overlay( y = POSY_surv_data_list$surv_t1, yrep = msurv_yrep_POSY[1:100,]) + xlab("prob. of y") + ggtitle("POSY")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+resid_calc <- function(y,yrep){
+y_resid <- y$surv_t1 - yrep$prob
+yrep_resid <- yrep$yrep - yrep$prob  
+
+y_resid_abs <-  abs(y_resid)
+yrep_resid_abs <- abs(yrep_resid)
+
+fit_col <- colSums(y_resid_abs)
+fit_yrep_col <- colSums(yrep_resid_abs)
+
+fit_row <- rowSums(y_resid_abs)
+fit_yrep_row <- rowSums(yrep_resid_abs)
+
+out <- list(y_resid, yrep_resid, y_resid_abs, yrep_resid_abs, fit_col, fit_yrep_col, fit_row, fit_yrep_row)
+names(out) <- c("y_resid", "yrep_resid", "y_resid_abs", "yrep_resid_abs", "fit_col", "fit_yrep_col", "fit_row", "fit_yrep_row")
+
+return(out)
+}
+
+resid <- resid_calc(POAL_surv_data_list, POAL_surv_yrep)
+col_resid <- cbind(resid$yrep_resid_abs, resid$y_resid_abs)
+
+
+col <- cbind(resid$fit_yrep_col, resid$fit_col)
+plot(col)
+
+row <- cbind(resid$fit_yrep_row, resid$fit_row)
+
+plot(row)
+abline(a = 0, b = 1, col = "blue", lwd = 2)
+
+plot(resid$fit,resid$fit_yrep)
+abline(a = 0, b = 1, col = "blue", lwd = 2)
+
+yrep <- t(POAL_surv_yrep$yrep)
+ppc_dens_overlay( y = POAL_surv_data_list$surv_t1, yrep = yrep[1:500,])
+
+
+
+yresid <- resid[[1]]
+yrep_resid <- resid[[2]]
+
+
+fit <- colSums(yresid)
+fit_yrep <- colSums(yrep_resid)
+
+plot(x = fit_yrep, y = fit)
+abline(a = 0, b = 1, col = "blue", lwd = 2)
+
+
+
+
 
 ivalues <- length(beta1_post)
 nvalues <- length(POAL_surv_data$logsize_t)
@@ -424,7 +561,7 @@ ratios_smPOSY <- neff_ratio(smPOSY)
 mcmc_neff(ratios_smPOSY, size =3)
 
 ## Overlay plot of yrep vs surv_t1 
-ppc_dens_overlay(surv_t1, yrep[1:500, ])
+ppc_dens_overlay(POAL_surv_data_list$surv_t1, resid$yrep[,1:10])
 
 ## Density plot of postieror distribution for select parameters
 stan_dens(smPOSY, pars = c("alpha", "beta[2]", "tau_year[1,1]", "sigma[1]", "sigma[2]"))

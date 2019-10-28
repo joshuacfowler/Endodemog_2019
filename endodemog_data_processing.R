@@ -1824,57 +1824,60 @@ POAL_plot_Xs <- POAL_surv_data %>%
   
 
 # Create model matrices for each species
-AGPE_surv_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01)^2 + origin_01
-                                    , data = AGPE_surv_data)
-AGPE_surv_matrix <- model.matrix(surv_t1 ~ (logsize_t + endo_01)^2 + origin_01
-                                 , data =AGPE_surv_for_matrix)
 
-ELRI_surv_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01)^2 + origin_01 
-                                    , data = ELRI_surv_data)
-ELRI_surv_matrix <- model.matrix(surv_t1 ~ (logsize_t + endo_01)^2 + origin_01
-                                 , data =ELRI_surv_for_matrix)
+AGPE_yearendo_formatrix <- model.frame(surv_t1 ~ 0 + as.factor(year_t)*as.factor(endo_01), data = AGPE_surv_data)
+AGPE_yearendo_Xs <- model.matrix(surv_t1 ~ 0 + as.factor(year_t)*as.factor(endo_01), data = AGPE_yearendo_formatrix)
 
-ELVI_surv_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01)^2 + origin_01
-                                    , data = ELVI_surv_data)
-ELVI_surv_matrix <- model.matrix(surv_t1 ~ (logsize_t + endo_01)^2 + origin_01
-                                 , data =ELVI_surv_for_matrix)
+AGPE_plot_formatrix <- model.frame(surv_t1 ~ 0 + as.factor(plot_index), data = AGPE_surv_data)
+AGPE_plot_Xs <- model.matrix(surv_t1 ~ 0 + as.factor(plot_index), data = AGPE_plot_formatrix)
 
-FESU_surv_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01)^2 + origin_01
-                                    , data = FESU_surv_data)
-FESU_surv_matrix <- model.matrix(surv_t1 ~ (logsize_t + endo_01)^2 + origin_01
-                                 , data =FESU_surv_for_matrix)
 
-LOAR_surv_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01)^2 + origin_01
-                                    , data = LOAR_surv_data)
-LOAR_surv_matrix <- model.matrix(surv_t1 ~ (logsize_t + endo_01)^2 + origin_01
-                                 , data =LOAR_surv_for_matrix)
+ELRI_yearendo_formatrix <- model.frame(surv_t1 ~ 0 + as.factor(year_t)*as.factor(endo_01), data = ELRI_surv_data)
+ELRI_yearendo_Xs <- model.matrix(surv_t1 ~ 0 + as.factor(year_t)*as.factor(endo_01), data = ELRI_yearendo_formatrix)
 
-POAL_surv_for_matrix <- model.frame(surv_t1 ~ 0 +(logsize_t + endo_01)^2 + origin_01 
-                                    , data = POAL_surv_data)
-POAL_surv_matrix <- model.matrix(surv_t1 ~ 0 + (logsize_t + endo_01)^2 + origin_01 
-                                 , data =POAL_surv_for_matrix)
-POAL_year_formatrix <- model.frame(surv_t1 ~ 0 + as.factor(year_t), data = POAL_surv_data)
-POAL_year_matrix <- model.matrix(surv_t1 ~ 0 + as.factor(year_t), data = POAL_year_formatrix)
+ELRI_plot_formatrix <- model.frame(surv_t1 ~ 0 + as.factor(plot_index), data = ELRI_surv_data)
+ELRI_plot_Xs <- model.matrix(surv_t1 ~ 0 + as.factor(plot_index), data = ELRI_plot_formatrix)
 
-POAL_endo_formatrix <- model.frame(surv_t1 ~ 0 + as.factor(endo_01), data = POAL_surv_data)
-POAL_endo_matrix <- model.matrix(surv_t1 ~ 0 + as.factor(endo_01), data = POAL_endo_formatrix)
+
+ELVI_yearendo_formatrix <- model.frame(surv_t1 ~ 0 + as.factor(year_t)*as.factor(endo_01), data = ELVI_surv_data)
+ELVI_yearendo_Xs <- model.matrix(surv_t1 ~ 0 + as.factor(year_t)*as.factor(endo_01), data = ELVI_yearendo_formatrix)
+
+ELVI_plot_formatrix <- model.frame(surv_t1 ~ 0 + as.factor(plot_index), data = ELVI_surv_data)
+ELVI_plot_Xs <- model.matrix(surv_t1 ~ 0 + as.factor(plot_index), data = ELVI_plot_formatrix)
+
+
+FESU_yearendo_formatrix <- model.frame(surv_t1 ~ 0 + as.factor(year_t)*as.factor(endo_01), data = FESU_surv_data)
+FESU_yearendo_Xs <- model.matrix(surv_t1 ~ 0 + as.factor(year_t)*as.factor(endo_01), data = FESU_yearendo_formatrix)
+
+FESU_plot_formatrix <- model.frame(surv_t1 ~ 0 + as.factor(plot_index), data = FESU_surv_data)
+FESU_plot_Xs <- model.matrix(surv_t1 ~ 0 + as.factor(plot_index), data = FESU_plot_formatrix)
+
+
+LOAR_yearendo_formatrix <- model.frame(surv_t1 ~ 0 + as.factor(year_t)*as.factor(endo_01), data = LOAR_surv_data)
+LOAR_yearendo_Xs <- model.matrix(surv_t1 ~ 0 + as.factor(year_t)*as.factor(endo_01), data = LOAR_yearendo_formatrix)
+
+LOAR_plot_formatrix <- model.frame(surv_t1 ~ 0 + as.factor(plot_index), data = LOAR_surv_data)
+LOAR_plot_Xs <- model.matrix(surv_t1 ~ 0 + as.factor(plot_index), data = LOAR_plot_formatrix)
 
 
 POAL_yearendo_formatrix <- model.frame(surv_t1 ~ 0 + as.factor(year_t)*as.factor(endo_01), data = POAL_surv_data)
-POAL_yearendo_matrix <- model.matrix(surv_t1 ~ 0 + as.factor(year_t)*as.factor(endo_01), data = POAL_yearendo_formatrix)
+POAL_yearendo_Xs <- model.matrix(surv_t1 ~ 0 + as.factor(year_t)*as.factor(endo_01), data = POAL_yearendo_formatrix)
 
 POAL_plot_formatrix <- model.frame(surv_t1 ~ 0 + as.factor(plot_index), data = POAL_surv_data)
-POAL_plot_matrix <- model.matrix(surv_t1 ~ 0 + as.factor(plot_index), data = POAL_plot_formatrix)
-POAL_surv_Xs <- cbind(POAL_surv_matrix, POAL_endo_matrix, POAL_year_matrix, POAL_plot_matrix)
+POAL_plot_Xs <- model.matrix(surv_t1 ~ 0 + as.factor(plot_index), data = POAL_plot_formatrix)
 
-POSY_surv_for_matrix <- model.frame(surv_t1 ~ (logsize_t + endo_01)^2 + origin_01
-                                    , data = POSY_surv_data)
-POSY_surv_matrix <- model.matrix(surv_t1 ~ (logsize_t + endo_01)^2 + origin_01
-                                 , data =POSY_surv_for_matrix)
+
+POSY_yearendo_formatrix <- model.frame(surv_t1 ~ 0 + as.factor(year_t)*as.factor(endo_01), data = POSY_surv_data)
+POSY_yearendo_Xs <- model.matrix(surv_t1 ~ 0 + as.factor(year_t)*as.factor(endo_01), data = POSY_yearendo_formatrix)
+
+POSY_plot_formatrix <- model.frame(surv_t1 ~ 0 + as.factor(plot_index), data = POSY_surv_data)
+POSY_plot_Xs <- model.matrix(surv_t1 ~ 0 + as.factor(plot_index), data = POSY_plot_formatrix)
+
 
 # Create data lists to be used for the Stan model
 AGPE_surv_data_list <- list(surv_t1 = AGPE_surv_data$surv_t1,
-                            Xs = AGPE_surv_matrix,
+                            yearendo_Xs = AGPE_yearendo_Xs,
+                            plot_Xs = AGPE_plot_Xs,
                             logsize_t = AGPE_surv_data$logsize_t,
                             origin_01 = AGPE_surv_data$origin_01,
                             endo_01 = AGPE_surv_data$endo_01,
@@ -1889,7 +1892,8 @@ AGPE_surv_data_list <- list(surv_t1 = AGPE_surv_data$surv_t1,
 str(AGPE_surv_data_list)
 
 ELRI_surv_data_list <- list(surv_t1 = ELRI_surv_data$surv_t1,
-                            Xs = ELRI_surv_matrix,
+                            yearendo_Xs = ELRI_yearendo_Xs,
+                            plot_Xs = ELRI_plot_Xs,
                             logsize_t = ELRI_surv_data$logsize_t,
                             origin_01 = ELRI_surv_data$origin_01,
                             endo_01 = ELRI_surv_data$endo_01,
@@ -1904,7 +1908,8 @@ ELRI_surv_data_list <- list(surv_t1 = ELRI_surv_data$surv_t1,
 str(ELRI_surv_data_list)
 
 ELVI_surv_data_list <- list(surv_t1 = ELVI_surv_data$surv_t1,
-                            Xs = ELVI_surv_matrix,
+                            yearendo_Xs = ELVI_yearendo_Xs,
+                            plot_Xs = ELVI_plot_Xs,
                             logsize_t = ELVI_surv_data$logsize_t,
                             origin_01 = ELVI_surv_data$origin_01,
                             endo_01 = ELVI_surv_data$endo_01,
@@ -1919,7 +1924,8 @@ ELVI_surv_data_list <- list(surv_t1 = ELVI_surv_data$surv_t1,
 str(ELVI_surv_data_list)
 
 FESU_surv_data_list <- list(surv_t1 = FESU_surv_data$surv_t1,
-                            Xs = FESU_surv_matrix,
+                            yearendo_Xs = FESU_yearendo_Xs,
+                            plot_Xs = FESU_plot_Xs,
                             logsize_t = FESU_surv_data$logsize_t,
                             origin_01 = FESU_surv_data$origin_01,
                             endo_01 = FESU_surv_data$endo_01,
@@ -1934,7 +1940,8 @@ FESU_surv_data_list <- list(surv_t1 = FESU_surv_data$surv_t1,
 str(FESU_surv_data_list)
 
 LOAR_surv_data_list <- list(surv_t1 = LOAR_surv_data$surv_t1,
-                            Xs = LOAR_surv_matrix,
+                            yearendo_Xs = LOAR_yearendo_Xs,
+                            plot_Xs = LOAR_plot_Xs,
                             logsize_t = LOAR_surv_data$logsize_t,
                             origin_01 = LOAR_surv_data$origin_01,
                             endo_01 = LOAR_surv_data$endo_01,
@@ -1965,7 +1972,8 @@ POAL_surv_data_list <- list(surv_t1 = POAL_surv_data$surv_t1,
 str(POAL_surv_data_list)
 
 POSY_surv_data_list <- list(surv_t1 = POSY_surv_data$surv_t1,
-                            Xs = POSY_surv_matrix,
+                            yearendo_Xs = POSY_yearendo_Xs,
+                            plot_Xs = POSY_plot_Xs,
                             logsize_t = POSY_surv_data$logsize_t,
                             origin_01 = POSY_surv_data$origin_01,
                             endo_01 = POSY_surv_data$endo_01,
