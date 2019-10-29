@@ -141,22 +141,142 @@ saveRDS(smPOSY, file = "endodemog_flw_POSY.rds")
 
 
 ## to read in model output without rerunning models
-smPOAL <- readRDS(file = "model_run_MAR7/endodemog_flw_POAL.rds")
-smPOSY <- readRDS(file = "model_run_MAR7/endodemog_flw_POSY.rds")
-smLOAR <- readRDS(file = "model_run_MAR7/endodemog_flw_LOAR.rds")
-smELVI <- readRDS(file = "model_run_MAR7/endodemog_flw_ELVI.rds")
-smELRI <- readRDS(file = "model_run_MAR7/endodemog_flw_ELRI.rds")
-smFESU <- readRDS(file = "model_run_MAR7/endodemog_flw_FESU.rds")
-smAGPE <- readRDS(file = "model_run_MAR7/endodemog_flw_AGPE.rds")
+
+smAGPE <- readRDS(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_flw_AGPE.rds")
+smELRI <- readRDS(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_flw_ELRI.rds")
+smELVI <- readRDS(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_flw_ELVI.rds")
+smFESU <- readRDS(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_flw_FESU.rds")
+smLOAR <- readRDS(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_flw_LOAR.rds")
+smPOAL <- readRDS(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_flw_POAL.rds")
+smPOSY <- readRDS(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_flw_POSY.rds")
+
 
 
 #########################################################################################################
 ###### Perform posterior predictive checks and assess model convergence-------------------------
 #########################################################################################################
 params = c("beta[1]", "beta[2]", "tau_year[1,1]", "sigma_e[1]", "sigma_e[2]")
+
 ##### POAL - flowering
 print(smPOAL)
 # summary(smPOAL)
+
+## plot traceplots of chains for select parameters
+traceplot(smAGPE, pars = params)
+traceplot(smELRI, pars = params)
+traceplot(smELVI, pars = params)
+traceplot(smFESU, pars = params)
+traceplot(smLOAR, pars = params)
+traceplot(smPOSY, pars = params)
+traceplot(smPOSY, pars = params)
+
+
+# Pull out the posteriors
+post_flwAGPE <- extract(smAGPE)
+post_flwELRI <- extract(smELRI)
+post_flwELVI <- extract(smELVI)
+post_flwFESU <- extract(smFESU)
+post_flwLOAR <- extract(smLOAR)
+post_flwPOAL <- extract(smPOAL)
+post_flwPOSY <- extract(smPOSY)
+
+
+
+
+# This function generates replicate data for each given data point using the model matrix within the datalist for the random effects
+prediction<- function(x, fit, reps) {
+  post <- extract(fit)
+  beta_post <- post$beta
+  tau_plot_post <- post$tau_plot
+  tau_year_post <- post$tau_year
+  dim(tau_year_post) <- c(15000,22)
+  lin_comb <- matrix(nrow = x$N, ncol = reps)
+  yrep <- matrix(nrow = x$N, ncol = reps)
+  for(n in 1:reps){
+    lin_comb[,n] <- sample(beta_post[,1], size = x$N)+ x$logsize_t*sample(beta_post[,2], size = x$N) 
+    + x$endo_01*sample(beta_post[,3], size = x$N) + x$origin_01*sample(beta_post[,4], size = x$N) 
+    + x$logsize_t*x$endo_01*sample(beta_post[,5], size = x$N) 
+    + x$plot_Xs[]*sample(tau_plot_post[], size = x$N) 
+    + x$yearendo_Xs[]*sample(tau_year_post[], size = x$N)
+    
+    prob <- invlogit(lin_comb)
+    yrep[,n] <- rbinom(x$N, 1, prob[,n])
+    print(paste("rep", n, "of", reps))
+    
+  }
+  out <- list(yrep, prob, lin_comb) 
+  names(out) <- c("yrep", "prob", "lin_comb")
+  
+  return(out)
+}
+
+# apply the function for each species
+AGPE_flw_yrep <- prediction(AGPE_flw_data_list, smAGPE, 500)
+ELRI_flw_yrep <- prediction(ELRI_flw_data_list, smELRI, 500)
+ELVI_flw_yrep <- prediction(ELVI_flw_data_list, smELVI, 500)
+FESU_flw_yrep <- prediction(FESU_flw_data_list, smFESU, 500)
+LOAR_flw_yrep <- prediction(LOAR_flw_data_list, smLOAR, 500)
+POAL_flw_yrep <- prediction(POAL_flw_data_list, smPOAL, 500)
+POSY_flw_yrep <- prediction(POSY_flw_data_list, smPOSY, 500)
+
+
+# overlay 100 replicates over the actual dataset
+mflw_yrep_AGPE <- t(AGPE_flw_yrep$yrep)
+ppc_dens_overlay( y = AGPE_flw_data_list$flw_t, yrep = mflw_yrep_AGPE[1:100,])+ xlab("prob. of y") + ggtitle("AGPE")
+
+mflw_yrep_ELRI <- t(ELRI_flw_yrep$yrep)
+ppc_dens_overlay( y = ELRI_flw_data_list$flw_t, yrep = mflw_yrep_ELRI[1:100,])+ xlab("prob. of y") + ggtitle("ELRI")
+
+mflw_yrep_ELVI <- t(ELVI_flw_yrep$yrep)
+ppc_dens_overlay( y = ELVI_flw_data_list$flw_t, yrep = mflw_yrep_ELVI[1:100,]) + xlab("prob. of y") + ggtitle("ELVI")
+
+mflw_yrep_FESU <- t(FESU_flw_yrep$yrep)
+ppc_dens_overlay( y = FESU_flw_data_list$flw_t, yrep = mflw_yrep_FESU[1:100,]) + xlab("prob. of y") + ggtitle("FESU")
+
+mflw_yrep_LOAR <- t(LOAR_flw_yrep$yrep)
+ppc_dens_overlay( y = LOAR_flw_data_list$flw_t, yrep = mflw_yrep_LOAR[1:100,]) + xlab("prob. of y") + ggtitle("LOAR")
+
+mflw_yrep_POAL <- t(POAL_flw_yrep$yrep)
+ppc_dens_overlay( y = POAL_flw_data_list$flw_t, yrep = mflw_yrep_POAL[1:100,]) + xlab("prob. of y") + ggtitle("POAL")
+
+mflw_yrep_POSY <- t(POSY_flw_yrep$yrep)
+ppc_dens_overlay( y = POSY_flw_data_list$flw_t, yrep = mflw_yrep_POSY[1:100,]) + xlab("prob. of y") + ggtitle("POSY")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ## plot traceplots of chains for select parameters
 traceplot(smPOAL, pars = c("alpha", "beta[2]", "tau_year[1,1]", "sigma_0[1]", "sigma_0[2]"))
