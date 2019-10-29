@@ -10,6 +10,7 @@ library(StanHeaders)
 library(shinystan)
 library(bayesplot)
 library(devtools)
+library(MASS)
 
 
 #############################################################################################
@@ -155,16 +156,17 @@ print(sm, pars = "tau_year")
 
 
 ## to read in model output without rerunning models
-smPOAL <- readRDS(file = "model_run_MAR7/endodemog_grow_POAL_withplot.rds")
-smPOSY <- readRDS(file = "model_run_MAR7/endodemog_grow_POSY_withplot.rds")
-smLOAR <- readRDS(file = "model_run_MAR7/endodemog_grow_LOAR_withplot.rds")
-smELVI <- readRDS(file = "model_run_MAR7/endodemog_grow_ELVI_withplot.rds")
-smELRI <- readRDS(file = "model_run_MAR7/endodemog_grow_ELRI_withplot.rds")
-smFESU <- readRDS(file = "model_run_MAR7/endodemog_grow_FESU_withplot.rds")
-smAGPE <- readRDS(file = "model_run_MAR7/endodemog_grow_AGPE_withplot.rds")
+
+smAGPE <- readRDS(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_grow_AGPE.rds")
+smELRI <- readRDS(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_grow_ELRI.rds")
+smELVI <- readRDS(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_grow_ELVI.rds")
+smFESU <- readRDS(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_grow_FESU.rds")
+smLOAR <- readRDS(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_grow_LOAR.rds")
+smPOAL <- readRDS(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_grow_POAL.rds")
+smPOSY <- readRDS(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_grow_POSY.rds")
 
 
-
+# A stan model 
 
 #########################################################################################################
 ###### Perform posterior predictive checks and assess model convergence-------------------------
@@ -175,51 +177,98 @@ params <- c("beta[1]", "beta[2]", "tau_year[1,1]", "sigma_e[1]", "sigma_e[2]")
 ##### POAL - growth
 print(smPOAL)
 
-#extract posteriors into dataframe
-posterior <- as.data.frame(smPOAL)
-
-yrep <- gen_est(POAL_surv_data_list)
-
-
-
-y_rep <- apply(posterior, MARGIN = 1:2, FUN = function(draw) {
-  rnorm(n, mean = draw[grepl("mu", names(draw))], sd = "sigma")
-})
+## plot traceplots of chains for select parameters
+traceplot(smAGPE, pars = params)
+traceplot(smELRI, pars = params)
+traceplot(smELVI, pars = params)
+traceplot(smFESU, pars = params)
+traceplot(smLOAR, pars = params)
+traceplot(smPOSY, pars = params)
+traceplot(smPOSY, pars = params)
 
 
-# Extract Entire posterior (for all parameters) - 3 chains
-posterior <- extract(smPOAL, inc_warmup = FALSE, permute = FALSE)
+# Pull out the posteriors
+post_growAGPE <- extract(smAGPE)
+post_growELRI <- extract(smELRI)
+post_growELVI <- extract(smELVI)
+post_growFESU <- extract(smFESU)
+post_growLOAR <- extract(smLOAR)
+post_growPOAL <- extract(smPOAL)
+post_growPOSY <- extract(smPOSY)
 
-# Generate new data
-
-y_rep <- apply(posterior, MARGIN = 1:2, FUN = function(draw) {
-  rnorm(n, mean = draw[grepl("^mu", names(draw))], sd = draw["sigma"])
-})
 
 
-dim(y_rep) # 16 replicates by 5000 iterations by 3 chains
-error_rep <- y - y_rep # y = 16 replications
-mean(error_rep^2) # far greater than sigma2 (92 vs true = 25) - also differs from estimated sigma2 of ~40
-
-# alternative way to extract mu MCMC estimates
-mu_rep <- apply(posterior, MARGIN = 1:2, FUN = function(draw) {
-  mu1 = draw[grepl("^mu", names(draw))]
-})
-
-# Fit statistics that are done within WinBUGS
-residual <- y - mu_rep
-sq <- residual^2
-sq.new <- (y_rep - mu_rep)^2
-
-for(i in 1:5000){
-  fit[i] <- sum(sq[ , i, 1]) # Not sure how to get this to loop right for 3 chains - might be easier with permuted extract function
+# This function generates replicate data for each given data point using the model matrix within the datalist for the random effects
+prediction<- function(x, fit, reps) {
+  post <- extract(fit)
+  beta_post <- post$beta
+  tau_plot_post <- post$tau_plot
+  tau_year_post <- post$tau_year
+  dim(tau_year_post) <- c(15000,22)
+  lin_comb <- matrix(nrow = x$N, ncol = reps)
+  yrep <- matrix(nrow = x$N, ncol = reps)
+  for(n in 1:reps){
+    lin_comb[,n] <- sample(beta_post[,1], size = x$N)+ x$logsize_t*sample(beta_post[,2], size = x$N) 
+    + x$endo_01*sample(beta_post[,3], size = x$N) + x$origin_01*sample(beta_post[,4], size = x$N) 
+    + x$logsize_t*x$endo_01*sample(beta_post[,5], size = x$N) 
+    + x$plot_Xs[]*sample(tau_plot_post[], size = x$N) 
+    + x$yearendo_Xs[]*sample(tau_year_post[], size = x$N)
+    
+    prob <- exp(lin_comb)
+    yrep[,n] <- rnegbin(x$N, mu = prob[,n], theta = mean(post$phi))
+    print(paste("rep", n, "of", reps))
+    
+  }
+  out <- list(yrep, prob, lin_comb) 
+  names(out) <- c("yrep", "prob", "lin_comb")
+  
+  return(out)
 }
 
-for(i in 1:5000) fit.new[i] <- sum(sq.new[, i, 1])
 
-# Posterior predictive distributions and bayesian p-values
-test <- ifelse(test = (fit.new - fit) > 0, yes=1, no = 0) # Test whether new data set more extreme
-(bpvalue <- mean(test)) # Bayesian p-value = 0.0358 indicates poor fit (should be ~0.5)
 
-plot(fit, fit.new) 
-abline(0, 1) # Also shows poor fit - bias of idealized (new) fit data being lower than fit data. The SSQ are also MUCH larger than those found in WinBUGS. Seems like I did something incorrectly since the summary output was the same for WinBUGS and Stan.
+# apply the function for each species
+AGPE_grow_yrep <- prediction(AGPE_grow_data_list, smAGPE, 500)
+ELRI_grow_yrep <- prediction(ELRI_grow_data_list, smELRI, 500)
+ELVI_grow_yrep <- prediction(ELVI_grow_data_list, smELVI, 500)
+FESU_grow_yrep <- prediction(FESU_grow_data_list, smFESU, 500)
+LOAR_grow_yrep <- prediction(LOAR_grow_data_list, smLOAR, 500)
+POAL_grow_yrep <- prediction(POAL_grow_data_list, smPOAL, 500)
+POSY_grow_yrep <- prediction(POSY_grow_data_list, smPOSY, 500)
+
+
+
+# overlay 100 replicates over the actual dataset
+mgrow_yrep_AGPE <- t(AGPE_grow_yrep$yrep)
+ppc_dens_overlay( y = AGPE_grow_data_list$size_t1, yrep = mgrow_yrep_AGPE[1:100,])+ xlab("prob. of y") + ggtitle("AGPE")
+
+mgrow_yrep_ELRI <- t(ELRI_grow_yrep$yrep)
+ppc_dens_overlay( y = ELRI_grow_data_list$size_t1, yrep = mgrow_yrep_ELRI[1:100,])+ xlab("prob. of y") + ggtitle("ELRI")
+
+mgrow_yrep_ELVI <- t(ELVI_grow_yrep$yrep)
+ppc_dens_overlay( y = ELVI_grow_data_list$size_t1, yrep = mgrow_yrep_ELVI[1:100,]) + xlab("prob. of y") + ggtitle("ELVI")
+
+mgrow_yrep_FESU <- t(FESU_grow_yrep$yrep)
+ppc_dens_overlay( y = FESU_grow_data_list$size_t1, yrep = mgrow_yrep_FESU[1:100,]) + xlab("prob. of y") + ggtitle("FESU")
+
+mgrow_yrep_LOAR <- t(LOAR_grow_yrep$yrep)
+ppc_dens_overlay( y = LOAR_grow_data_list$size_t1, yrep = mgrow_yrep_LOAR[1:100,]) + xlab("prob. of y") + ggtitle("LOAR")
+
+mgrow_yrep_POAL <- t(POAL_grow_yrep$yrep)
+ppc_dens_overlay( y = POAL_grow_data_list$size_t1, yrep = mgrow_yrep_POAL[1:100,]) + xlab("prob. of y") + ggtitle("POAL")
+
+mgrow_yrep_POSY <- t(POSY_grow_yrep$yrep)
+ppc_dens_overlay( y = POSY_grow_data_list$size_t1, yrep = mgrow_yrep_POSY[1:100,]) + xlab("prob. of y") + ggtitle("POSY")
+
+
+
+
+
+
+
+
+
+
+
+
+
