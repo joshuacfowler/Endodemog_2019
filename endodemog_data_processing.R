@@ -2874,75 +2874,196 @@ str(POSY_fert_data_list)
 ##############################################################################
 ####### Preparing datalists for Spikelet/inflorescence Kernel ------------------------------
 ##############################################################################
-LTREB_data_for_spike <- LTREB_full %>%
-  filter(!is.na(FLW_T)) %>% 
-  filter(FLW_T>0)
+LTREB_data_forspike <- LTREB_full %>%
+  select(-FLW_COUNT_T1, -FLW_STAT_T1, -SPIKE_A_T1, -SPIKE_B_T1, -SPIKE_C_T1, -SPIKE_D_T1, -endo_status_from_check, -plot_endo_for_check, -endo_mismatch, -dist_a, -dist_b) %>% 
+  filter(!is.na(FLW_STAT_T)) %>% 
+  filter(FLW_STAT_T>0) %>% 
+  melt(id.var = c("plot_fixed" ,            "pos"         ,           "id",
+                  "species"       ,         "species_index"  ,        "endo_01",
+                  "endo_index"  ,           "origin_01"       ,       "birth" ,
+                  "year_t1"         ,       "year_t1_index"       ,   "surv_t1" ,
+                  "size_t1"         ,       "logsize_t1"       ,
+                   "year_t",
+                  "year_t_index"     ,      "size_t"           ,      "logsize_t"  ,
+                  "FLW_COUNT_T"      ,      "FLW_STAT_T"),
+                  value.name = "spike_count_t") %>% 
+  rename(spikelet_id = variable) %>% 
+  filter(!is.na(spike_count_t))
 
-dim(LTREB_data_for_seedmeans)
+dim(LTREB_data_forspike)
 
 # Creating individual species data lists to be passed to the model
-
 # Split up the main dataframe by species and recode plot to be used as an index for each species
-AGPE_spike_data <- LTREB_data_for_spike %>% 
+AGPE_spike_data <- LTREB_data_forspike %>% 
   filter(species == "AGPE") %>% 
-  filter(!is.na(SPIKEPERINF_T)) %>% 
   mutate(plot_index = as.integer(as.character(recode(as.factor(plot_fixed),"111"="1", "112"="2", "113"="3", "114"="4", "115"="5", "116"="6", "117"="7", "118"="8","119"="9", "120"="10"))))
 
-
-ELRI_spike_data <- LTREB_data_for_spike %>% #Elymus species are seed/inf
+# ELRI and ELVI need to have seed data instead
+ELRI_spike_data <- LTREB_data_forspike %>% 
   filter(species == "ELRI") %>% 
-  filter(!is.na(SEEDPERINF_T)) %>% 
   mutate(plot_index = as.integer(as.character(recode(as.factor(plot_fixed),"101"="1", "102"="2", "103"="3", "104"="4", "105"="5", "106"="6", "107"="7", "108"="8","109"="9", "110"="10"))))
-
-ELVI_spike_data <- LTREB_data_for_spike %>% #Elymus species are seed/inf
-  filter(species == "ELVI") %>%
-  filter(!is.na(SEEDPERINF_T)) %>% 
+ELVI_spike_data <- LTREB_data_forspike %>% 
+  filter(species == "ELVI") %>% 
   mutate(plot_index = as.integer(as.character(recode(as.factor(plot_fixed),"91"="1", "92"="2", "93"="3", "94"="4", "95"="5", "96"="6", "97"="7", "98"="8","99"="9", "100"="10"))))
 
-
-FESU_spike_data <- LTREB_data_for_spike %>% 
+FESU_spike_data <- LTREB_data_forspike %>% 
   filter(species == "FESU") %>% 
-  filter(!is.na(SPIKEPERINF_T)) %>% 
   mutate(plot_index = as.integer(as.character(recode(as.factor(plot_fixed),"121"="1", "122"="2", "123"="3", "124"="4", "125"="5", "126"="6", "127"="7", "128"="8","129"="9", "130"="10"))))
-
-LOAR_spike_data <- LTREB_data_for_spike %>% 
+LOAR_spike_data <- LTREB_data_forspike %>% 
   filter(species == "LOAR") %>% 
-  filter(!is.na(SPIKEPERINF_T)) %>% 
   mutate(plot_index = as.integer(as.character(recode(as.factor(plot_fixed),"31"="1", "32"="2", "33"="3", "34"="4", "35"="5", "36"="6", "37"="7", "38"="8","39"="9", "40"="10"))))
-
-POAL_spike_data <- LTREB_data_for_spike %>% 
+POAL_spike_data <- LTREB_data_forspike %>% 
   filter(species == "POAL") %>% 
-  filter(!is.na(SPIKEPERINF_T)) %>% 
   mutate(plot_index = as.integer(as.character(recode(as.factor(plot_fixed),"3"="1", "4"="2", "8"="3", "9"="4", "10"="5", "11"="6", "15"="7", "16"="8","17"="9", "19"="10","151"="11","152"="12","153"="13","154"="14","155"="15","156"="16","157"="17","158"="18"))))
-
-POSY_spike_data <- LTREB_data_for_spike %>% 
+POSY_spike_data <- LTREB_data_forspike %>% 
   filter(species == "POSY") %>% 
-  filter(!is.na(SPIKEPERINF_T)) %>% 
   mutate(plot_index = as.integer(as.character(recode(as.factor(plot_fixed),"1"="1", "2"="2", "5"="3", "6"="4", "7"="5", "12"="6", "13"="7", "14"="8","18"="9", "20"="10","141"="11","142"="12","143"="13","144"="14","145"="15","146"="16","147"="17","148"="18", "149"="19", "150"="20"))))
 
+
+# Create model matrices for each species year*endo and plot random effects
+AGPE_yearendo_Xs_spike <- AGPE_spike_data %>% 
+  select(id, endo_01, year_t) %>% 
+  unite("year_endo", year_t:endo_01, remove = FALSE) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = year_endo, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id, - endo_01, -year_t) %>% 
+  add_column(year_endo2007_0 = 0, year_endo2007_1 = 0,year_endo2008_0 = 0, year_endo2008_1 = 0,year_endo2009_0 = 0, year_endo2009_1 = 0,year_endo2010_0 = 0, year_endo2010_1 = 0,year_endo2011_0 = 0, year_endo2011_1 = 0, .before = TRUE) %>% 
+  add_column(year_endo2013_0 = 0, year_endo2013_1 = 0,year_endo2014_0 = 0, year_endo2014_1 = 0, .before = c("year_endo2015_0"))
+
+AGPE_plot_Xs_spike <- AGPE_spike_data %>% 
+  select(id, plot_index) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = plot_index, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id) %>% 
+  add_column(plot_index6 = 0, .before = c("plot_index7"))
+
+
+# Hold off on ELRI and ELVI for now
+ELRI_yearendo_Xs_spike <- ELRI_spike_data %>% 
+  select(id, endo_01, year_t) %>% 
+  unite("year_endo", year_t:endo_01, remove = FALSE) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = year_endo, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id, - endo_01, -year_t) %>% 
+  add_column(year_endo2007_0 = 0, year_endo2007_1 = 0, .before = TRUE)
+
+
+ELRI_plot_Xs_spike <- ELRI_spike_data %>% 
+  select(id, plot_index) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = plot_index, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id)
+
+ELVI_yearendo_Xs_spike <- ELVI_spike_data %>% 
+  select(id, endo_01, year_t) %>% 
+  unite("year_endo", year_t:endo_01, remove = FALSE) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = year_endo, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id, - endo_01, -year_t)%>% 
+  add_column(year_endo2007_0 = 0, year_endo2007_1 = 0, .before = TRUE)
+
+ELVI_plot_Xs_spike <- ELVI_spike_data %>% 
+  select(id, plot_index) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = plot_index, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id)
+# 
+
+
+
+FESU_yearendo_Xs_spike <- FESU_spike_data %>% 
+  select(id, endo_01, year_t) %>% 
+  unite("year_endo", year_t:endo_01, remove = FALSE) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = year_endo, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id, - endo_01, -year_t) %>% 
+  add_column(year_endo2007_0 = 0, year_endo2007_1 = 0, year_endo2008_0 = 0, year_endo2008_1 = 0, .before = TRUE) %>% 
+  add_column(year_endo2011_0 = 0, .before = c("year_endo2011_1")) %>% 
+  add_column(year_endo2012_0 = 0, .before = c("year_endo2012_1"))
+
+FESU_plot_Xs_spike <- FESU_spike_data %>% 
+  select(id, plot_index) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = plot_index, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id)
+
+LOAR_yearendo_Xs_spike <- LOAR_spike_data %>% 
+  select(id, endo_01, year_t) %>% 
+  unite("year_endo", year_t:endo_01, remove = FALSE) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = year_endo, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id, - endo_01, -year_t) %>% 
+  add_column(year_endo2007_0 = 0, year_endo2007_1 = 0, .before = TRUE) %>% 
+  add_column(year_endo2011_0 = 0, year_endo2011_1 = 0, .before = c("year_endo2012_0"))
+
+LOAR_plot_Xs_spike <- LOAR_spike_data %>% 
+  select(id, plot_index) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = plot_index, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id)
+
+POAL_yearendo_Xs_spike <- POAL_spike_data %>% 
+  select(id, endo_01, year_t) %>% 
+  unite("year_endo", year_t:endo_01, remove = FALSE) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = year_endo, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id, - endo_01, -year_t) %>% 
+  add_column(year_endo2007_0 = 0, year_endo2007_1 = 0, .before = TRUE) %>% 
+  add_column(year_endo2013_0 = 0, .before = c("year_endo2013_1")) %>% 
+  add_column(year_endo2014_0 = 0, .before = c("year_endo2014_1")) %>% 
+  add_column(year_endo2015_0 = 0, year_endo2015_1 = 0, year_endo_2016_0 = 0, .before = c("year_endo2016_1"))
+
+POAL_plot_Xs_spike <- POAL_spike_data %>% 
+  select(id, plot_index) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = plot_index, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id)
+
+
+POSY_yearendo_Xs_spike <- POSY_spike_data %>% 
+  select(id, endo_01, year_t) %>% 
+  unite("year_endo", year_t:endo_01, remove = FALSE) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = year_endo, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id, - endo_01, -year_t) %>% 
+  add_column(year_endo2007_0 = 0, year_endo2007_1 = 0, .before = TRUE)
+
+POSY_plot_Xs_spike <- POSY_spike_data %>% 
+  select(id, plot_index) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = plot_index, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id)
+
+
+
+
+
 # Create data lists to be used for the Stan model
-AGPE_spike_data_list <- list(spike_t = AGPE_spike_data$SPIKEPERINF_T,
+AGPE_spike_data_list <- list(spike_t = AGPE_spike_data$spike_count_t,
+                             yearendo_Xs = AGPE_yearendo_Xs_spike,
+                             plot_Xs = AGPE_plot_Xs_spike,
                              logsize_t = AGPE_spike_data$logsize_t,
                              origin_01 = AGPE_spike_data$origin_01,
                              endo_01 = AGPE_spike_data$endo_01,
                              endo_index = AGPE_spike_data$endo_index,
                              year_t = AGPE_spike_data$year_t_index,
                              plot = AGPE_spike_data$plot_index,
-                             N = length(na.omit(AGPE_spike_data$SPIKEPERINF_T)),
+                             N = nrow(AGPE_spike_data),
                              K = 5L,
                              nYear = 11L,
                              nPlot = 10L,
                              nEndo =   length(unique(AGPE_spike_data$endo_01)))
 str(AGPE_spike_data_list)
 
-ELRI_spike_data_list <- list(spike_t = (ELRI_spike_data$SEEDPERINF_T),
+ELRI_spike_data_list <- list(spike_t = (ELRI_spike_data$spike_count_t),
+                             yearendo_Xs = ELRI_yearendo_Xs_spike,
+                             plot_Xs = ELRI_plot_Xs_spike,
                              logsize_t = ELRI_spike_data$logsize_t,
                              origin_01 = ELRI_spike_data$origin_01,
                             endo_01 = ELRI_spike_data$endo_01,
                             endo_index = ELRI_spike_data$endo_index,
                             year_t = ELRI_spike_data$year_t_index,
                             plot = ELRI_spike_data$plot_index,
-                            N = length((ELRI_spike_data$SEEDPERINF_T)),
                             N = nrow(ELRI_spike_data),
                             K = 5L,
                             nYear = 11L,
@@ -2950,14 +3071,15 @@ ELRI_spike_data_list <- list(spike_t = (ELRI_spike_data$SEEDPERINF_T),
                             nEndo =   length(unique(ELRI_spike_data$endo_01)))
 str(ELRI_spike_data_list)
 
-ELVI_spike_data_list <- list(spike_t = (ELVI_spike_data$SEEDPERINF_T),
+ELVI_spike_data_list <- list(spike_t = (ELVI_spike_data$spike_count_t),
+                             yearendo_Xs = ELVI_yearendo_Xs_spike,
+                             plot_Xs = ELVI_plot_Xs_spike,
                              logsize_t = ELRI_spike_data$logsize_t,
                              origin_01 = ELRI_spike_data$origin_01,
                             endo_01 = ELVI_spike_data$endo_01,
                             endo_index = ELVI_spike_data$endo_index,
                             year_t = ELVI_spike_data$year_t_index,
                             plot = ELVI_spike_data$plot_index,
-                            N = length((ELVI_spike_data$SEEDPERINF_T)),
                             N = nrow(ELVI_spike_data),
                             K = 5L,
                             nYear = 11L,
@@ -2965,56 +3087,64 @@ ELVI_spike_data_list <- list(spike_t = (ELVI_spike_data$SEEDPERINF_T),
                             nEndo =   length(unique(ELVI_spike_data$endo_01)))
 str(ELVI_spike_data_list)
 
-FESU_spike_data_list <- list(spike_t = (FESU_spike_data$SPIKEPERINF_T),
+FESU_spike_data_list <- list(spike_t = (FESU_spike_data$spike_count_t),
+                             yearendo_Xs = FESU_yearendo_Xs_spike,
+                             plot_Xs = FESU_plot_Xs_spike,
                              logsize_t = FESU_spike_data$logsize_t,
                              origin_01 = FESU_spike_data$origin_01,
                             endo_01 = FESU_spike_data$endo_01,
                             endo_index = FESU_spike_data$endo_index,
                             year_t = FESU_spike_data$year_t_index,
                             plot = FESU_spike_data$plot_index,
-                            N = length((FESU_spike_data$SPIKEPERINF_T)),
+                            N = nrow(FESU_spike_data),
                             K = 5L,
                             nYear = 11L,
                             nPlot = 10L,
                             nEndo =   length(unique(FESU_spike_data$endo_01)))
 str(FESU_spike_data_list)
 
-LOAR_spike_data_list <- list(spike_t = (LOAR_spike_data$SPIKEPERINF_T),
+LOAR_spike_data_list <- list(spike_t = (LOAR_spike_data$spike_count_t),
+                             yearendo_Xs = LOAR_yearendo_Xs_spike,
+                             plot_Xs = LOAR_plot_Xs_spike,
                              logsize_t = LOAR_spike_data$logsize_t,
                              origin_01 = LOAR_spike_data$origin_01,
                             endo_01 = LOAR_spike_data$endo_01,
                             endo_index = LOAR_spike_data$endo_index,
                             year_t = LOAR_spike_data$year_t_index,
                             plot = LOAR_spike_data$plot_index,
-                            N = length((LOAR_spike_data$SPIKEPERINF_T)),
+                            N = nrow(LOAR_spike_data),
                             K = 5L,
                             nYear = 11L,
                             nPlot = 10L,
                             nEndo =   length(unique(LOAR_spike_data$endo_01)))
 str(LOAR_spike_data_list)
 
-POAL_spike_data_list <- list(spike_t = (POAL_spike_data$SPIKEPERINF_T),
+POAL_spike_data_list <- list(spike_t = (POAL_spike_data$spike_count_t),
+                             yearendo_Xs = POAL_yearendo_Xs_spike,
+                             plot_Xs = POAL_plot_Xs_spike,
                              logsize_t = POAL_spike_data$logsize_t,
                              origin_01 = POAL_spike_data$origin_01,
                             endo_01 = POAL_spike_data$endo_01,
                             endo_index = POAL_spike_data$endo_index,
                             year_t = POAL_spike_data$year_t_index,
                             plot = POAL_spike_data$plot_index,
-                            N = length((POAL_spike_data$SPIKEPERINF_T)),
+                            N = nrow(POAL_spike_data),
                             K = 5L,
                             nYear = 11L,
                             nPlot = 18L,
                             nEndo =   length(unique(POAL_spike_data$endo_01)))
 str(POAL_spike_data_list)
 
-POSY_spike_data_list <- list(spike_t = (POSY_spike_data$SPIKEPERINF_T),
+POSY_spike_data_list <- list(spike_t = (POSY_spike_data$spike_count_t),
+                             yearendo_Xs = POSY_yearendo_Xs_spike,
+                             plot_Xs = POSY_plot_Xs_spike,
                              logsize_t = POSY_spike_data$logsize_t,
                              origin_01 = POSY_spike_data$origin_01,
                             endo_01 = POSY_spike_data$endo_01,
                             endo_index = POSY_spike_data$endo_index,
                             year_t = POSY_spike_data$year_t_index,
                             plot = POSY_spike_data$plot_index,
-                            N = length(POSY_spike_data$SPIKEPERINF_T),
+                            N = nrow(POSY_spike_data),
                             K = 5L,
                             nYear = 11L,
                             nPlot = 20L,
