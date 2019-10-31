@@ -25,7 +25,7 @@ LTREB_data <- LTREB_endodemog %>%
   mutate(size_t1 = na_if(size_t1, 0)) %>%  
   mutate(size_t, logsize_t = log(size_t)) %>% 
   mutate(size_t1, logsize_t1 = log(size_t1)) %>%  
-  mutate(surv_t1 = as.integer(recode(surv_t1, "0" = 0, "1" =1, "2" = 1, "4" = 1))) %>% 
+  mutate(surv_t1 = as.integer(recode(surv_t1, "0" = 0, "1" =1, "2" = 1, "4" = 1))) %>%
   mutate(endo_01 = as.integer(case_when(endo == "0" | endo == "minus" ~ 0,
                                         endo == "1"| endo =="plus" ~ 1))) %>% 
   mutate(endo_index = as.integer(as.factor(endo_01+1)))  %>% 
@@ -103,7 +103,7 @@ ELRI_data_r <- read_xlsx("/Users/joshuacfowler/Dropbox/EndodemogData/rawdatafile
 ELRI_data_seed2009 <- read_xlsx("/Users/joshuacfowler/Dropbox/EndodemogData/rawdatafilesbyspecies/ELRI data up to 2016.xlsx", sheet = "ELRI infl 09")
 ELRI_data_r <- ELRI_data_r %>% 
   mutate(tag = paste(PLOT, RecruitNo, sep = "_")) 
-# Read in data from POSY
+# Read in data from AGPE
 AGPE_data <- read_xlsx("/Users/joshuacfowler/Dropbox/EndodemogData/rawdatafilesbyspecies/AGPE2016_final.xlsx", sheet = "AGPE")
 AGPE_data_r <- read_xlsx("/Users/joshuacfowler/Dropbox/EndodemogData/rawdatafilesbyspecies/AGPE2016_final.xlsx", sheet = "AGPE recruits")
 
@@ -1696,15 +1696,92 @@ LTREB_full_to2018_lag <- LTREB_full_to2018 %>%
          SPIKE_A_T, SPIKE_B_T, SPIKE_C_T, SPIKE_D_T)
 
 ##############################################################################
-####### This would be a good place to merge in 2019 data ------------------------------
+####### Here we will merge in 2019 data ------------------------------
 ##############################################################################
 
+# ELRI_2019_data <- read_xlsx("~/Dropbox/EndodemogData/Field Data/2019/LTREB_data_2019_July2019FieldData_NumbersConversion.xlsx", sheet = "ELRI")
+# ELVI_2019_data <- read_xlsx("~/Dropbox/EndodemogData/Field Data/2019/LTREB_data_2019_July2019FieldData_NumbersConversion.xlsx", sheet = "ELVI")
+# FESU_2019_data <- read_xlsx("~/Dropbox/EndodemogData/Field Data/2019/LTREB_data_2019_July2019FieldData_NumbersConversion.xlsx", sheet = "FESU")
+# LOAR_2019_data <- read_xlsx("~/Dropbox/EndodemogData/Field Data/2019/LTREB_data_2019_July2019FieldData_NumbersConversion.xlsx", sheet = "LOAR")
+# POAL_2019_data <- read_xlsx("~/Dropbox/EndodemogData/Field Data/2019/LTREB_data_2019_July2019FieldData_NumbersConversion.xlsx", sheet = "POAL") %>% 
+#   mutate(id = paste(plot, "_", pos))
+# POSY_2019_data <- read_xlsx("~/Dropbox/EndodemogData/Field Data/2019/LTREB_data_2019_July2019FieldData_NumbersConversion.xlsx", sheet = "POSY") %>% 
+#   mutate(id = paste(plot, "_", pos))
+# 
+# # Now we can merge all the different species together.
+# LTREB_2019_data <- ELRI_2019_data %>% 
+#   merge(ELVI_2019_data, by = c("species", "origin", "plot", "pos","id",  "birth_year", "observation_year", "species", "distance_A", "distance_B", "survival", "size_tillers", "flowering_tillers", "spikelets_A", "spikelets_B", "spikelets_C", "notes"), all = TRUE) %>% 
+#   merge(FESU_2019_data, by = c("species", "origin", "plot", "pos","id",  "birth_year", "observation_year", "species", "distance_A", "distance_B", "survival", "size_tillers", "flowering_tillers", "spikelets_A", "spikelets_B", "spikelets_C", "notes"), all = TRUE) %>% 
+#   merge(LOAR_2019_data, by = c("species", "origin", "plot", "pos","id",  "birth_year", "observation_year", "species", "distance_A", "distance_B", "survival", "size_tillers", "flowering_tillers", "spikelets_A", "spikelets_B", "spikelets_C", "notes"), all = TRUE) %>% 
+#   merge(POAL_2019_data, by = c("species", "origin", "plot", "pos","id",  "birth_year", "observation_year", "species", "distance_A", "distance_B", "survival", "size_tillers", "flowering_tillers", "spikelets_A", "spikelets_B", "spikelets_C", "notes"), all = TRUE) %>% 
+#   merge(POSY_2019_data, by = c("species", "origin", "plot", "pos","id",  "birth_year", "observation_year", "species", "distance_A", "distance_B", "survival", "size_tillers", "flowering_tillers", "spikelets_A", "spikelets_B", "spikelets_C", "notes"), all = TRUE)
+#   
+# # We need to do a little bit of cleaning up for some of the missing tags and changing variable names.
+# LTREB_2019_cleaned <- LTREB_2019_data %>% 
+#   rename(year_t1 = observation_year, surv_t1 = survival, 
+#          size_t1 = size_tillers, FLW_COUNT_T1 = flowering_tillers, 
+#          SPIKE_A_T1 = spikelets_A, SPIKE_B_T1 = spikelets_B, SPIKE_C_T1 = spikelets_C,
+#          dist_a = distance_A, dist_b = distance_B)
+#   mutate(plot_fixed = as.integer(plot))
+#   
+#   
+#   # I'm gonna talk to Tom about this stuff and see if the excel sheet can be cleaned up more.
+#   
+#   LTREB_data <- LTREB_endodemog %>% 
+#     mutate(size_t = na_if(size_t, 0)) %>% 
+#     mutate(size_t1 = na_if(size_t1, 0)) %>%  
+#     mutate(size_t, logsize_t = log(size_t)) %>% 
+#     mutate(size_t1, logsize_t1 = log(size_t1)) %>%  
+#     mutate(surv_t1 = as.integer(recode(surv_t1, "0" = 0, "1" =1, "2" = 1, "4" = 1))) %>% 
+#     mutate(endo_01 = as.integer(case_when(endo == "0" | endo == "minus" ~ 0,
+#                                           endo == "1"| endo =="plus" ~ 1))) %>% 
+#     mutate(endo_index = as.integer(as.factor(endo_01+1)))  %>% 
+#     mutate(species = case_when(species == "ELVI" & plot == 101 ~ "ELRI", species == "ELVI" & plot != 101 ~ "ELVI",  # This is for the compiled data where a ELRI data point in plot 101, tag 2004 is labelled as ELVI
+#                                species == "ELRI" ~ "ELRI",
+#                                species == "FESU" ~ "FESU",
+#                                species == "AGPE" ~ "AGPE",
+#                                species == "POAL" ~ "POAL",
+#                                species == "POSY" ~ "POSY",
+#                                species == "LOAR" ~ "LOAR"))  %>%    
+#     mutate(species_index = as.integer(recode_factor(species,                   
+#                                                     "AGPE" = 1, "ELRI" = 2, "ELVI" = 3, 
+#                                                     "FESU" = 4, "LOAR" = 5, "POAL" = 6, 
+#                                                     "POSY" = 7))) %>% 
+#     mutate(year_t_index = as.integer(recode(year_t, 
+#                                             '2007' = 1, '2008' = 2, '2009' = 3, 
+#                                             '2010' = 4, '2011' = 5, '2012' = 6, 
+#                                             '2013' = 7, '2014' = 8, '2015' = 9, 
+#                                             '2016' = 10, '2017' = 11))) %>%             
+#     mutate(year_t1_index = as.integer(recode(year_t1, 
+#                                              '2008' = 2, '2009' = 3, '2010' = 4, 
+#                                              '2011' = 5, '2012' = 6, '2013' = 7, 
+#                                              '2014' = 8, '2015' = 9, '2016' = 10, 
+#                                              '2017' = 11, '2018' = 12))) %>%               
+#     mutate(origin_01 = as.integer(case_when(origin == "O" ~ 0, 
+#                                             origin == "R" ~ 1, 
+#                                             origin != "R" | origin != "O" ~ 1))) %>%
+#     mutate(plot_fixed = as.integer(case_when(species == "LOAR" & id == "39_1B" ~ "39", # This is for a copy error with LOAR individual 39_1B, which assigned it to plots 41-44
+#                                              plot != "R" ~ as.character(plot), 
+#                                              plot == "R" ~ as.character(origin)))) %>% 
+#     mutate(surv_t1 = as.integer(case_when(surv_t1 == 1 ~ 1,
+#                                           surv_t1 == 0 ~ 0,
+#                                           is.na(surv_t1) & birth == year_t1 ~ 1))) %>% 
+#     filter(duplicated(.) == FALSE)
+#   # dim(LTREB_data)
+#   
+#   
+#   
+# 
+# # We still need 2019 AGPE data
+# LTREB_full_to2019 <- LTREB_full_to2018_lag %>% 
+#   full_join()
+# 
 
 ##############################################################################
 ####### Merging in the endophyte checks ------------------------------
 ##############################################################################
 
-LTREB_endo_check <- read_csv(file = "~/Dropbox/Endodemogdata/Fulldataplusmetadata/endo_demog_status.csv") %>% 
+LTREB_endo_check <- read_csv(file = "~/Dropbox/EndodemogData/Fulldataplusmetadata/endo_demog_status.csv") %>% 
   select(-recno,-check, -X11) %>% 
   rename("origin_from_check" = "origin", "endo_status_from_check" = "status", "plot_endo_for_check" = "endo") %>% 
   mutate(origin_01 = as.integer(case_when(origin_from_check == "O" ~ 0, 
@@ -1742,7 +1819,7 @@ LTREB_status_changes <- LTREB_full_2 %>%
 ####### Merging in the location data ------------------------------
 ##############################################################################
 
-LTREB_distances <- read_csv(file = "~/Dropbox/Endodemogdata/Fulldataplusmetadata/endo_distance_tubeid.csv",
+LTREB_distances <- read_csv(file = "~/Dropbox/EndodemogData/Fulldataplusmetadata/endo_distance_tubeid.csv",
                             col_types = cols( species = col_character(),
                             origin = col_character(),
                             plot = col_integer(),
@@ -1808,76 +1885,105 @@ POSY_surv_data <- LTREB_data_forsurv %>%
   filter(species == "POSY") %>% 
   mutate(plot_index = as.integer(as.character(recode(as.factor(plot_fixed),"1"="1", "2"="2", "5"="3", "6"="4", "7"="5", "12"="6", "13"="7", "14"="8","18"="9", "20"="10","141"="11","142"="12","143"="13","144"="14","145"="15","146"="16","147"="17","148"="18", "149"="19", "150"="20"))))
 
-
-POAL_yearendo_Xs <- POAL_surv_data %>% 
+# Create model matrices for each species year*endo and plot random effects
+AGPE_yearendo_Xs_s <- AGPE_surv_data %>% 
   select(id, endo_01, year_t) %>% 
   unite("year_endo", year_t:endo_01, remove = FALSE) %>% 
   mutate(row_id = 1:n()) %>% 
   mutate(one = 1) %>% spread(key = year_endo, value = one, fill = 0, sep = "") %>% 
   ungroup() %>% select(-id, -row_id, - endo_01, -year_t)
 
-POAL_plot_Xs <- POAL_surv_data %>% 
+AGPE_plot_Xs_s <- AGPE_surv_data %>% 
+  select(id, plot_index) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = plot_index, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id)
+
+ELRI_yearendo_Xs_s <- ELRI_surv_data %>% 
+  select(id, endo_01, year_t) %>% 
+  unite("year_endo", year_t:endo_01, remove = FALSE) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = year_endo, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id, - endo_01, -year_t)
+
+ELRI_plot_Xs_s <- ELRI_surv_data %>% 
+  select(id, plot_index) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = plot_index, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id)
+
+ELVI_yearendo_Xs_s <- ELVI_surv_data %>% 
+  select(id, endo_01, year_t) %>% 
+  unite("year_endo", year_t:endo_01, remove = FALSE) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = year_endo, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id, - endo_01, -year_t)
+
+ELVI_plot_Xs_s <- ELVI_surv_data %>% 
+  select(id, plot_index) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = plot_index, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id)
+
+
+FESU_yearendo_Xs_s <- FESU_surv_data %>% 
+  select(id, endo_01, year_t) %>% 
+  unite("year_endo", year_t:endo_01, remove = FALSE) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = year_endo, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id, - endo_01, -year_t)
+
+FESU_plot_Xs_s <- FESU_surv_data %>% 
+  select(id, plot_index) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = plot_index, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id)
+
+LOAR_yearendo_Xs_s <- LOAR_surv_data %>% 
+  select(id, endo_01, year_t) %>% 
+  unite("year_endo", year_t:endo_01, remove = FALSE) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = year_endo, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id, - endo_01, -year_t)
+
+LOAR_plot_Xs_s <- LOAR_surv_data %>% 
+  select(id, plot_index) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = plot_index, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id)
+
+POAL_yearendo_Xs_s <- POAL_surv_data %>% 
+  select(id, endo_01, year_t) %>% 
+  unite("year_endo", year_t:endo_01, remove = FALSE) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = year_endo, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id, - endo_01, -year_t)
+
+POAL_plot_Xs_s <- POAL_surv_data %>% 
   select(id, plot_index) %>% 
   mutate(row_id = 1:n()) %>% 
   mutate(one = 1) %>% spread(key = plot_index, value = one, fill = 0, sep = "") %>% 
   ungroup() %>% select(-id, -row_id)
   
 
-# Create model matrices for each species
+POSY_yearendo_Xs_s <- POSY_surv_data %>% 
+  select(id, endo_01, year_t) %>% 
+  unite("year_endo", year_t:endo_01, remove = FALSE) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = year_endo, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id, - endo_01, -year_t)
 
-AGPE_yearendo_formatrix <- model.frame(surv_t1 ~ 0 + as.factor(year_t)*as.factor(endo_01), data = AGPE_surv_data)
-AGPE_yearendo_Xs <- model.matrix(surv_t1 ~ 0 + as.factor(year_t)*as.factor(endo_01), data = AGPE_yearendo_formatrix)
-
-AGPE_plot_formatrix <- model.frame(surv_t1 ~ 0 + as.factor(plot_index), data = AGPE_surv_data)
-AGPE_plot_Xs <- model.matrix(surv_t1 ~ 0 + as.factor(plot_index), data = AGPE_plot_formatrix)
-
-
-ELRI_yearendo_formatrix <- model.frame(surv_t1 ~ 0 + as.factor(year_t)*as.factor(endo_01), data = ELRI_surv_data)
-ELRI_yearendo_Xs <- model.matrix(surv_t1 ~ 0 + as.factor(year_t)*as.factor(endo_01), data = ELRI_yearendo_formatrix)
-
-ELRI_plot_formatrix <- model.frame(surv_t1 ~ 0 + as.factor(plot_index), data = ELRI_surv_data)
-ELRI_plot_Xs <- model.matrix(surv_t1 ~ 0 + as.factor(plot_index), data = ELRI_plot_formatrix)
-
-
-ELVI_yearendo_formatrix <- model.frame(surv_t1 ~ 0 + as.factor(year_t)*as.factor(endo_01), data = ELVI_surv_data)
-ELVI_yearendo_Xs <- model.matrix(surv_t1 ~ 0 + as.factor(year_t)*as.factor(endo_01), data = ELVI_yearendo_formatrix)
-
-ELVI_plot_formatrix <- model.frame(surv_t1 ~ 0 + as.factor(plot_index), data = ELVI_surv_data)
-ELVI_plot_Xs <- model.matrix(surv_t1 ~ 0 + as.factor(plot_index), data = ELVI_plot_formatrix)
-
-
-FESU_yearendo_formatrix <- model.frame(surv_t1 ~ 0 + as.factor(year_t)*as.factor(endo_01), data = FESU_surv_data)
-FESU_yearendo_Xs <- model.matrix(surv_t1 ~ 0 + as.factor(year_t)*as.factor(endo_01), data = FESU_yearendo_formatrix)
-
-FESU_plot_formatrix <- model.frame(surv_t1 ~ 0 + as.factor(plot_index), data = FESU_surv_data)
-FESU_plot_Xs <- model.matrix(surv_t1 ~ 0 + as.factor(plot_index), data = FESU_plot_formatrix)
-
-
-LOAR_yearendo_formatrix <- model.frame(surv_t1 ~ 0 + as.factor(year_t)*as.factor(endo_01), data = LOAR_surv_data)
-LOAR_yearendo_Xs <- model.matrix(surv_t1 ~ 0 + as.factor(year_t)*as.factor(endo_01), data = LOAR_yearendo_formatrix)
-
-LOAR_plot_formatrix <- model.frame(surv_t1 ~ 0 + as.factor(plot_index), data = LOAR_surv_data)
-LOAR_plot_Xs <- model.matrix(surv_t1 ~ 0 + as.factor(plot_index), data = LOAR_plot_formatrix)
-
-
-POAL_yearendo_formatrix <- model.frame(surv_t1 ~ 0 + as.factor(year_t)*as.factor(endo_01), data = POAL_surv_data)
-POAL_yearendo_Xs <- model.matrix(surv_t1 ~ 0 + as.factor(year_t)*as.factor(endo_01), data = POAL_yearendo_formatrix)
-
-POAL_plot_formatrix <- model.frame(surv_t1 ~ 0 + as.factor(plot_index), data = POAL_surv_data)
-POAL_plot_Xs <- model.matrix(surv_t1 ~ 0 + as.factor(plot_index), data = POAL_plot_formatrix)
-
-
-POSY_yearendo_formatrix <- model.frame(surv_t1 ~ 0 + as.factor(year_t)*as.factor(endo_01), data = POSY_surv_data)
-POSY_yearendo_Xs <- model.matrix(surv_t1 ~ 0 + as.factor(year_t)*as.factor(endo_01), data = POSY_yearendo_formatrix)
-
-POSY_plot_formatrix <- model.frame(surv_t1 ~ 0 + as.factor(plot_index), data = POSY_surv_data)
-POSY_plot_Xs <- model.matrix(surv_t1 ~ 0 + as.factor(plot_index), data = POSY_plot_formatrix)
+POSY_plot_Xs_s <- POSY_surv_data %>% 
+  select(id, plot_index) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = plot_index, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id)
 
 
 # Create data lists to be used for the Stan model
 AGPE_surv_data_list <- list(surv_t1 = AGPE_surv_data$surv_t1,
-                            yearendo_Xs = AGPE_yearendo_Xs,
-                            plot_Xs = AGPE_plot_Xs,
+                            yearendo_Xs = AGPE_yearendo_Xs_s,
+                            plot_Xs = AGPE_plot_Xs_s,
                             logsize_t = AGPE_surv_data$logsize_t,
                             origin_01 = AGPE_surv_data$origin_01,
                             endo_01 = AGPE_surv_data$endo_01,
@@ -1892,8 +1998,8 @@ AGPE_surv_data_list <- list(surv_t1 = AGPE_surv_data$surv_t1,
 str(AGPE_surv_data_list)
 
 ELRI_surv_data_list <- list(surv_t1 = ELRI_surv_data$surv_t1,
-                            yearendo_Xs = ELRI_yearendo_Xs,
-                            plot_Xs = ELRI_plot_Xs,
+                            yearendo_Xs = ELRI_yearendo_Xs_s,
+                            plot_Xs = ELRI_plot_Xs_s,
                             logsize_t = ELRI_surv_data$logsize_t,
                             origin_01 = ELRI_surv_data$origin_01,
                             endo_01 = ELRI_surv_data$endo_01,
@@ -1908,8 +2014,8 @@ ELRI_surv_data_list <- list(surv_t1 = ELRI_surv_data$surv_t1,
 str(ELRI_surv_data_list)
 
 ELVI_surv_data_list <- list(surv_t1 = ELVI_surv_data$surv_t1,
-                            yearendo_Xs = ELVI_yearendo_Xs,
-                            plot_Xs = ELVI_plot_Xs,
+                            yearendo_Xs = ELVI_yearendo_Xs_s,
+                            plot_Xs = ELVI_plot_Xs_s,
                             logsize_t = ELVI_surv_data$logsize_t,
                             origin_01 = ELVI_surv_data$origin_01,
                             endo_01 = ELVI_surv_data$endo_01,
@@ -1924,8 +2030,8 @@ ELVI_surv_data_list <- list(surv_t1 = ELVI_surv_data$surv_t1,
 str(ELVI_surv_data_list)
 
 FESU_surv_data_list <- list(surv_t1 = FESU_surv_data$surv_t1,
-                            yearendo_Xs = FESU_yearendo_Xs,
-                            plot_Xs = FESU_plot_Xs,
+                            yearendo_Xs = FESU_yearendo_Xs_s,
+                            plot_Xs = FESU_plot_Xs_s,
                             logsize_t = FESU_surv_data$logsize_t,
                             origin_01 = FESU_surv_data$origin_01,
                             endo_01 = FESU_surv_data$endo_01,
@@ -1940,8 +2046,8 @@ FESU_surv_data_list <- list(surv_t1 = FESU_surv_data$surv_t1,
 str(FESU_surv_data_list)
 
 LOAR_surv_data_list <- list(surv_t1 = LOAR_surv_data$surv_t1,
-                            yearendo_Xs = LOAR_yearendo_Xs,
-                            plot_Xs = LOAR_plot_Xs,
+                            yearendo_Xs = LOAR_yearendo_Xs_s,
+                            plot_Xs = LOAR_plot_Xs_s,
                             logsize_t = LOAR_surv_data$logsize_t,
                             origin_01 = LOAR_surv_data$origin_01,
                             endo_01 = LOAR_surv_data$endo_01,
@@ -1956,8 +2062,8 @@ LOAR_surv_data_list <- list(surv_t1 = LOAR_surv_data$surv_t1,
 str(LOAR_surv_data_list)
 
 POAL_surv_data_list <- list(surv_t1 = POAL_surv_data$surv_t1,
-                            yearendo_Xs = POAL_yearendo_Xs,
-                            plot_Xs = POAL_plot_Xs,
+                            yearendo_Xs = POAL_yearendo_Xs_s,
+                            plot_Xs = POAL_plot_Xs_s,
                             logsize_t = POAL_surv_data$logsize_t,
                             origin_01 = POAL_surv_data$origin_01,
                             endo_01 = POAL_surv_data$endo_01,
@@ -1972,8 +2078,8 @@ POAL_surv_data_list <- list(surv_t1 = POAL_surv_data$surv_t1,
 str(POAL_surv_data_list)
 
 POSY_surv_data_list <- list(surv_t1 = POSY_surv_data$surv_t1,
-                            yearendo_Xs = POSY_yearendo_Xs,
-                            plot_Xs = POSY_plot_Xs,
+                            yearendo_Xs = POSY_yearendo_Xs_s,
+                            plot_Xs = POSY_plot_Xs_s,
                             logsize_t = POSY_surv_data$logsize_t,
                             origin_01 = POSY_surv_data$origin_01,
                             endo_01 = POSY_surv_data$endo_01,
@@ -1994,14 +2100,14 @@ str(POSY_surv_data_list)
 ##############################################################################
 
 LTREB_data_forgrow <- LTREB_full %>%
-  filter(!is.na(logsize_t1)) %>%
   filter(!is.na(logsize_t)) %>% 
-  filter(logsize_t >= 0) %>% 
-  filter(logsize_t1>=0) %>% 
+  filter(!is.na(size_t1)) %>% 
   filter(!is.na(endo_01)) %>% 
   mutate(size_t1 = as.integer(size_t1))
 
 dim(LTREB_data_forgrow)
+
+# Creating individual species dataframes and updating plots for indexing
 
 AGPE_grow_data <- LTREB_data_forgrow %>% 
   filter(species == "AGPE") %>% 
@@ -2025,62 +2131,109 @@ POSY_grow_data <- LTREB_data_forgrow %>%
   filter(species == "POSY") %>% 
   mutate(plot_index = as.integer(as.character(recode(as.factor(plot_fixed),"1"="1", "2"="2", "5"="3", "6"="4", "7"="5", "12"="6", "13"="7", "14"="8","18"="9", "20"="10","141"="11","142"="12","143"="13","144"="14","145"="15","146"="16","147"="17","148"="18", "149"="19", "150"="20"))))
 
-# Creating individual species data lists to be passed to the model
-
-# Split up the main dataframe by species and recode plot to be used as an index for each species
-AGPE_yearendo_formatrix <- model.frame(logsize_t1 ~ 0 + as.factor(year_t)*as.factor(endo_01), data = AGPE_grow_data)
-AGPE_yearendo_Xs <- model.matrix(logsize_t1 ~ 0 + as.factor(year_t)*as.factor(endo_01), data = AGPE_yearendo_formatrix)
-
-AGPE_plot_formatrix <- model.frame(logsize_t1 ~ 0 + as.factor(plot_index), data = AGPE_grow_data)
-AGPE_plot_Xs <- model.matrix(logsize_t1 ~ 0 + as.factor(plot_index), data = AGPE_plot_formatrix)
 
 
-ELRI_yearendo_formatrix <- model.frame(logsize_t1 ~ 0 + as.factor(year_t)*as.factor(endo_01), data = ELRI_grow_data)
-ELRI_yearendo_Xs <- model.matrix(logsize_t1 ~ 0 + as.factor(year_t)*as.factor(endo_01), data = ELRI_yearendo_formatrix)
-
-ELRI_plot_formatrix <- model.frame(logsize_t1 ~ 0 + as.factor(plot_index), data = ELRI_grow_data)
-ELRI_plot_Xs <- model.matrix(logsize_t1 ~ 0 + as.factor(plot_index), data = ELRI_plot_formatrix)
 
 
-ELVI_yearendo_formatrix <- model.frame(logsize_t1 ~ 0 + as.factor(year_t)*as.factor(endo_01), data = ELVI_grow_data)
-ELVI_yearendo_Xs <- model.matrix(logsize_t1 ~ 0 + as.factor(year_t)*as.factor(endo_01), data = ELVI_yearendo_formatrix)
 
-ELVI_plot_formatrix <- model.frame(logsize_t1 ~ 0 + as.factor(plot_index), data = ELVI_grow_data)
-ELVI_plot_Xs <- model.matrix(logsize_t1 ~ 0 + as.factor(plot_index), data = ELVI_plot_formatrix)
+# Create model matrices for each species year*endo and plot random effects
+AGPE_yearendo_Xs_g <- AGPE_grow_data %>% 
+  select(id, endo_01, year_t) %>% 
+  unite("year_endo", year_t:endo_01, remove = FALSE) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = year_endo, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id, - endo_01, -year_t)
+
+AGPE_plot_Xs_g <- AGPE_grow_data %>% 
+  select(id, plot_index) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = plot_index, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id)
+
+ELRI_yearendo_Xs_g <- ELRI_grow_data %>% 
+  select(id, endo_01, year_t) %>% 
+  unite("year_endo", year_t:endo_01, remove = FALSE) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = year_endo, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id, - endo_01, -year_t)
+
+ELRI_plot_Xs_g <- ELRI_grow_data %>% 
+  select(id, plot_index) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = plot_index, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id)
+
+ELVI_yearendo_Xs_g <- ELVI_grow_data %>% 
+  select(id, endo_01, year_t) %>% 
+  unite("year_endo", year_t:endo_01, remove = FALSE) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = year_endo, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id, - endo_01, -year_t)
+
+ELVI_plot_Xs_g <- ELVI_grow_data %>% 
+  select(id, plot_index) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = plot_index, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id)
 
 
-FESU_yearendo_formatrix <- model.frame(logsize_t1 ~ 0 + as.factor(year_t)*as.factor(endo_01), data = FESU_grow_data)
-FESU_yearendo_Xs <- model.matrix(logsize_t1 ~ 0 + as.factor(year_t)*as.factor(endo_01), data = FESU_yearendo_formatrix)
+FESU_yearendo_Xs_g <- FESU_grow_data %>% 
+  select(id, endo_01, year_t) %>% 
+  unite("year_endo", year_t:endo_01, remove = FALSE) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = year_endo, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id, - endo_01, -year_t)
 
-FESU_plot_formatrix <- model.frame(logsize_t1 ~ 0 + as.factor(plot_index), data = FESU_grow_data)
-FESU_plot_Xs <- model.matrix(logsize_t1 ~ 0 + as.factor(plot_index), data = FESU_plot_formatrix)
+FESU_plot_Xs_g <- FESU_grow_data %>% 
+  select(id, plot_index) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = plot_index, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id)
+
+LOAR_yearendo_Xs_g <- LOAR_grow_data %>% 
+  select(id, endo_01, year_t) %>% 
+  unite("year_endo", year_t:endo_01, remove = FALSE) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = year_endo, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id, - endo_01, -year_t)
+
+LOAR_plot_Xs_g <- LOAR_grow_data %>% 
+  select(id, plot_index) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = plot_index, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id)
+
+POAL_yearendo_Xs_g <- POAL_grow_data %>% 
+  select(id, endo_01, year_t) %>% 
+  unite("year_endo", year_t:endo_01, remove = FALSE) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = year_endo, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id, - endo_01, -year_t)
+
+POAL_plot_Xs_g <- POAL_grow_data %>% 
+  select(id, plot_index) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = plot_index, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id)
 
 
-LOAR_yearendo_formatrix <- model.frame(logsize_t1 ~ 0 + as.factor(year_t)*as.factor(endo_01), data = LOAR_grow_data)
-LOAR_yearendo_Xs <- model.matrix(logsize_t1 ~ 0 + as.factor(year_t)*as.factor(endo_01), data = LOAR_yearendo_formatrix)
+POSY_yearendo_Xs_g <- POSY_grow_data %>% 
+  select(id, endo_01, year_t) %>% 
+  unite("year_endo", year_t:endo_01, remove = FALSE) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = year_endo, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id, - endo_01, -year_t)
 
-LOAR_plot_formatrix <- model.frame(logsize_t1 ~ 0 + as.factor(plot_index), data = LOAR_grow_data)
-LOAR_plot_Xs <- model.matrix(logsize_t1 ~ 0 + as.factor(plot_index), data = LOAR_plot_formatrix)
-
-
-POAL_yearendo_formatrix <- model.frame(logsize_t1 ~ 0 + as.factor(year_t)*as.factor(endo_01), data = POAL_grow_data)
-POAL_yearendo_Xs <- model.matrix(logsize_t1 ~ 0 + as.factor(year_t)*as.factor(endo_01), data = POAL_yearendo_formatrix)
-
-POAL_plot_formatrix <- model.frame(logsize_t1 ~ 0 + as.factor(plot_index), data = POAL_grow_data)
-POAL_plot_Xs <- model.matrix(logsize_t1 ~ 0 + as.factor(plot_index), data = POAL_plot_formatrix)
-
-
-POSY_yearendo_formatrix <- model.frame(logsize_t1 ~ 0 + as.factor(year_t)*as.factor(endo_01), data = POSY_grow_data)
-POSY_yearendo_Xs <- model.matrix(logsize_t1 ~ 0 + as.factor(year_t)*as.factor(endo_01), data = POSY_yearendo_formatrix)
-
-POSY_plot_formatrix <- model.frame(logsize_t1 ~ 0 + as.factor(plot_index), data = POSY_grow_data)
-POSY_plot_Xs <- model.matrix(logsize_t1 ~ 0 + as.factor(plot_index), data = POSY_plot_formatrix)
-
+POSY_plot_Xs_g <- POSY_grow_data %>% 
+  select(id, plot_index) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = plot_index, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id)
 
 # Create data lists to be used for the Stan model
 AGPE_grow_data_list <- list(size_t1 = AGPE_grow_data$size_t1,
-                            yearendo_Xs = POSY_yearendo_Xs,
-                            plot_Xs = POSY_plot_Xs,
+                            yearendo_Xs = AGPE_yearendo_Xs_g,
+                            plot_Xs = AGPE_plot_Xs_g,
                             logsize_t = AGPE_grow_data$logsize_t,
                             origin_01 = AGPE_grow_data$origin_01,
                             endo_01 = AGPE_grow_data$endo_01,
@@ -2096,8 +2249,8 @@ AGPE_grow_data_list <- list(size_t1 = AGPE_grow_data$size_t1,
 str(AGPE_grow_data_list)
 
 ELRI_grow_data_list <- list(size_t1 = ELRI_grow_data$size_t1,
-                            yearendo_Xs = POSY_yearendo_Xs,
-                            plot_Xs = POSY_plot_Xs,
+                            yearendo_Xs = ELRI_yearendo_Xs_g,
+                            plot_Xs = ELRI_plot_Xs_g,
                             logsize_t = ELRI_grow_data$logsize_t,
                             origin_01 = ELRI_grow_data$origin_01,
                             endo_01 = ELRI_grow_data$endo_01,
@@ -2113,8 +2266,8 @@ ELRI_grow_data_list <- list(size_t1 = ELRI_grow_data$size_t1,
 str(ELRI_grow_data_list)
 
 ELVI_grow_data_list <- list(size_t1 = ELVI_grow_data$size_t1,
-                            yearendo_Xs = POSY_yearendo_Xs,
-                            plot_Xs = POSY_plot_Xs,
+                            yearendo_Xs = ELVI_yearendo_Xs_g,
+                            plot_Xs = ELVI_plot_Xs_g,
                             logsize_t = ELVI_grow_data$logsize_t,
                             origin_01 = ELVI_grow_data$origin_01,
                             endo_01 = ELVI_grow_data$endo_01,
@@ -2130,8 +2283,8 @@ ELVI_grow_data_list <- list(size_t1 = ELVI_grow_data$size_t1,
 str(ELVI_grow_data_list)
 
 FESU_grow_data_list <- list(size_t1 = FESU_grow_data$size_t1,
-                            yearendo_Xs = POSY_yearendo_Xs,
-                            plot_Xs = POSY_plot_Xs,
+                            yearendo_Xs = FESU_yearendo_Xs_g,
+                            plot_Xs = FESU_plot_Xs_g,
                             logsize_t = FESU_grow_data$logsize_t,
                             origin_01 = FESU_grow_data$origin_01,
                             endo_01 = FESU_grow_data$endo_01,
@@ -2147,8 +2300,8 @@ FESU_grow_data_list <- list(size_t1 = FESU_grow_data$size_t1,
 str(FESU_grow_data_list)
 
 LOAR_grow_data_list <- list(size_t1 = LOAR_grow_data$size_t1,
-                            yearendo_Xs = POSY_yearendo_Xs,
-                            plot_Xs = POSY_plot_Xs,
+                            yearendo_Xs = LOAR_yearendo_Xs_g,
+                            plot_Xs = LOAR_plot_Xs_g,
                             logsize_t = LOAR_grow_data$logsize_t,
                             origin_01 = LOAR_grow_data$origin_01,
                             endo_01 = LOAR_grow_data$endo_01,
@@ -2164,8 +2317,8 @@ LOAR_grow_data_list <- list(size_t1 = LOAR_grow_data$size_t1,
 str(LOAR_grow_data_list)
 
 POAL_grow_data_list <- list(size_t1 = POAL_grow_data$size_t1,
-                            yearendo_Xs = POSY_yearendo_Xs,
-                            plot_Xs = POSY_plot_Xs,
+                            yearendo_Xs = POAL_yearendo_Xs_g,
+                            plot_Xs = POAL_plot_Xs_g,
                             logsize_t = POAL_grow_data$logsize_t,
                             origin_01 = POAL_grow_data$origin_01,
                             endo_01 = POAL_grow_data$endo_01,
@@ -2181,8 +2334,8 @@ POAL_grow_data_list <- list(size_t1 = POAL_grow_data$size_t1,
 str(POAL_grow_data_list)
 
 POSY_grow_data_list <- list(size_t1 = POSY_grow_data$size_t1,
-                            yearendo_Xs = POSY_yearendo_Xs,
-                            plot_Xs = POSY_plot_Xs,
+                            yearendo_Xs = POSY_yearendo_Xs_g,
+                            plot_Xs = POSY_plot_Xs_g,
                             logsize_t = POSY_grow_data$logsize_t,
                             origin_01 = POSY_grow_data$origin_01,
                             endo_01 = POSY_grow_data$endo_01,
@@ -2206,7 +2359,6 @@ str(POSY_grow_data_list)
 LTREB_data_forflw <- LTREB_full %>% 
   filter(!is.na(FLW_STAT_T)) %>% 
   filter(!is.na(logsize_t)) %>% 
-  filter(logsize_t >= 0) %>% 
   filter(!is.na(endo_01))
 
 
@@ -2237,48 +2389,113 @@ POSY_flw_data <- LTREB_data_forflw %>%
   filter(species == "POSY") %>% 
   mutate(plot_index = as.integer(as.character(recode(as.factor(plot_fixed),"1"="1", "2"="2", "5"="3", "6"="4", "7"="5", "12"="6", "13"="7", "14"="8","18"="9", "20"="10","141"="11","142"="12","143"="13","144"="14","145"="15","146"="16","147"="17","148"="18", "149"="19", "150"="20"))))
 
+# Create model matrices for each species year*endo and plot random effects
+AGPE_yearendo_Xs_flw <- AGPE_flw_data %>% 
+  select(id, endo_01, year_t) %>% 
+  unite("year_endo", year_t:endo_01, remove = FALSE) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = year_endo, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id, - endo_01, -year_t) %>% 
+  add_column(year_endo2007_0 = 0, year_endo2007_1 = 0, .before = TRUE)
 
-# Create model matrices for each species
-AGPE_for_flw_matrix <- model.frame(FLW_STAT_T ~ (logsize_t + endo_01)^2 + origin_01
-                               , data = AGPE_flw_data)
-AGPE_flw_matrix <- model.matrix(FLW_STAT_T ~ (logsize_t + endo_01)^2 + origin_01
-                        , data =AGPE_for_flw_matrix)
+AGPE_plot_Xs_flw <- AGPE_flw_data %>% 
+  select(id, plot_index) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = plot_index, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id)
 
-ELRI_for_flw_matrix <- model.frame(FLW_STAT_T ~ (logsize_t + endo_01)^2 + origin_01
-                               , data = ELRI_flw_data)
-ELRI_flw_matrix <- model.matrix(FLW_STAT_T ~ (logsize_t + endo_01)^2 + origin_01
-                        , data =ELRI_for_flw_matrix)
+ELRI_yearendo_Xs_flw <- ELRI_flw_data %>% 
+  select(id, endo_01, year_t) %>% 
+  unite("year_endo", year_t:endo_01, remove = FALSE) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = year_endo, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id, - endo_01, -year_t) %>% 
+  add_column(year_endo2007_0 = 0, year_endo2007_1 = 0, .before = TRUE)
 
-ELVI_for_flw_matrix <- model.frame(FLW_STAT_T ~ (logsize_t + endo_01)^2 + origin_01
-                               , data = ELVI_flw_data)
-ELVI_flw_matrix <- model.matrix(FLW_STAT_T ~ (logsize_t + endo_01)^2 + origin_01
-                        , data =ELVI_for_flw_matrix)
 
-FESU_for_flw_matrix <- model.frame(FLW_STAT_T ~ (logsize_t + endo_01)^2 + origin_01
-                               , data = FESU_flw_data)
-FESU_flw_matrix <- model.matrix(FLW_STAT_T ~ (logsize_t + endo_01)^2 + origin_01
-                        , data =FESU_for_flw_matrix)
+ELRI_plot_Xs_flw <- ELRI_flw_data %>% 
+  select(id, plot_index) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = plot_index, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id)
 
-LOAR_for_flw_matrix <- model.frame(FLW_STAT_T ~ (logsize_t + endo_01)^2 + origin_01
-                               , data = LOAR_flw_data)
-LOAR_flw_matrix <- model.matrix(FLW_STAT_T ~ (logsize_t + endo_01)^2 + origin_01
-                        , data =LOAR_for_flw_matrix)
+ELVI_yearendo_Xs_flw <- ELVI_flw_data %>% 
+  select(id, endo_01, year_t) %>% 
+  unite("year_endo", year_t:endo_01, remove = FALSE) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = year_endo, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id, - endo_01, -year_t)%>% 
+  add_column(year_endo2007_0 = 0, year_endo2007_1 = 0, .before = TRUE)
 
-POAL_for_flw_matrix <- model.frame(FLW_STAT_T ~ (logsize_t + endo_01)^2 + origin_01
-                               , data = POAL_flw_data)
-POAL_flw_matrix <- model.matrix(FLW_STAT_T ~ (logsize_t + endo_01)^2 + origin_01
-                        , data =POAL_for_flw_matrix)
+ELVI_plot_Xs_flw <- ELVI_flw_data %>% 
+  select(id, plot_index) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = plot_index, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id)
 
-POSY_for_flw_matrix <- model.frame(FLW_STAT_T ~ (logsize_t + endo_01)^2 + origin_01
-                               , data = POSY_flw_data)
-POSY_flw_matrix <- model.matrix(FLW_STAT_T ~ (logsize_t + endo_01)^2 + origin_01
-                        , data =POSY_for_flw_matrix)
 
+FESU_yearendo_Xs_flw <- FESU_flw_data %>% 
+  select(id, endo_01, year_t) %>% 
+  unite("year_endo", year_t:endo_01, remove = FALSE) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = year_endo, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id, - endo_01, -year_t) %>% 
+  add_column(year_endo2007_0 = 0, year_endo2007_1 = 0, .before = TRUE)
+
+FESU_plot_Xs_flw <- FESU_flw_data %>% 
+  select(id, plot_index) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = plot_index, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id)
+
+LOAR_yearendo_Xs_flw <- LOAR_flw_data %>% 
+  select(id, endo_01, year_t) %>% 
+  unite("year_endo", year_t:endo_01, remove = FALSE) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = year_endo, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id, - endo_01, -year_t) %>% 
+  add_column(year_endo2007_0 = 0, year_endo2007_1 = 0, .before = TRUE)
+
+LOAR_plot_Xs_flw <- LOAR_flw_data %>% 
+  select(id, plot_index) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = plot_index, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id)
+
+POAL_yearendo_Xs_flw <- POAL_flw_data %>% 
+  select(id, endo_01, year_t) %>% 
+  unite("year_endo", year_t:endo_01, remove = FALSE) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = year_endo, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id, - endo_01, -year_t) %>% 
+  add_column(year_endo2007_0 = 0, year_endo2007_1 = 0, .before = TRUE)
+
+POAL_plot_Xs_flw <- POAL_flw_data %>% 
+  select(id, plot_index) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = plot_index, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id)
+
+
+POSY_yearendo_Xs_flw <- POSY_flw_data %>% 
+  select(id, endo_01, year_t) %>% 
+  unite("year_endo", year_t:endo_01, remove = FALSE) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = year_endo, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id, - endo_01, -year_t) %>% 
+  add_column(year_endo2007_0 = 0, year_endo2007_1 = 0, .before = TRUE)
+
+POSY_plot_Xs_flw <- POSY_flw_data %>% 
+  select(id, plot_index) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = plot_index, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id)
 
 
 # Create data lists to be used for the Stan model
 AGPE_flw_data_list <- list(flw_t = AGPE_flw_data$FLW_STAT_T,
-                           Xs = AGPE_flw_matrix,
+                           yearendo_Xs = AGPE_yearendo_Xs_flw,
+                           plot_Xs = AGPE_plot_Xs_flw,
                            logsize_t = AGPE_flw_data$logsize_t,
                            origin_01 = AGPE_flw_data$origin_01,
                            endo_01 = AGPE_flw_data$endo_01,
@@ -2286,29 +2503,31 @@ AGPE_flw_data_list <- list(flw_t = AGPE_flw_data$FLW_STAT_T,
                            year_t = AGPE_flw_data$year_t_index,
                            plot = AGPE_flw_data$plot_index,
                            N = nrow(AGPE_flw_data),
-                           K = ncol(AGPE_flw_matrix),
+                           K = 5L,
                            nYear = 11L,
                            nPlot = 10L,
                            nEndo =   length(unique(AGPE_flw_data$endo_01)))
 str(AGPE_flw_data_list)
 
 ELRI_flw_data_list <- list(flw_t = ELRI_flw_data$FLW_STAT_T,
-                           Xs = ELRI_flw_matrix,
-                           logsize_t = ELRI_flw_data$logsize_t,
+                           yearendo_Xs = ELRI_yearendo_Xs_flw,
+                           plot_Xs = ELRI_plot_Xs_flw,
+                           ogsize_t = ELRI_flw_data$logsize_t,
                            origin_01 = ELRI_flw_data$origin_01,
                            endo_01 = ELRI_flw_data$endo_01,
                            endo_index = ELRI_flw_data$endo_index,
                            year_t = ELRI_flw_data$year_t_index,
                            plot = ELRI_flw_data$plot_index,
                            N = nrow(ELRI_flw_data),
-                           K = ncol(ELRI_flw_matrix),
+                           K = 5L,
                            nYear = 11L,
                            nPlot = 10L,
                            nEndo =   length(unique(ELRI_flw_data$endo_01)))
 str(ELRI_flw_data_list)
 
 ELVI_flw_data_list <- list(flw_t = ELVI_flw_data$FLW_STAT_T,
-                           Xs = ELVI_flw_matrix,
+                           yearendo_Xs = ELVI_yearendo_Xs_flw,
+                           plot_Xs = ELVI_plot_Xs_flw,
                            logsize_t = ELVI_flw_data$logsize_t,
                            origin_01 = ELVI_flw_data$origin_01,
                            endo_01 = ELVI_flw_data$endo_01,
@@ -2316,14 +2535,15 @@ ELVI_flw_data_list <- list(flw_t = ELVI_flw_data$FLW_STAT_T,
                            year_t = ELVI_flw_data$year_t_index,
                            plot = ELVI_flw_data$plot_index,
                            N = nrow(ELVI_flw_data),
-                           K = ncol(ELVI_flw_matrix),
+                           K = 5L,
                            nYear = 11L,
                            nPlot = 10L,
                            nEndo =   length(unique(ELVI_flw_data$endo_01)))
 str(ELVI_flw_data_list)
 
 FESU_flw_data_list <- list(flw_t = FESU_flw_data$FLW_STAT_T,
-                           Xs = FESU_flw_matrix,
+                           yearendo_Xs = FESU_yearendo_Xs_flw,
+                           plot_Xs = FESU_plot_Xs_flw,
                            logsize_t = FESU_flw_data$logsize_t,
                            origin_01 = FESU_flw_data$origin_01,
                            endo_01 = FESU_flw_data$endo_01,
@@ -2331,14 +2551,15 @@ FESU_flw_data_list <- list(flw_t = FESU_flw_data$FLW_STAT_T,
                            year_t = FESU_flw_data$year_t_index,
                            plot = FESU_flw_data$plot_index,
                            N = nrow(FESU_flw_data),
-                           K = ncol(FESU_flw_matrix),
+                           K = 5L,
                            nYear = 11L,
                            nPlot = 10L,
                            nEndo =   length(unique(FESU_flw_data$endo_01)))
 str(FESU_flw_data_list)
 
 LOAR_flw_data_list <- list(flw_t = LOAR_flw_data$FLW_STAT_T,
-                           Xs = LOAR_flw_matrix,
+                           yearendo_Xs = LOAR_yearendo_Xs_flw,
+                           plot_Xs = LOAR_plot_Xs_flw,
                            logsize_t = LOAR_flw_data$logsize_t,
                            origin_01 = LOAR_flw_data$origin_01,
                            endo_01 = LOAR_flw_data$endo_01,
@@ -2346,14 +2567,15 @@ LOAR_flw_data_list <- list(flw_t = LOAR_flw_data$FLW_STAT_T,
                            year_t = LOAR_flw_data$year_t_index,
                            plot = LOAR_flw_data$plot_index,
                            N = nrow(LOAR_flw_data),
-                           K = ncol(LOAR_flw_matrix),
+                           K = 5L,
                            nYear = 11L,
                            nPlot = 10L,
                            nEndo =   length(unique(LOAR_flw_data$endo_01)))
 str(LOAR_flw_data_list)
 
 POAL_flw_data_list <- list(flw_t = POAL_flw_data$FLW_STAT_T,
-                           Xs = POAL_flw_matrix,
+                           yearendo_Xs = POAL_yearendo_Xs_flw,
+                           plot_Xs = POAL_plot_Xs_flw,
                            logsize_t = POAL_flw_data$logsize_t,
                            origin_01 = POAL_flw_data$origin_01,
                            endo_01 = POAL_flw_data$endo_01,
@@ -2361,14 +2583,15 @@ POAL_flw_data_list <- list(flw_t = POAL_flw_data$FLW_STAT_T,
                            year_t = POAL_flw_data$year_t_index,
                            plot = POAL_flw_data$plot_index,
                            N = nrow(POAL_flw_data),
-                           K = ncol(POAL_flw_matrix),
+                           K = 5L,
                            nYear = 11L,
                            nPlot = 18L,
                            nEndo =   length(unique(POAL_flw_data$endo_01)))
 str(POAL_flw_data_list)
 
 POSY_flw_data_list <- list(flw_t = POSY_flw_data$FLW_STAT_T,
-                           Xs = POSY_flw_matrix,
+                           yearendo_Xs = POSY_yearendo_Xs_flw,
+                           plot_Xs = POSY_plot_Xs_flw,
                            logsize_t = POSY_flw_data$logsize_t,
                            origin_01 = POSY_flw_data$origin_01,
                            endo_01 = POSY_flw_data$endo_01,
@@ -2376,7 +2599,7 @@ POSY_flw_data_list <- list(flw_t = POSY_flw_data$FLW_STAT_T,
                            year_t = POSY_flw_data$year_t_index,
                            plot = POSY_flw_data$plot_index,
                            N = nrow(POSY_flw_data),
-                           K = ncol(POSY_flw_matrix),
+                           K = 5L,
                            nYear = 11L,
                            nPlot = 20L,
                            nEndo =   length(unique(POSY_flw_data$endo_01)))
@@ -2392,12 +2615,9 @@ str(POSY_flw_data_list)
 
 # NA's in survival come from mostly 2017 recruits.
 LTREB_data_forfert <- LTREB_full %>% 
-  filter(!is.na(FLW_T)) %>% 
-  filter(FLW_T>0) %>% 
-  filter(!is.na(logsize_t)) %>% 
-  filter(logsize_t >= 0) %>% 
-  filter(!is.na(endo_01))
-
+  filter(!is.na(FLW_COUNT_T)) %>% 
+  filter(FLW_COUNT_T > 0) %>% 
+  filter(!is.na(logsize_t))
 
 dim(LTREB_data_forfert)
 
@@ -2425,48 +2645,117 @@ POSY_fert_data <- LTREB_data_forfert %>%
   filter(species == "POSY") %>% 
   mutate(plot_index = as.integer(as.character(recode(as.factor(plot_fixed),"1"="1", "2"="2", "5"="3", "6"="4", "7"="5", "12"="6", "13"="7", "14"="8","18"="9", "20"="10","141"="11","142"="12","143"="13","144"="14","145"="15","146"="16","147"="17","148"="18", "149"="19", "150"="20"))))
 
+# Create model matrices for each species year*endo and plot random effects
+AGPE_yearendo_Xs_fert <- AGPE_fert_data %>% 
+  select(id, endo_01, year_t) %>% 
+  unite("year_endo", year_t:endo_01, remove = FALSE) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = year_endo, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id, - endo_01, -year_t) %>% 
+  add_column(year_endo2007_0 = 0, year_endo2007_1 = 0, .before = TRUE)
 
-# Create model matrices for each species
-AGPE_for_fert_matrix <- model.frame(FLW_T ~ (logsize_t + endo_01)^2 + origin_01
-                               , data = AGPE_fert_data)
-AGPE_fert_matrix <- model.matrix(FLW_T ~ (logsize_t + endo_01)^2 + origin_01
-                        , data =AGPE_for_fert_matrix)
+AGPE_plot_Xs_fert <- AGPE_fert_data %>% 
+  select(id, plot_index) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = plot_index, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id)
 
-ELRI_for_fert_matrix <- model.frame(FLW_T ~ (logsize_t + endo_01)^2 + origin_01
-                               , data = ELRI_fert_data)
-ELRI_fert_matrix <- model.matrix(FLW_T ~ (logsize_t + endo_01)^2 + origin_01
-                        , data =ELRI_for_fert_matrix)
+ELRI_yearendo_Xs_fert <- ELRI_fert_data %>% 
+  select(id, endo_01, year_t) %>% 
+  unite("year_endo", year_t:endo_01, remove = FALSE) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = year_endo, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id, - endo_01, -year_t) %>% 
+  add_column(year_endo2007_0 = 0, year_endo2007_1 = 0, .before = TRUE)
 
-ELVI_for_fert_matrix <- model.frame(FLW_T ~ (logsize_t + endo_01)^2 + origin_01
-                               , data = ELVI_fert_data)
-ELVI_fert_matrix <- model.matrix(FLW_T ~ (logsize_t + endo_01)^2 + origin_01
-                        , data =ELVI_for_fert_matrix)
 
-FESU_for_fert_matrix <- model.frame(FLW_T ~ (logsize_t + endo_01)^2 + origin_01
-                               , data = FESU_fert_data)
-FESU_fert_matrix <- model.matrix(FLW_T ~ (logsize_t + endo_01)^2 + origin_01
-                        , data =FESU_for_fert_matrix)
+ELRI_plot_Xs_fert <- ELRI_fert_data %>% 
+  select(id, plot_index) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = plot_index, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id)
 
-LOAR_for_fert_matrix <- model.frame(FLW_T ~ (logsize_t + endo_01)^2 + origin_01
-                               , data = LOAR_fert_data)
-LOAR_fert_matrix <- model.matrix(FLW_T ~ (logsize_t + endo_01)^2 + origin_01
-                        , data =LOAR_for_fert_matrix)
+ELVI_yearendo_Xs_fert <- ELVI_fert_data %>% 
+  select(id, endo_01, year_t) %>% 
+  unite("year_endo", year_t:endo_01, remove = FALSE) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = year_endo, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id, - endo_01, -year_t)%>% 
+  add_column(year_endo2007_0 = 0, year_endo2007_1 = 0, .before = TRUE)
 
-POAL_for_fert_matrix <- model.frame(FLW_T ~ (logsize_t + endo_01)^2 + origin_01
-                               , data = POAL_fert_data)
-POAL_fert_matrix <- model.matrix(FLW_T ~ (logsize_t + endo_01)^2 + origin_01
-                        , data =POAL_for_fert_matrix)
+ELVI_plot_Xs_fert <- ELVI_fert_data %>% 
+  select(id, plot_index) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = plot_index, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id)
 
-POSY_for_fert_matrix <- model.frame(FLW_T ~ (logsize_t + endo_01)^2 + origin_01
-                               , data = POSY_fert_data)
-POSY_fert_matrix <- model.matrix(FLW_T ~ (logsize_t + endo_01)^2 + origin_01
-                        , data =POSY_for_fert_matrix)
 
+FESU_yearendo_Xs_fert <- FESU_fert_data %>% 
+  select(id, endo_01, year_t) %>% 
+  unite("year_endo", year_t:endo_01, remove = FALSE) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = year_endo, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id, - endo_01, -year_t) %>% 
+  add_column(year_endo2007_0 = 0, year_endo2007_1 = 0, year_endo2008_0 = 0, year_endo2008_1 = 0, .before = TRUE) %>% 
+  add_column(year_endo2011_0 = 0, .before = c("year_endo2011_1"))
+
+FESU_plot_Xs_fert <- FESU_fert_data %>% 
+  select(id, plot_index) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = plot_index, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id)
+
+LOAR_yearendo_Xs_fert <- LOAR_fert_data %>% 
+  select(id, endo_01, year_t) %>% 
+  unite("year_endo", year_t:endo_01, remove = FALSE) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = year_endo, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id, - endo_01, -year_t) %>% 
+  add_column(year_endo2007_0 = 0, year_endo2007_1 = 0, .before = TRUE)
+
+LOAR_plot_Xs_fert <- LOAR_fert_data %>% 
+  select(id, plot_index) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = plot_index, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id)
+
+POAL_yearendo_Xs_fert <- POAL_fert_data %>% 
+  select(id, endo_01, year_t) %>% 
+  unite("year_endo", year_t:endo_01, remove = FALSE) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = year_endo, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id, - endo_01, -year_t) %>% 
+  add_column(year_endo2007_0 = 0, year_endo2007_1 = 0, .before = TRUE) %>% 
+  add_column(year_endo2013_0 = 0, .before = c("year_endo2013_1")) %>% 
+  add_column(year_endo2014_0 = 0, .before = c("year_endo2014_1")) %>% 
+  add_column(year_endo2015_0 = 0, year_endo2015_1 = 0, year_endo_2016_0 = 0, .before = c("year_endo2016_1"))
+
+POAL_plot_Xs_fert <- POAL_fert_data %>% 
+  select(id, plot_index) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = plot_index, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id)
+
+
+POSY_yearendo_Xs_fert <- POSY_fert_data %>% 
+  select(id, endo_01, year_t) %>% 
+  unite("year_endo", year_t:endo_01, remove = FALSE) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = year_endo, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id, - endo_01, -year_t) %>% 
+  add_column(year_endo2007_0 = 0, year_endo2007_1 = 0, .before = TRUE)
+
+POSY_plot_Xs_fert <- POSY_fert_data %>% 
+  select(id, plot_index) %>% 
+  mutate(row_id = 1:n()) %>% 
+  mutate(one = 1) %>% spread(key = plot_index, value = one, fill = 0, sep = "") %>% 
+  ungroup() %>% select(-id, -row_id)
 
 
 # Create data lists to be used for the Stan model
-AGPE_fert_data_list <- list(flw_t = AGPE_fert_data$FLW_T,
-                            Xs = AGPE_fert_matrix,
+AGPE_fert_data_list <- list(flw_t = AGPE_fert_data$FLW_COUNT_T,
+                            yearendo_Xs = AGPE_yearendo_Xs_fert,
+                            plot_Xs = AGPE_plot_Xs_fert,
                             logsize_t = AGPE_fert_data$logsize_t,
                             origin_01 = AGPE_fert_data$origin_01,
                             endo_01 = AGPE_fert_data$endo_01,
@@ -2474,15 +2763,16 @@ AGPE_fert_data_list <- list(flw_t = AGPE_fert_data$FLW_T,
                             year_t = AGPE_fert_data$year_t_index,
                             plot = AGPE_fert_data$plot_index,
                             N = nrow(AGPE_fert_data),
-                            K = ncol(AGPE_fert_matrix),
-                            lowerlimit = as.integer(min(AGPE_fert_data$FLW_T)),
+                            K = 5L,
+                            lowerlimit = as.integer(min(AGPE_fert_data$FLW_COUNT_T)),
                             nYear = 11L,
                             nPlot = 10L,
                             nEndo =   length(unique(AGPE_fert_data$endo_01)))
 str(AGPE_fert_data_list)
 
-ELRI_fert_data_list <- list(flw_t = ELRI_fert_data$FLW_T,
-                            Xs = ELRI_fert_matrix,
+ELRI_fert_data_list <- list(flw_t = ELRI_fert_data$FLW_COUNT_T,
+                            yearendo_Xs = ELRI_yearendo_Xs_fert,
+                            plot_Xs = ELRI_plot_Xs_fert,
                             logsize_t = ELRI_fert_data$logsize_t,
                             origin_01 = ELRI_fert_data$origin_01,
                             endo_01 = ELRI_fert_data$endo_01,
@@ -2490,15 +2780,16 @@ ELRI_fert_data_list <- list(flw_t = ELRI_fert_data$FLW_T,
                             year_t = ELRI_fert_data$year_t_index,
                             plot = ELRI_fert_data$plot_index,
                             N = nrow(ELRI_fert_data),
-                            K = ncol(ELRI_fert_matrix),
-                            lowerlimit = as.integer(min(ELRI_fert_data$FLW_T)),
+                            K = 5L,
+                            lowerlimit = as.integer(min(ELRI_fert_data$FLW_COUNT_T)),
                             nYear = 11L,
                             nPlot = 10L,
                             nEndo =   length(unique(ELRI_fert_data$endo_01)))
 str(ELRI_fert_data_list)
 
-ELVI_fert_data_list <- list(flw_t = ELVI_fert_data$FLW_T,
-                            Xs = ELVI_fert_matrix,
+ELVI_fert_data_list <- list(flw_t = ELVI_fert_data$FLW_COUNT_T,
+                            yearendo_Xs = ELVI_yearendo_Xs_fert,
+                            plot_Xs = ELVI_plot_Xs_fert,
                             logsize_t = ELVI_fert_data$logsize_t,
                             origin_01 = ELVI_fert_data$origin_01,
                             endo_01 = ELVI_fert_data$endo_01,
@@ -2506,15 +2797,16 @@ ELVI_fert_data_list <- list(flw_t = ELVI_fert_data$FLW_T,
                             year_t = ELVI_fert_data$year_t_index,
                             plot = ELVI_fert_data$plot_index,
                             N = nrow(ELVI_fert_data),
-                            K = ncol(ELVI_fert_matrix),
-                            lowerlimit = as.integer(min(ELVI_fert_data$FLW_T)),
+                            K = 5L,
+                            lowerlimit = as.integer(min(ELVI_fert_data$FLW_COUNT_T)),
                             nYear = 11L,
                             nPlot = 10L,
                             nEndo =   length(unique(ELVI_fert_data$endo_01)))
 str(ELVI_fert_data_list)
 
-FESU_fert_data_list <- list(flw_t = FESU_fert_data$FLW_T,
-                            Xs = FESU_fert_matrix,
+FESU_fert_data_list <- list(flw_t = FESU_fert_data$FLW_COUNT_T,
+                            yearendo_Xs = FESU_yearendo_Xs_fert,
+                            plot_Xs = FESU_plot_Xs_fert,
                             logsize_t = FESU_fert_data$logsize_t,
                             origin_01 = FESU_fert_data$origin_01,
                             endo_01 = FESU_fert_data$endo_01,
@@ -2522,15 +2814,16 @@ FESU_fert_data_list <- list(flw_t = FESU_fert_data$FLW_T,
                             year_t = FESU_fert_data$year_t_index,
                             plot = FESU_fert_data$plot_index,
                             N = nrow(FESU_fert_data),
-                            K = ncol(FESU_fert_matrix),
-                            lowerlimit = as.integer(min(FESU_fert_data$FLW_T)),
+                            K = 5L,
+                            lowerlimit = as.integer(min(FESU_fert_data$FLW_COUNT_T)),
                             nYear = 11L,
                             nPlot = 10L,
                             nEndo =   length(unique(FESU_fert_data$endo_01)))
 str(FESU_fert_data_list)
 
-LOAR_fert_data_list <- list(flw_t = LOAR_fert_data$FLW_T,
-                            Xs = LOAR_fert_matrix,
+LOAR_fert_data_list <- list(flw_t = LOAR_fert_data$FLW_COUNT_T,
+                            yearendo_Xs = LOAR_yearendo_Xs_fert,
+                            plot_Xs = LOAR_plot_Xs_fert,
                             logsize_t = LOAR_fert_data$logsize_t,
                             origin_01 = LOAR_fert_data$origin_01,
                             endo_01 = LOAR_fert_data$endo_01,
@@ -2538,14 +2831,15 @@ LOAR_fert_data_list <- list(flw_t = LOAR_fert_data$FLW_T,
                             year_t = LOAR_fert_data$year_t_index,
                             plot = LOAR_fert_data$plot_index,
                             N = nrow(LOAR_fert_data),
-                            K = ncol(LOAR_fert_matrix),
-                            lowerlimit = as.integer(min(LOAR_fert_data$FLW_T)),
+                            K = 5L,
+                            lowerlimit = as.integer(min(LOAR_fert_data$FLW_COUNT_T)),
                             nYear = 11L,
                             nPlot = 10L,
                             nEndo =   length(unique(LOAR_fert_data$endo_01)))
 str(LOAR_fert_data_list)
-POAL_fert_data_list <- list(flw_t = POAL_fert_data$FLW_T,
-                            Xs = POAL_fert_matrix,
+POAL_fert_data_list <- list(flw_t = POAL_fert_data$FLW_COUNT_T,
+                            yearendo_Xs = POAL_yearendo_Xs_fert,
+                            plot_Xs = POAL_plot_Xs_fert,
                             logsize_t = POAL_fert_data$logsize_t,
                             origin_01 = POAL_fert_data$origin_01,
                             endo_01 = POAL_fert_data$endo_01,
@@ -2553,15 +2847,16 @@ POAL_fert_data_list <- list(flw_t = POAL_fert_data$FLW_T,
                             year_t = POAL_fert_data$year_t_index,
                             plot = POAL_fert_data$plot_index,
                             N = nrow(POAL_fert_data),
-                            K = ncol(POAL_fert_matrix),
-                            lowerlimit = as.integer(min(POAL_fert_data$FLW_T)),
+                            K = 5L,
+                            lowerlimit = as.integer(min(POAL_fert_data$FLW_COUNT_T)),
                             nYear = 11L,
                             nPlot = 18L,
                             nEndo =   length(unique(POAL_fert_data$endo_01)))
 str(POAL_fert_data_list)
 
-POSY_fert_data_list <- list(flw_t = POSY_fert_data$FLW_T,
-                            Xs = POSY_fert_matrix,
+POSY_fert_data_list <- list(flw_t = POSY_fert_data$FLW_COUNT_T,
+                            yearendo_Xs = POSY_yearendo_Xs_fert,
+                            plot_Xs = POSY_plot_Xs_fert,
                             logsize_t = POSY_fert_data$logsize_t,
                             origin_01 = POSY_fert_data$origin_01,
                             endo_01 = POSY_fert_data$endo_01,
@@ -2569,8 +2864,8 @@ POSY_fert_data_list <- list(flw_t = POSY_fert_data$FLW_T,
                             year_t = POSY_fert_data$year_t_index,
                             plot = POSY_fert_data$plot_index,
                             N = nrow(POSY_fert_data),
-                            K = ncol(POSY_fert_matrix),
-                            lowerlimit = as.integer(min(POSY_fert_data$FLW_T)),
+                            K = 5L,
+                            lowerlimit = as.integer(min(POSY_fert_data$FLW_COUNT_T)),
                             nYear = 11L,
                             nPlot = 20L,
                             nEndo =   length(unique(POSY_fert_data$endo_01)))
