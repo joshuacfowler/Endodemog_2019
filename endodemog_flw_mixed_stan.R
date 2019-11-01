@@ -32,8 +32,8 @@ options(mc.cores = parallel::detectCores())
 set.seed(123)
 
 ## MCMC settings
-ni <- 10000
-nb <- 5000
+ni <- 1000
+nb <- 500
 nc <- 3
 
 
@@ -87,15 +87,6 @@ cat("
     }
     
          generated quantities{
-    vector[N] mu;
-    
-    // for posterior predictive check
-    for(n in 1:N){
-      mu[n] = beta[1] + beta[2]*logsize_t[n] + beta[3]*endo_01[n] +beta[4]*origin_01[n]
-      + beta[5]*logsize_t[n]*endo_01[n] 
-      + tau_year[endo_index[n],year_t[n]] 
-      + tau_plot[plot[n]];
-    }
     }
   
       ", fill = T)
@@ -109,31 +100,31 @@ stanmodel <- stanc("endodemog_flw.stan")
 
 smAGPE<- stan(file = "endodemog_flw.stan", data = AGPE_flw_data_list,
               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-saveRDS(smAGPE, file = "endodemog_flw_AGPE.rds")
+# saveRDS(smAGPE, file = "endodemog_flw_AGPE.rds")
 
 smELRI <- stan(file = "endodemog_flw.stan", data = ELRI_flw_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-saveRDS(smELRI, file = "endodemog_flw_ELRI.rds")
+# saveRDS(smELRI, file = "endodemog_flw_ELRI.rds")
 
 smELVI <- stan(file = "endodemog_flw.stan", data = ELVI_flw_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-saveRDS(smELVI, file = "endodemog_flw_ELVI.rds")
+# saveRDS(smELVI, file = "endodemog_flw_ELVI.rds")
 
 smFESU <- stan(file = "endodemog_flw.stan", data = FESU_flw_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-saveRDS(smFESU, file = "endodemog_flw_FESU.rds")
+# saveRDS(smFESU, file = "endodemog_flw_FESU.rds")
 
 smLOAR <- stan(file = "endodemog_flw.stan", data = LOAR_flw_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-saveRDS(smLOAR, file = "endodemog_flw_LOAR.rds")
+# saveRDS(smLOAR, file = "endodemog_flw_LOAR.rds")
 
 smPOAL <- stan(file = "endodemog_flw.stan", data = POAL_flw_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-saveRDS(smPOAL, file = "endodemog_flw_POAL.rds")
+# saveRDS(smPOAL, file = "endodemog_flw_POAL.rds")
 
 smPOSY <- stan(file = "endodemog_flw.stan", data = POSY_flw_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-saveRDS(smPOSY, file = "endodemog_flw_POSY.rds")
+# saveRDS(smPOSY, file = "endodemog_flw_POSY.rds")
 
 
 
@@ -183,64 +174,45 @@ post_flwPOSY <- extract(smPOSY)
 
 
 
-# This function generates replicate data for each given data point using the model matrix within the datalist for the random effects
-prediction<- function(x, fit, reps) {
+# This function extracts the posterior draws and generates replicate data for each given model
+prediction <- function(data, fit, n_post_draws){
   post <- extract(fit)
-  beta_post <- post$beta
-  tau_plot_post <- post$tau_plot
-  tau_year_post <- post$tau_year
-  dim(tau_year_post) <- c(15000,22)
-  lin_comb <- matrix(nrow = x$N, ncol = reps)
-  yrep <- matrix(nrow = x$N, ncol = reps)
-  for(n in 1:reps){
-    lin_comb[,n] <- sample(beta_post[,1], size = x$N)+ x$logsize_t*sample(beta_post[,2], size = x$N) 
-    + x$endo_01*sample(beta_post[,3], size = x$N) + x$origin_01*sample(beta_post[,4], size = x$N) 
-    + x$logsize_t*x$endo_01*sample(beta_post[,5], size = x$N) 
-    + x$plot_Xs[]*sample(tau_plot_post[], size = x$N) 
-    + x$yearendo_Xs[]*sample(tau_year_post[], size = x$N)
-    
-    prob <- invlogit(lin_comb)
-    yrep[,n] <- rbinom(x$N, 1, prob[,n])
-    print(paste("rep", n, "of", reps))
-    
+  mu <- post$mu
+  yrep <- matrix(nrow = n_post_draws, ncol = data$N)
+  for(n in 1:n_post_draws){
+    yrep[n,] <- rbinom(n = data$N, size = 1, prob = invlogit(mu[n,]))
   }
-  out <- list(yrep, prob, lin_comb) 
-  names(out) <- c("yrep", "prob", "lin_comb")
-  
+  out <- list(yrep, mu)
+  names(out) <- c("yrep", "mu")
   return(out)
 }
 
+
+
 # apply the function for each species
-AGPE_flw_yrep <- prediction(AGPE_flw_data_list, smAGPE, 500)
-ELRI_flw_yrep <- prediction(ELRI_flw_data_list, smELRI, 500)
-ELVI_flw_yrep <- prediction(ELVI_flw_data_list, smELVI, 500)
-FESU_flw_yrep <- prediction(FESU_flw_data_list, smFESU, 500)
-LOAR_flw_yrep <- prediction(LOAR_flw_data_list, smLOAR, 500)
-POAL_flw_yrep <- prediction(POAL_flw_data_list, smPOAL, 500)
-POSY_flw_yrep <- prediction(POSY_flw_data_list, smPOSY, 500)
+AGPE_flw_yrep <- prediction(data = AGPE_flw_data_list, fit = smAGPE, n_post_draws = 500)
+ELRI_flw_yrep <- prediction(data = ELRI_flw_data_list, fit = smELRI, n_post_draws = 500)
+ELVI_flw_yrep <- prediction(data = ELVI_flw_data_list, fit = smELVI, n_post_draws = 500)
+FESU_flw_yrep <- prediction(data = FESU_flw_data_list, fit = smFESU, n_post_draws = 500)
+LOAR_flw_yrep <- prediction(data = LOAR_flw_data_list, fit =  smLOAR, n_post_draws = 500)
+POAL_flw_yrep <- prediction(data = POAL_flw_data_list, fit = smPOAL, n_post_draws = 500)
+POSY_flw_yrep <- prediction(data = POSY_flw_data_list, fit = smPOSY, n_post_draws = 500)
 
 
 # overlay 100 replicates over the actual dataset
-mflw_yrep_AGPE <- t(AGPE_flw_yrep$yrep)
-ppc_dens_overlay( y = AGPE_flw_data_list$flw_t, yrep = mflw_yrep_AGPE[1:100,])+ xlab("prob. of y") + ggtitle("AGPE")
+ppc_dens_overlay( y = AGPE_flw_data_list$flw_t, yrep = AGPE_flw_yrep$yrep[1:100,]) + ggtitle("AGPE")
 
-mflw_yrep_ELRI <- t(ELRI_flw_yrep$yrep)
-ppc_dens_overlay( y = ELRI_flw_data_list$flw_t, yrep = mflw_yrep_ELRI[1:100,])+ xlab("prob. of y") + ggtitle("ELRI")
+ppc_dens_overlay( y = ELRI_flw_data_list$flw_t, yrep = ELRI_flw_yrep$yrep[1:100,]) + ggtitle("ELRI")
 
-mflw_yrep_ELVI <- t(ELVI_flw_yrep$yrep)
-ppc_dens_overlay( y = ELVI_flw_data_list$flw_t, yrep = mflw_yrep_ELVI[1:100,]) + xlab("prob. of y") + ggtitle("ELVI")
+ppc_dens_overlay( y = ELVI_flw_data_list$flw_t, yrep = ELVI_flw_yrep$yrep[1:100,]) + ggtitle("ELVI")
 
-mflw_yrep_FESU <- t(FESU_flw_yrep$yrep)
-ppc_dens_overlay( y = FESU_flw_data_list$flw_t, yrep = mflw_yrep_FESU[1:100,]) + xlab("prob. of y") + ggtitle("FESU")
+ppc_dens_overlay( y = FESU_flw_data_list$flw_t, yrep = FESU_flw_yrep$yrep[1:100,]) + ggtitle("FESU")
 
-mflw_yrep_LOAR <- t(LOAR_flw_yrep$yrep)
-ppc_dens_overlay( y = LOAR_flw_data_list$flw_t, yrep = mflw_yrep_LOAR[1:100,]) + xlab("prob. of y") + ggtitle("LOAR")
+ppc_dens_overlay( y = LOAR_flw_data_list$flw_t, yrep = LOAR_flw_yrep$yrep[1:100,]) + ggtitle("LOAR")
 
-mflw_yrep_POAL <- t(POAL_flw_yrep$yrep)
-ppc_dens_overlay( y = POAL_flw_data_list$flw_t, yrep = mflw_yrep_POAL[1:100,]) + xlab("prob. of y") + ggtitle("POAL")
+ppc_dens_overlay( y = POAL_flw_data_list$flw_t, yrep = POAL_flw_yrep$yrep[1:100,]) + ggtitle("POAL")
 
-mflw_yrep_POSY <- t(POSY_flw_yrep$yrep)
-ppc_dens_overlay( y = POSY_flw_data_list$flw_t, yrep = mflw_yrep_POSY[1:100,]) + xlab("prob. of y") + ggtitle("POSY")
+ppc_dens_overlay( y = POSY_flw_data_list$flw_t, yrep = POSY_flw_yrep$yrep[1:100,]) + ggtitle("POSY")
 
 
 

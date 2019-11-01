@@ -2188,7 +2188,7 @@ AGPE_flw_data_list <- list(flw_t = AGPE_flw_data$FLW_STAT_T,
 str(AGPE_flw_data_list)
 
 ELRI_flw_data_list <- list(flw_t = ELRI_flw_data$FLW_STAT_T,
-                           ogsize_t = ELRI_flw_data$logsize_t,
+                           logsize_t = ELRI_flw_data$logsize_t,
                            origin_01 = ELRI_flw_data$origin_01,
                            endo_01 = ELRI_flw_data$endo_01,
                            endo_index = ELRI_flw_data$endo_index,

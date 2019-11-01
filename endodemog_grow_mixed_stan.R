@@ -64,15 +64,12 @@ cat("
     real<lower=0> sigma_e[nEndo];        //year variance by endophyte effect
     vector[nPlot] tau_plot;        // random plot effect
     real<lower=0> sigma_p;          // plot variance
-    real<lower=0> reciprocal_phi;            // inverse dispersion parameter
+    real<lower=0> phi;            // dispersion parameter
     }
     
     transformed parameters{
-    real<lower=0> phi;                    // negative binomial dispersion parameter
     real mu[N];                         // Linear Predictor
 
-    phi = 1. / reciprocal_phi;
-    
       for(n in 1:N){
     mu[n] = beta[1] + beta[2]*logsize_t[n] + beta[3]*endo_01[n] +beta[4]*origin_01[n]
     + beta[5]*logsize_t[n]*endo_01[n] 
@@ -88,7 +85,6 @@ cat("
     tau_plot ~ normal(0,sigma_p);   // prior for plot random effects
     to_vector(tau_year[1]) ~ normal(0,sigma_e[1]);   // prior for E- year random effects
     to_vector(tau_year[2]) ~ normal(0,sigma_e[2]);   // prior for E+ year random effects
-    reciprocal_phi ~ cauchy(0., 5.);
 
 
     // Likelihood
@@ -114,31 +110,31 @@ stanmodel <- stanc("endodemog_grow.stan")
 
 smAGPE <- stan(file = "endodemog_grow.stan", data = AGPE_grow_data_list,
            iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-saveRDS(smAGPE, file = "endodemog_grow_AGPE.rds")
+# saveRDS(smAGPE, file = "endodemog_grow_AGPE.rds")
 
 smELRI <- stan(file = "endodemog_grow.stan", data = ELRI_grow_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-saveRDS(smELRI, file = "endodemog_grow_ELRI.rds")
+# saveRDS(smELRI, file = "endodemog_grow_ELRI.rds")
 
 smELVI <- stan(file = "endodemog_grow.stan", data = ELVI_grow_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-saveRDS(smELVI, file = "endodemog_grow_ELVI.rds")
+# saveRDS(smELVI, file = "endodemog_grow_ELVI.rds")
 
 smFESU <- stan(file = "endodemog_grow.stan", data = FESU_grow_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-saveRDS(smFESU, file = "endodemog_grow_FESU.rds")
+# saveRDS(smFESU, file = "endodemog_grow_FESU.rds")
 
 smLOAR <- stan(file = "endodemog_grow.stan", data = LOAR_grow_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-saveRDS(smLOAR, file = "endodemog_grow_LOAR.rds")
+# saveRDS(smLOAR, file = "endodemog_grow_LOAR.rds")
 
 smPOAL <- stan(file = "endodemog_grow.stan", data = POAL_grow_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-saveRDS(smPOAL, file = "endodemog_grow_POAL.rds")
+# saveRDS(smPOAL, file = "endodemog_grow_POAL.rds")
 
 smPOSY <- stan(file = "endodemog_grow.stan", data = POSY_grow_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-saveRDS(smPOSY, file = "endodemog_grow_POSY.rds")
+# saveRDS(smPOSY, file = "endodemog_grow_POSY.rds")
 
 
 
@@ -191,38 +187,28 @@ post_growPOAL <- extract(smPOAL)
 post_growPOSY <- extract(smPOSY)
 
 
+post_growAGPE$phi
 
-# This function generates replicate data for each given data point using the model matrix within the datalist for the random effects
-prediction<- function(x, fit, reps) {
+# This function extracts the posterior draws and generates replicate data for each given model
+prediction <- function(data, fit, n_post_draws){
   post <- extract(fit)
-  beta_post <- post$beta
-  tau_plot_post <- post$tau_plot
-  tau_year_post <- post$tau_year
-  dim(tau_year_post) <- c(15000,22)
-  lin_comb <- matrix(nrow = x$N, ncol = reps)
-  yrep <- matrix(nrow = x$N, ncol = reps)
-  for(n in 1:reps){
-    lin_comb[,n] <- sample(beta_post[,1], size = x$N)+ x$logsize_t*sample(beta_post[,2], size = x$N) 
-    + x$endo_01*sample(beta_post[,3], size = x$N) + x$origin_01*sample(beta_post[,4], size = x$N) 
-    + x$logsize_t*x$endo_01*sample(beta_post[,5], size = x$N) 
-    + x$plot_Xs[]*sample(tau_plot_post[], size = x$N) 
-    + x$yearendo_Xs[]*sample(tau_year_post[], size = x$N)
-    
-    prob <- exp(lin_comb)
-    yrep[,n] <- rztnbinom(prob = prob[,n], n = x$N, size = mean(post$phi))
-    print(paste("rep", n, "of", reps))
-    
+  mu <- post$mu
+  yrep <- matrix(nrow = n_post_draws, ncol = data$N)
+  for(n in 1:n_post_draws){
+    yrep[n,] <- rztnbinom(n = data$N, prob = exp(mu[n,]), size = post$phi[n])
   }
-  out <- list(yrep, prob, lin_comb) 
-  names(out) <- c("yrep", "prob", "lin_comb")
-  
+  out <- list(yrep, mu)
+  names(out) <- c("yrep", "mu")
   return(out)
 }
 
+prob <- exp(post_growAGPE$mu)
+ytest <- matrix(nrow = 10, ncol = 10)
 
+ytest<- (rztnbinom(n = 100, size = post_growAGPE$phi[1], prob = log(post_growAGPE$mu[1,])))
 
 # apply the function for each species
-AGPE_grow_yrep <- prediction(AGPE_grow_data_list, smAGPE, 500)
+AGPE_grow_yrep <- prediction(data = AGPE_grow_data_list, fit = smAGPE, n_post_draws = 500)
 ELRI_grow_yrep <- prediction(ELRI_grow_data_list, smELRI, 500)
 ELVI_grow_yrep <- prediction(ELVI_grow_data_list, smELVI, 500)
 FESU_grow_yrep <- prediction(FESU_grow_data_list, smFESU, 500)
@@ -233,25 +219,18 @@ POSY_grow_yrep <- prediction(POSY_grow_data_list, smPOSY, 500)
 
 
 # overlay 100 replicates over the actual dataset
-mgrow_yrep_AGPE <- t(AGPE_grow_yrep$yrep)
-ppc_dens_overlay( y = AGPE_grow_data_list$size_t1, yrep = mgrow_yrep_AGPE[1:100,])+ xlab("prob. of y") + ggtitle("AGPE")
+ppc_dens_overlay( y = AGPE_grow_data_list$size_t1, yrep = AGPE_grow_yrep$yrep[1:100,])+ xlab("prob. of y") + ggtitle("AGPE")
 
-mgrow_yrep_ELRI <- t(ELRI_grow_yrep$yrep)
 ppc_dens_overlay( y = ELRI_grow_data_list$size_t1, yrep = mgrow_yrep_ELRI[1:100,])+ xlab("prob. of y") + ggtitle("ELRI")
 
-mgrow_yrep_ELVI <- t(ELVI_grow_yrep$yrep)
 ppc_dens_overlay( y = ELVI_grow_data_list$size_t1, yrep = mgrow_yrep_ELVI[1:100,]) + xlab("prob. of y") + ggtitle("ELVI")
 
-mgrow_yrep_FESU <- t(FESU_grow_yrep$yrep)
 ppc_dens_overlay( y = FESU_grow_data_list$size_t1, yrep = mgrow_yrep_FESU[1:100,]) + xlab("prob. of y") + ggtitle("FESU")
 
-mgrow_yrep_LOAR <- t(LOAR_grow_yrep$yrep)
 ppc_dens_overlay( y = LOAR_grow_data_list$size_t1, yrep = mgrow_yrep_LOAR[1:100,]) + xlab("prob. of y") + ggtitle("LOAR")
 
-mgrow_yrep_POAL <- t(POAL_grow_yrep$yrep)
 ppc_dens_overlay( y = POAL_grow_data_list$size_t1, yrep = mgrow_yrep_POAL[1:100,]) + xlab("prob. of y") + ggtitle("POAL")
 
-mgrow_yrep_POSY <- t(POSY_grow_yrep$yrep)
 ppc_dens_overlay( y = POSY_grow_data_list$size_t1, yrep = mgrow_yrep_POSY[1:100,]) + xlab("prob. of y") + ggtitle("POSY")
 
 

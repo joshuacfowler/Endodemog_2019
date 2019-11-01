@@ -22,22 +22,24 @@
     real<lower=0> sigma_p;          // plot variance effect
     }
     
-    model {
-        // Linear Predictor
-    vector[N] mu;
-    for(n in 1:N){
+    transformed parameters {
+    real mu[N];                           // Linear Predictor
+
+       for(n in 1:N){
     mu[n] = beta[1] + beta[2]*logsize_t[n] + beta[3]*endo_01[n] +beta[4]*origin_01[n]
     + beta[5]*logsize_t[n]*endo_01[n] 
     + tau_year[endo_index[n],year_t[n]] 
     + tau_plot[plot[n]];
     }
-  
+    }
     
+    model {
     // Priors
     beta ~ normal(0,100);      // prior for predictor intercepts
     tau_plot ~ normal(0,sigma_p);   // prior for plot random effects
     to_vector(tau_year[1]) ~ normal(0,sigma_e[1]);   // prior for E- year random effects
     to_vector(tau_year[2]) ~ normal(0,sigma_e[2]);   // prior for E+ year random effects
+    
     // Likelihood
       surv_t1 ~ bernoulli_logit(mu);
     }
