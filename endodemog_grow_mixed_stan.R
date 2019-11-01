@@ -10,7 +10,7 @@ library(StanHeaders)
 library(shinystan)
 library(bayesplot)
 library(devtools)
-library(MASS)
+library(actuar)
 
 
 #############################################################################################
@@ -30,8 +30,8 @@ options(mc.cores = parallel::detectCores())
 set.seed(123)
 
 ## MCMC settings
-ni <-10000
-nb <- 5000
+ni <-1000
+nb <- 500
 nc <- 3
 
 # Stan model -------------
@@ -66,21 +66,23 @@ cat("
     real<lower=0> sigma_p;          // plot variance
     real<lower=0> reciprocal_phi;            // inverse dispersion parameter
     }
+    
     transformed parameters{
     real<lower=0> phi;                    // negative binomial dispersion parameter
+    real mu[N];                         // Linear Predictor
+
     phi = 1. / reciprocal_phi;
+    
+      for(n in 1:N){
+    mu[n] = beta[1] + beta[2]*logsize_t[n] + beta[3]*endo_01[n] +beta[4]*origin_01[n]
+    + beta[5]*logsize_t[n]*endo_01[n] 
+    + tau_year[endo_index[n],year_t[n]]
+    + tau_plot[plot[n]];
+    }
     }
     
     model {
-    vector[N] mu;
-    
-    // Linear Predictor
-    for(n in 1:N){
-      mu[n] = beta[1] + beta[2]*logsize_t[n] + beta[3]*endo_01[n] +beta[4]*origin_01[n]
-      + beta[5]*logsize_t[n]*endo_01[n] 
-      + tau_year[endo_index[n],year_t[n]]
-      + tau_plot[plot[n]];
-    }
+
     // Priors
     beta ~ normal(0,100);      // prior for predictor intercepts
     tau_plot ~ normal(0,sigma_p);   // prior for plot random effects
@@ -97,16 +99,8 @@ cat("
     }
     
    generated quantities{
-      vector[N] mu;
-    
-    // for posterior predictive check
-    for(n in 1:N){
-      mu[n] = beta[1] + beta[2]*logsize_t[n] + beta[3]*endo_01[n] +beta[4]*origin_01[n]
-      + beta[5]*logsize_t[n]*endo_01[n] 
-      + tau_year[endo_index[n],year_t[n]]
-      + tau_plot[plot[n]];
-    }
    }
+  
   
     ", fill = T)
 sink()
@@ -215,7 +209,7 @@ prediction<- function(x, fit, reps) {
     + x$yearendo_Xs[]*sample(tau_year_post[], size = x$N)
     
     prob <- exp(lin_comb)
-    yrep[,n] <- rnegbin(x$N, mu = prob[,n], theta = mean(post$phi))
+    yrep[,n] <- rztnbinom(prob = prob[,n], n = x$N, size = mean(post$phi))
     print(paste("rep", n, "of", reps))
     
   }

@@ -1,7 +1,7 @@
 ## Authors: Josh and Tom	## Grass endophyte population model
 ## Purpose: Create a script that imports Endodemog data, perform all raw data manipulation to set up data lists for Survival and Growth models and for the flowering tiller and seed production models,	
 ## and create an .RData object that can be loaded for analysis	
-## Last Update: Jul 20, 2019
+## Last Update: Oct 31, 2019
 ######################################################
 library(tidyverse)
 library(reshape2)
@@ -2888,7 +2888,8 @@ LTREB_data_forspike <- LTREB_full %>%
                   "FLW_COUNT_T"      ,      "FLW_STAT_T"),
                   value.name = "spike_count_t") %>% 
   rename(spikelet_id = variable) %>% 
-  filter(!is.na(spike_count_t))
+  filter(!is.na(spike_count_t)) %>% 
+  mutate(spike_count_t = as.integer(spike_count_t))
 
 dim(LTREB_data_forspike)
 
