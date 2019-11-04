@@ -85,6 +85,7 @@ cat("
     tau_plot ~ normal(0,sigma_p);   // prior for plot random effects
     to_vector(tau_year[1]) ~ normal(0,sigma_e[1]);   // prior for E- year random effects
     to_vector(tau_year[2]) ~ normal(0,sigma_e[2]);   // prior for E+ year random effects
+    phi ~ cauchy(0., 5.);
 
 
     // Likelihood
@@ -195,7 +196,7 @@ prediction <- function(data, fit, n_post_draws){
   mu <- post$mu
   yrep <- matrix(nrow = n_post_draws, ncol = data$N)
   for(n in 1:n_post_draws){
-    yrep[n,] <- rztnbinom(n = data$N, prob = exp(mu[n,]), size = post$phi[n])
+    yrep[n,] <- rztnbinom(n = data$N, prob = log(mu[n,]), size = post$phi[n])
   }
   out <- list(yrep, mu)
   names(out) <- c("yrep", "mu")
@@ -203,12 +204,12 @@ prediction <- function(data, fit, n_post_draws){
 }
 
 prob <- exp(post_growAGPE$mu)
-ytest <- matrix(nrow = 10, ncol = 10)
-
-ytest<- (rztnbinom(n = 100, size = post_growAGPE$phi[1], prob = log(post_growAGPE$mu[1,])))
-
-# apply the function for each species
-AGPE_grow_yrep <- prediction(data = AGPE_grow_data_list, fit = smAGPE, n_post_draws = 500)
+ytest <- matrix(nrow = 10, ncol = AGPE_grow_data_list$N)
+for(n in 1:100){
+ytest[n,]<- rztnbinom(n = 100, size = post_growAGPE$phi[n], prob = exp(post_growAGPE$mu[n,]))
+}
+p# apply the function for each species
+AGPE_grow_yrep <- prediction(data = AGPE_grow_data_list, fit = smAGPE, n_post_draws = 100)
 ELRI_grow_yrep <- prediction(ELRI_grow_data_list, smELRI, 500)
 ELVI_grow_yrep <- prediction(ELVI_grow_data_list, smELVI, 500)
 FESU_grow_yrep <- prediction(FESU_grow_data_list, smFESU, 500)
@@ -216,10 +217,10 @@ LOAR_grow_yrep <- prediction(LOAR_grow_data_list, smLOAR, 500)
 POAL_grow_yrep <- prediction(POAL_grow_data_list, smPOAL, 500)
 POSY_grow_yrep <- prediction(POSY_grow_data_list, smPOSY, 500)
 
-
+ttest <- na.omit(AGPE_grow_yrep$yrep)
 
 # overlay 100 replicates over the actual dataset
-ppc_dens_overlay( y = AGPE_grow_data_list$size_t1, yrep = AGPE_grow_yrep$yrep[1:100,])+ xlab("prob. of y") + ggtitle("AGPE")
+ppc_dens_overlay( y = AGPE_grow_data_list$size_t1, yrep = na.omit(AGPE_grow_yrep$yrep[1:10,]))+ xlab("prob. of y") + ggtitle("AGPE")
 
 ppc_dens_overlay( y = ELRI_grow_data_list$size_t1, yrep = mgrow_yrep_ELRI[1:100,])+ xlab("prob. of y") + ggtitle("ELRI")
 

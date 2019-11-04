@@ -59,17 +59,13 @@ cat("
     real<lower=0> sigma_e[nEndo];        //year variance by endophyte effect
     vector[nPlot] tau_plot;        // random plot effect
     real<lower=0> sigma_p;          // plot variance
-    real<lower=0> reciprocal_phi;            // inverse dispersion parameter
+    real<lower=0> phi;            // negative binomial dispersion parameter
     }
     
    transformed parameters{
-    real<lower=0> phi;                    // negative binomial dispersion parameter
     real mu[N];                         // Linear Predictor
-    
-    phi = 1. / reciprocal_phi;
-
-    
-        for(n in 1:N){
+ 
+    for(n in 1:N){
        mu[n] = beta[1] + beta[2]*logsize_t[n] + beta[3]*endo_01[n] +beta[4]*origin_01[n]
        + beta[5]*logsize_t[n]*endo_01[n] 
        + tau_year[endo_index[n],year_t[n]]
@@ -84,7 +80,7 @@ cat("
     tau_plot ~ normal(0,sigma_p);   // prior for plot random effects
     to_vector(tau_year[1]) ~ normal(0,sigma_e[1]);   // prior for E- year random effects
     to_vector(tau_year[2]) ~ normal(0,sigma_e[2]);   // prior for E+ year random effects
-    reciprocal_phi ~ cauchy(0., 5.);
+    phi ~ cauchy(0., 5.);
 
 
     // Likelihood 
@@ -99,38 +95,39 @@ sink()
 
 stanmodel <- stanc("endodemog_spike.stan")
 
-
+# I fit this as a neg. binom. because there are some zeros in the data. The POAL for that individ has a notes that says that the flower was browsed so there was a flowering tiller but no spikelets.
+# There are also zeros for some ELVI and several FESU. I think some of this could be from seeds that were collected in the field and counted later, so there could be some mix ups.
 
 ## Run the model by calling stan()
 ## Save the outputs as rds files
 
 smAGPE<- stan(file = "endodemog_spike.stan", data = AGPE_spike_data_list,
               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-# saveRDS(smAGPE, file = "endodemog_spike_AGPE_withplot.rds")
+# saveRDS(smAGPE, file = "endodemog_spike_AGPE.rds")
 
 smELRI <- stan(file = "endodemog_spike.stan", data = ELRI_spike_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-# saveRDS(smELRI, file = "endodemog_spike_ELRI_withplot.rds")
+# saveRDS(smELRI, file = "endodemog_spike_ELRI.rds")
 
 smELVI <- stan(file = "endodemog_spike.stan", data = ELVI_spike_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-# saveRDS(smELVI, file = "endodemog_spike_ELVI_withplot.rds")
+# saveRDS(smELVI, file = "endodemog_spike_ELVI.rds")
 
 smFESU <- stan(file = "endodemog_spike.stan", data = FESU_spike_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-# saveRDS(smFESU, file = "endodemog_spike_FESU_withplot.rds")
+# saveRDS(smFESU, file = "endodemog_spike_FESU.rds")
 
 smLOAR <- stan(file = "endodemog_spike.stan", data = LOAR_spike_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-# saveRDS(smLOAR, file = "endodemog_spike_LOAR_withplot.rds")
+# saveRDS(smLOAR, file = "endodemog_spike_LOAR.rds")
 
 smPOAL <- stan(file = "endodemog_spike.stan", data = POAL_spike_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-# saveRDS(smPOAL, file = "endodemog_spike_POAL_withplot.rds")
+# saveRDS(smPOAL, file = "endodemog_spike_POAL.rds")
 
 smPOSY <- stan(file = "endodemog_spike.stan", data = POSY_spike_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-# saveRDS(smPOSY, file = "endodemog_spike_POSY_withplot.rds")
+# saveRDS(smPOSY, file = "endodemog_spike_POSY.rds")
 
 
 
@@ -165,23 +162,35 @@ post_spikePOSY <- extract(smPOSY)
 
 
 # This function generates replicate data for each given data point using the model matrix within the datalist for the random effects
-prediction<- function(x, fit, reps) {
+prediction <- function(data, fit, n_post_draws){
+  post <- extract(fit)
+  mu <- post$mu
+  yrep <- matrix(nrow = n_post_draws, ncol = data$N)
+  for(n in 1:n_post_draws){
+    yrep[n,] <- rnbinom(n = data$N, size = 1, prob = exp(mu[n,]))
+  }
+  out <- list(yrep, mu)
+  names(out) <- c("yrep", "mu")
+  return(out)
+}
+
+prediction<- function(data, fit, n_post_draws) {
   post <- extract(fit)
   beta_post <- post$beta
   tau_plot_post <- post$tau_plot
   tau_year_post <- post$tau_year
   dim(tau_year_post) <- c(15000,22)
-  lin_comb <- matrix(nrow = x$N, ncol = reps)
-  yrep <- matrix(nrow = x$N, ncol = reps)
-  for(n in 1:reps){
-    lin_comb[,n] <- sample(beta_post[,1], size = x$N)+ x$logsize_t*sample(beta_post[,2], size = x$N) 
-    + x$endo_01*sample(beta_post[,3], size = x$N) + x$origin_01*sample(beta_post[,4], size = x$N) 
-    + x$logsize_t*x$endo_01*sample(beta_post[,5], size = x$N) 
-    + x$plot_Xs[]*sample(tau_plot_post[], size = x$N) 
-    + x$yearendo_Xs[]*sample(tau_year_post[], size = x$N)
+  lin_comb <- matrix(nrow = data$N, ncol = n_post_draws)
+  yrep <- matrix(nrow = data$N, ncol = n_post_draws)
+  for(n in 1:n_post_draws){
+    lin_comb[,n] <- sample(beta_post[,1], size = data$N)+ data$logsize_t*sample(beta_post[,2], size = data$N) 
+    + data$endo_01*sample(beta_post[,3], size = data$N) + data$origin_01*sample(beta_post[,4], size = data$N) 
+    + data$logsize_t*data$endo_01*sample(beta_post[,5], size = data$N) 
+    + data$plot_datas[]*sample(tau_plot_post[], size = data$N) 
+    + data$yearendo_datas[]*sample(tau_year_post[], size = data$N)
     
     prob <- exp(lin_comb)
-    yrep[,n] <- rnbinom(prob = prob[,n], n = x$N, size = mean(post$phi))
+    yrep[,n] <- rnbinom(prob = prob[,n], n = data$N, size = mean(post$phi))
     print(paste("rep", n, "of", reps))
     
   }
@@ -190,11 +199,15 @@ prediction<- function(x, fit, reps) {
   
   return(out)
 }
-
-
-
+yrep <- matrix(nrow = AGPE_spike_data_list$N, ncol = 10)
+mu <- exp(post_spikeAGPE$mu[n,])
+phi <- mean(post_spikeAGPE$phi)
+for(n in 1:10){
+  yrep[n,] <- rnbinom(n = 25, size = phi, prob = mu)
+}
+head(yrep)
 # apply the function for each species
-AGPE_spike_yrep <- prediction(AGPE_spike_data_list, smAGPE, 500)
+AGPE_spike_yrep <- prediction(data = AGPE_spike_data_list, fit = smAGPE, n_post_draws = 500)
 ELRI_spike_yrep <- prediction(ELRI_spike_data_list, smELRI, 500)
 ELVI_spike_yrep <- prediction(ELVI_spike_data_list, smELVI, 500)
 FESU_spike_yrep <- prediction(FESU_spike_data_list, smFESU, 500)
@@ -206,7 +219,7 @@ POSY_spike_yrep <- prediction(POSY_spike_data_list, smPOSY, 500)
 
 # overlay 100 replicates over the actual dataset
 mspike_yrep_AGPE <- t(AGPE_spike_yrep$yrep)
-ppc_dens_overlay( y = AGPE_spike_data_list$spike_t, yrep = mspike_yrep_AGPE[1:100,])+ xlab("prob. of y") + ggtitle("AGPE")
+ppc_dens_overlay( y = AGPE_spike_data_list$spike_t, yrep = AGPE_spike_yrep$yrep[1:100,])+ xlab("prob. of y") + ggtitle("AGPE")
 
 mspike_yrep_ELRI <- t(ELRI_spike_yrep$yrep)
 ppc_dens_overlay( y = ELRI_spike_data_list$spike_t, yrep = mspike_yrep_ELRI[1:100,])+ xlab("prob. of y") + ggtitle("ELRI")
