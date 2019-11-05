@@ -64,17 +64,13 @@ cat("
     real<lower=0> sigma_e[nEndo];        //year variance by endophyte effect
     vector[nPlot] tau_plot;        // random plot effect
     real<lower=0> sigma_p;          // plot variance
-    real<lower=0> reciprocal_phi;            // inverse dispersion parameter
+    real<lower=0> phi;            // negative binomial dispersion parameter
     }
-    transformed parameters{
-    real<lower=0> phi;                    // negative binomial dispersion parameter
-    phi = 1. / reciprocal_phi;
-    }
-    
     transformed parameters{
     // Linear Predictor
     real mu[N];
-        for(n in 1:N){
+    
+    for(n in 1:N){
       mu[n] = beta[1] + beta[2]*logsize_t[n] + beta[3]*endo_01[n] +beta[4]*origin_01[n]
       + beta[5]*logsize_t[n]*endo_01[n] 
       + tau_year[endo_index[n],year_t[n]]
@@ -89,7 +85,7 @@ cat("
     tau_plot ~ normal(0,sigma_p);   // prior for plot random effects
     to_vector(tau_year[1]) ~ normal(0,sigma_e[1]);   // prior for E- year random effects
     to_vector(tau_year[2]) ~ normal(0,sigma_e[2]);   // prior for E+ year random effects
-    reciprocal_phi ~ cauchy(0., 5.);
+    phi ~ cauchy(0., 5.);
 
     // Likelihood
     for(n in 1:N){
