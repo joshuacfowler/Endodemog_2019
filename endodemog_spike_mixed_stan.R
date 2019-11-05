@@ -10,6 +10,7 @@ library(StanHeaders)
 library(shinystan)
 library(bayesplot)
 library(devtools)
+library(countreg)
 
 invlogit<-function(x){exp(x)/(1+exp(x))}
 logit = function(x) { log(x/(1-x)) }
@@ -31,8 +32,8 @@ options(mc.cores = parallel::detectCores())
 set.seed(123)
 
 ## MCMC settings
-ni <-10000
-nb <- 5000
+ni <-1000
+nb <- 500
 nc <- 3
 
 sink("endodemog_spike.stan")
@@ -66,7 +67,7 @@ cat("
     real mu[N];                         // Linear Predictor
  
     for(n in 1:N){
-       mu[n] = beta[1] + beta[2]*logsize_t[n] + beta[3]*endo_01[n] +beta[4]*origin_01[n]
+       mu[n] = beta[1] + beta[2]*logsize_t[n] + beta[3]*endo_01[n] + beta[4]*origin_01[n]
        + beta[5]*logsize_t[n]*endo_01[n] 
        + tau_year[endo_index[n],year_t[n]]
        + tau_plot[plot[n]];
@@ -84,7 +85,9 @@ cat("
 
 
     // Likelihood 
-      spike_t ~ neg_binomial_2_log(mu, phi);
+        for(n in 1:N){
+      spike_t[n] ~ neg_binomial_2_log(mu[n],phi);
+    }
     }
     
     generated quantities{
@@ -129,6 +132,16 @@ smPOSY <- stan(file = "endodemog_spike.stan", data = POSY_spike_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
 # saveRDS(smPOSY, file = "endodemog_spike_POSY.rds")
 
+## to read in model output without rerunning models
+
+smAGPE <- readRDS(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_spike_AGPE.rds")
+smELRI <- readRDS(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_spike_ELRI.rds")
+smELVI <- readRDS(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_spike_ELVI.rds")
+smFESU <- readRDS(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_spike_FESU.rds")
+smLOAR <- readRDS(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_spike_LOAR.rds")
+smPOAL <- readRDS(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_spike_POAL.rds")
+smPOSY <- readRDS(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_spike_POSY.rds")
+
 
 
 #########################################################################################################
@@ -165,79 +178,42 @@ post_spikePOSY <- extract(smPOSY)
 prediction <- function(data, fit, n_post_draws){
   post <- extract(fit)
   mu <- post$mu
+  phi <- post$phi
   yrep <- matrix(nrow = n_post_draws, ncol = data$N)
   for(n in 1:n_post_draws){
-    yrep[n,] <- rnbinom(n = data$N, size = 1, prob = exp(mu[n,]))
+    yrep[n,] <- rztnbinom(n = data$N, size = phi[n], mu = exp(mu[n,]))
   }
   out <- list(yrep, mu)
   names(out) <- c("yrep", "mu")
   return(out)
 }
 
-prediction<- function(data, fit, n_post_draws) {
-  post <- extract(fit)
-  beta_post <- post$beta
-  tau_plot_post <- post$tau_plot
-  tau_year_post <- post$tau_year
-  dim(tau_year_post) <- c(15000,22)
-  lin_comb <- matrix(nrow = data$N, ncol = n_post_draws)
-  yrep <- matrix(nrow = data$N, ncol = n_post_draws)
-  for(n in 1:n_post_draws){
-    lin_comb[,n] <- sample(beta_post[,1], size = data$N)+ data$logsize_t*sample(beta_post[,2], size = data$N) 
-    + data$endo_01*sample(beta_post[,3], size = data$N) + data$origin_01*sample(beta_post[,4], size = data$N) 
-    + data$logsize_t*data$endo_01*sample(beta_post[,5], size = data$N) 
-    + data$plot_datas[]*sample(tau_plot_post[], size = data$N) 
-    + data$yearendo_datas[]*sample(tau_year_post[], size = data$N)
-    
-    prob <- exp(lin_comb)
-    yrep[,n] <- rnbinom(prob = prob[,n], n = data$N, size = mean(post$phi))
-    print(paste("rep", n, "of", reps))
-    
-  }
-  out <- list(yrep, prob, lin_comb) 
-  names(out) <- c("yrep", "prob", "lin_comb")
-  
-  return(out)
-}
-yrep <- matrix(nrow = AGPE_spike_data_list$N, ncol = 10)
-mu <- exp(post_spikeAGPE$mu[n,])
-phi <- mean(post_spikeAGPE$phi)
-for(n in 1:10){
-  yrep[n,] <- rnbinom(n = 25, size = phi, prob = mu)
-}
-head(yrep)
+
 # apply the function for each species
 AGPE_spike_yrep <- prediction(data = AGPE_spike_data_list, fit = smAGPE, n_post_draws = 500)
-ELRI_spike_yrep <- prediction(ELRI_spike_data_list, smELRI, 500)
-ELVI_spike_yrep <- prediction(ELVI_spike_data_list, smELVI, 500)
-FESU_spike_yrep <- prediction(FESU_spike_data_list, smFESU, 500)
-LOAR_spike_yrep <- prediction(LOAR_spike_data_list, smLOAR, 500)
-POAL_spike_yrep <- prediction(POAL_spike_data_list, smPOAL, 500)
-POSY_spike_yrep <- prediction(POSY_spike_data_list, smPOSY, 500)
+ELRI_spike_yrep <- prediction(data = ELRI_spike_data_list, fit = smELRI, n_post_draws = 500)
+ELVI_spike_yrep <- prediction(data = ELVI_spike_data_list, fit = smELVI, n_post_draws = 500)
+FESU_spike_yrep <- prediction(data = FESU_spike_data_list, fit = smFESU, n_post_draws = 500)
+LOAR_spike_yrep <- prediction(data = LOAR_spike_data_list, fit = smLOAR, n_post_draws = 500)
+POAL_spike_yrep <- prediction(data = POAL_spike_data_list, fit = smPOAL, n_post_draws = 500)
+POSY_spike_yrep <- prediction(data = POSY_spike_data_list, fit = smPOSY, n_post_draws = 500)
 
 
 
 # overlay 100 replicates over the actual dataset
-mspike_yrep_AGPE <- t(AGPE_spike_yrep$yrep)
 ppc_dens_overlay( y = AGPE_spike_data_list$spike_t, yrep = AGPE_spike_yrep$yrep[1:100,])+ xlab("prob. of y") + ggtitle("AGPE")
 
-mspike_yrep_ELRI <- t(ELRI_spike_yrep$yrep)
-ppc_dens_overlay( y = ELRI_spike_data_list$spike_t, yrep = mspike_yrep_ELRI[1:100,])+ xlab("prob. of y") + ggtitle("ELRI")
+ppc_dens_overlay( y = ELRI_spike_data_list$spike_t, yrep = ELRI_spike_yrep$yrep[1:100,])+ xlab("prob. of y") + ggtitle("ELRI")
 
-mspike_yrep_ELVI <- t(ELVI_spike_yrep$yrep)
-ppc_dens_overlay( y = ELVI_spike_data_list$spike_t, yrep = mspike_yrep_ELVI[1:100,]) + xlab("prob. of y") + ggtitle("ELVI")
+ppc_dens_overlay( y = ELVI_spike_data_list$spike_t, yrep = ELVI_spike_yrep$yrep[1:100,]) + xlab("prob. of y") + ggtitle("ELVI")
 
-mspike_yrep_FESU <- t(FESU_spike_yrep$yrep)
-ppc_dens_overlay( y = FESU_spike_data_list$spike_t, yrep = mspike_yrep_FESU[1:100,]) + xlab("prob. of y") + ggtitle("FESU")
+ppc_dens_overlay( y = FESU_spike_data_list$spike_t, yrep = FESU_spike_yrep$yrep[1:100,]) + xlab("prob. of y") + ggtitle("FESU")
 
-mspike_yrep_LOAR <- t(LOAR_spike_yrep$yrep)
-ppc_dens_overlay( y = LOAR_spike_data_list$spike_t, yrep = mspike_yrep_LOAR[1:100,]) + xlab("prob. of y") + ggtitle("LOAR")
+ppc_dens_overlay( y = LOAR_spike_data_list$spike_t, yrep = LOAR_spike_yrep$yrep[1:100,]) + xlab("prob. of y") + ggtitle("LOAR")
 
-mspike_yrep_POAL <- t(POAL_spike_yrep$yrep)
-ppc_dens_overlay( y = POAL_spike_data_list$spike_t, yrep = mspike_yrep_POAL[1:100,]) + xlab("prob. of y") + ggtitle("POAL")
+ppc_dens_overlay( y = POAL_spike_data_list$spike_t, yrep = POAL_spike_yrep$yrep[1:100,]) + xlab("prob. of y") + ggtitle("POAL")
 
-mspike_yrep_POSY <- t(POSY_spike_yrep$yrep)
-ppc_dens_overlay( y = POSY_spike_data_list$spike_t, yrep = mspike_yrep_POSY[1:100,]) + xlab("prob. of y") + ggtitle("POSY")
+ppc_dens_overlay( y = POSY_spike_data_list$spike_t, yrep = POSY_spike_yrep$yrep[1:100,]) + xlab("prob. of y") + ggtitle("POSY")
 
 
 
