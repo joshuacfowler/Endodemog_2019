@@ -30,8 +30,8 @@ rstan_options(auto_write = TRUE)
 options(mc.cores = parallel::detectCores())
 set.seed(123)
 ## MCMC settings
-ni <- 500
-nb <- 100
+ni <- 10000
+nb <- 5000
 nc <- 3
 
 # Stan model -------------
@@ -55,7 +55,7 @@ cat("
     }
 
     parameters {
-    vector[K] beta;                     // predictor parameters
+    vector[4] beta;                     // predictor parameters
     vector[nYear] tau_year[nEndo];      // random year effect
     real<lower=0> sigma_e[nEndo];        //year variance by endophyte effect
     vector[nPlot] tau_plot;        // random plot effect
@@ -67,7 +67,6 @@ cat("
 
        for(n in 1:N){
     mu[n] = beta[1] + beta[2]*logsize_t[n] + beta[3]*endo_01[n] +beta[4]*origin_01[n]
-    + beta[5]*logsize_t[n]*endo_01[n] 
     + tau_year[endo_index[n],year_t[n]] 
     + tau_plot[plot[n]];
     }
@@ -196,19 +195,19 @@ POSY_surv_yrep <- prediction(data = POSY_surv_data_list, fit = smPOSY, n_post_dr
 
 
 # overlay 100 replicates over the actual dataset
-ppc_dens_overlay( y = AGPE_surv_data_list$surv_t1, yrep = AGPE_surv_yrep$yrep[1:500,]) + ggtitle("AGPE")
+ppc_dens_overlay( y = AGPE_surv_data_list$surv_t1, yrep = AGPE_surv_yrep$yrep[1:100,]) + ggtitle("AGPE")
 
-ppc_dens_overlay( y = ELRI_surv_data_list$surv_t1, yrep = msurv_yrep_ELRI[1:100,]) + ggtitle("ELRI")
+ppc_dens_overlay( y = ELRI_surv_data_list$surv_t1, yrep = ELRI_surv_yrep$yrep[1:100,]) + ggtitle("ELRI")
 
-ppc_dens_overlay( y = ELVI_surv_data_list$surv_t1, yrep = msurv_yrep_ELVI[1:100,]) + ggtitle("ELVI")
+ppc_dens_overlay( y = ELVI_surv_data_list$surv_t1, yrep = ELVI_surv_yrep$yrep[1:100,]) + ggtitle("ELVI")
 
-ppc_dens_overlay( y = FESU_surv_data_list$surv_t1, yrep = msurv_yrep_FESU[1:100,]) + ggtitle("FESU")
+ppc_dens_overlay( y = FESU_surv_data_list$surv_t1, yrep = FESU_surv_yrep$yrep[1:100,]) + ggtitle("FESU")
 
-ppc_dens_overlay( y = LOAR_surv_data_list$surv_t1, yrep = msurv_yrep_LOAR[1:100,]) + ggtitle("LOAR")
+ppc_dens_overlay( y = LOAR_surv_data_list$surv_t1, yrep = LOAR_surv_yrep$yrep[1:100,]) + ggtitle("LOAR")
 
-ppc_dens_overlay( y = POAL_surv_data_list$surv_t1, yrep = msurv_yrep_POAL[1:100,]) + ggtitle("POAL")
+ppc_dens_overlay( y = POAL_surv_data_list$surv_t1, yrep = POAL_surv_yrep$yrep[1:100,]) + ggtitle("POAL")
 
-ppc_dens_overlay( y = POSY_surv_data_list$surv_t1, yrep = msurv_yrep_POSY[1:100,]) + ggtitle("POSY")
+ppc_dens_overlay( y = POSY_surv_data_list$surv_t1, yrep = POSY_surv_yrep$yrep[1:100,]) + ggtitle("POSY")
 
 
 
