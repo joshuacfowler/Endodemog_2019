@@ -10,7 +10,7 @@ library(StanHeaders)
 library(shinystan)
 library(bayesplot)
 library(devtools)
-library(actuar)
+library(countreg)
 
 
 #############################################################################################
@@ -157,8 +157,6 @@ smPOAL <- readRDS(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/
 smPOSY <- readRDS(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_grow_POSY.rds")
 
 
-# A stan model 
-
 #########################################################################################################
 ###### Perform posterior predictive checks and assess model convergence-------------------------
 #########################################################################################################
@@ -194,45 +192,41 @@ post_growAGPE$phi
 prediction <- function(data, fit, n_post_draws){
   post <- extract(fit)
   mu <- post$mu
+  phi <- post$phi
   yrep <- matrix(nrow = n_post_draws, ncol = data$N)
   for(n in 1:n_post_draws){
-    yrep[n,] <- rztnbinom(n = data$N, prob = log(mu[n,]), size = post$phi[n])
+    yrep[n,] <- rztnbinom(n = data$N, mu = exp(mu[n,]), size = phi[n])
   }
   out <- list(yrep, mu)
   names(out) <- c("yrep", "mu")
   return(out)
 }
 
-prob <- exp(post_growAGPE$mu)
-ytest <- matrix(nrow = 10, ncol = AGPE_grow_data_list$N)
-for(n in 1:100){
-ytest[n,]<- rztnbinom(n = 100, size = post_growAGPE$phi[n], prob = exp(post_growAGPE$mu[n,]))
-}
-p# apply the function for each species
-AGPE_grow_yrep <- prediction(data = AGPE_grow_data_list, fit = smAGPE, n_post_draws = 100)
-ELRI_grow_yrep <- prediction(ELRI_grow_data_list, smELRI, 500)
-ELVI_grow_yrep <- prediction(ELVI_grow_data_list, smELVI, 500)
-FESU_grow_yrep <- prediction(FESU_grow_data_list, smFESU, 500)
-LOAR_grow_yrep <- prediction(LOAR_grow_data_list, smLOAR, 500)
-POAL_grow_yrep <- prediction(POAL_grow_data_list, smPOAL, 500)
-POSY_grow_yrep <- prediction(POSY_grow_data_list, smPOSY, 500)
 
-ttest <- na.omit(AGPE_grow_yrep$yrep)
+# apply the function for each species
+AGPE_grow_yrep <- prediction(data = AGPE_grow_data_list, fit = smAGPE, n_post_draws = 500)
+ELRI_grow_yrep <- prediction(data = ELRI_grow_data_list, fit = smELRI, n_post_draws =500)
+ELVI_grow_yrep <- prediction(data = ELVI_grow_data_list, fit = smELVI, n_post_draws =500)
+FESU_grow_yrep <- prediction(data = FESU_grow_data_list, fit = smFESU, n_post_draws =500)
+LOAR_grow_yrep <- prediction(data = LOAR_grow_data_list, fit = smLOAR, n_post_draws =500)
+POAL_grow_yrep <- prediction(data = POAL_grow_data_list, fit = smPOAL, n_post_draws =500)
+POSY_grow_yrep <- prediction(data = POSY_grow_data_list, fit = smPOSY, n_post_draws =500)
+
 
 # overlay 100 replicates over the actual dataset
-ppc_dens_overlay( y = AGPE_grow_data_list$size_t1, yrep = na.omit(AGPE_grow_yrep$yrep[1:10,]))+ xlab("prob. of y") + ggtitle("AGPE")
+ppc_dens_overlay( y = AGPE_grow_data_list$size_t1, yrep = AGPE_grow_yrep$yrep[1:100,])+ xlab("prob. of y") + ggtitle("AGPE")
 
-ppc_dens_overlay( y = ELRI_grow_data_list$size_t1, yrep = mgrow_yrep_ELRI[1:100,])+ xlab("prob. of y") + ggtitle("ELRI")
+ppc_dens_overlay( y = ELRI_grow_data_list$size_t1, yrep = ELRI_grow_yrep$yrep[1:100,])+ xlab("prob. of y") + ggtitle("ELRI")
 
-ppc_dens_overlay( y = ELVI_grow_data_list$size_t1, yrep = mgrow_yrep_ELVI[1:100,]) + xlab("prob. of y") + ggtitle("ELVI")
+ppc_dens_overlay( y = ELVI_grow_data_list$size_t1, yrep = ELVI_grow_yrep$yrep[1:100,]) + xlab("prob. of y") + ggtitle("ELVI")
 
-ppc_dens_overlay( y = FESU_grow_data_list$size_t1, yrep = mgrow_yrep_FESU[1:100,]) + xlab("prob. of y") + ggtitle("FESU")
+ppc_dens_overlay( y = FESU_grow_data_list$size_t1, yrep = FESU_grow_yrep$yrep[1:100,]) + xlab("prob. of y") + ggtitle("FESU")
 
-ppc_dens_overlay( y = LOAR_grow_data_list$size_t1, yrep = mgrow_yrep_LOAR[1:100,]) + xlab("prob. of y") + ggtitle("LOAR")
+ppc_dens_overlay( y = LOAR_grow_data_list$size_t1, yrep = LOAR_grow_yrep$yrep[1:100,]) + xlab("prob. of y") + ggtitle("LOAR")
 
-ppc_dens_overlay( y = POAL_grow_data_list$size_t1, yrep = mgrow_yrep_POAL[1:100,]) + xlab("prob. of y") + ggtitle("POAL")
+ppc_dens_overlay( y = POAL_grow_data_list$size_t1, yrep = POAL_grow_yrep$yrep[1:100,]) + xlab("prob. of y") + ggtitle("POAL")
 
-ppc_dens_overlay( y = POSY_grow_data_list$size_t1, yrep = mgrow_yrep_POSY[1:100,]) + xlab("prob. of y") + ggtitle("POSY")
+ppc_dens_overlay( y = POSY_grow_data_list$size_t1, yrep = POSY_grow_yrep$yrep[1:100,]) + xlab("prob. of y") + ggtitle("POSY")
 
 
 
