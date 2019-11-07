@@ -30,8 +30,8 @@ options(mc.cores = parallel::detectCores())
 set.seed(123)
 
 ## MCMC settings
-ni <-10000
-nb <- 5000
+ni <-1000
+nb <- 500
 nc <- 3
 
 # Stan model -------------
@@ -90,7 +90,7 @@ cat("
     // Likelihood
     for(n in 1:N){
       flw_t[n] ~ neg_binomial_2_log(mu[n],phi);
-      target += -log1m(neg_binomial_2_log_lpmf(lowerlimit | mu[n], phi)); // manually adjusting computation of likelihood because T[,] truncation syntax doesn't compile for neg binomial
+      target += -log1m(neg_binomial_2_log_lpmf(0 | mu[n], phi)); // manually adjusting computation of likelihood because T[,] truncation syntax doesn't compile for neg binomial
     }
     }
     
@@ -107,31 +107,131 @@ stanmodel <- stanc("endodemog_fert.stan")
 
 smAGPE<- stan(file = "endodemog_fert.stan", data = AGPE_fert_data_list,
               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-saveRDS(smAGPE, file = "endodemog_fert_AGPE_withplot.rds")
+# saveRDS(smAGPE, file = "endodemog_fert_AGPE_withplot.rds")
 
 smELRI <- stan(file = "endodemog_fert.stan", data = ELRI_fert_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-saveRDS(smELRI, file = "endodemog_fert_ELRI_withplot.rds")
+# saveRDS(smELRI, file = "endodemog_fert_ELRI_withplot.rds")
 
 smELVI <- stan(file = "endodemog_fert.stan", data = ELVI_fert_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-saveRDS(smELVI, file = "endodemog_fert_ELVI_withplot.rds")
+# saveRDS(smELVI, file = "endodemog_fert_ELVI_withplot.rds")
 
 smFESU <- stan(file = "endodemog_fert.stan", data = FESU_fert_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-saveRDS(smFESU, file = "endodemog_fert_FESU_withplot.rds")
+# saveRDS(smFESU, file = "endodemog_fert_FESU_withplot.rds")
 
 smLOAR <- stan(file = "endodemog_fert.stan", data = LOAR_fert_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-saveRDS(smLOAR, file = "endodemog_fert_LOAR_withplot.rds")
+# saveRDS(smLOAR, file = "endodemog_fert_LOAR_withplot.rds")
 
 smPOAL <- stan(file = "endodemog_fert.stan", data = POAL_fert_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-saveRDS(smPOAL, file = "endodemog_fert_POAL_withplot.rds")
+# saveRDS(smPOAL, file = "endodemog_fert_POAL_withplot.rds")
 
 smPOSY <- stan(file = "endodemog_fert.stan", data = POSY_fert_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-saveRDS(smPOSY, file = "endodemog_fert_POSY_withplot.rds")
+# saveRDS(smPOSY, file = "endodemog_fert_POSY_withplot.rds")
+
+
+
+
+
+
+
+
+
+
+
+
+#########################################################################################################
+###### Perform posterior predictive checks and assess model convergence-------------------------
+#########################################################################################################
+params <- c("beta[1]", "beta[2]", "tau_year[1,1]", "sigma_e[1]", "sigma_e[2]")
+
+
+##### POAL - growth
+print(smPOAL)
+
+## plot traceplots of chains for select parameters
+traceplot(smAGPE, pars = params)
+traceplot(smELRI, pars = params)
+traceplot(smELVI, pars = params)
+traceplot(smFESU, pars = params)
+traceplot(smLOAR, pars = params)
+traceplot(smPOSY, pars = params)
+traceplot(smPOSY, pars = params)
+
+
+# Pull out the posteriors
+post_spikeAGPE <- extract(smAGPE)
+post_spikeELRI <- extract(smELRI)
+post_spikeELVI <- extract(smELVI)
+post_spikeFESU <- extract(smFESU)
+post_spikeLOAR <- extract(smLOAR)
+post_spikePOAL <- extract(smPOAL)
+post_spikePOSY <- extract(smPOSY)
+
+
+
+# This function generates replicate data for each given data point using the model matrix within the datalist for the random effects
+prediction <- function(data, fit, n_post_draws){
+  post <- extract(fit)
+  mu <- post$mu
+  phi <- post$phi
+  yrep <- matrix(nrow = n_post_draws, ncol = data$N)
+  for(n in 1:n_post_draws){
+    yrep[n,] <- rztnbinom(n = data$N, size = phi[n], mu = exp(mu[n,]))
+  }
+  out <- list(yrep, mu)
+  names(out) <- c("yrep", "mu")
+  return(out)
+}
+
+
+# apply the function for each species
+AGPE_fert_yrep <- prediction(data = AGPE_fert_data_list, fit = smAGPE, n_post_draws = 500)
+ELRI_fert_yrep <- prediction(data = ELRI_fert_data_list, fit = smELRI, n_post_draws = 500)
+ELVI_fert_yrep <- prediction(data = ELVI_fert_data_list, fit = smELVI, n_post_draws = 500)
+FESU_fert_yrep <- prediction(data = FESU_fert_data_list, fit = smFESU, n_post_draws = 500)
+LOAR_fert_yrep <- prediction(data = LOAR_fert_data_list, fit = smLOAR, n_post_draws = 500)
+POAL_fert_yrep <- prediction(data = POAL_fert_data_list, fit = smPOAL, n_post_draws = 500)
+POSY_fert_yrep <- prediction(data = POSY_fert_data_list, fit = smPOSY, n_post_draws = 500)
+
+
+
+# overlay 100 replicates over the actual dataset
+ppc_dens_overlay( y = AGPE_fert_data_list$flw_t, yrep = AGPE_fert_yrep$yrep[1:100,]) + xlim(0,40) + xlab("prob. of y") + ggtitle("AGPE")
+
+ppc_dens_overlay( y = ELRI_fert_data_list$flw_t, yrep = ELRI_fert_yrep$yrep[1:100,])+ xlab("prob. of y") + ggtitle("ELRI")
+
+ppc_dens_overlay( y = ELVI_fert_data_list$flw_t, yrep = ELVI_fert_yrep$yrep[1:100,]) + xlab("prob. of y") + ggtitle("ELVI")
+
+ppc_dens_overlay( y = FESU_fert_data_list$flw_t, yrep = FESU_fert_yrep$yrep[1:100,]) + xlab("prob. of y") + ggtitle("FESU")
+
+ppc_dens_overlay( y = LOAR_fert_data_list$flw_t, yrep = LOAR_fert_yrep$yrep[1:100,])+ xlim(0,20) + xlab("prob. of y") + ggtitle("LOAR")
+
+ppc_dens_overlay( y = POAL_fert_data_list$flw_t, yrep = POAL_fert_yrep$yrep[1:100,]) + xlim(0,40) + xlab("prob. of y") + ggtitle("POAL")
+
+ppc_dens_overlay( y = POSY_fert_data_list$flw_t, yrep = POSY_fert_yrep$yrep[1:100,]) + xlab("prob. of y") + ggtitle("POSY")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
