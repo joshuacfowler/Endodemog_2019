@@ -32,8 +32,8 @@ options(mc.cores = parallel::detectCores())
 set.seed(123)
 
 ## MCMC settings
-ni <-1000
-nb <- 500
+ni <-5000
+nb <- 2000
 nc <- 3
 
 sink("endodemog_spike.stan")
@@ -41,6 +41,7 @@ cat("
     data { 
     int<lower=0> N;                       // number of observations
     int<lower=0> K;                       // number of predictors
+    int<lower=0> lowerlimit;                         //lower limit for truncated negative binomial
     int<lower=0> nYear;                       // number of years (used as index)
     int<lower=0> year_t[N];                      // year of observation
     int<lower=0> nEndo;                       // number of endo treatments
@@ -68,7 +69,6 @@ cat("
  
     for(n in 1:N){
        mu[n] = beta[1] + beta[2]*logsize_t[n] + beta[3]*endo_01[n] + beta[4]*origin_01[n]
-       + beta[5]*logsize_t[n]*endo_01[n] 
        + tau_year[endo_index[n],year_t[n]]
        + tau_plot[plot[n]];
     }
@@ -147,7 +147,7 @@ smPOSY <- readRDS(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/
 #########################################################################################################
 ###### Perform posterior predictive checks and assess model convergence-------------------------
 #########################################################################################################
-params <- c("beta[1]", "beta[2]", "tau_year[1,1]", "sigma_e[1]", "sigma_e[2]")
+params <- c("beta[1]", "beta[2]", "tau_year[1,4]", "sigma_e[1]", "sigma_e[2]")
 
 
 ##### POAL - growth
@@ -181,7 +181,7 @@ prediction <- function(data, fit, n_post_draws){
   phi <- post$phi
   yrep <- matrix(nrow = n_post_draws, ncol = data$N)
   for(n in 1:n_post_draws){
-    yrep[n,] <- rztnbinom(n = data$N, size = phi[n], mu = exp(mu[n,]))
+    yrep[n,] <- rnbinom(n = data$N, size = phi[n], mu = exp(mu[n,]))
   }
   out <- list(yrep, mu)
   names(out) <- c("yrep", "mu")
