@@ -230,32 +230,32 @@ stanmodel <- stanc("endodemog_s_to_s.stan")
 ## and save the output to .rds files so that they can be called laters
 
 smAGPE <- stan(file = "endodemog_s_to_s.stan", data = AGPE_s_to_s_data_list,
-               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-# saveRDS(smAGPE, file = "endodemog_s_to_s_AGPE.rds")
+               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE, control = list(adapt_delta = 0.99, max_treedepth = 20))
+saveRDS(smAGPE, file = "endodemog_s_to_s_AGPE.rds")
 
-smELRI <- stan(file = "endodemog_s_to_s.stan", data = ELRI_s_to_s_data_list,
-               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
+# smELRI <- stan(file = "endodemog_s_to_s.stan", data = ELRI_s_to_s_data_list,
+#                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE, control = list(adapt_delta = 0.99, max_treedepth = 20))
 # saveRDS(smELRI, file = "endodemog_s_to_s_ELRI.rds")
-
-smELVI <- stan(file = "endodemog_s_to_s.stan", data = ELVI_s_to_s_data_list,
-               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
+# 
+# smELVI <- stan(file = "endodemog_s_to_s.stan", data = ELVI_s_to_s_data_list,
+#                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE, control = list(adapt_delta = 0.99, max_treedepth = 20))
 # saveRDS(smELVI, file = "endodemog_s_to_s_ELVI.rds")
 
 smFESU <- stan(file = "endodemog_s_to_s.stan", data = FESU_s_to_s_data_list,
-               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-# saveRDS(smFESU, file = "endodemog_s_to_s_FESU.rds")
+               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE, control = list(adapt_delta = 0.99, max_treedepth = 20))
+saveRDS(smFESU, file = "endodemog_s_to_s_FESU.rds")
 
 smLOAR <- stan(file = "endodemog_s_to_s.stan", data = LOAR_s_to_s_data_list,
-               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-# saveRDS(smLOAR, file = "endodemog_s_to_s_LOAR.rds")
+               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE, control = list(adapt_delta = 0.99, max_treedepth = 20))
+saveRDS(smLOAR, file = "endodemog_s_to_s_LOAR.rds")
 
 smPOAL <- stan(file = "endodemog_s_to_s.stan", data = POAL_s_to_s_data_list,
-               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-# saveRDS(smPOAL, file = "endodemog_s_to_s_POAL.rds")
+               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE, control = list(adapt_delta = 0.99, max_treedepth = 20))
+saveRDS(smPOAL, file = "endodemog_s_to_s_POAL.rds")
 
 smPOSY <- stan(file = "endodemog_s_to_s.stan", data = POSY_s_to_s_data_list,
-               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-# saveRDS(smPOSY, file = "endodemog_s_to_s_POSY.rds")
+               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE, control = list(adapt_delta = 0.99, max_treedepth = 20))
+saveRDS(smPOSY, file = "endodemog_s_to_s_POSY.rds")
 
 print(sm)
 summary(sm)
@@ -306,7 +306,7 @@ post_survPOSY <- extract(smPOSY)
 
 # This function extracts the posterior draws and generates replicate data for each given model
 prediction <- function(data, fit, n_post_draws){
-  post <- extract(fit)
+  post <- rstan::extract(fit)
   mu <- post$mu
   yrep <- matrix(nrow = n_post_draws, ncol = data$N)
   for(n in 1:n_post_draws){
