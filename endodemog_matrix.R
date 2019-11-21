@@ -118,21 +118,6 @@ bigmatrix<-function(params){
   return(list(MPMmat=MPMmat,Fmat=Fmat,Tmat=Tmat))
 }
 
-bigmatrix<-function(params){   
-  
-  matdim<-params$max_size ## matrix dimension
-  y<-1:params$max_size ## size (tiller number) associated with each class
-  
-
-  # Growth/survival transition matrix
-  Tmat<-matrix(0,matdim,matdim)
-  Tmat<-t(outer(y,y,pxy,params=params)) 
-  
-  # Put it all together
-  MPMmat<-Tmat #sum the Tmat & Fmat to get the whole matrix
-  
-  return(list(Tmat=Tmat))
-}
 ## population growth rate (eigenalaysis of the projection matrix)
 # matrix <- bigmatrix(loar_params)
 lambda(bigmatrix(loar_params)$Tmat)
