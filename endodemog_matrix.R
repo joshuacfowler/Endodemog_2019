@@ -43,6 +43,7 @@ loar <- loar %>% filter(size_t > 0,
 survLOAR <- read_rds(path = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_surv_LOAR.rds")
 
 growLOAR <- read_rds(path = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_grow_LOAR.rds")
+flwLOAR <- read_rds(path = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_flw_LOAR.rds")
 
 fertLOAR <- read_rds(path = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_fert_LOAR.rds")
 
