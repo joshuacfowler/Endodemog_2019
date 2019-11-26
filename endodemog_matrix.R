@@ -18,11 +18,37 @@ logit = function(x) { log(x/(1-x)) }
 
 # Growth data lists are generated in the endodemog_data_processing.R file
 # within the section titled "Preparing datalists for Growth Kernel"
-source("endodemog_data_processing.R")
+# source("endodemog_data_processing.R")
 
+endo_demog <- read.csv("~/Dropbox/EndodemogData/fulldataplusmetadata/endo_demog_long.csv") 
+loar <- endo_demog %>% 
+  filter(species == "LOAR") %>% 
+  mutate(log_size_t = log(size_t),
+         log_size_t1 = log(size_t1),
+         flow_t = as.integer(seed_t > 0))
 
-#  Read in the model outputs ----------------------------------------------
-source("endodemog_model_outputs.R")
+# DATA ISSUES:
+# I noticed that there are about 10 plants with a size of 0 tillers. They are:
+filter(loar,size_t==0)
+# I also noticed that there are a few instances where survival was > 1:
+filter(loar,surv_t1 > 1)
+# We'll need to cut these for the analysis.
+loar <- loar %>% filter(size_t > 0,
+                        surv_t1 <= 1)
+
+# 
+# #  Read in the model outputs ----------------------------------------------
+# source("endodemog_model_outputs.R")
+
+survLOAR <- read_rds(path = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_surv_LOAR.rds")
+
+growLOAR <- read_rds(path = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_grow_LOAR.rds")
+
+fertLOAR <- read_rds(path = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_fert_LOAR.rds")
+
+spikeLOAR <- read_rds(path = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_spike_LOAR.rds")
+seedLOAR <- read_rds(path = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_seed_mean_LOAR.rds")
+s_to_sLOAR <- read_rds(path = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_s_to_s_LOAR.rds")
 
 #############################################################################################
 # Assembling matrix model -------------------------------------------------
@@ -63,7 +89,7 @@ loar_params[22] <- lapply(rstan::extract(s_to_sLOAR, pars = "beta[1]"), FUN = me
 loar_params[23] <- lapply(rstan::extract(s_to_sLOAR, pars = "beta[2]"), FUN = mean); names(loar_params)[23] <- "s_to_s_beta2"
 # min and max size
 loar_params[24] <- 1; names(loar_params)[24]<-"min_size"
-loar_params[25] <- quantile(LOAR_grow_data_list$size_t1,0.95,na.rm=T); names(loar_params)[25]<-"max_size"
+loar_params[25] <- quantile(loar$size_t1,0.95,na.rm=T); names(loar_params)[25]<-"max_size"
 # note that I define max size as the 95TH pctile of observed sized. The very max sizes observed often have very poor 
 # replication, and I find that these few observations (and the corresponding vital rate predictions) can have a strong
 # influence on the results. So this approach is conservative, but you can always experiment with this.
@@ -83,7 +109,7 @@ sx<-function(x,params){
 
 gxy <- function(x,y,params){
   grow.mean <- params["grow_beta1"] + params["grow_beta2"]*log(x)
-  pr_grow <- sample(x=y, size=1, replace=T, prob=dnbinom(1:y, mu = exp(grow.mean), size = params["grow_phi"]))
+  pr_grow <- base::sample(x=y, size=1, replace=T, prob=dnbinom(1:y, mu = exp(grow.mean), size = params["grow_phi"]))
   return(pr_grow)
 }
 
@@ -96,9 +122,9 @@ pxy<-function(x,y,params){
 fx<-function(x,params){
   p_flw <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x))
   fert.mean <- params["fert_beta1"] + params["fert_beta2"]*log(x)
-  p_fert <- sample(x=y, size=1, replace=T, prob=dnbinom(1:y, mu = exp(fert.mean), size = params["fert_phi"]))
+  p_fert <- base::sample(x=y, size=1, replace=T, prob=dnbinom(1:y, mu = exp(fert.mean), size = params["fert_phi"]))
   spike.mean <- params["spike_beta1"] + params["spike_beta2"]*log(x)
-  p_spike <- sample(x=y, size=1, replace=T, prob=dnbinom(1:y, mu = exp(spike.mean), size = params["spike_phi"]))
+  p_spike <- base::sample(x=y, size=1, replace=T, prob=dnbinom(1:y, mu = exp(spike.mean), size = params["spike_phi"]))
   seed.mean <- params["mu_seed"]
   p_rec <- inv_logit(params["s_to_s_beta1"])
   seedlings <- p_flw * p_fert * p_spike * seed.mean * p_rec
@@ -129,7 +155,7 @@ bigmatrix<-function(params){
 
 ## population growth rate (eigenalaysis of the projection matrix)
 # matrix <- bigmatrix(loar_params)
-lambda(bigmatrix(loar_params)$Tmat)
+bigmatrix(loar_params)$Tmat
 
 
 y <- 33
