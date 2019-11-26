@@ -70,20 +70,20 @@ loar_params[25] <- quantile(LOAR_grow_data_list$size_t1,0.95,na.rm=T); names(loa
 loar_params[26] <- lapply(rstan::extract(growLOAR, pars = "phi"), FUN = mean); names(loar_params[26]) <- "grow_phi"
 loar_params[27] <- lapply(rstan::extract(fertLOAR, pars = "phi"), FUN = mean); names(loar_params[27]) <- "fert_phi"
 loar_params[28] <- lapply(rstan::extract(spikeLOAR, pars = "phi"), FUN = mean); names(loar_params[28]) <- "spike_phi"
-
+loar_params <- unlist(loar_params)
 
 # define functions that will be used to populate projection matrix
 #SURVIVAL AT SIZE X.
 # currently this is fitting as if the E- is the intercept
 
 sx<-function(x,params){
-  invlogit(params$surv_beta1 + params$surv_beta2*log(x))
+  invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x))
 }
 
 
 gxy <- function(x,y,params){
-  grow.mean <- params$grow_beta1 + params$grow_beta2*log(x)
-  pr_grow <- sample(x=y, size=1, replace=T, prob=dnbinom(1:y, mu = exp(grow.mean), size = params$grow_phi/(1 - (dnbinom(0, mu = exp(grow.mean), size = params$grow_phi)) + sum(dnbinom(x = (params$max_size+1):500, mu = exp(grow.mean), size = params$grow_phi)))))
+  grow.mean <- params["grow_beta1"] + params["grow_beta2"]*log(x)
+  pr_grow <- sample(x=y, size=1, replace=T, prob=dnbinom(1:y, mu = exp(grow.mean), size = params["grow_phi"]))
   return(pr_grow)
 }
 
@@ -94,13 +94,13 @@ pxy<-function(x,y,params){
 
 #FERTILITY--returns number of seedlings, which we will assume (for now) to be 1-tiller, produced by size X
 fx<-function(x,params){
-  p_flw <- invlogit(params$flw_beta1 + params$flw_beta2*log(x))
-  fert.mean <- params$fert_beta1 + params$fert_beta2*log(x)
-  p_fert <- sample(x=y, size=1, replace=T, prob=dnbinom(1:y, mu = exp(fert.mean), size = params$fert_phi/(1 - (dnbinom(0, mu = exp(fert.mean), size = params$fert_phi)) + sum(dnbinom(x = (params$max_size+1):500, mu = exp(fert.mean), size = params$fert_phi)))))
-  spike.mean <- params$spike_beta1 + params$spike_beta2*log(x)
-  p_spike <- sample(x=y, size=1, replace=T, prob=dnbinom(1:y, mu = exp(spike.mean), size = params$spike_phi/(1 - (dnbinom(0, mu = exp(spike.mean), size = params$spike_phi)) + sum(dnbinom(x = (params$max_size+1):500, mu = exp(spike.mean), size = params$spike_phi)))))
-  seed.mean <- params$mu_seed
-  p_rec <- inv_logit(params$s_to_s_beta1)
+  p_flw <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x))
+  fert.mean <- params["fert_beta1"] + params["fert_beta2"]*log(x)
+  p_fert <- sample(x=y, size=1, replace=T, prob=dnbinom(1:y, mu = exp(fert.mean), size = params["fert_phi"]))
+  spike.mean <- params["spike_beta1"] + params["spike_beta2"]*log(x)
+  p_spike <- sample(x=y, size=1, replace=T, prob=dnbinom(1:y, mu = exp(spike.mean), size = params["spike_phi"]))
+  seed.mean <- params["mu_seed"]
+  p_rec <- inv_logit(params["s_to_s_beta1"])
   seedlings <- p_flw * p_fert * p_spike * seed.mean * p_rec
   return(seedlings)
 }
@@ -109,9 +109,9 @@ fx<-function(x,params){
 # finally, here is the function that takes the parameter vector and assembles the matrix model from all of the pieces
 bigmatrix<-function(params){   
   
-  matdim<-as.numeric(params["max_size"])## matrix dimension
-  y<-1:as.numeric(params["max_size"])## size (tiller number) associated with each class
-  
+  matdim<-params["max_size"]## matrix dimension
+  y <- 1:params["max_size"]## size (tiller number) associated with each class
+
   # Fertility matrix
   Fmat<-matrix(0,matdim,matdim)
   # all seedlings get dumped into top row (1-tiller)
@@ -131,4 +131,9 @@ bigmatrix<-function(params){
 # matrix <- bigmatrix(loar_params)
 lambda(bigmatrix(loar_params)$Tmat)
 
+
+y <- 33
+x <- y
+
+g <- gxy(x,y, loar_params)
 
