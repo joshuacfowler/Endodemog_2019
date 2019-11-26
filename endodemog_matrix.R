@@ -20,7 +20,7 @@ logit = function(x) { log(x/(1-x)) }
 # within the section titled "Preparing datalists for Growth Kernel"
 # source("endodemog_data_processing.R")
 
-endo_demog <- read.csv("~/Dropbox/EndodemogData/fulldataplusmetadata/endo_demog_long.csv") 
+endo_demog <- read.csv("C:/Users/tm9/Dropbox/EndodemogData/fulldataplusmetadata/endo_demog_long.csv") 
 loar <- endo_demog %>% 
   filter(species == "LOAR") %>% 
   mutate(log_size_t = log(size_t),
@@ -40,16 +40,16 @@ loar <- loar %>% filter(size_t > 0,
 # #  Read in the model outputs ----------------------------------------------
 # source("endodemog_model_outputs.R")
 
-survLOAR <- read_rds(path = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_surv_LOAR.rds")
+survLOAR <- read_rds(path = "C:/Users/tm9/Dropbox/EndodemogData/Model_Runs/endodemog_surv_LOAR.rds")
 
-growLOAR <- read_rds(path = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_grow_LOAR.rds")
-flwLOAR <- read_rds(path = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_flw_LOAR.rds")
+growLOAR <- read_rds(path = "C:/Users/tm9/Dropbox/EndodemogData/Model_Runs/endodemog_grow_LOAR.rds")
+flwLOAR <- read_rds(path = "C:/Users/tm9/Dropbox/EndodemogData/Model_Runs/endodemog_flw_LOAR.rds")
 
-fertLOAR <- read_rds(path = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_fert_LOAR.rds")
+fertLOAR <- read_rds(path = "C:/Users/tm9/Dropbox/EndodemogData/Model_Runs/endodemog_fert_LOAR.rds")
 
-spikeLOAR <- read_rds(path = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_spike_LOAR.rds")
-seedLOAR <- read_rds(path = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_seed_mean_LOAR.rds")
-s_to_sLOAR <- read_rds(path = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_s_to_s_LOAR.rds")
+spikeLOAR <- read_rds(path = "C:/Users/tm9/Dropbox/EndodemogData/Model_Runs/endodemog_spike_LOAR.rds")
+seedLOAR <- read_rds(path = "C:/Users/tm9/Dropbox/EndodemogData/Model_Runs/endodemog_seed_mean_LOAR.rds")
+s_to_sLOAR <- read_rds(path = "C:/Users/tm9/Dropbox/EndodemogData/Model_Runs/endodemog_s_to_s_LOAR.rds")
 
 #############################################################################################
 # Assembling matrix model -------------------------------------------------
@@ -107,13 +107,13 @@ sx<-function(x,params){
   invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x))
 }
 
-
 gxy <- function(x,y,params){
   grow.mean <- params["grow_beta1"] + params["grow_beta2"]*log(x)
   # pr_grow <- exp(grow.mean)
   pr_grow <- dnbinom(x=y, mu = exp(grow.mean), size = params["grow_phi"])
  return(pr_grow)
 }
+
 # I'll truncate this later...
 # prob=dnbinom(1:n_post_draws, mu = exp(mu[i,j]), size = phi[i]/(1-dnbinom(0, mu = exp(mu[i,j]), size = phi[i]))))
 
@@ -124,21 +124,21 @@ pxy<-function(x,y,params){
 }
 
 #FERTILITY--returns number of seedlings, which we will assume (for now) to be 1-tiller, produced by size X
-fx<-function(x, y, params){
+fx<-function(x, params){
   p_flw <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x))
-  fert.mean <- params["fert_beta1"] + params["fert_beta2"]*log(x)
+  fert.mean <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x))
   # p_fert <- exp(fert.mean)
-  p_fert <- dnbinom(x=y, prob = exp(fert.mean), size = params["fert_phi"])
-  spike.mean <- params["spike_beta1"] + params["spike_beta2"]*log(x)
+  #p_fert <- dnbinom(x=y, prob = exp(fert.mean), size = params["fert_phi"])
+  spike.mean <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x))
   # p_spike <- exp(spike.mean)
-  p_spike <-dnbinom(x=y, prob = exp(spike.mean), size = params["spike_phi"])
+  #p_spike <-dnbinom(x=y, prob = exp(spike.mean), size = params["spike_phi"])
   seed.mean <- params["mu_seed"]
   p_rec <- invlogit(params["s_to_s_beta1"])
-  seedlings <- p_flw * p_fert * p_spike * seed.mean * p_rec
+  seedlings <- p_flw * fert.mean * spike.mean * seed.mean * p_rec
   return(seedlings)
 }
 
-
+## note from Tom: we should think about adding a reproductive delay
 # finally, here is the function that takes the parameter vector and assembles the matrix model from all of the pieces
 bigmatrix<-function(params){   
   
@@ -147,7 +147,7 @@ bigmatrix<-function(params){
   # Fertility matrix
   Fmat<-matrix(0,matdim,matdim)
   # all seedlings get dumped into top row (1-tiller)
-  Fmat[1,]<-fx(x = y, y = y, params=params) 
+  Fmat[1,]<-fx(x = y, params=params) 
   
   # Growth/survival transition matrix
   Tmat<-matrix(0,matdim,matdim)
@@ -161,7 +161,10 @@ bigmatrix<-function(params){
 
 ## population growth rate (eigenalaysis of the projection matrix)
 # matrix <- bigmatrix(loar_params)
-bigmatrix(loar_params)$MPMmat
+image(bigmatrix(loar_params)$Fmat)
+image(bigmatrix(loar_params)$Tmat)
+
+lambda(bigmatrix(loar_params)$MPMmat)
 
 y <- 1:33
 fert.mean <- loar_params["fert_beta1"] + loar_params["fert_beta2"]*log(x)
