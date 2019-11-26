@@ -30,8 +30,8 @@ rstan_options(auto_write = TRUE)
 options(mc.cores = parallel::detectCores())
 set.seed(123)
 ## MCMC settings
-ni <- 10000
-nb <- 5000
+ni <- 1000
+nb <- 500
 nc <- 3
 
 # Stan model -------------
@@ -55,7 +55,7 @@ cat("
     }
 
     parameters {
-    vector[4] beta;                     // predictor parameters
+    vector[K] beta;                     // predictor parameters
     vector[nYear] tau_year[nEndo];      // random year effect
     real<lower=0> sigma_e[nEndo];        //year variance by endophyte effect
     vector[nPlot] tau_plot;        // random plot effect
@@ -157,7 +157,7 @@ traceplot(smELRI, pars = params)
 traceplot(smELVI, pars = params)
 traceplot(smFESU, pars = params)
 traceplot(smLOAR, pars = params)
-traceplot(smPOSY, pars = params)
+traceplot(smPOAL, pars = params)
 traceplot(smPOSY, pars = params)
 
 
@@ -212,8 +212,9 @@ ppc_dens_overlay( y = POSY_surv_data_list$surv_t1, yrep = POSY_surv_yrep$yrep[1:
 
 
 
+# Pairs plots to diagnose sampling
 
-
+pairs(smPOAL, pars = "beta")
 
 
 
