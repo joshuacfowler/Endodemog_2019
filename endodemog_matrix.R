@@ -15,12 +15,14 @@ logit = function(x) { log(x/(1-x)) }
 #############################################################################################
 ####### Data manipulation to prepare data as lists for Stan models------------------
 #############################################################################################
-
+# filepaths
+joshpath <- "/Users/joshuacfowler/Dropbox/EndodemogData/"
+tompath <- "C:/Users/tm9/Dropbox/"
 # Growth data lists are generated in the endodemog_data_processing.R file
 # within the section titled "Preparing datalists for Growth Kernel"
-# source("endodemog_data_processing.R")
+# source("endodemog_data_processing.R"
 
-endo_demog <- read.csv("C:/Users/tm9/Dropbox/EndodemogData/fulldataplusmetadata/endo_demog_long.csv") 
+endo_demog <- read.csv("/Users/joshuacfowler/Dropbox/EndodemogData/fulldataplusmetadata/endo_demog_long.csv") 
 loar <- endo_demog %>% 
   filter(species == "LOAR") %>% 
   mutate(log_size_t = log(size_t),
@@ -161,6 +163,7 @@ bigmatrix<-function(params){
 
 ## population growth rate (eigenalaysis of the projection matrix)
 # matrix <- bigmatrix(loar_params)
+bigmatrix
 image(bigmatrix(loar_params)$Fmat)
 image(bigmatrix(loar_params)$Tmat)
 
