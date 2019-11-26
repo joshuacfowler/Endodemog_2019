@@ -111,7 +111,7 @@ sx<-function(x,params){
 gxy <- function(x,y,params){
   grow.mean <- params["grow_beta1"] + params["grow_beta2"]*log(x)
   # pr_grow <- exp(grow.mean)
-  pr_grow <- dnbinom(x=y, mu = exp(grow.mean), size = params["grow_phi"])
+  pr_grow <- dnbinom(x=y, prob = exp(grow.mean), size = params["grow_phi"])
  return(pr_grow)
 }
 # I'll truncate this later...
@@ -164,9 +164,17 @@ bigmatrix<-function(params){
 bigmatrix(loar_params)$MPMmat
 
 y <- 1:33
+grow.mean <- loar_params["grow_beta1"] + loar_params["grow_beta2"]*log(x)
+spike.mean <- loar_params["spike_beta1"] + loar_params["spike_beta2"]*log(x)
 fert.mean <- loar_params["fert_beta1"] + loar_params["fert_beta2"]*log(x)
-c <- dnbinom(x = y, prob = fert.mean, size = loar_params["fert_phi"])
-c
+
+g <- dnbinom(x = y, prob = grow.mean, size = loar_params["grow_phi"])
+s <- dnbinom(x = y, prob = spike.mean, size = loar_params["spike_phi"])
+f <- dnbinom(x = y, prob = fert.mean, size = loar_params["fert_phi"])
+
+g
+s
+f
 
 
 p_fert <- dnbinom(x=y, prob = exp(fert.mean), size = params["fert_phi"])
