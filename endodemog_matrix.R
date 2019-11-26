@@ -110,8 +110,8 @@ sx<-function(x,params){
 
 gxy <- function(x,y,params){
   grow.mean <- params["grow_beta1"] + params["grow_beta2"]*log(x)
-  pr_grow <- exp(grow.mean)
-  # pr_grow <- dnbinom(x=y, mu = exp(grow.mean), size = params["grow_phi"])
+  # pr_grow <- exp(grow.mean)
+  pr_grow <- dnbinom(x=y, mu = exp(grow.mean), size = params["grow_phi"])
  return(pr_grow)
 }
 # I'll truncate this later...
@@ -130,12 +130,12 @@ fx<-function(x, y, params){
   # p_fert <- exp(fert.mean)
   p_fert <- dnbinom(x=y, prob = exp(fert.mean), size = params["fert_phi"])
   spike.mean <- params["spike_beta1"] + params["spike_beta2"]*log(x)
-  p_spike <- exp(spike.mean)
-  # p_spike <-dnbinom(x=y, prob = exp(spike.mean), size = params["spike_phi"])
+  # p_spike <- exp(spike.mean)
+  p_spike <-dnbinom(x=y, prob = exp(spike.mean), size = params["spike_phi"])
   seed.mean <- params["mu_seed"]
   p_rec <- invlogit(params["s_to_s_beta1"])
   seedlings <- p_flw * p_fert * p_spike * seed.mean * p_rec
-  return(list(seedlings = seedlings, p_flw = p_flw, p_fert = p_fert,fert.mean = fert.mean))
+  return(seedlings)
 }
 
 
@@ -161,7 +161,7 @@ bigmatrix<-function(params){
 
 ## population growth rate (eigenalaysis of the projection matrix)
 # matrix <- bigmatrix(loar_params)
-bigmatrix(loar_params)$Tmat
+bigmatrix(loar_params)$MPMmat
 
 y <- 1:33
 fert.mean <- loar_params["fert_beta1"] + loar_params["fert_beta2"]*log(x)
