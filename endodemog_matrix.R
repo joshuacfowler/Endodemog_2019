@@ -94,9 +94,9 @@ loar_params[25] <- quantile(loar$size_t1,0.95,na.rm=T); names(loar_params)[25]<-
 # note that I define max size as the 95TH pctile of observed sized. The very max sizes observed often have very poor 
 # replication, and I find that these few observations (and the corresponding vital rate predictions) can have a strong
 # influence on the results. So this approach is conservative, but you can always experiment with this.
-loar_params[26] <- lapply(rstan::extract(growLOAR, pars = "phi"), FUN = mean); names(loar_params[26]) <- "grow_phi"
-loar_params[27] <- lapply(rstan::extract(fertLOAR, pars = "phi"), FUN = mean); names(loar_params[27]) <- "fert_phi"
-loar_params[28] <- lapply(rstan::extract(spikeLOAR, pars = "phi"), FUN = mean); names(loar_params[28]) <- "spike_phi"
+loar_params[26] <- lapply(rstan::extract(growLOAR, pars = "phi"), FUN = mean); names(loar_params)[26] <- "grow_phi"
+loar_params[27] <- lapply(rstan::extract(fertLOAR, pars = "phi"), FUN = mean); names(loar_params)[27] <- "fert_phi"
+loar_params[28] <- lapply(rstan::extract(spikeLOAR, pars = "phi"), FUN = mean); names(loar_params)[28] <- "spike_phi"
 loar_params <- unlist(loar_params)
 
 # define functions that will be used to populate projection matrix
@@ -110,9 +110,13 @@ sx<-function(x,params){
 
 gxy <- function(x,y,params){
   grow.mean <- params["grow_beta1"] + params["grow_beta2"]*log(x)
-  pr_grow <- dnbinom(x=y, mu = exp(grow.mean), size = params["grow_phi"])
-  return(pr_grow)
+  pr_grow <- exp(grow.mean)
+  # pr_grow <- dnbinom(x=y, mu = exp(grow.mean), size = params["grow_phi"])
+ return(pr_grow)
 }
+# I'll truncate this later...
+# prob=dnbinom(1:n_post_draws, mu = exp(mu[i,j]), size = phi[i]/(1-dnbinom(0, mu = exp(mu[i,j]), size = phi[i]))))
+
 
 #SURVIVAL*GROWTH
 pxy<-function(x,y,params){
@@ -120,16 +124,18 @@ pxy<-function(x,y,params){
 }
 
 #FERTILITY--returns number of seedlings, which we will assume (for now) to be 1-tiller, produced by size X
-fx<-function(x,params){
+fx<-function(x, y, params){
   p_flw <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x))
   fert.mean <- params["fert_beta1"] + params["fert_beta2"]*log(x)
-  p_fert <- dnbinom(x=y, mu = exp(fert.mean), size = params["fert_phi"])
+  # p_fert <- exp(fert.mean)
+  p_fert <- dnbinom(x=y, prob = exp(fert.mean), size = params["fert_phi"])
   spike.mean <- params["spike_beta1"] + params["spike_beta2"]*log(x)
-  p_spike <-dnbinom(x=y, mu = exp(spike.mean), size = params["spike_phi"])
+  p_spike <- exp(spike.mean)
+  # p_spike <-dnbinom(x=y, prob = exp(spike.mean), size = params["spike_phi"])
   seed.mean <- params["mu_seed"]
-  p_rec <- inv_logit(params["s_to_s_beta1"])
+  p_rec <- invlogit(params["s_to_s_beta1"])
   seedlings <- p_flw * p_fert * p_spike * seed.mean * p_rec
-  return(seedlings)
+  return(list(seedlings = seedlings, p_flw = p_flw, p_fert = p_fert,fert.mean = fert.mean))
 }
 
 
@@ -138,11 +144,10 @@ bigmatrix<-function(params){
   
   matdim<-params["max_size"]## matrix dimension
   y <- 1:params["max_size"]## size (tiller number) associated with each class
-
   # Fertility matrix
   Fmat<-matrix(0,matdim,matdim)
   # all seedlings get dumped into top row (1-tiller)
-  Fmat[1,]<-fx(x=y,params=params) 
+  Fmat[1,]<-fx(x = y, y = y, params=params) 
   
   # Growth/survival transition matrix
   Tmat<-matrix(0,matdim,matdim)
@@ -158,9 +163,15 @@ bigmatrix<-function(params){
 # matrix <- bigmatrix(loar_params)
 bigmatrix(loar_params)$Tmat
 
+y <- 1:33
+fert.mean <- loar_params["fert_beta1"] + loar_params["fert_beta2"]*log(x)
+c <- dnbinom(x = y, prob = fert.mean, size = loar_params["fert_phi"])
+c
 
-y <- 33
-x <- y
 
-g <- gxy(x,y, loar_params)
+p_fert <- dnbinom(x=y, prob = exp(fert.mean), size = params["fert_phi"])
 
+v <- gxy(x = 1:33, y = 1:33, params = loar_params)
+v
+z <- fx(x = 1:loar_params["max_size"], y = 1:loar_params["max_size"], params = loar_params)
+z
