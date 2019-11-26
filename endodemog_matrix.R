@@ -110,7 +110,7 @@ sx<-function(x,params){
 
 gxy <- function(x,y,params){
   grow.mean <- params["grow_beta1"] + params["grow_beta2"]*log(x)
-  pr_grow <- base::sample(x=y, size=1, replace=T, prob=dnbinom(1:y, mu = exp(grow.mean), size = params["grow_phi"]))
+  pr_grow <- dnbinom(x=y, mu = exp(grow.mean), size = params["grow_phi"])
   return(pr_grow)
 }
 
@@ -123,9 +123,9 @@ pxy<-function(x,y,params){
 fx<-function(x,params){
   p_flw <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x))
   fert.mean <- params["fert_beta1"] + params["fert_beta2"]*log(x)
-  p_fert <- base::sample(x=y, size=1, replace=T, prob=dnbinom(1:y, mu = exp(fert.mean), size = params["fert_phi"]))
+  p_fert <- dnbinom(x=y, mu = exp(fert.mean), size = params["fert_phi"])
   spike.mean <- params["spike_beta1"] + params["spike_beta2"]*log(x)
-  p_spike <- base::sample(x=y, size=1, replace=T, prob=dnbinom(1:y, mu = exp(spike.mean), size = params["spike_phi"]))
+  p_spike <-dnbinom(x=y, mu = exp(spike.mean), size = params["spike_phi"])
   seed.mean <- params["mu_seed"]
   p_rec <- inv_logit(params["s_to_s_beta1"])
   seedlings <- p_flw * p_fert * p_spike * seed.mean * p_rec
