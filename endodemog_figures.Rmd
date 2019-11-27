@@ -51,13 +51,17 @@ colors2 <- c("#ff7f00","#6a3d9a") #"#ff7f00" = E-, "#e31a1c" = E+
 Plots of variance posteriors
 ```{r variance histogram gg objects, include=FALSE}
 # Variance posterior distributions by species
+# This function has code to do either two distributions of the variance between e+ and e- or a distribution of the difference between the two
 variance_histogram <- function(df){
   require(ggplot2)
-  spp <- ggplot() + 
-    geom_histogram(data = df, aes(`sigma_e[1]`), fill = "#ff7f00", alpha = .4, bins = 200) +
-    geom_histogram(data = df, aes(`sigma_e[2]`), fill = "#6a3d9a", alpha = .4, bins = 200) +
-    labs(x = expression(σ[year]), y = "Posterior density",
-         title = deparse(substitute(df))) + theme_classic()
+  df$"diff_sigma_e" <- df$`sigma_e[1]` - df$`sigma_e[2]`
+  spp <- ggplot() +
+    # geom_histogram(data = df, aes(`sigma_e[1]`), fill = "#ff7f00", alpha = .4, bins = 200) +
+    # geom_histogram(data = df, aes(`sigma_e[2]`), fill = "#6a3d9a", alpha = .4, bins = 200) +
+    geom_histogram(data = df, aes(diff_sigma_e), fill = "#4d9158", alpha = .6, bins = 200) +
+    geom_vline(xintercept = 0) +
+    geom_vline(xintercept = mean(df$diff_sigma_e), col = "#4d9158") + 
+    labs(x = expression(σ[year]), y = "Posterior density") + theme_classic()
   return(spp)
 }
 # survival
@@ -213,42 +217,45 @@ POSYsurv_bins <- surv_data_bins(POSY_surv_data)
 flw_data_bins <- function(df_raw){
   require(tidyverse)
   flw_bin_minus <- df_raw %>% 
-    select(flw_stat_t1, logsize_t, year_t, endo_01) %>%
+    select(FLW_STAT_T1, logsize_t, year_t, endo_01) %>%
     filter(endo_01 == 0) %>% 
+    rename(Endo = endo_01) %>% 
     mutate(Year = as.factor(as.integer(as.factor(year_t)))) %>% 
     mutate(size_bin = cut_interval(logsize_t, n = 15)) %>% 
     group_by(size_bin, Year) %>% 
     summarise(mean_size = mean((logsize_t),na.rm=T),
-              mean_flw = mean(flw_stat_t1,na.rm=T),
+              mean_flw = mean(FLW_STAT_T1,na.rm=T),
               samplesize = n())
 
   flw_bin_plus <- df_raw %>% 
-    select(flw_stat_t1, logsize_t, year_t, endo_01) %>%
+    select(FLW_STAT_T1, logsize_t, year_t, endo_01) %>%
     filter(endo_01 == 1) %>% 
+    rename(Endo = endo_01) %>% 
     mutate(Year = as.factor(as.integer(as.factor(year_t)))) %>% 
     mutate(size_bin = cut_interval(logsize_t, n = 15)) %>% 
     group_by(size_bin, Year) %>% 
     summarise(mean_size = mean((logsize_t),na.rm=T),
-              mean_flw = mean(flw_stat_t1,na.rm=T),
+              mean_flw = mean(FLW_STAT_T1,na.rm=T),
               samplesize = n())
   
   flw_bin_byyear <- df_raw %>% 
-    select(flw_stat_t1, logsize_t, year_t, endo_01) %>%
+    select(FLW_STAT_T1, logsize_t, year_t, endo_01) %>%
+    rename(Endo = endo_01) %>% 
     mutate(Year = as.factor(as.integer(as.factor(year_t)))) %>% 
     mutate(size_bin = cut_interval(logsize_t, n = 15)) %>% 
-    group_by(size_bin, Year, endo_01) %>% 
+    group_by(size_bin, Year, Endo) %>% 
     summarise(mean_size = mean((logsize_t),na.rm=T),
-              mean_flw = mean(flw_stat_t1,na.rm=T),
+              mean_flw = mean(FLW_STAT_T1,na.rm=T),
               samplesize = n())
 
 
-  flw_binmean <- df_raw %>% 
-    select(flw_stat_t1, logsize_t, endo_01) %>%
-    mutate(endo_01 = recode(endo_01, "0" = "E-", "1" = "E+", minus = 'E-', plus = 'E+')) %>% 
+  flw_bin_mean <- df_raw %>% 
+    select(FLW_STAT_T1, logsize_t, endo_01) %>%
+    mutate(Endo = recode(endo_01, "0" = "E-", "1" = "E+", minus = 'E-', plus = 'E+')) %>% 
     mutate(size_bin = cut_interval(logsize_t, n = 12)) %>% 
     group_by(size_bin, endo_01) %>% 
     summarise(mean_size = mean((logsize_t),na.rm=T),
-              mean_flw = mean(flw_stat_t1,na.rm=T),
+              mean_flw = mean(FLW_STAT_T1,na.rm=T),
               samplesize = n())
   flw_bins_list <- list(flw_bin_minus, flw_bin_plus, flw_bin_byyear, flw_bin_mean)
   names(flw_bins_list) <- c("flw_bins_minus", "flw_bins_plus", "flw_bin_byyear", "flw_bin_mean")
@@ -342,41 +349,44 @@ POSYgrow_bins <- grow_data_bins(POSY_grow_data)
 fert_data_bins <- function(df_raw){
   require(tidyverse)
   fert_bin_minus<- df_raw %>% 
-    select(flw_t, logsize_t, year_t, endo_01) %>%
+    select(FLW_T, logsize_t, year_t, endo_01) %>%
     filter(endo_01 == 0) %>% 
+    rename(Endo = endo_01) %>% 
     mutate(Year = as.factor(as.integer(as.factor(year_t)))) %>% 
     mutate(size_bin = cut_interval(logsize_t, n = 15)) %>% 
     group_by(size_bin, Year) %>% 
     summarise(mean_size = mean((logsize_t),na.rm=T),
-              mean_fert = mean(flw_t,na.rm=T),
+              mean_fert = mean(FLW_T,na.rm=T),
               samplesize = n())
   
   fert_bin_plus <- df_raw %>% 
-    select(flw_t, logsize_t, year_t, endo_01) %>%
+    select(FLW_T, logsize_t, year_t, endo_01) %>%
     filter(endo_01 == 1) %>% 
+    rename(Endo = endo_01) %>% 
     mutate(Year = as.factor(as.integer(as.factor(year_t)))) %>% 
     mutate(size_bin = cut_interval(logsize_t, n = 15)) %>% 
     group_by(size_bin, Year) %>% 
     summarise(mean_size = mean((logsize_t),na.rm=T),
-              mean_fert = mean(flw_t,na.rm=T),
+              mean_fert = mean(FLW_T,na.rm=T),
               samplesize = n())
   
   fert_bin_byyear <- df_raw %>% 
-    select(flw_t, logsize_t, year_t, endo_01) %>%
+    select(FLW_T, logsize_t, year_t, endo_01) %>%
     mutate(Year = as.factor(as.integer(as.factor(year_t)))) %>% 
     mutate(size_bin = cut_interval(logsize_t, n = 15)) %>% 
     group_by(size_bin, Year, endo_01) %>% 
     summarise(mean_size = mean((logsize_t),na.rm=T),
-              mean_fert = mean(flw_t,na.rm=T),
+              mean_fert = mean(FLW_T,na.rm=T),
               samplesize = n())
   
   fert_binmean <- df_raw %>% 
-    select(flw_t, logsize_t, endo_01) %>%
+    select(FLW_T, logsize_t, endo_01) %>%
     mutate(endo_01 = as.character(endo_01)) %>% 
+    rename(Endo = endo_01) %>% 
     mutate(size_bin = cut_interval(logsize_t, n = 12)) %>% 
-    group_by(size_bin, endo_01) %>% 
+    group_by(size_bin, Endo) %>% 
     summarise(mean_size = mean((logsize_t),na.rm=T),
-              mean_fert = mean(flw_t,na.rm=T),
+              mean_fert = mean(FLW_T,na.rm=T),
               samplesize = n())
 
   fert_bins_list <- list(fert_bin_minus, fert_bin_plus, fert_bin_byyear, fert_binmean)
@@ -617,10 +627,14 @@ surv_minus_byyear <- function(fits, bins, title){
                        "eminus.y11" = "11")) 
   bins_df <- as.data.frame(bins[["surv_bins_minus"]])
   Eminusbyyear <- ggplot(data = fits_df) +
-  geom_line(aes(x = xdummy, y = value, color = Year),  lwd = .8) +
+  geom_line(aes(x = xdummy, y = value, color = Year),  lwd = 2) +
   geom_point(data = bins_df, aes(x = mean_size, y = mean_surv, color = Year, lwd = samplesize)) +  
   labs(title = title, subtitle = "E-", x = "log(size_t)", y = "Prob. of Survival") +
-  scale_color_manual(values = yearcolors) + guides(lwd = "none") + theme_classic()
+  scale_color_manual(values = yearcolors) + guides(lwd = "none") + theme_classic() +           
+  theme(axis.title = element_text(size = 60), axis.text = element_text(size = 30),
+        legend.title = element_text(size = 40), legend.text = element_text(size = 20)) +
+  guides(colour = guide_legend(override.aes = list(size=10)))
+
 return(Eminusbyyear)  
 }
 surv_plus_byyear <- function(fits, bins, title){
@@ -641,27 +655,30 @@ surv_plus_byyear <- function(fits, bins, title){
                        "eplus.y11" = "11")) 
   bins_df <- as.data.frame(bins[["surv_bins_plus"]])
   Eplusbyyear <- ggplot(data = fits_df) +
-  geom_line(aes(x = xdummy, y = value, color = Year), lwd = .8) +
+  geom_line(aes(x = xdummy, y = value, color = Year), lwd = 2) +
   geom_point(data = bins_df, aes(x = mean_size, y = mean_surv, color = Year, lwd = samplesize)) +  
   labs(title = title, subtitle = "E+", x = "log(size_t)", y = "Prob. of Survival") +
-  scale_color_manual(values = yearcolors) + guides(lwd = "none") +theme_classic()
+  scale_color_manual(values = yearcolors) + guides(lwd = "none") +theme_classic() +
+  theme(axis.title = element_text(size = 60), axis.text = element_text(size = 30),
+        legend.title = element_text(size = 40), legend.text = element_text(size = 20)) +
+  guides(colour = guide_legend(override.aes = list(size=10)))
+
 return(Eplusbyyear)  
 }
 surv_mean <- function(fits, bins, title){
 fits_df <- as.data.frame(fits)
 bins_df <- as.data.frame(bins[["surv_bin_mean"]])
-minus_samps_df <- as.data.frame(fits$eminus$samps) %>% 
-  melt(id = "xdummy")
-plus_samps_df <- as.data.frame(fits$eplus$samps) %>% 
-  melt(id = "xdummy")
 survmean <- ggplot(data = fits_df) +
-  geom_line(aes(x = xdummy, y = eplus.mean), color = "#6a3d9a")+
-  geom_line(aes(x = xdummy, y = eminus.mean), color = "#ff7f00") +
+  geom_line(aes(x = xdummy, y = eplus.mean), color = "#6a3d9a", lwd = 2)+
+  geom_line(aes(x = xdummy, y = eminus.mean), color = "#ff7f00", lwd = 2) +
   geom_ribbon(aes(x = xdummy, ymin = eplus.CI.lower, ymax = eplus.CI.upper), fill = "#6a3d9a", alpha = .3) +
   geom_ribbon(aes(x = xdummy, ymin = eminus.CI.lower, ymax = eminus.CI.upper), fill = "#ff7f00", alpha = .3) +
   geom_point(data = bins_df, aes(x = mean_size, y = mean_surv, color = Endo, lwd = samplesize)) +
   labs(title = title, subtitle = "Mean Survival Probability", x = "log(size_t)", y = "Prob. of Survival") +
-  scale_color_manual(values = colors2) + theme_classic() + guides(lwd = "none")
+  scale_color_manual(values = colors2) + guides(lwd = "none") + theme_classic() +
+  theme(axis.title = element_text(size = 60), axis.text = element_text(size = 30),
+        legend.title = element_text(size = 40), legend.text = element_text(size = 20)) +
+  guides(colour = guide_legend(override.aes = list(size=10)))
 return(survmean)
 }
 
@@ -710,8 +727,16 @@ titlesurvivalfits <- annotate_figure(survivalfits, top = "Survival", left = "")
 
 ```
 
-```{r survival figures, echo=FALSE, fig.width = 9, fig.height = 12}
-titlesurvivalfits
+```{r survival figures, echo=FALSE, fig.width = 4, fig.height = 4}
+# titlesurvivalfits
+
+FESUsurv_mean
+FESUsurv_minus_byyear
+FESUsurv_plus_byyear
+
+POSYsurv_mean
+POSYsurv_minus_byyear
+POSYsurv_plus_byyear
 ```
 
 ```{r growth raw and fits ggobjects, include = FALSE}
@@ -734,10 +759,13 @@ grow_minus_byyear <- function(fits, bins, title){
                        "eminus.y11" = "11")) 
   bins_df <- as.data.frame(bins[["grow_bins_minus"]])
   Eminusbyyear <- ggplot(data = fits_df) +
-  geom_line(aes(x = xdummy, y = value, color = Year),  lwd = .8) +
-  geom_point(data = bins_df, aes(x = mean_size, y = mean_grow, color = Year, lwd = samplesize)) +  
-  labs(title = title, subtitle = "E-", x = "log(size_t)", y = "Prob. of growth") +
-  scale_color_manual(values = yearcolors) + guides(lwd = "none") + theme_classic()
+  geom_line(aes(x = xdummy, y = value, color = Year),  lwd = 2) +
+  geom_point(data = bins_df, aes(x = mean_size, y = mean_grow, color = Year, size = samplesize*60)) +  
+  labs(title = title, subtitle = "E-", x = "log(size_t)", y = "log(size_t1)") +
+  scale_color_manual(values = yearcolors) + guides(lwd = "none") + theme_classic() +
+  theme(axis.title = element_text(size = 60), axis.text = element_text(size = 30),
+        legend.title = element_text(size = 40), legend.text = element_text(size = 20)) +
+  guides(colour = guide_legend(override.aes = list(size=5)))
 return(Eminusbyyear)  
 }
 grow_plus_byyear <- function(fits, bins, title){
@@ -758,23 +786,29 @@ grow_plus_byyear <- function(fits, bins, title){
                        "eplus.y11" = "11")) 
   bins_df <- as.data.frame(bins[["grow_bins_plus"]])
   Eplusbyyear <- ggplot(data = fits_df) +
-  geom_line(aes(x = xdummy, y = value, color = Year), lwd = .8) +
-  geom_point(data = bins_df, aes(x = mean_size, y = mean_grow, color = Year, lwd = samplesize)) +  
-  labs(title = title, subtitle = "E+", x = "log(size_t)", y = "Prob. of growth") +
-  scale_color_manual(values = yearcolors) + guides(lwd = "none") +theme_classic()
+  geom_line(aes(x = xdummy, y = value, color = Year), lwd = 2) +
+  geom_point(data = bins_df, aes(x = mean_size, y = mean_grow, color = Year, size = samplesize*60)) +  
+  labs(title = title, subtitle = "E+", x = "log(size_t)", y = "log(size_t1)") +
+  scale_color_manual(values = yearcolors) + guides(lwd = "none") +theme_classic() +
+  theme(axis.title = element_text(size = 60), axis.text = element_text(size = 30),
+        legend.title = element_text(size = 40), legend.text = element_text(size = 20)) +
+  guides(colour = guide_legend(override.aes = list(size=5)))
 return(Eplusbyyear)  
 }
 grow_mean <- function(fits, bins, title){
 fits_df <- as.data.frame(fits)
 bins_df <- as.data.frame(bins[["grow_bin_mean"]])
 growmean <- ggplot(data = fits_df) +
-  geom_line(aes(x = xdummy, y = eplus.mean), color = "#6a3d9a")+
-  geom_line(aes(x = xdummy, y = eminus.mean), color = "#ff7f00") +
+  geom_line(aes(x = xdummy, y = eplus.mean), color = "#6a3d9a", lwd = 2)+
+  geom_line(aes(x = xdummy, y = eminus.mean), color = "#ff7f00", lwd = 2) +
   geom_ribbon(aes(x = xdummy, ymin = eplus.CI.lower, ymax = eplus.CI.upper), fill = "#6a3d9a", alpha = .3) +
   geom_ribbon(aes(x = xdummy, ymin = eminus.CI.lower, ymax = eminus.CI.upper), fill = "#ff7f00", alpha = .3) +
-  geom_point(data = bins_df, aes(x = mean_size, y = mean_grow, color = Endo, lwd = samplesize)) +
-  labs(title = title, subtitle = "Mean growth Probability", x = "log(size_t)", y = "Prob. of growth") +
-  scale_color_manual(values = colors2) + theme_classic() + guides(lwd = "none")
+  geom_point(data = bins_df, aes(x = mean_size, y = mean_grow, color = Endo, size = samplesize*60)) +
+  labs(title = title, subtitle = "Mean growth Probability", x = "log(size_t)", y = "log(size_t1)") +
+  scale_color_manual(values = colors2) + guides(lwd = "none") + theme_classic() +
+  theme(axis.title = element_text(size = 60), axis.text = element_text(size = 30),
+        legend.title = element_text(size = 40), legend.text = element_text(size = 20)) +
+  guides(colour = guide_legend(override.aes = list(size=10)))
 return(growmean)
 }
 
@@ -823,6 +857,14 @@ titlegrowthfits <- annotate_figure(growthfits, top = "growth", left = "")
 
 ```
 
-```{r growth figures, echo=FALSE, fig.width = 9, fig.height = 12}
-titlegrowthfits
+```{r growth figures, echo=FALSE, fig.width = 4, fig.height = 4}
+# titlegrowthfits
+
+FESUgrow_mean
+FESUgrow_minus_byyear
+FESUgrow_plus_byyear
+
+POSYgrow_mean
+POSYgrow_minus_byyear
+POSYgrow_plus_byyear
 ```
