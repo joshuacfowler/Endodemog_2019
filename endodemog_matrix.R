@@ -138,26 +138,32 @@ return(list(eminus_pr_grow  = eminus_pr_grow, eplus_pr_grow = eplus_pr_grow))
 
 
 #SURVIVAL*GROWTH
-pxy<-function(x,y,params){
-  eminuspxy <- sx(x,params)$eminus_surv * gxy(x,y,params)$eminus_pr_grow
-  epluspxy <- sx(x,params)$eplus_surv * gxy(x,y,params)$eplus_pr_grow
-  return(list(eminuspxy = eminuspxy, epluspxy = epluspxy))
+pxy_eminus<-function(x,y,params){
+  sx(x,params)$eminus_surv * gxy(x,y,params)$eminus_pr_grow
 }
-# pxy(x = 2, y = 10, params = loar_params)
+pxy_eplus<-function(x,y,params){
+  sx(x,params)$eplus_surv * gxy(x,y,params)$eplus_pr_grow
+}
+# pxy_eminus(x = 2, y = 10, params = loar_params)
+# pxy_eplus(x = 2, y = 10, params = loar_params)
 
 #FERTILITY--returns number of seedlings, which we will assume (for now) to be 1-tiller, produced by size X
 fx<-function(x, params){
-  p_flw <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x)) 
-  fert.mean <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x))
-  # p_fert <- exp(fert.mean)
-  #p_fert <- dnbinom(x=y, prob = exp(fert.mean), size = params["fert_phi"])
-  spike.mean <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x))
-  # p_spike <- exp(spike.mean)
-  #p_spike <-dnbinom(x=y, prob = exp(spike.mean), size = params["spike_phi"])
-  seed.mean <- params["mu_seed"]
-  p_rec <- invlogit(params["s_to_s_beta1"])
-  seedlings <- p_flw * fert.mean * spike.mean * seed.mean * p_rec
-  return(seedlings)
+  eminus_p_flw <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x)) 
+  eminus_fert.mean <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x))
+  eminus_spike.mean <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x))
+  eminus_seed.mean <- params["mu_seed"]
+  eminus_p_rec <- invlogit(params["s_to_s_beta1"])
+  
+  eplus_p_flw <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_beta3"])
+  eplus_fert.mean <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x) + params["fert_beta3"])
+  eplus_spike.mean <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_beta3"])
+  eplus_seed.mean <- params["mu_seed"]
+  eplus_p_rec <- invlogit(params["s_to_s_beta1"] + params["s_to_s_beta2"])
+  
+  eminus_seedlings <- eminus_p_flw * eminus_fert.mean * eminus_spike.mean * eminus_seed.mean * eminus_p_rec
+  eplus_seedlings <- eplus_p_flw * eplus_fert.mean * eplus_spike.mean * eplus_seed.mean * eplus_p_rec
+  return(list(eminus_seedlings = eminus_seedlings, eplus_seedlings = eplus_seedlings))
 }
 
 ## note from Tom: we should think about adding a reproductive delay
@@ -167,43 +173,74 @@ bigmatrix<-function(params){
   matdim<-params["max_size"]## matrix dimension
   y <- 1:params["max_size"]## size (tiller number) associated with each class
   # Fertility matrix
-  Fmat<-matrix(0,matdim,matdim)
+  Fmat_eminus<-matrix(0,matdim,matdim)
+  Fmat_eplus<-matrix(0,matdim,matdim)
+  
   # all seedlings get dumped into top row (1-tiller)
-  Fmat[1,]<-fx(x = y, params=params) 
+  Fmat_eminus[1,]<-fx(x = y, params=params)$eminus_seedlings 
+  Fmat_eplus[1,]<-fx(x = y, params=params)$eplus_seedlings 
   
   # Growth/survival transition matrix
-  Tmat<-matrix(0,matdim,matdim)
-  Tmat<-t(outer(y,y,pxy,params=params))
+  Tmat_eminus<-matrix(0,matdim,matdim)
+  Tmat_eminus<-t(outer(y,y,pxy_eminus,params=params))
+  
+  Tmat_eplus<-matrix(0,matdim,matdim)
+  Tmat_eplus<-t(outer(y,y,pxy_eplus,params=params))
   
   # Put it all together
-  MPMmat<-Tmat+Fmat #sum the Tmat & Fmat to get the whole matrix
+  MPMmat_eminus<-Tmat_eminus+Fmat_eminus #sum the Tmat & Fmat to get the whole matrix
+  MPMmat_eplus<-Tmat_eplus+Fmat_eplus #sum the Tmat & Fmat to get the whole matrix
   
-  return(list(MPMmat=MPMmat,Fmat=Fmat,Tmat=Tmat))
+  return(list(MPMmat_eminus=MPMmat_eminus,MPMmat_eplus=MPMmat_eplus,Fmat_eminus=Fmat_eminus,Fmat_eplus=Fmat_eplus,Tmat_eminus=Tmat_eminus,Tmat_eplus=Tmat_eplus))
 }
 
 ## population growth rate (eigenalaysis of the projection matrix)
 # matrix <- bigmatrix(loar_params)
-image(bigmatrix(agpe_params)$Fmat)
-image(bigmatrix(agpe_params)$Tmat)
-image(bigmatrix(agpe_params)$MPMmat)
-lambda(bigmatrix(agpe_params)$MPMmat)
+image(bigmatrix(agpe_params)$Fmat_eplus)
+image(bigmatrix(agpe_params)$Fmat_eminus)
+image(bigmatrix(agpe_params)$Tmat_eplus)
+image(bigmatrix(agpe_params)$Tmat_eminus)
+image(bigmatrix(agpe_params)$MPMmat_eplus)
+image(bigmatrix(agpe_params)$MPMmat_eminus)
+lambda(bigmatrix(agpe_params)$MPMmat_eplus)
+lambda(bigmatrix(agpe_params)$MPMmat_eminus)
 
-image(bigmatrix(fesu_params)$Fmat)
-image(bigmatrix(fesu_params)$Tmat)
-image(bigmatrix(fesu_params)$MPMmat)
-lambda(bigmatrix(fesu_params)$MPMmat)
+image(bigmatrix(fesu_params)$Fmat_eplus)
+image(bigmatrix(fesu_params)$Fmat_eminus)
+image(bigmatrix(fesu_params)$Tmat_eplus)
+image(bigmatrix(fesu_params)$Tmat_eminus)
+image(bigmatrix(fesu_params)$MPMmat_eplus)
+image(bigmatrix(fesu_params)$MPMmat_eminus)
+lambda(bigmatrix(fesu_params)$MPMmat_eplus)
+lambda(bigmatrix(fesu_params)$MPMmat_eminus)
 
-image(bigmatrix(loar_params)$Fmat)
-image(bigmatrix(loar_params)$Tmat)
-image(bigmatrix(loar_params)$MPMmat)
-lambda(bigmatrix(loar_params)$MPMmat)
+image(bigmatrix(loar_params)$Fmat_eplus)
+image(bigmatrix(loar_params)$Fmat_eminus)
+image(bigmatrix(loar_params)$Tmat_eplus)
+image(bigmatrix(loar_params)$Tmat_eminus)
+image(bigmatrix(loar_params)$MPMmat_eplus)
+image(bigmatrix(loar_params)$MPMmat_eminus)
+lambda(bigmatrix(loar_params)$MPMmat_eplus)
+lambda(bigmatrix(loar_params)$MPMmat_eminus)
 
-image(bigmatrix(poal_params)$Fmat)
-image(bigmatrix(poal_params)$Tmat)
-image(bigmatrix(poal_params)$MPMmat)
-lambda(bigmatrix(poal_params)$MPMmat)
+image(bigmatrix(poal_params)$Fmat_eplus)
+image(bigmatrix(poal_params)$Fmat_eminus)
+image(bigmatrix(poal_params)$Tmat_eplus)
+image(bigmatrix(poal_params)$Tmat_eminus)
+image(bigmatrix(poal_params)$MPMmat_eplus)
+image(bigmatrix(poal_params)$MPMmat_eminus)
+lambda(bigmatrix(poal_params)$MPMmat_eplus)
+lambda(bigmatrix(poal_params)$MPMmat_eminus)
 
-image(bigmatrix(posy_params)$Fmat)
-image(bigmatrix(posy_params)$Tmat)
-image(bigmatrix(posy_params)$MPMmat)
-lambda(bigmatrix(posy_params)$MPMmat)
+image(bigmatrix(posy_params)$Fmat_eplus)
+image(bigmatrix(posy_params)$Fmat_eminus)
+image(bigmatrix(posy_params)$Tmat_eplus)
+image(bigmatrix(posy_params)$Tmat_eminus)
+image(bigmatrix(posy_params)$MPMmat_eplus)
+image(bigmatrix(posy_params)$MPMmat_eminus)
+lambda(bigmatrix(posy_params)$MPMmat_eplus)
+lambda(bigmatrix(posy_params)$MPMmat_eminus)
+
+
+
+
