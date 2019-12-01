@@ -246,33 +246,294 @@ posy_params <- getparams(surv = survPOSY, grow = growPOSY, flw = flwPOSY, fert =
 # currently this is fitting as if the E- is the intercept
 
 sx<-function(x,params){
+  # eminus original plants
   eminus_surv <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x))
+  eminus_surv_y1 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_eminus_y1"])
+  eminus_surv_y2 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_eminus_y2"])
+  eminus_surv_y3 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_eminus_y3"])
+  eminus_surv_y4 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_eminus_y4"])
+  eminus_surv_y5 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_eminus_y5"])
+  eminus_surv_y6 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_eminus_y6"])
+  eminus_surv_y7 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_eminus_y7"])
+  eminus_surv_y8 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_eminus_y8"])
+  eminus_surv_y9 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_eminus_y9"])
+  eminus_surv_y10 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_eminus_y10"])
+  eminus_surv_y11 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_eminus_y11"])
+  # eplus original plants
   eplus_surv <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta3"])
-  return(list(eminus_surv = eminus_surv, eplus_surv = eplus_surv))
+  eplus_surv_y1 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_eplus_y1"])
+  eplus_surv_y2 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_eplus_y2"])
+  eplus_surv_y3 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_eplus_y3"])
+  eplus_surv_y4 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_eplus_y4"])
+  eplus_surv_y5 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_eplus_y5"])
+  eplus_surv_y6 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_eplus_y6"])
+  eplus_surv_y7 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_eplus_y7"])
+  eplus_surv_y8 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_eplus_y8"])
+  eplus_surv_y9 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_eplus_y9"])
+  eplus_surv_y10 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_eplus_y10"])
+  eplus_surv_y11 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_eplus_y11"])
+  # eminus recruit plants
+  eminus_surv_rec <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta4"])
+  eminus_surv_rec_y1 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta4"] + params["surv_eminus_y1"])
+  eminus_surv_rec_y2 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta4"] + params["surv_eminus_y2"])
+  eminus_surv_rec_y3 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta4"] + params["surv_eminus_y3"])
+  eminus_surv_rec_y4 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta4"] + params["surv_eminus_y4"])
+  eminus_surv_rec_y5 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta4"] + params["surv_eminus_y5"])
+  eminus_surv_rec_y6 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta4"] + params["surv_eminus_y6"])
+  eminus_surv_rec_y7 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta4"] + params["surv_eminus_y7"])
+  eminus_surv_rec_y8 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta4"] + params["surv_eminus_y8"])
+  eminus_surv_rec_y9 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta4"] + params["surv_eminus_y9"])
+  eminus_surv_rec_y10 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta4"] + params["surv_eminus_y10"])
+  eminus_surv_rec_y11 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta4"] + params["surv_eminus_y11"])
+  # eplus recruit plants
+  eplus_surv_rec <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta3"] + params["surv_beta4"])
+  eplus_surv_rec_y1 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta4"] + params["surv_eplus_y1"])
+  eplus_surv_rec_y2 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta4"] + params["surv_eplus_y2"])
+  eplus_surv_rec_y3 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta4"] + params["surv_eplus_y3"])
+  eplus_surv_rec_y4 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta4"] + params["surv_eplus_y4"])
+  eplus_surv_rec_y5 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta4"] + params["surv_eplus_y5"])
+  eplus_surv_rec_y6 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta4"] + params["surv_eplus_y6"])
+  eplus_surv_rec_y7 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta4"] + params["surv_eplus_y7"])
+  eplus_surv_rec_y8 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta4"] + params["surv_eplus_y8"])
+  eplus_surv_rec_y9 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta4"] + params["surv_eplus_y9"])
+  eplus_surv_rec_y10 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta4"] + params["surv_eplus_y10"])
+  eplus_surv_rec_y11 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta4"] + params["surv_eplus_y11"])
+  
+  return(list(eminus_surv=eminus_surv,eminus_surv_y1=eminus_surv_y1,eminus_surv_y2=eminus_surv_y2,eminus_surv_y3=eminus_surv_y3,eminus_surv_y4=eminus_surv_y4,eminus_surv_y5=eminus_surv_y5,eminus_surv_y6=eminus_surv_y6,eminus_surv_y7=eminus_surv_y7,eminus_surv_y8=eminus_surv_y8,eminus_surv_y9=eminus_surv_y9,eminus_surv_y10=eminus_surv_y10,eminus_surv_y11=eminus_surv_y11,
+              eplus_surv =eplus_surv,eplus_surv_y1=eplus_surv_y1,eplus_surv_y2=eplus_surv_y2,eplus_surv_y3=eplus_surv_y3,eplus_surv_y4=eplus_surv_y4,eplus_surv_y5=eplus_surv_y5,eplus_surv_y6=eplus_surv_y6,eplus_surv_y7=eplus_surv_y7,eplus_surv_y8=eplus_surv_y8,eplus_surv_y9=eplus_surv_y9,eplus_surv_y10=eplus_surv_y10,eplus_surv_y11=eplus_surv_y11,
+              eminus_surv_rec=eminus_surv_rec,eminus_surv_rec_y1=eminus_surv_rec_y1,eminus_surv_rec_y2=eminus_surv_rec_y2,eminus_surv_rec_y3=eminus_surv_rec_y3,eminus_surv_rec_y4=eminus_surv_rec_y4,eminus_surv_rec_y5=eminus_surv_rec_y5,eminus_surv_rec_y6=eminus_surv_rec_y6,eminus_surv_rec_y7=eminus_surv_rec_y7,eminus_surv_rec_y8=eminus_surv_rec_y8,eminus_surv_rec_y9=eminus_surv_rec_y9,eminus_surv_rec_y10=eminus_surv_rec_y10,eminus_surv_rec_y11=eminus_surv_rec_y11,
+              eplus_surv_rec=eplus_surv_rec,eplus_surv_rec_y1=eplus_surv_rec_y1,eplus_surv_rec_y2=eplus_surv_rec_y2,eplus_surv_rec_y3=eplus_surv_rec_y3,eplus_surv_rec_y4=eplus_surv_rec_y4,eplus_surv_rec_y5=eplus_surv_rec_y5,eplus_surv_rec_y6=eplus_surv_rec_y6,eplus_surv_rec_y7=eplus_surv_rec_y7,eplus_surv_rec_y8=eplus_surv_rec_y8,eplus_surv_rec_y9=eplus_surv_rec_y9,eplus_surv_rec_y10=eplus_surv_rec_y10,eplus_surv_rec_y11=eplus_surv_rec_y11))
 }
 # sx(x = 10, params = poal_params) # we can test out our functions for different sizes of x
 gxy <- function(x,y,params){
+  # eminus original plants
   eminus_grow.mean <- params["grow_beta1"] + params["grow_beta2"]*log(x)
   eminus_pr_grow <- dnbinom(x=y, mu = exp(eminus_grow.mean), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eminus_grow.mean), size = params["grow_phi"])))
+  eminus_grow.mean_y1 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_eminus_y1"]
+  eminus_pr_grow_y1 <- dnbinom(x=y, mu = exp(eminus_grow.mean_y1), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eminus_grow.mean_y1), size = params["grow_phi"])))
+  eminus_grow.mean_y2 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_eminus_y2"]
+  eminus_pr_grow_y2 <- dnbinom(x=y, mu = exp(eminus_grow.mean_y2), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eminus_grow.mean_y2), size = params["grow_phi"])))
+  eminus_grow.mean_y3 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_eminus_y3"]
+  eminus_pr_grow_y3 <- dnbinom(x=y, mu = exp(eminus_grow.mean_y3), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eminus_grow.mean_y3), size = params["grow_phi"])))
+  eminus_grow.mean_y4 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_eminus_y4"]
+  eminus_pr_grow_y4 <- dnbinom(x=y, mu = exp(eminus_grow.mean_y4), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eminus_grow.mean_y4), size = params["grow_phi"])))
+  eminus_grow.mean_y5 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_eminus_y5"]
+  eminus_pr_grow_y5 <- dnbinom(x=y, mu = exp(eminus_grow.mean_y5), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eminus_grow.mean_y5), size = params["grow_phi"])))
+  eminus_grow.mean_y6 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_eminus_y6"]
+  eminus_pr_grow_y6 <- dnbinom(x=y, mu = exp(eminus_grow.mean_y6), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eminus_grow.mean_y6), size = params["grow_phi"])))
+  eminus_grow.mean_y7 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_eminus_y7"]
+  eminus_pr_grow_y7 <- dnbinom(x=y, mu = exp(eminus_grow.mean_y7), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eminus_grow.mean_y7), size = params["grow_phi"])))
+  eminus_grow.mean_y8 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_eminus_y8"]
+  eminus_pr_grow_y8 <- dnbinom(x=y, mu = exp(eminus_grow.mean_y8), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eminus_grow.mean_y8), size = params["grow_phi"])))
+  eminus_grow.mean_y9 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_eminus_y9"]
+  eminus_pr_grow_y9 <- dnbinom(x=y, mu = exp(eminus_grow.mean_y9), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eminus_grow.mean_y9), size = params["grow_phi"])))
+  eminus_grow.mean_y10 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_eminus_y10"]
+  eminus_pr_grow_y10 <- dnbinom(x=y, mu = exp(eminus_grow.mean_y10), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eminus_grow.mean_y10), size = params["grow_phi"])))
+  eminus_grow.mean_y11 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_eminus_y11"]
+  eminus_pr_grow_y11 <- dnbinom(x=y, mu = exp(eminus_grow.mean_y11), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eminus_grow.mean_y11), size = params["grow_phi"])))
+  # eplus original plants
   eplus_grow.mean <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta3"]
   eplus_pr_grow <- dnbinom(x=y, mu = exp(eplus_grow.mean), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eplus_grow.mean), size = params["grow_phi"])))
-  
-return(list(eminus_pr_grow  = eminus_pr_grow, eplus_pr_grow = eplus_pr_grow))
+  eplus_grow.mean_y1 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_eplus_y1"]
+  eplus_pr_grow_y1 <- dnbinom(x=y, mu = exp(eplus_grow.mean_y1), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eplus_grow.mean_y1), size = params["grow_phi"])))
+  eplus_grow.mean_y2 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_eplus_y2"]
+  eplus_pr_grow_y2 <- dnbinom(x=y, mu = exp(eplus_grow.mean_y2), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eplus_grow.mean_y2), size = params["grow_phi"])))
+  eplus_grow.mean_y3 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_eplus_y3"]
+  eplus_pr_grow_y3 <- dnbinom(x=y, mu = exp(eplus_grow.mean_y3), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eplus_grow.mean_y3), size = params["grow_phi"])))
+  eplus_grow.mean_y4 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_eplus_y4"]
+  eplus_pr_grow_y4 <- dnbinom(x=y, mu = exp(eplus_grow.mean_y4), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eplus_grow.mean_y4), size = params["grow_phi"])))
+  eplus_grow.mean_y5 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_eplus_y5"]
+  eplus_pr_grow_y5 <- dnbinom(x=y, mu = exp(eplus_grow.mean_y5), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eplus_grow.mean_y5), size = params["grow_phi"])))
+  eplus_grow.mean_y6 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_eplus_y6"]
+  eplus_pr_grow_y6 <- dnbinom(x=y, mu = exp(eplus_grow.mean_y6), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eplus_grow.mean_y6), size = params["grow_phi"])))
+  eplus_grow.mean_y7 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_eplus_y7"]
+  eplus_pr_grow_y7 <- dnbinom(x=y, mu = exp(eplus_grow.mean_y7), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eplus_grow.mean_y7), size = params["grow_phi"])))
+  eplus_grow.mean_y8 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_eplus_y8"]
+  eplus_pr_grow_y8 <- dnbinom(x=y, mu = exp(eplus_grow.mean_y8), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eplus_grow.mean_y8), size = params["grow_phi"])))
+  eplus_grow.mean_y9 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_eplus_y9"]
+  eplus_pr_grow_y9 <- dnbinom(x=y, mu = exp(eplus_grow.mean_y9), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eplus_grow.mean_y9), size = params["grow_phi"])))
+  eplus_grow.mean_y10 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_eplus_y10"]
+  eplus_pr_grow_y10 <- dnbinom(x=y, mu = exp(eplus_grow.mean_y10), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eplus_grow.mean_y10), size = params["grow_phi"])))
+  eplus_grow.mean_y11 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_eplus_y11"]
+  eplus_pr_grow_y11 <- dnbinom(x=y, mu = exp(eplus_grow.mean_y11), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eplus_grow.mean_y11), size = params["grow_phi"])))
+  # eminus recruit plants
+  eminus_grow.mean_rec <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta4"]
+  eminus_pr_grow_rec <- dnbinom(x=y, mu = exp(eminus_grow.mean_rec), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eminus_grow.mean_rec), size = params["grow_phi"])))
+  eminus_grow.mean_rec_y1 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta4"] + params["grow_eminus_y1"]
+  eminus_pr_grow_rec_y1 <- dnbinom(x=y, mu = exp(eminus_grow.mean_rec_y1), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eminus_grow.mean_rec_y1), size = params["grow_phi"])))
+  eminus_grow.mean_rec_y2 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta4"] + params["grow_eminus_y2"]
+  eminus_pr_grow_rec_y2 <- dnbinom(x=y, mu = exp(eminus_grow.mean_rec_y2), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eminus_grow.mean_rec_y2), size = params["grow_phi"])))
+  eminus_grow.mean_rec_y3 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta4"] + params["grow_eminus_y3"]
+  eminus_pr_grow_rec_y3 <- dnbinom(x=y, mu = exp(eminus_grow.mean_rec_y3), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eminus_grow.mean_rec_y3), size = params["grow_phi"])))
+  eminus_grow.mean_rec_y4 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta4"] + params["grow_eminus_y4"]
+  eminus_pr_grow_rec_y4 <- dnbinom(x=y, mu = exp(eminus_grow.mean_rec_y4), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eminus_grow.mean_rec_y4), size = params["grow_phi"])))
+  eminus_grow.mean_rec_y5 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta4"] + params["grow_eminus_y5"]
+  eminus_pr_grow_rec_y5 <- dnbinom(x=y, mu = exp(eminus_grow.mean_rec_y5), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eminus_grow.mean_rec_y5), size = params["grow_phi"])))
+  eminus_grow.mean_rec_y6 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta4"] + params["grow_eminus_y6"]
+  eminus_pr_grow_rec_y6 <- dnbinom(x=y, mu = exp(eminus_grow.mean_rec_y6), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eminus_grow.mean_rec_y6), size = params["grow_phi"])))
+  eminus_grow.mean_rec_y7 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta4"] + params["grow_eminus_y7"]
+  eminus_pr_grow_rec_y7 <- dnbinom(x=y, mu = exp(eminus_grow.mean_rec_y7), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eminus_grow.mean_rec_y7), size = params["grow_phi"])))
+  eminus_grow.mean_rec_y8 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta4"] + params["grow_eminus_y8"]
+  eminus_pr_grow_rec_y8 <- dnbinom(x=y, mu = exp(eminus_grow.mean_rec_y8), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eminus_grow.mean_rec_y8), size = params["grow_phi"])))
+  eminus_grow.mean_rec_y9 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta4"] + params["grow_eminus_y9"]
+  eminus_pr_grow_rec_y9 <- dnbinom(x=y, mu = exp(eminus_grow.mean_rec_y9), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eminus_grow.mean_rec_y9), size = params["grow_phi"])))
+  eminus_grow.mean_rec_y10 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta4"] + params["grow_eminus_y10"]
+  eminus_pr_grow_rec_y10 <- dnbinom(x=y, mu = exp(eminus_grow.mean_rec_y10), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eminus_grow.mean_rec_y10), size = params["grow_phi"])))
+  eminus_grow.mean_rec_y11 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta4"] + params["grow_eminus_y11"]
+  eminus_pr_grow_rec_y11 <- dnbinom(x=y, mu = exp(eminus_grow.mean_rec_y11), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eminus_grow.mean_rec_y11), size = params["grow_phi"])))
+  # eplus recruit plants
+  eplus_grow.mean_rec <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta3"] + params["grow_beta4"]
+  eplus_pr_grow_rec <- dnbinom(x=y, mu = exp(eplus_grow.mean_rec), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eplus_grow.mean_rec), size = params["grow_phi"])))
+  eplus_grow.mean_rec_y1 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta4"] + params["grow_eplus_y1"]
+  eplus_pr_grow_rec_y1 <- dnbinom(x=y, mu = exp(eplus_grow.mean_rec_y1), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eplus_grow.mean_rec_y1), size = params["grow_phi"])))
+  eplus_grow.mean_rec_y2 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta4"] + params["grow_eplus_y2"]
+  eplus_pr_grow_rec_y2 <- dnbinom(x=y, mu = exp(eplus_grow.mean_rec_y2), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eplus_grow.mean_rec_y2), size = params["grow_phi"])))
+  eplus_grow.mean_rec_y3 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta4"] + params["grow_eplus_y3"]
+  eplus_pr_grow_rec_y3 <- dnbinom(x=y, mu = exp(eplus_grow.mean_rec_y3), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eplus_grow.mean_rec_y3), size = params["grow_phi"])))
+  eplus_grow.mean_rec_y4 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta4"] + params["grow_eplus_y4"]
+  eplus_pr_grow_rec_y4 <- dnbinom(x=y, mu = exp(eplus_grow.mean_rec_y4), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eplus_grow.mean_rec_y4), size = params["grow_phi"])))
+  eplus_grow.mean_rec_y5 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta4"] + params["grow_eplus_y5"]
+  eplus_pr_grow_rec_y5 <- dnbinom(x=y, mu = exp(eplus_grow.mean_rec_y5), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eplus_grow.mean_rec_y5), size = params["grow_phi"])))
+  eplus_grow.mean_rec_y6 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta4"] + params["grow_eplus_y6"]
+  eplus_pr_grow_rec_y6 <- dnbinom(x=y, mu = exp(eplus_grow.mean_rec_y6), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eplus_grow.mean_rec_y6), size = params["grow_phi"])))
+  eplus_grow.mean_rec_y7 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta4"] + params["grow_eplus_y7"]
+  eplus_pr_grow_rec_y7 <- dnbinom(x=y, mu = exp(eplus_grow.mean_rec_y7), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eplus_grow.mean_rec_y7), size = params["grow_phi"])))
+  eplus_grow.mean_rec_y8 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta4"] + params["grow_eplus_y8"]
+  eplus_pr_grow_rec_y8 <- dnbinom(x=y, mu = exp(eplus_grow.mean_rec_y8), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eplus_grow.mean_rec_y8), size = params["grow_phi"])))
+  eplus_grow.mean_rec_y9 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta4"] + params["grow_eplus_y9"]
+  eplus_pr_grow_rec_y9 <- dnbinom(x=y, mu = exp(eplus_grow.mean_rec_y9), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eplus_grow.mean_rec_y9), size = params["grow_phi"])))
+  eplus_grow.mean_rec_y10 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta4"] + params["grow_eplus_y10"]
+  eplus_pr_grow_rec_y10 <- dnbinom(x=y, mu = exp(eplus_grow.mean_rec_y10), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eplus_grow.mean_rec_y10), size = params["grow_phi"])))
+  eplus_grow.mean_rec_y11 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta4"] + params["grow_eplus_y11"]
+  eplus_pr_grow_rec_y11 <- dnbinom(x=y, mu = exp(eplus_grow.mean_rec_y11), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eplus_grow.mean_rec_y11), size = params["grow_phi"])))
+
+  return(list(eminus_pr_grow=eminus_pr_grow,eminus_pr_grow_y1=eminus_pr_grow_y1,eminus_pr_grow_y2=eminus_pr_grow_y2,eminus_pr_grow_y3=eminus_pr_grow_y3,eminus_pr_grow_y4=eminus_pr_grow_y4,eminus_pr_grow_y5=eminus_pr_grow_y5,eminus_pr_grow_y6=eminus_pr_grow_y6,eminus_pr_grow_y7=eminus_pr_grow_y7,eminus_pr_grow_y8=eminus_pr_grow_y8,eminus_pr_grow_y9=eminus_pr_grow_y9,eminus_pr_grow_y10=eminus_pr_grow_y10,eminus_pr_grow_y11=eminus_pr_grow_y11, 
+            eplus_pr_grow=eplus_pr_grow,eplus_pr_grow_y1=eplus_pr_grow_y1,eplus_pr_grow_y2=eplus_pr_grow_y2,eplus_pr_grow_y3=eplus_pr_grow_y3,eplus_pr_grow_y4=eplus_pr_grow_y4,eplus_pr_grow_y5=eplus_pr_grow_y5,eplus_pr_grow_y6=eplus_pr_grow_y6,eplus_pr_grow_y7=eplus_pr_grow_y7,eplus_pr_grow_y8=eplus_pr_grow_y8,eplus_pr_grow_y9=eplus_pr_grow_y9,eplus_pr_grow_y10=eplus_pr_grow_y10,eplus_pr_grow_y11=eplus_pr_grow_y11, 
+            eminus_pr_grow_rec=eminus_pr_grow_rec, eminus_pr_grow_rec_y1=eminus_pr_grow_rec_y1,eminus_pr_grow_rec_y2=eminus_pr_grow_rec_y2,eminus_pr_grow_rec_y3=eminus_pr_grow_rec_y3,eminus_pr_grow_rec_y4=eminus_pr_grow_rec_y4,eminus_pr_grow_rec_y5=eminus_pr_grow_rec_y5,eminus_pr_grow_rec_y6=eminus_pr_grow_rec_y6,eminus_pr_grow_rec_y7=eminus_pr_grow_rec_y7,eminus_pr_grow_rec_y8=eminus_pr_grow_rec_y8,eminus_pr_grow_rec_y9=eminus_pr_grow_rec_y9,eminus_pr_grow_rec_y10=eminus_pr_grow_rec_y10,eminus_pr_grow_rec_y11=eminus_pr_grow_rec_y11, 
+            eplus_pr_grow_rec=eplus_pr_grow_rec,eplus_pr_grow_rec_y1=eplus_pr_grow_rec_y1,eplus_pr_grow_rec_y2=eplus_pr_grow_rec_y2,eplus_pr_grow_rec_y3=eplus_pr_grow_rec_y3,eplus_pr_grow_rec_y4=eplus_pr_grow_rec_y4,eplus_pr_grow_rec_y5=eplus_pr_grow_rec_y5,eplus_pr_grow_rec_y6=eplus_pr_grow_rec_y6,eplus_pr_grow_rec_y7=eplus_pr_grow_rec_y7,eplus_pr_grow_rec_y8=eplus_pr_grow_rec_y8,eplus_pr_grow_rec_y9=eplus_pr_grow_rec_y9,eplus_pr_grow_rec_y10=eplus_pr_grow_rec_y10,eplus_pr_grow_rec_y11=eplus_pr_grow_rec_y11))
 }
-# gxy(x = 10, y = 11, params = loar_params)$eplus_pr_grow
+# gxy(x = 10, y = 11, params = loar_params)
 # I'll truncate this later...
 # prob=dnbinom(1:n_post_draws, mu = exp(mu[i,j]), size = phi[i]/(1-dnbinom(0, mu = exp(mu[i,j]), size = phi[i]))))
 
 
 #SURVIVAL*GROWTH
-pxy_eminus<-function(x,y,params){
-  sx(x,params)$eminus_surv * gxy(x,y,params)$eminus_pr_grow
+# This function generates the transition matrix by multiplying growth and survival.
+# the output argument is important in our bigmatrix function to specify which one of the categories we are using.
+pxy<-function(x,y,params,output = ""){
+  # eminus original plants
+  pxy_eminus <- sx(x,params)$eminus_surv * gxy(x,y,params)$eminus_pr_grow
+  pxy_eminus_y1 <- sx(x,params)$eminus_surv_y1 * gxy(x,y,params)$eminus_pr_grow_y1
+  pxy_eminus_y2 <- sx(x,params)$eminus_surv_y1 * gxy(x,y,params)$eminus_pr_grow_y2
+  pxy_eminus_y3 <- sx(x,params)$eminus_surv_y1 * gxy(x,y,params)$eminus_pr_grow_y3
+  pxy_eminus_y4 <- sx(x,params)$eminus_surv_y1 * gxy(x,y,params)$eminus_pr_grow_y4
+  pxy_eminus_y5 <- sx(x,params)$eminus_surv_y1 * gxy(x,y,params)$eminus_pr_grow_y5
+  pxy_eminus_y6 <- sx(x,params)$eminus_surv_y1 * gxy(x,y,params)$eminus_pr_grow_y6
+  pxy_eminus_y7 <- sx(x,params)$eminus_surv_y1 * gxy(x,y,params)$eminus_pr_grow_y7
+  pxy_eminus_y8 <- sx(x,params)$eminus_surv_y1 * gxy(x,y,params)$eminus_pr_grow_y8
+  pxy_eminus_y9 <- sx(x,params)$eminus_surv_y1 * gxy(x,y,params)$eminus_pr_grow_y9
+  pxy_eminus_y10 <- sx(x,params)$eminus_surv_y1 * gxy(x,y,params)$eminus_pr_grow_y10
+  pxy_eminus_y11 <- sx(x,params)$eminus_surv_y1 * gxy(x,y,params)$eminus_pr_grow_y11
+  
+  # eplus original plants
+  pxy_eplus <- sx(x,params)$eplus_surv * gxy(x,y,params)$eplus_pr_grow
+  pxy_eplus_y1 <- sx(x,params)$eplus_surv_y1 * gxy(x,y,params)$eplus_pr_grow_y1
+  pxy_eplus_y2 <- sx(x,params)$eplus_surv_y1 * gxy(x,y,params)$eplus_pr_grow_y2
+  pxy_eplus_y3 <- sx(x,params)$eplus_surv_y1 * gxy(x,y,params)$eplus_pr_grow_y3
+  pxy_eplus_y4 <- sx(x,params)$eplus_surv_y1 * gxy(x,y,params)$eplus_pr_grow_y4
+  pxy_eplus_y5 <- sx(x,params)$eplus_surv_y1 * gxy(x,y,params)$eplus_pr_grow_y5
+  pxy_eplus_y6 <- sx(x,params)$eplus_surv_y1 * gxy(x,y,params)$eplus_pr_grow_y6
+  pxy_eplus_y7 <- sx(x,params)$eplus_surv_y1 * gxy(x,y,params)$eplus_pr_grow_y7
+  pxy_eplus_y8 <- sx(x,params)$eplus_surv_y1 * gxy(x,y,params)$eplus_pr_grow_y8
+  pxy_eplus_y9 <- sx(x,params)$eplus_surv_y1 * gxy(x,y,params)$eplus_pr_grow_y9
+  pxy_eplus_y10 <- sx(x,params)$eplus_surv_y1 * gxy(x,y,params)$eplus_pr_grow_y10
+  pxy_eplus_y11 <- sx(x,params)$eplus_surv_y1 * gxy(x,y,params)$eplus_pr_grow_y11
+  # eminus recruit plants
+  pxy_eminus_rec <- sx(x,params)$eminus_surv_rec * gxy(x,y,params)$eminus_pr_grow_rec
+  pxy_eminus_rec_y1 <- sx(x,params)$eminus_surv_rec_y1 * gxy(x,y,params)$eminus_pr_grow_rec_y1
+  pxy_eminus_rec_y2 <- sx(x,params)$eminus_surv_rec_y2 * gxy(x,y,params)$eminus_pr_grow_rec_y2
+  pxy_eminus_rec_y3 <- sx(x,params)$eminus_surv_rec_y3 * gxy(x,y,params)$eminus_pr_grow_rec_y3
+  pxy_eminus_rec_y4 <- sx(x,params)$eminus_surv_rec_y4 * gxy(x,y,params)$eminus_pr_grow_rec_y4
+  pxy_eminus_rec_y5 <- sx(x,params)$eminus_surv_rec_y5 * gxy(x,y,params)$eminus_pr_grow_rec_y5
+  pxy_eminus_rec_y6 <- sx(x,params)$eminus_surv_rec_y6 * gxy(x,y,params)$eminus_pr_grow_rec_y6
+  pxy_eminus_rec_y7 <- sx(x,params)$eminus_surv_rec_y7 * gxy(x,y,params)$eminus_pr_grow_rec_y7
+  pxy_eminus_rec_y8 <- sx(x,params)$eminus_surv_rec_y8 * gxy(x,y,params)$eminus_pr_grow_rec_y8
+  pxy_eminus_rec_y9 <- sx(x,params)$eminus_surv_rec_y9 * gxy(x,y,params)$eminus_pr_grow_rec_y9
+  pxy_eminus_rec_y10 <- sx(x,params)$eminus_surv_rec_y10 * gxy(x,y,params)$eminus_pr_grow_rec_y10
+  pxy_eminus_rec_y11 <- sx(x,params)$eminus_surv_rec_y11 * gxy(x,y,params)$eminus_pr_grow_rec_y11
+  # eplus recruit plants
+  pxy_eplus_rec <- sx(x,params)$eplus_surv_rec * gxy(x,y,params)$eplus_pr_grow_rec
+  pxy_eplus_rec_y1 <- sx(x,params)$eplus_surv_rec_y1 * gxy(x,y,params)$eplus_pr_grow_rec_y1
+  pxy_eplus_rec_y2 <- sx(x,params)$eplus_surv_rec_y2 * gxy(x,y,params)$eplus_pr_grow_rec_y2
+  pxy_eplus_rec_y3 <- sx(x,params)$eplus_surv_rec_y3 * gxy(x,y,params)$eplus_pr_grow_rec_y3
+  pxy_eplus_rec_y4 <- sx(x,params)$eplus_surv_rec_y4 * gxy(x,y,params)$eplus_pr_grow_rec_y4
+  pxy_eplus_rec_y5 <- sx(x,params)$eplus_surv_rec_y5 * gxy(x,y,params)$eplus_pr_grow_rec_y5
+  pxy_eplus_rec_y6 <- sx(x,params)$eplus_surv_rec_y6 * gxy(x,y,params)$eplus_pr_grow_rec_y6
+  pxy_eplus_rec_y7 <- sx(x,params)$eplus_surv_rec_y7 * gxy(x,y,params)$eplus_pr_grow_rec_y7
+  pxy_eplus_rec_y8 <- sx(x,params)$eplus_surv_rec_y8 * gxy(x,y,params)$eplus_pr_grow_rec_y8
+  pxy_eplus_rec_y9 <- sx(x,params)$eplus_surv_rec_y9 * gxy(x,y,params)$eplus_pr_grow_rec_y9
+  pxy_eplus_rec_y10 <- sx(x,params)$eplus_surv_rec_y10 * gxy(x,y,params)$eplus_pr_grow_rec_y10
+  pxy_eplus_rec_y11 <- sx(x,params)$eplus_surv_rec_y11 * gxy(x,y,params)$eplus_pr_grow_rec_y11
+  
+  result <- list(pxy_eminus=pxy_eminus,pxy_eminus_y1=pxy_eminus_y1,pxy_eminus_y2=pxy_eminus_y2,pxy_eminus_y3=pxy_eminus_y3,pxy_eminus_y4=pxy_eminus_y4,pxy_eminus_y5=pxy_eminus_y5,pxy_eminus_y6=pxy_eminus_y6,pxy_eminus_y7=pxy_eminus_y7,pxy_eminus_y8=pxy_eminus_y8,pxy_eminus_y9=pxy_eminus_y9,pxy_eminus_y10=pxy_eminus_y10,pxy_eminus_y11=pxy_eminus_y11,
+                 pxy_eplus=pxy_eplus,pxy_eplus_y1=pxy_eplus_y1,pxy_eplus_y2=pxy_eplus_y2,pxy_eplus_y3=pxy_eplus_y3,pxy_eplus_y4=pxy_eplus_y4,pxy_eplus_y5=pxy_eplus_y5,pxy_eplus_y6=pxy_eplus_y6,pxy_eplus_y7=pxy_eplus_y7,pxy_eplus_y8=pxy_eplus_y8,pxy_eplus_y9=pxy_eplus_y9,pxy_eplus_y10=pxy_eplus_y10,pxy_eplus_y11=pxy_eplus_y11,
+                 pxy_eminus_rec=pxy_eminus_rec,pxy_eminus_rec_y1=pxy_eminus_rec_y1,pxy_eminus_rec_y2=pxy_eminus_rec_y2,pxy_eminus_rec_y3=pxy_eminus_rec_y3,pxy_eminus_rec_y4=pxy_eminus_rec_y4,pxy_eminus_rec_y5=pxy_eminus_rec_y5,pxy_eminus_rec_y6=pxy_eminus_rec_y6,pxy_eminus_rec_y7=pxy_eminus_rec_y7,pxy_eminus_rec_y8=pxy_eminus_rec_y8,pxy_eminus_rec_y9=pxy_eminus_rec_y9,pxy_eminus_rec_y10=pxy_eminus_rec_y10,pxy_eminus_rec_y11=pxy_eminus_rec_y11,
+                 pxy_eplus_rec=pxy_eplus_rec,pxy_eplus_rec_y1=pxy_eplus_rec_y1,pxy_eplus_rec_y2=pxy_eplus_rec_y2,pxy_eplus_rec_y3=pxy_eplus_rec_y3,pxy_eplus_rec_y4=pxy_eplus_rec_y4,pxy_eplus_rec_y5=pxy_eplus_rec_y5,pxy_eplus_rec_y6=pxy_eplus_rec_y6,pxy_eplus_rec_y7=pxy_eplus_rec_y7,pxy_eplus_rec_y8=pxy_eplus_rec_y8,pxy_eplus_rec_y9=pxy_eplus_rec_y9,pxy_eplus_rec_y10=pxy_eplus_rec_y10,pxy_eplus_rec_y11=pxy_eplus_rec_y11)
+         if(output == "pxy_eminus") return(result$pxy_eminus)
+         if(output == "pxy_eminus_y1") return(result$pxy_eminus_y1)
+         if(output == "pxy_eminus_y2") return(result$pxy_eminus_y2)
+         if(output == "pxy_eminus_y3") return(result$pxy_eminus_y3)
+         if(output == "pxy_eminus_y4") return(result$pxy_eminus_y4)
+         if(output == "pxy_eminus_y5") return(result$pxy_eminus_y5)
+         if(output == "pxy_eminus_y6") return(result$pxy_eminus_y6)
+         if(output == "pxy_eminus_y7") return(result$pxy_eminus_y7)
+         if(output == "pxy_eminus_y8") return(result$pxy_eminus_y8)
+         if(output == "pxy_eminus_y9") return(result$pxy_eminus_y9)
+         if(output == "pxy_eminus_y10") return(result$pxy_eminus_y10)
+         if(output == "pxy_eminus_y11") return(result$pxy_eminus_y11)
+  
+         if(output == "pxy_eplus") return(result$pxy_eplus) 
+         if(output == "pxy_eplus_y1") return(result$pxy_eplus_y1)
+         if(output == "pxy_eplus_y2") return(result$pxy_eplus_y2)
+         if(output == "pxy_eplus_y3") return(result$pxy_eplus_y3)
+         if(output == "pxy_eplus_y4") return(result$pxy_eplus_y4)
+         if(output == "pxy_eplus_y5") return(result$pxy_eplus_y5)
+         if(output == "pxy_eplus_y6") return(result$pxy_eplus_y6)
+         if(output == "pxy_eplus_y7") return(result$pxy_eplus_y7)
+         if(output == "pxy_eplus_y8") return(result$pxy_eplus_y8)
+         if(output == "pxy_eplus_y9") return(result$pxy_eplus_y9)
+         if(output == "pxy_eplus_y10") return(result$pxy_eplus_y10)
+         if(output == "pxy_eplus_y11") return(result$pxy_eplus_y11)
+  
+         if(output == "pxy_eminus_rec") return(result$pxy_eminus_rec)
+         if(output == "pxy_eminus_rec_y1") return(result$pxy_eminus_rec_y1)
+         if(output == "pxy_eminus_rec_y2") return(result$pxy_eminus_rec_y2)
+         if(output == "pxy_eminus_rec_y3") return(result$pxy_eminus_rec_y3)
+         if(output == "pxy_eminus_rec_y4") return(result$pxy_eminus_rec_y4)
+         if(output == "pxy_eminus_rec_y5") return(result$pxy_eminus_rec_y5)
+         if(output == "pxy_eminus_rec_y6") return(result$pxy_eminus_rec_y6)
+         if(output == "pxy_eminus_rec_y7") return(result$pxy_eminus_rec_y7)
+         if(output == "pxy_eminus_rec_y8") return(result$pxy_eminus_rec_y8)
+         if(output == "pxy_eminus_rec_y9") return(result$pxy_eminus_rec_y9)
+         if(output == "pxy_eminus_rec_y10") return(result$pxy_eminus_rec_y10)
+         if(output == "pxy_eminus_rec_y11") return(result$pxy_eminus_rec_y11)
+  
+         if(output == "pxy_eplus_rec") return(result$pxy_eplus_rec) 
+         if(output == "pxy_eplus_rec_y1") return(result$pxy_eplus_rec_y1)
+         if(output == "pxy_eplus_rec_y2") return(result$pxy_eplus_rec_y2)
+         if(output == "pxy_eplus_rec_y3") return(result$pxy_eplus_rec_y3)
+         if(output == "pxy_eplus_rec_y4") return(result$pxy_eplus_rec_y4)
+         if(output == "pxy_eplus_rec_y5") return(result$pxy_eplus_rec_y5)
+         if(output == "pxy_eplus_rec_y6") return(result$pxy_eplus_rec_y6)
+         if(output == "pxy_eplus_rec_y7") return(result$pxy_eplus_rec_y7)
+         if(output == "pxy_eplus_rec_y8") return(result$pxy_eplus_rec_y8)
+         if(output == "pxy_eplus_rec_y9") return(result$pxy_eplus_rec_y9)
+         if(output == "pxy_eplus_rec_y10") return(result$pxy_eplus_rec_y10)
+         if(output == "pxy_eplus_rec_y11") return(result$pxy_eplus_rec_y11)
+  else return(result)
 }
-pxy_eplus<-function(x,y,params){
-  sx(x,params)$eplus_surv * gxy(x,y,params)$eplus_pr_grow
-}
-# pxy_eminus(x = 2, y = 10, params = loar_params)
-# pxy_eplus(x = 2, y = 10, params = loar_params)
+# pxy(x = 10,y = 1,params = loar_params, output = "pxy_eplus_rec_y1")
+
 
 #FERTILITY--returns number of seedlings, which we will assume (for now) to be 1-tiller, produced by size X
 fx<-function(x, params){
@@ -309,10 +570,10 @@ bigmatrix<-function(params){
   
   # Growth/survival transition matrix
   Tmat_eminus<-matrix(0,matdim,matdim)
-  Tmat_eminus<-t(outer(y,y,pxy_eminus,params=params))
+  Tmat_eminus<-t(outer(y,y,pxy,params=params,output="pxy_eminus"))
   
   Tmat_eplus<-matrix(0,matdim,matdim)
-  Tmat_eplus<-t(outer(y,y,pxy_eplus,params=params))
+  Tmat_eplus<-t(outer(y,y,pxy,params=params,output="pxy_eplus"))
   
   # Put it all together
   MPMmat_eminus<-Tmat_eminus+Fmat_eminus #sum the Tmat & Fmat to get the whole matrix
