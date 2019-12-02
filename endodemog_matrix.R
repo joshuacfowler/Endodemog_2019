@@ -1107,7 +1107,120 @@ bigmatrix<-function(params){
 
 ## population growth rate (eigenalaysis of the projection matrix)
 # matrix <- bigmatrix(loar_params)
-image(bigmatrix(agpe_params)$Fmat_eplus)
+# calculating the matrices
+agpe_mat <- bigmatrix(agpe_params)
+fesu_mat <- bigmatrix(fesu_params)
+loar_mat <- bigmatrix(loar_params)
+poal_mat <- bigmatrix(poal_params)
+posy_mat <- bigmatrix(posy_params)
+
+
+# avg lambdas
+lambda(agpe_mat$MPMmat_eminus)
+lambda(agpe_mat$MPMmat_eplus)
+lambda(fesu_mat$MPMmat_eminus)
+lambda(fesu_mat$MPMmat_eplus)
+lambda(loar_mat$MPMmat_eminus)
+lambda(loar_mat$MPMmat_eplus)
+lambda(poal_mat$MPMmat_eminus)
+lambda(poal_mat$MPMmat_eplus)
+lambda(posy_mat$MPMmat_eminus)
+lambda(posy_mat$MPMmat_eplus)
+
+# saving the yearly growth rates to vectors 
+yearly <- function(mat){
+  yearly_eminus <- c()
+  yearly_eplus <- c()
+  yearly_eminus_rec <- c()
+  yearly_eplus_rec <- c()
+  year_t1 <- c()
+  # eminus original
+  yearly_eminus[1] <- lambda(mat$MPMmat_eminus_y1)
+  yearly_eminus[2] <- lambda(mat$MPMmat_eminus_y2)
+  yearly_eminus[3] <- lambda(mat$MPMmat_eminus_y3)
+  yearly_eminus[4] <- lambda(mat$MPMmat_eminus_y4)
+  yearly_eminus[5] <- lambda(mat$MPMmat_eminus_y5)
+  yearly_eminus[6] <- lambda(mat$MPMmat_eminus_y6)
+  yearly_eminus[7] <- lambda(mat$MPMmat_eminus_y7)
+  yearly_eminus[8] <- lambda(mat$MPMmat_eminus_y8)
+  yearly_eminus[9] <- lambda(mat$MPMmat_eminus_y9)
+  yearly_eminus[10] <- lambda(mat$MPMmat_eminus_y10)
+  yearly_eminus[11] <- lambda(mat$MPMmat_eminus_y11)
+  # eplus original
+  yearly_eplus[1] <- lambda(mat$MPMmat_eplus_y1)
+  yearly_eplus[2] <- lambda(mat$MPMmat_eplus_y2)
+  yearly_eplus[3] <- lambda(mat$MPMmat_eplus_y3)
+  yearly_eplus[4] <- lambda(mat$MPMmat_eplus_y4)
+  yearly_eplus[5] <- lambda(mat$MPMmat_eplus_y5)
+  yearly_eplus[6] <- lambda(mat$MPMmat_eplus_y6)
+  yearly_eplus[7] <- lambda(mat$MPMmat_eplus_y7)
+  yearly_eplus[8] <- lambda(mat$MPMmat_eplus_y8)
+  yearly_eplus[9] <- lambda(mat$MPMmat_eplus_y9)
+  yearly_eplus[10] <- lambda(mat$MPMmat_eplus_y10)
+  yearly_eplus[11] <- lambda(mat$MPMmat_eplus_y11)
+  # eminus recruit
+  yearly_eminus_rec[1] <- lambda(mat$MPMmat_eminus_rec_y1)
+  yearly_eminus_rec[2] <- lambda(mat$MPMmat_eminus_rec_y2)
+  yearly_eminus_rec[3] <- lambda(mat$MPMmat_eminus_rec_y3)
+  yearly_eminus_rec[4] <- lambda(mat$MPMmat_eminus_rec_y4)
+  yearly_eminus_rec[5] <- lambda(mat$MPMmat_eminus_rec_y5)
+  yearly_eminus_rec[6] <- lambda(mat$MPMmat_eminus_rec_y6)
+  yearly_eminus_rec[7] <- lambda(mat$MPMmat_eminus_rec_y7)
+  yearly_eminus_rec[8] <- lambda(mat$MPMmat_eminus_rec_y8)
+  yearly_eminus_rec[9] <- lambda(mat$MPMmat_eminus_rec_y9)
+  yearly_eminus_rec[10] <- lambda(mat$MPMmat_eminus_rec_y10)
+  yearly_eminus_rec[11] <- lambda(mat$MPMmat_eminus_rec_y11)
+  # eplus recruit
+  yearly_eplus_rec[1] <- lambda(mat$MPMmat_eplus_rec_y1)
+  yearly_eplus_rec[2] <- lambda(mat$MPMmat_eplus_rec_y2)
+  yearly_eplus_rec[3] <- lambda(mat$MPMmat_eplus_rec_y3)
+  yearly_eplus_rec[4] <- lambda(mat$MPMmat_eplus_rec_y4)
+  yearly_eplus_rec[5] <- lambda(mat$MPMmat_eplus_rec_y5)
+  yearly_eplus_rec[6] <- lambda(mat$MPMmat_eplus_rec_y6)
+  yearly_eplus_rec[7] <- lambda(mat$MPMmat_eplus_rec_y7)
+  yearly_eplus_rec[8] <- lambda(mat$MPMmat_eplus_rec_y8)
+  yearly_eplus_rec[9] <- lambda(mat$MPMmat_eplus_rec_y9)
+  yearly_eplus_rec[10] <- lambda(mat$MPMmat_eplus_rec_y10)
+  yearly_eplus_rec[11] <- lambda(mat$MPMmat_eplus_rec_y11)
+  # year date
+  year_t1[1] <- 2008
+  year_t1[2] <- 2009
+  year_t1[3] <- 2010
+  year_t1[4] <- 2011
+  year_t1[5] <- 2012
+  year_t1[6] <- 2013
+  year_t1[7] <- 2014
+  year_t1[8] <- 2015
+  year_t1[9] <- 2016
+  year_t1[10] <- 2017
+  year_t1[11] <- 2018
+
+  lambdas <- as_tibble(cbind(yearly_eminus, yearly_eplus, yearly_eminus_rec, yearly_eplus_rec, year_t1))
+  
+  return(lambdas)
+}
+# yearly(agpe_mat)
+
+hist(yearly(agpe_mat)$yearly_eminus)
+hist(yearly(agpe_mat)$yearly_eplus)
+
+
+# I'm gonna read in env. data here
+# weather station data downloaded from NOAA, the service is down temporarily
+NOAA <- read_csv(file = "~/Dropbox/EndodemogData//.csv"")
+temp <- read_csv(file = "")
+
+
+
+
+
+
+
+
+
+
+
+image(bigmatrix(agpe_params)$Fmat_eplus_y1)
 image(bigmatrix(agpe_params)$Fmat_eminus)
 image(bigmatrix(agpe_params)$Tmat_eplus)
 image(bigmatrix(agpe_params)$Tmat_eminus)
