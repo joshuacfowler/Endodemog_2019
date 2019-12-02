@@ -103,7 +103,6 @@ params[28] <- quantile(data$size_t1,0.95,na.rm=T); names(params)[28]<-"max_size"
 # note that I define max size as the 95TH pctile of observed sized. The very max sizes observed often have very poor 
 # replication, and I find that these few observations (and the corresponding vital rate predictions) can have a strong
 # influence on the results. So this approach is conservative, but you can always experiment with this.
-
 # collect the endo specific year parameters
 # surv
 params[29] <- lapply(rstan::extract(surv, pars = "tau_year[1,1]"), FUN = mean); names(params)[29] <- "surv_eminus_y1"
@@ -180,55 +179,80 @@ params[92] <- lapply(rstan::extract(flw, pars = "tau_year[2,9]"), FUN = mean); n
 params[93] <- lapply(rstan::extract(flw, pars = "tau_year[2,10]"), FUN = mean); names(params)[93] <- "flw_eplus_y10"
 params[94] <- lapply(rstan::extract(flw, pars = "tau_year[2,11]"), FUN = mean); names(params)[94] <- "flw_eplus_y11"
 
-# spike
-params[95] <- lapply(rstan::extract(spike, pars = "tau_year[1,1]"), FUN = mean); names(params)[95] <- "spike_eminus_y1"
-params[96] <- lapply(rstan::extract(spike, pars = "tau_year[1,2]"), FUN = mean); names(params)[96] <- "spike_eminus_y2"
-params[97] <- lapply(rstan::extract(spike, pars = "tau_year[1,3]"), FUN = mean); names(params)[97] <- "spike_eminus_y3"
-params[98] <- lapply(rstan::extract(spike, pars = "tau_year[1,4]"), FUN = mean); names(params)[98] <- "spike_eminus_y4"
-params[99] <- lapply(rstan::extract(spike, pars = "tau_year[1,5]"), FUN = mean); names(params)[99] <- "spike_eminus_y5"
-params[100] <- lapply(rstan::extract(spike, pars = "tau_year[1,6]"), FUN = mean); names(params)[100] <- "spike_eminus_y6"
-params[101] <- lapply(rstan::extract(spike, pars = "tau_year[1,7]"), FUN = mean); names(params)[101] <- "spike_eminus_y7"
-params[102] <- lapply(rstan::extract(spike, pars = "tau_year[1,8]"), FUN = mean); names(params)[102] <- "spike_eminus_y8"
-params[103] <- lapply(rstan::extract(spike, pars = "tau_year[1,9]"), FUN = mean); names(params)[103] <- "spike_eminus_y9"
-params[104] <- lapply(rstan::extract(spike, pars = "tau_year[1,10]"), FUN = mean); names(params)[104] <- "spike_eminus_y10"
-params[105] <- lapply(rstan::extract(spike, pars = "tau_year[1,11]"), FUN = mean); names(params)[105] <- "spike_eminus_y11"
+# fert
+params[95] <- lapply(rstan::extract(fert, pars = "tau_year[1,1]"), FUN = mean); names(params)[95] <- "fert_eminus_y1"
+params[96] <- lapply(rstan::extract(fert, pars = "tau_year[1,2]"), FUN = mean); names(params)[96] <- "fert_eminus_y2"
+params[97] <- lapply(rstan::extract(fert, pars = "tau_year[1,3]"), FUN = mean); names(params)[97] <- "fert_eminus_y3"
+params[98] <- lapply(rstan::extract(fert, pars = "tau_year[1,4]"), FUN = mean); names(params)[98] <- "fert_eminus_y4"
+params[99] <- lapply(rstan::extract(fert, pars = "tau_year[1,5]"), FUN = mean); names(params)[99] <- "fert_eminus_y5"
+params[100] <- lapply(rstan::extract(fert, pars = "tau_year[1,6]"), FUN = mean); names(params)[100] <- "fert_eminus_y6"
+params[101] <- lapply(rstan::extract(fert, pars = "tau_year[1,7]"), FUN = mean); names(params)[101] <- "fert_eminus_y7"
+params[102] <- lapply(rstan::extract(fert, pars = "tau_year[1,8]"), FUN = mean); names(params)[102] <- "fert_eminus_y8"
+params[103] <- lapply(rstan::extract(fert, pars = "tau_year[1,9]"), FUN = mean); names(params)[103] <- "fert_eminus_y9"
+params[104] <- lapply(rstan::extract(fert, pars = "tau_year[1,10]"), FUN = mean); names(params)[104] <- "fert_eminus_y10"
+params[105] <- lapply(rstan::extract(fert, pars = "tau_year[1,11]"), FUN = mean); names(params)[105] <- "fert_eminus_y11"
 
-params[106] <- lapply(rstan::extract(spike, pars = "tau_year[2,1]"), FUN = mean); names(params)[106] <- "spike_eplus_y1"
-params[107] <- lapply(rstan::extract(spike, pars = "tau_year[2,2]"), FUN = mean); names(params)[107] <- "spike_eplus_y2"
-params[108] <- lapply(rstan::extract(spike, pars = "tau_year[2,3]"), FUN = mean); names(params)[108] <- "spike_eplus_y3"
-params[109] <- lapply(rstan::extract(spike, pars = "tau_year[2,4]"), FUN = mean); names(params)[109] <- "spike_eplus_y4"
-params[110] <- lapply(rstan::extract(spike, pars = "tau_year[2,5]"), FUN = mean); names(params)[110] <- "spike_eplus_y5"
-params[111] <- lapply(rstan::extract(spike, pars = "tau_year[2,6]"), FUN = mean); names(params)[111] <- "spike_eplus_y6"
-params[112] <- lapply(rstan::extract(spike, pars = "tau_year[2,7]"), FUN = mean); names(params)[112] <- "spike_eplus_y7"
-params[113] <- lapply(rstan::extract(spike, pars = "tau_year[2,8]"), FUN = mean); names(params)[113] <- "spike_eplus_y8"
-params[114] <- lapply(rstan::extract(spike, pars = "tau_year[2,9]"), FUN = mean); names(params)[114] <- "spike_eplus_y9"
-params[115] <- lapply(rstan::extract(spike, pars = "tau_year[2,10]"), FUN = mean); names(params)[115] <- "spike_eplus_y10"
-params[116] <- lapply(rstan::extract(spike, pars = "tau_year[2,11]"), FUN = mean); names(params)[116] <- "spike_eplus_y11"
+params[106] <- lapply(rstan::extract(fert, pars = "tau_year[2,1]"), FUN = mean); names(params)[106] <- "fert_eplus_y1"
+params[107] <- lapply(rstan::extract(fert, pars = "tau_year[2,2]"), FUN = mean); names(params)[107] <- "fert_eplus_y2"
+params[108] <- lapply(rstan::extract(fert, pars = "tau_year[2,3]"), FUN = mean); names(params)[108] <- "fert_eplus_y3"
+params[109] <- lapply(rstan::extract(fert, pars = "tau_year[2,4]"), FUN = mean); names(params)[109] <- "fert_eplus_y4"
+params[110] <- lapply(rstan::extract(fert, pars = "tau_year[2,5]"), FUN = mean); names(params)[110] <- "fert_eplus_y5"
+params[111] <- lapply(rstan::extract(fert, pars = "tau_year[2,6]"), FUN = mean); names(params)[111] <- "fert_eplus_y6"
+params[112] <- lapply(rstan::extract(fert, pars = "tau_year[2,7]"), FUN = mean); names(params)[112] <- "fert_eplus_y7"
+params[113] <- lapply(rstan::extract(fert, pars = "tau_year[2,8]"), FUN = mean); names(params)[113] <- "fert_eplus_y8"
+params[114] <- lapply(rstan::extract(fert, pars = "tau_year[2,9]"), FUN = mean); names(params)[114] <- "fert_eplus_y9"
+params[115] <- lapply(rstan::extract(fert, pars = "tau_year[2,10]"), FUN = mean); names(params)[115] <- "fert_eplus_y10"
+params[116] <- lapply(rstan::extract(fert, pars = "tau_year[2,11]"), FUN = mean); names(params)[116] <- "fert_eplus_y11"
+
+# spike
+params[117] <- lapply(rstan::extract(spike, pars = "tau_year[1,1]"), FUN = mean); names(params)[117] <- "spike_eminus_y1"
+params[118] <- lapply(rstan::extract(spike, pars = "tau_year[1,2]"), FUN = mean); names(params)[118] <- "spike_eminus_y2"
+params[119] <- lapply(rstan::extract(spike, pars = "tau_year[1,3]"), FUN = mean); names(params)[119] <- "spike_eminus_y3"
+params[120] <- lapply(rstan::extract(spike, pars = "tau_year[1,4]"), FUN = mean); names(params)[120] <- "spike_eminus_y4"
+params[121] <- lapply(rstan::extract(spike, pars = "tau_year[1,5]"), FUN = mean); names(params)[121] <- "spike_eminus_y5"
+params[122] <- lapply(rstan::extract(spike, pars = "tau_year[1,6]"), FUN = mean); names(params)[122] <- "spike_eminus_y6"
+params[123] <- lapply(rstan::extract(spike, pars = "tau_year[1,7]"), FUN = mean); names(params)[123] <- "spike_eminus_y7"
+params[124] <- lapply(rstan::extract(spike, pars = "tau_year[1,8]"), FUN = mean); names(params)[124] <- "spike_eminus_y8"
+params[125] <- lapply(rstan::extract(spike, pars = "tau_year[1,9]"), FUN = mean); names(params)[125] <- "spike_eminus_y9"
+params[126] <- lapply(rstan::extract(spike, pars = "tau_year[1,10]"), FUN = mean); names(params)[126] <- "spike_eminus_y10"
+params[127] <- lapply(rstan::extract(spike, pars = "tau_year[1,11]"), FUN = mean); names(params)[127] <- "spike_eminus_y11"
+
+params[128] <- lapply(rstan::extract(spike, pars = "tau_year[2,1]"), FUN = mean); names(params)[128] <- "spike_eplus_y1"
+params[129] <- lapply(rstan::extract(spike, pars = "tau_year[2,2]"), FUN = mean); names(params)[129] <- "spike_eplus_y2"
+params[130] <- lapply(rstan::extract(spike, pars = "tau_year[2,3]"), FUN = mean); names(params)[130] <- "spike_eplus_y3"
+params[131] <- lapply(rstan::extract(spike, pars = "tau_year[2,4]"), FUN = mean); names(params)[131] <- "spike_eplus_y4"
+params[132] <- lapply(rstan::extract(spike, pars = "tau_year[2,5]"), FUN = mean); names(params)[132] <- "spike_eplus_y5"
+params[133] <- lapply(rstan::extract(spike, pars = "tau_year[2,6]"), FUN = mean); names(params)[133] <- "spike_eplus_y6"
+params[134] <- lapply(rstan::extract(spike, pars = "tau_year[2,7]"), FUN = mean); names(params)[134] <- "spike_eplus_y7"
+params[135] <- lapply(rstan::extract(spike, pars = "tau_year[2,8]"), FUN = mean); names(params)[135] <- "spike_eplus_y8"
+params[136] <- lapply(rstan::extract(spike, pars = "tau_year[2,9]"), FUN = mean); names(params)[136] <- "spike_eplus_y9"
+params[137] <- lapply(rstan::extract(spike, pars = "tau_year[2,10]"), FUN = mean); names(params)[137] <- "spike_eplus_y10"
+params[138] <- lapply(rstan::extract(spike, pars = "tau_year[2,11]"), FUN = mean); names(params)[138] <- "spike_eplus_y11"
 
 # s_to_s
-params[117] <- lapply(rstan::extract(s_to_s, pars = "tau_year[1,1]"), FUN = mean); names(params)[117] <- "s_to_s_eminus_y1"
-params[118] <- lapply(rstan::extract(s_to_s, pars = "tau_year[1,2]"), FUN = mean); names(params)[118] <- "s_to_s_eminus_y2"
-params[119] <- lapply(rstan::extract(s_to_s, pars = "tau_year[1,3]"), FUN = mean); names(params)[119] <- "s_to_s_eminus_y3"
-params[120] <- lapply(rstan::extract(s_to_s, pars = "tau_year[1,4]"), FUN = mean); names(params)[120] <- "s_to_s_eminus_y4"
-params[121] <- lapply(rstan::extract(s_to_s, pars = "tau_year[1,5]"), FUN = mean); names(params)[121] <- "s_to_s_eminus_y5"
-params[122] <- lapply(rstan::extract(s_to_s, pars = "tau_year[1,6]"), FUN = mean); names(params)[122] <- "s_to_s_eminus_y6"
-params[123] <- lapply(rstan::extract(s_to_s, pars = "tau_year[1,7]"), FUN = mean); names(params)[123] <- "s_to_s_eminus_y7"
-params[124] <- lapply(rstan::extract(s_to_s, pars = "tau_year[1,8]"), FUN = mean); names(params)[124] <- "s_to_s_eminus_y8"
-params[125] <- lapply(rstan::extract(s_to_s, pars = "tau_year[1,9]"), FUN = mean); names(params)[125] <- "s_to_s_eminus_y9"
-params[126] <- lapply(rstan::extract(s_to_s, pars = "tau_year[1,10]"), FUN = mean); names(params)[126] <- "s_to_s_eminus_y10"
-params[127] <- lapply(rstan::extract(s_to_s, pars = "tau_year[1,11]"), FUN = mean); names(params)[127] <- "s_to_s_eminus_y11"
+params[139] <- lapply(rstan::extract(s_to_s, pars = "tau_year[1,1]"), FUN = mean); names(params)[139] <- "s_to_s_eminus_y1"
+params[140] <- lapply(rstan::extract(s_to_s, pars = "tau_year[1,2]"), FUN = mean); names(params)[140] <- "s_to_s_eminus_y2"
+params[141] <- lapply(rstan::extract(s_to_s, pars = "tau_year[1,3]"), FUN = mean); names(params)[141] <- "s_to_s_eminus_y3"
+params[142] <- lapply(rstan::extract(s_to_s, pars = "tau_year[1,4]"), FUN = mean); names(params)[142] <- "s_to_s_eminus_y4"
+params[143] <- lapply(rstan::extract(s_to_s, pars = "tau_year[1,5]"), FUN = mean); names(params)[143] <- "s_to_s_eminus_y5"
+params[144] <- lapply(rstan::extract(s_to_s, pars = "tau_year[1,6]"), FUN = mean); names(params)[144] <- "s_to_s_eminus_y6"
+params[145] <- lapply(rstan::extract(s_to_s, pars = "tau_year[1,7]"), FUN = mean); names(params)[145] <- "s_to_s_eminus_y7"
+params[146] <- lapply(rstan::extract(s_to_s, pars = "tau_year[1,8]"), FUN = mean); names(params)[146] <- "s_to_s_eminus_y8"
+params[147] <- lapply(rstan::extract(s_to_s, pars = "tau_year[1,9]"), FUN = mean); names(params)[147] <- "s_to_s_eminus_y9"
+params[148] <- lapply(rstan::extract(s_to_s, pars = "tau_year[1,10]"), FUN = mean); names(params)[148] <- "s_to_s_eminus_y10"
+params[149] <- lapply(rstan::extract(s_to_s, pars = "tau_year[1,11]"), FUN = mean); names(params)[149] <- "s_to_s_eminus_y11"
 
-params[128] <- lapply(rstan::extract(s_to_s, pars = "tau_year[2,1]"), FUN = mean); names(params)[128] <- "s_to_s_eplus_y1"
-params[129] <- lapply(rstan::extract(s_to_s, pars = "tau_year[2,2]"), FUN = mean); names(params)[129] <- "s_to_s_eplus_y2"
-params[130] <- lapply(rstan::extract(s_to_s, pars = "tau_year[2,3]"), FUN = mean); names(params)[130] <- "s_to_s_eplus_y3"
-params[131] <- lapply(rstan::extract(s_to_s, pars = "tau_year[2,4]"), FUN = mean); names(params)[131] <- "s_to_s_eplus_y4"
-params[132] <- lapply(rstan::extract(s_to_s, pars = "tau_year[2,5]"), FUN = mean); names(params)[132] <- "s_to_s_eplus_y5"
-params[133] <- lapply(rstan::extract(s_to_s, pars = "tau_year[2,6]"), FUN = mean); names(params)[133] <- "s_to_s_eplus_y6"
-params[134] <- lapply(rstan::extract(s_to_s, pars = "tau_year[2,7]"), FUN = mean); names(params)[134] <- "s_to_s_eplus_y7"
-params[135] <- lapply(rstan::extract(s_to_s, pars = "tau_year[2,8]"), FUN = mean); names(params)[135] <- "s_to_s_eplus_y8"
-params[136] <- lapply(rstan::extract(s_to_s, pars = "tau_year[2,9]"), FUN = mean); names(params)[136] <- "s_to_s_eplus_y9"
-params[137] <- lapply(rstan::extract(s_to_s, pars = "tau_year[2,10]"), FUN = mean); names(params)[137] <- "s_to_s_eplus_y10"
-params[138] <- lapply(rstan::extract(s_to_s, pars = "tau_year[2,11]"), FUN = mean); names(params)[138] <- "s_to_s_eplus_y11"
+params[150] <- lapply(rstan::extract(s_to_s, pars = "tau_year[2,1]"), FUN = mean); names(params)[150] <- "s_to_s_eplus_y1"
+params[151] <- lapply(rstan::extract(s_to_s, pars = "tau_year[2,2]"), FUN = mean); names(params)[151] <- "s_to_s_eplus_y2"
+params[152] <- lapply(rstan::extract(s_to_s, pars = "tau_year[2,3]"), FUN = mean); names(params)[152] <- "s_to_s_eplus_y3"
+params[153] <- lapply(rstan::extract(s_to_s, pars = "tau_year[2,4]"), FUN = mean); names(params)[153] <- "s_to_s_eplus_y4"
+params[154] <- lapply(rstan::extract(s_to_s, pars = "tau_year[2,5]"), FUN = mean); names(params)[154] <- "s_to_s_eplus_y5"
+params[155] <- lapply(rstan::extract(s_to_s, pars = "tau_year[2,6]"), FUN = mean); names(params)[155] <- "s_to_s_eplus_y6"
+params[156] <- lapply(rstan::extract(s_to_s, pars = "tau_year[2,7]"), FUN = mean); names(params)[156] <- "s_to_s_eplus_y7"
+params[157] <- lapply(rstan::extract(s_to_s, pars = "tau_year[2,8]"), FUN = mean); names(params)[157] <- "s_to_s_eplus_y8"
+params[158] <- lapply(rstan::extract(s_to_s, pars = "tau_year[2,9]"), FUN = mean); names(params)[158] <- "s_to_s_eplus_y9"
+params[159] <- lapply(rstan::extract(s_to_s, pars = "tau_year[2,10]"), FUN = mean); names(params)[159] <- "s_to_s_eplus_y10"
+params[160] <- lapply(rstan::extract(s_to_s, pars = "tau_year[2,11]"), FUN = mean); names(params)[160] <- "s_to_s_eplus_y11"
 
 params <- unlist(params)
 return(params)
@@ -261,17 +285,17 @@ sx<-function(x,params){
   eminus_surv_y11 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_eminus_y11"])
   # eplus original plants
   eplus_surv <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta3"])
-  eplus_surv_y1 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_eplus_y1"])
-  eplus_surv_y2 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_eplus_y2"])
-  eplus_surv_y3 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_eplus_y3"])
-  eplus_surv_y4 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_eplus_y4"])
-  eplus_surv_y5 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_eplus_y5"])
-  eplus_surv_y6 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_eplus_y6"])
-  eplus_surv_y7 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_eplus_y7"])
-  eplus_surv_y8 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_eplus_y8"])
-  eplus_surv_y9 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_eplus_y9"])
-  eplus_surv_y10 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_eplus_y10"])
-  eplus_surv_y11 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_eplus_y11"])
+  eplus_surv_y1 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta3"] + params["surv_eplus_y1"])
+  eplus_surv_y2 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta3"] + params["surv_eplus_y2"])
+  eplus_surv_y3 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta3"] + params["surv_eplus_y3"])
+  eplus_surv_y4 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta3"] + params["surv_eplus_y4"])
+  eplus_surv_y5 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta3"] + params["surv_eplus_y5"])
+  eplus_surv_y6 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta3"] + params["surv_eplus_y6"])
+  eplus_surv_y7 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta3"] + params["surv_eplus_y7"])
+  eplus_surv_y8 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta3"] + params["surv_eplus_y8"])
+  eplus_surv_y9 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta3"] + params["surv_eplus_y9"])
+  eplus_surv_y10 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta3"] + params["surv_eplus_y10"])
+  eplus_surv_y11 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta3"] + params["surv_eplus_y11"])
   # eminus recruit plants
   eminus_surv_rec <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta4"])
   eminus_surv_rec_y1 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta4"] + params["surv_eminus_y1"])
@@ -287,20 +311,20 @@ sx<-function(x,params){
   eminus_surv_rec_y11 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta4"] + params["surv_eminus_y11"])
   # eplus recruit plants
   eplus_surv_rec <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta3"] + params["surv_beta4"])
-  eplus_surv_rec_y1 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta4"] + params["surv_eplus_y1"])
-  eplus_surv_rec_y2 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta4"] + params["surv_eplus_y2"])
-  eplus_surv_rec_y3 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta4"] + params["surv_eplus_y3"])
-  eplus_surv_rec_y4 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta4"] + params["surv_eplus_y4"])
-  eplus_surv_rec_y5 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta4"] + params["surv_eplus_y5"])
-  eplus_surv_rec_y6 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta4"] + params["surv_eplus_y6"])
-  eplus_surv_rec_y7 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta4"] + params["surv_eplus_y7"])
-  eplus_surv_rec_y8 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta4"] + params["surv_eplus_y8"])
-  eplus_surv_rec_y9 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta4"] + params["surv_eplus_y9"])
-  eplus_surv_rec_y10 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta4"] + params["surv_eplus_y10"])
-  eplus_surv_rec_y11 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta4"] + params["surv_eplus_y11"])
+  eplus_surv_rec_y1 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta3"] + params["surv_beta4"] + params["surv_eplus_y1"])
+  eplus_surv_rec_y2 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta3"] + params["surv_beta4"] + params["surv_eplus_y2"])
+  eplus_surv_rec_y3 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta3"] + params["surv_beta4"] + params["surv_eplus_y3"])
+  eplus_surv_rec_y4 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta3"] + params["surv_beta4"] + params["surv_eplus_y4"])
+  eplus_surv_rec_y5 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta3"] + params["surv_beta4"] + params["surv_eplus_y5"])
+  eplus_surv_rec_y6 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta3"] + params["surv_beta4"] + params["surv_eplus_y6"])
+  eplus_surv_rec_y7 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta3"] + params["surv_beta4"] + params["surv_eplus_y7"])
+  eplus_surv_rec_y8 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta3"] + params["surv_beta4"] + params["surv_eplus_y8"])
+  eplus_surv_rec_y9 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta3"] + params["surv_beta4"] + params["surv_eplus_y9"])
+  eplus_surv_rec_y10 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta3"] + params["surv_beta4"] + params["surv_eplus_y10"])
+  eplus_surv_rec_y11 <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta3"] + params["surv_beta4"] + params["surv_eplus_y11"])
   
   return(list(eminus_surv=eminus_surv,eminus_surv_y1=eminus_surv_y1,eminus_surv_y2=eminus_surv_y2,eminus_surv_y3=eminus_surv_y3,eminus_surv_y4=eminus_surv_y4,eminus_surv_y5=eminus_surv_y5,eminus_surv_y6=eminus_surv_y6,eminus_surv_y7=eminus_surv_y7,eminus_surv_y8=eminus_surv_y8,eminus_surv_y9=eminus_surv_y9,eminus_surv_y10=eminus_surv_y10,eminus_surv_y11=eminus_surv_y11,
-              eplus_surv =eplus_surv,eplus_surv_y1=eplus_surv_y1,eplus_surv_y2=eplus_surv_y2,eplus_surv_y3=eplus_surv_y3,eplus_surv_y4=eplus_surv_y4,eplus_surv_y5=eplus_surv_y5,eplus_surv_y6=eplus_surv_y6,eplus_surv_y7=eplus_surv_y7,eplus_surv_y8=eplus_surv_y8,eplus_surv_y9=eplus_surv_y9,eplus_surv_y10=eplus_surv_y10,eplus_surv_y11=eplus_surv_y11,
+              eplus_surv=eplus_surv,eplus_surv_y1=eplus_surv_y1,eplus_surv_y2=eplus_surv_y2,eplus_surv_y3=eplus_surv_y3,eplus_surv_y4=eplus_surv_y4,eplus_surv_y5=eplus_surv_y5,eplus_surv_y6=eplus_surv_y6,eplus_surv_y7=eplus_surv_y7,eplus_surv_y8=eplus_surv_y8,eplus_surv_y9=eplus_surv_y9,eplus_surv_y10=eplus_surv_y10,eplus_surv_y11=eplus_surv_y11,
               eminus_surv_rec=eminus_surv_rec,eminus_surv_rec_y1=eminus_surv_rec_y1,eminus_surv_rec_y2=eminus_surv_rec_y2,eminus_surv_rec_y3=eminus_surv_rec_y3,eminus_surv_rec_y4=eminus_surv_rec_y4,eminus_surv_rec_y5=eminus_surv_rec_y5,eminus_surv_rec_y6=eminus_surv_rec_y6,eminus_surv_rec_y7=eminus_surv_rec_y7,eminus_surv_rec_y8=eminus_surv_rec_y8,eminus_surv_rec_y9=eminus_surv_rec_y9,eminus_surv_rec_y10=eminus_surv_rec_y10,eminus_surv_rec_y11=eminus_surv_rec_y11,
               eplus_surv_rec=eplus_surv_rec,eplus_surv_rec_y1=eplus_surv_rec_y1,eplus_surv_rec_y2=eplus_surv_rec_y2,eplus_surv_rec_y3=eplus_surv_rec_y3,eplus_surv_rec_y4=eplus_surv_rec_y4,eplus_surv_rec_y5=eplus_surv_rec_y5,eplus_surv_rec_y6=eplus_surv_rec_y6,eplus_surv_rec_y7=eplus_surv_rec_y7,eplus_surv_rec_y8=eplus_surv_rec_y8,eplus_surv_rec_y9=eplus_surv_rec_y9,eplus_surv_rec_y10=eplus_surv_rec_y10,eplus_surv_rec_y11=eplus_surv_rec_y11))
 }
@@ -334,27 +358,27 @@ gxy <- function(x,y,params){
   # eplus original plants
   eplus_grow.mean <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta3"]
   eplus_pr_grow <- dnbinom(x=y, mu = exp(eplus_grow.mean), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eplus_grow.mean), size = params["grow_phi"])))
-  eplus_grow.mean_y1 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_eplus_y1"]
+  eplus_grow.mean_y1 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta3"] + params["grow_eplus_y1"]
   eplus_pr_grow_y1 <- dnbinom(x=y, mu = exp(eplus_grow.mean_y1), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eplus_grow.mean_y1), size = params["grow_phi"])))
-  eplus_grow.mean_y2 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_eplus_y2"]
+  eplus_grow.mean_y2 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta3"] + params["grow_eplus_y2"]
   eplus_pr_grow_y2 <- dnbinom(x=y, mu = exp(eplus_grow.mean_y2), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eplus_grow.mean_y2), size = params["grow_phi"])))
-  eplus_grow.mean_y3 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_eplus_y3"]
+  eplus_grow.mean_y3 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta3"] + params["grow_eplus_y3"]
   eplus_pr_grow_y3 <- dnbinom(x=y, mu = exp(eplus_grow.mean_y3), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eplus_grow.mean_y3), size = params["grow_phi"])))
-  eplus_grow.mean_y4 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_eplus_y4"]
+  eplus_grow.mean_y4 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta3"] + params["grow_eplus_y4"]
   eplus_pr_grow_y4 <- dnbinom(x=y, mu = exp(eplus_grow.mean_y4), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eplus_grow.mean_y4), size = params["grow_phi"])))
-  eplus_grow.mean_y5 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_eplus_y5"]
+  eplus_grow.mean_y5 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta3"] + params["grow_eplus_y5"]
   eplus_pr_grow_y5 <- dnbinom(x=y, mu = exp(eplus_grow.mean_y5), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eplus_grow.mean_y5), size = params["grow_phi"])))
-  eplus_grow.mean_y6 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_eplus_y6"]
+  eplus_grow.mean_y6 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta3"] + params["grow_eplus_y6"]
   eplus_pr_grow_y6 <- dnbinom(x=y, mu = exp(eplus_grow.mean_y6), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eplus_grow.mean_y6), size = params["grow_phi"])))
-  eplus_grow.mean_y7 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_eplus_y7"]
+  eplus_grow.mean_y7 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta3"] + params["grow_eplus_y7"]
   eplus_pr_grow_y7 <- dnbinom(x=y, mu = exp(eplus_grow.mean_y7), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eplus_grow.mean_y7), size = params["grow_phi"])))
-  eplus_grow.mean_y8 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_eplus_y8"]
+  eplus_grow.mean_y8 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta3"] + params["grow_eplus_y8"]
   eplus_pr_grow_y8 <- dnbinom(x=y, mu = exp(eplus_grow.mean_y8), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eplus_grow.mean_y8), size = params["grow_phi"])))
-  eplus_grow.mean_y9 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_eplus_y9"]
+  eplus_grow.mean_y9 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta3"] + params["grow_eplus_y9"]
   eplus_pr_grow_y9 <- dnbinom(x=y, mu = exp(eplus_grow.mean_y9), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eplus_grow.mean_y9), size = params["grow_phi"])))
-  eplus_grow.mean_y10 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_eplus_y10"]
+  eplus_grow.mean_y10 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta3"] + params["grow_eplus_y10"]
   eplus_pr_grow_y10 <- dnbinom(x=y, mu = exp(eplus_grow.mean_y10), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eplus_grow.mean_y10), size = params["grow_phi"])))
-  eplus_grow.mean_y11 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_eplus_y11"]
+  eplus_grow.mean_y11 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta3"] + params["grow_eplus_y11"]
   eplus_pr_grow_y11 <- dnbinom(x=y, mu = exp(eplus_grow.mean_y11), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eplus_grow.mean_y11), size = params["grow_phi"])))
   # eminus recruit plants
   eminus_grow.mean_rec <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta4"]
@@ -384,27 +408,27 @@ gxy <- function(x,y,params){
   # eplus recruit plants
   eplus_grow.mean_rec <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta3"] + params["grow_beta4"]
   eplus_pr_grow_rec <- dnbinom(x=y, mu = exp(eplus_grow.mean_rec), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eplus_grow.mean_rec), size = params["grow_phi"])))
-  eplus_grow.mean_rec_y1 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta4"] + params["grow_eplus_y1"]
+  eplus_grow.mean_rec_y1 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta3"] + params["grow_beta4"] + params["grow_eplus_y1"]
   eplus_pr_grow_rec_y1 <- dnbinom(x=y, mu = exp(eplus_grow.mean_rec_y1), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eplus_grow.mean_rec_y1), size = params["grow_phi"])))
-  eplus_grow.mean_rec_y2 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta4"] + params["grow_eplus_y2"]
+  eplus_grow.mean_rec_y2 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta3"] + params["grow_beta4"] + params["grow_eplus_y2"]
   eplus_pr_grow_rec_y2 <- dnbinom(x=y, mu = exp(eplus_grow.mean_rec_y2), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eplus_grow.mean_rec_y2), size = params["grow_phi"])))
-  eplus_grow.mean_rec_y3 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta4"] + params["grow_eplus_y3"]
+  eplus_grow.mean_rec_y3 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta3"] + params["grow_beta4"] + params["grow_eplus_y3"]
   eplus_pr_grow_rec_y3 <- dnbinom(x=y, mu = exp(eplus_grow.mean_rec_y3), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eplus_grow.mean_rec_y3), size = params["grow_phi"])))
-  eplus_grow.mean_rec_y4 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta4"] + params["grow_eplus_y4"]
+  eplus_grow.mean_rec_y4 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta3"] + params["grow_beta4"] + params["grow_eplus_y4"]
   eplus_pr_grow_rec_y4 <- dnbinom(x=y, mu = exp(eplus_grow.mean_rec_y4), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eplus_grow.mean_rec_y4), size = params["grow_phi"])))
-  eplus_grow.mean_rec_y5 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta4"] + params["grow_eplus_y5"]
+  eplus_grow.mean_rec_y5 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta3"] + params["grow_beta4"] + params["grow_eplus_y5"]
   eplus_pr_grow_rec_y5 <- dnbinom(x=y, mu = exp(eplus_grow.mean_rec_y5), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eplus_grow.mean_rec_y5), size = params["grow_phi"])))
-  eplus_grow.mean_rec_y6 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta4"] + params["grow_eplus_y6"]
+  eplus_grow.mean_rec_y6 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta3"] + params["grow_beta4"] + params["grow_eplus_y6"]
   eplus_pr_grow_rec_y6 <- dnbinom(x=y, mu = exp(eplus_grow.mean_rec_y6), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eplus_grow.mean_rec_y6), size = params["grow_phi"])))
-  eplus_grow.mean_rec_y7 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta4"] + params["grow_eplus_y7"]
+  eplus_grow.mean_rec_y7 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta3"] + params["grow_beta4"] + params["grow_eplus_y7"]
   eplus_pr_grow_rec_y7 <- dnbinom(x=y, mu = exp(eplus_grow.mean_rec_y7), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eplus_grow.mean_rec_y7), size = params["grow_phi"])))
-  eplus_grow.mean_rec_y8 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta4"] + params["grow_eplus_y8"]
+  eplus_grow.mean_rec_y8 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta3"] + params["grow_beta4"] + params["grow_eplus_y8"]
   eplus_pr_grow_rec_y8 <- dnbinom(x=y, mu = exp(eplus_grow.mean_rec_y8), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eplus_grow.mean_rec_y8), size = params["grow_phi"])))
-  eplus_grow.mean_rec_y9 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta4"] + params["grow_eplus_y9"]
+  eplus_grow.mean_rec_y9 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta3"] + params["grow_beta4"] + params["grow_eplus_y9"]
   eplus_pr_grow_rec_y9 <- dnbinom(x=y, mu = exp(eplus_grow.mean_rec_y9), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eplus_grow.mean_rec_y9), size = params["grow_phi"])))
-  eplus_grow.mean_rec_y10 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta4"] + params["grow_eplus_y10"]
+  eplus_grow.mean_rec_y10 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta3"] + params["grow_beta4"] + params["grow_eplus_y10"]
   eplus_pr_grow_rec_y10 <- dnbinom(x=y, mu = exp(eplus_grow.mean_rec_y10), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eplus_grow.mean_rec_y10), size = params["grow_phi"])))
-  eplus_grow.mean_rec_y11 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta4"] + params["grow_eplus_y11"]
+  eplus_grow.mean_rec_y11 <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta3"] + params["grow_beta4"] + params["grow_eplus_y11"]
   eplus_pr_grow_rec_y11 <- dnbinom(x=y, mu = exp(eplus_grow.mean_rec_y11), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(eplus_grow.mean_rec_y11), size = params["grow_phi"])))
 
   return(list(eminus_pr_grow=eminus_pr_grow,eminus_pr_grow_y1=eminus_pr_grow_y1,eminus_pr_grow_y2=eminus_pr_grow_y2,eminus_pr_grow_y3=eminus_pr_grow_y3,eminus_pr_grow_y4=eminus_pr_grow_y4,eminus_pr_grow_y5=eminus_pr_grow_y5,eminus_pr_grow_y6=eminus_pr_grow_y6,eminus_pr_grow_y7=eminus_pr_grow_y7,eminus_pr_grow_y8=eminus_pr_grow_y8,eminus_pr_grow_y9=eminus_pr_grow_y9,eminus_pr_grow_y10=eminus_pr_grow_y10,eminus_pr_grow_y11=eminus_pr_grow_y11, 
@@ -537,22 +561,259 @@ pxy<-function(x,y,params,output = ""){
 
 #FERTILITY--returns number of seedlings, which we will assume (for now) to be 1-tiller, produced by size X
 fx<-function(x, params){
-  eminus_p_flw <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x)) 
-  eminus_fert.mean <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x))
-  eminus_spike.mean <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x))
-  eminus_seed.mean <- params["mu_seed"]
-  eminus_p_rec <- invlogit(params["s_to_s_beta1"])
+  # flowering
+    # eminus original plants
+    eminus_flw <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x)) 
+    eminus_flw_y1 <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_eminus_y1"]) 
+    eminus_flw_y2 <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_eminus_y2"]) 
+    eminus_flw_y3 <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_eminus_y3"]) 
+    eminus_flw_y4 <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_eminus_y4"]) 
+    eminus_flw_y5 <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_eminus_y5"]) 
+    eminus_flw_y6 <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_eminus_y6"]) 
+    eminus_flw_y7 <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_eminus_y7"]) 
+    eminus_flw_y8 <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_eminus_y8"]) 
+    eminus_flw_y9 <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_eminus_y9"]) 
+    eminus_flw_y10 <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_eminus_y10"]) 
+    eminus_flw_y11 <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_eminus_y11"]) 
+    # eplus original plants
+    eplus_flw <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_beta3"])
+    eplus_flw_y1 <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_beta3"] + params["flw_eplus_y1"])
+    eplus_flw_y2 <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_beta3"] + params["flw_eplus_y2"])
+    eplus_flw_y3 <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_beta3"] + params["flw_eplus_y3"])
+    eplus_flw_y4 <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_beta3"] + params["flw_eplus_y4"])
+    eplus_flw_y5 <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_beta3"] + params["flw_eplus_y5"])
+    eplus_flw_y6 <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_beta3"] + params["flw_eplus_y6"])
+    eplus_flw_y7 <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_beta3"] + params["flw_eplus_y7"])
+    eplus_flw_y8 <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_beta3"] + params["flw_eplus_y8"])
+    eplus_flw_y9 <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_beta3"] + params["flw_eplus_y9"])
+    eplus_flw_y10 <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_beta3"] + params["flw_eplus_y10"])
+    eplus_flw_y11 <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_beta3"] + params["flw_eplus_y11"])
+    # eminus recruit plants
+    eminus_flw_rec <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_beta4"]) 
+    eminus_flw_rec_y1 <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_beta4"] + params["flw_eminus_y1"]) 
+    eminus_flw_rec_y2 <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_beta4"] + params["flw_eminus_y2"]) 
+    eminus_flw_rec_y3 <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_beta4"] + params["flw_eminus_y3"]) 
+    eminus_flw_rec_y4 <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_beta4"] + params["flw_eminus_y4"]) 
+    eminus_flw_rec_y5 <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_beta4"] + params["flw_eminus_y5"]) 
+    eminus_flw_rec_y6 <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_beta4"] + params["flw_eminus_y6"]) 
+    eminus_flw_rec_y7 <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_beta4"] + params["flw_eminus_y7"]) 
+    eminus_flw_rec_y8 <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_beta4"] + params["flw_eminus_y8"]) 
+    eminus_flw_rec_y9 <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_beta4"] + params["flw_eminus_y9"]) 
+    eminus_flw_rec_y10 <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_beta4"] + params["flw_eminus_y10"]) 
+    eminus_flw_rec_y11 <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_beta4"] + params["flw_eminus_y11"]) 
+    # eplus recruit plants
+    eplus_flw_rec <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_beta3"] + params["flw_beta4"])
+    eplus_flw_rec_y1 <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_beta3"] + params["flw_beta4"] + params["flw_eplus_y1"])
+    eplus_flw_rec_y2 <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_beta3"] + params["flw_beta4"] + params["flw_eplus_y2"])
+    eplus_flw_rec_y3 <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_beta3"] + params["flw_beta4"] + params["flw_eplus_y3"])
+    eplus_flw_rec_y4 <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_beta3"] + params["flw_beta4"] + params["flw_eplus_y4"])
+    eplus_flw_rec_y5 <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_beta3"] + params["flw_beta4"] + params["flw_eplus_y5"])
+    eplus_flw_rec_y6 <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_beta3"] + params["flw_beta4"] + params["flw_eplus_y6"])
+    eplus_flw_rec_y7 <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_beta3"] + params["flw_beta4"] + params["flw_eplus_y7"])
+    eplus_flw_rec_y8 <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_beta3"] + params["flw_beta4"] + params["flw_eplus_y8"])
+    eplus_flw_rec_y9 <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_beta3"] + params["flw_beta4"] + params["flw_eplus_y9"])
+    eplus_flw_rec_y10 <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_beta3"] + params["flw_beta4"] + params["flw_eplus_y10"])
+    eplus_flw_rec_y11 <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_beta3"] + params["flw_beta4"] + params["flw_eplus_y11"])
+
+  # flw tiller no.
+    # eminus original plants
+    eminus_fert <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x))
+    eminus_fert_y1 <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x) + params["fert_eminus_y1"])
+    eminus_fert_y2 <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x) + params["fert_eminus_y2"])
+    eminus_fert_y3 <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x) + params["fert_eminus_y3"])
+    eminus_fert_y4 <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x) + params["fert_eminus_y4"])
+    eminus_fert_y5 <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x) + params["fert_eminus_y5"])
+    eminus_fert_y6 <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x) + params["fert_eminus_y6"])
+    eminus_fert_y7 <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x) + params["fert_eminus_y7"])
+    eminus_fert_y8 <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x) + params["fert_eminus_y8"])
+    eminus_fert_y9 <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x) + params["fert_eminus_y9"])
+    eminus_fert_y10 <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x) + params["fert_eminus_y10"])
+    eminus_fert_y11 <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x) + params["fert_eminus_y11"])
+    # eplus original plants
+    eplus_fert <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x) + params["fert_beta3"])
+    eplus_fert_y1 <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x) + params["fert_beta3"] + params["fert_eplus_y1"])
+    eplus_fert_y2 <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x) + params["fert_beta3"] + params["fert_eplus_y2"])
+    eplus_fert_y3 <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x) + params["fert_beta3"] + params["fert_eplus_y3"])
+    eplus_fert_y4 <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x) + params["fert_beta3"] + params["fert_eplus_y4"])
+    eplus_fert_y5 <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x) + params["fert_beta3"] + params["fert_eplus_y5"])
+    eplus_fert_y6 <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x) + params["fert_beta3"] + params["fert_eplus_y6"])
+    eplus_fert_y7 <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x) + params["fert_beta3"] + params["fert_eplus_y7"])
+    eplus_fert_y8 <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x) + params["fert_beta3"] + params["fert_eplus_y8"])
+    eplus_fert_y9 <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x) + params["fert_beta3"] + params["fert_eplus_y9"])
+    eplus_fert_y10 <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x) + params["fert_beta3"] + params["fert_eplus_y10"])
+    eplus_fert_y11 <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x) + params["fert_beta3"] + params["fert_eplus_y11"])
+    # eminus recruit plants
+    eminus_fert_rec <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x)+ params["fert_beta4"])
+    eminus_fert_rec_y1 <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x)+ params["fert_beta4"] + params["fert_eminus_y1"])
+    eminus_fert_rec_y2 <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x)+ params["fert_beta4"] + params["fert_eminus_y2"])
+    eminus_fert_rec_y3 <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x)+ params["fert_beta4"] + params["fert_eminus_y3"])
+    eminus_fert_rec_y4 <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x)+ params["fert_beta4"] + params["fert_eminus_y4"])
+    eminus_fert_rec_y5 <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x)+ params["fert_beta4"] + params["fert_eminus_y5"])
+    eminus_fert_rec_y6 <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x)+ params["fert_beta4"] + params["fert_eminus_y6"])
+    eminus_fert_rec_y7 <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x)+ params["fert_beta4"] + params["fert_eminus_y7"])
+    eminus_fert_rec_y8 <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x)+ params["fert_beta4"] + params["fert_eminus_y8"])
+    eminus_fert_rec_y9 <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x)+ params["fert_beta4"] + params["fert_eminus_y9"])
+    eminus_fert_rec_y10 <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x)+ params["fert_beta4"] + params["fert_eminus_y10"])
+    eminus_fert_rec_y11 <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x)+ params["fert_beta4"] + params["fert_eminus_y11"])
+    # eplus recruit plants
+    eplus_fert_rec <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x) + params["fert_beta3"] + params["fert_beta4"])
+    eplus_fert_rec_y1 <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x) + params["fert_beta3"] + params["fert_beta4"] + params["fert_eplus_y1"])
+    eplus_fert_rec_y2 <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x) + params["fert_beta3"] + params["fert_beta4"] + params["fert_eplus_y2"])
+    eplus_fert_rec_y3 <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x) + params["fert_beta3"] + params["fert_beta4"] + params["fert_eplus_y3"])
+    eplus_fert_rec_y4 <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x) + params["fert_beta3"] + params["fert_beta4"] + params["fert_eplus_y4"])
+    eplus_fert_rec_y5 <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x) + params["fert_beta3"] + params["fert_beta4"] + params["fert_eplus_y5"])
+    eplus_fert_rec_y6 <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x) + params["fert_beta3"] + params["fert_beta4"] + params["fert_eplus_y6"])
+    eplus_fert_rec_y7 <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x) + params["fert_beta3"] + params["fert_beta4"] + params["fert_eplus_y7"])
+    eplus_fert_rec_y8 <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x) + params["fert_beta3"] + params["fert_beta4"] + params["fert_eplus_y8"])
+    eplus_fert_rec_y9 <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x) + params["fert_beta3"] + params["fert_beta4"] + params["fert_eplus_y9"])
+    eplus_fert_rec_y10 <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x) + params["fert_beta3"] + params["fert_beta4"] + params["fert_eplus_y10"])
+    eplus_fert_rec_y11 <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x) + params["fert_beta3"] + params["fert_beta4"] + params["fert_eplus_y11"])
+    
+  # spikelet per infl
+    # eminus original plants
+    eminus_spike <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x))
+    eminus_spike_y1 <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_eminus_y1"])
+    eminus_spike_y2 <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_eminus_y2"])
+    eminus_spike_y3 <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_eminus_y3"])
+    eminus_spike_y4 <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_eminus_y4"])
+    eminus_spike_y5 <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_eminus_y5"])
+    eminus_spike_y6 <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_eminus_y6"])
+    eminus_spike_y7 <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_eminus_y7"])
+    eminus_spike_y8 <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_eminus_y8"])
+    eminus_spike_y9 <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_eminus_y9"])
+    eminus_spike_y10 <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_eminus_y10"])
+    eminus_spike_y11 <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_eminus_y11"])
+    # eplus original plants
+    eplus_spike <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_beta3"])
+    eplus_spike_y1 <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_beta3"] + params["spike_eplus_y1"])
+    eplus_spike_y2 <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_beta3"] + params["spike_eplus_y2"])
+    eplus_spike_y3 <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_beta3"] + params["spike_eplus_y3"])
+    eplus_spike_y4 <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_beta3"] + params["spike_eplus_y4"])
+    eplus_spike_y5 <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_beta3"] + params["spike_eplus_y5"])
+    eplus_spike_y6 <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_beta3"] + params["spike_eplus_y6"])
+    eplus_spike_y7 <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_beta3"] + params["spike_eplus_y7"])
+    eplus_spike_y8 <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_beta3"] + params["spike_eplus_y8"])
+    eplus_spike_y9 <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_beta3"] + params["spike_eplus_y9"])
+    eplus_spike_y10 <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_beta3"] + params["spike_eplus_y10"])
+    eplus_spike_y11 <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_beta3"] + params["spike_eplus_y11"])
+    # eminus recruit plants
+    eminus_spike_rec <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_beta4"])
+    eminus_spike_rec_y1 <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_beta4"] + params["spike_eminus_y1"])
+    eminus_spike_rec_y2 <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_beta4"] + params["spike_eminus_y2"])
+    eminus_spike_rec_y3 <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_beta4"] + params["spike_eminus_y3"])
+    eminus_spike_rec_y4 <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_beta4"] + params["spike_eminus_y4"])
+    eminus_spike_rec_y5 <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_beta4"] + params["spike_eminus_y5"])
+    eminus_spike_rec_y6 <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_beta4"] + params["spike_eminus_y6"])
+    eminus_spike_rec_y7 <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_beta4"] + params["spike_eminus_y7"])
+    eminus_spike_rec_y8 <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_beta4"] + params["spike_eminus_y8"])
+    eminus_spike_rec_y9 <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_beta4"] + params["spike_eminus_y9"])
+    eminus_spike_rec_y10 <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_beta4"] + params["spike_eminus_y10"])
+    eminus_spike_rec_y11 <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_beta4"] + params["spike_eminus_y11"])
+    # eplus recruit plants
+    eplus_spike_rec <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_beta3"] + params["spike_beta4"])
+    eplus_spike_rec_y1 <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_beta3"] + params["spike_beta4"] + params["spike_eplus_y1"])
+    eplus_spike_rec_y2 <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_beta3"] + params["spike_beta4"] + params["spike_eplus_y2"])
+    eplus_spike_rec_y3 <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_beta3"] + params["spike_beta4"] + params["spike_eplus_y3"])
+    eplus_spike_rec_y4 <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_beta3"] + params["spike_beta4"] + params["spike_eplus_y4"])
+    eplus_spike_rec_y5 <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_beta3"] + params["spike_beta4"] + params["spike_eplus_y5"])
+    eplus_spike_rec_y6 <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_beta3"] + params["spike_beta4"] + params["spike_eplus_y6"])
+    eplus_spike_rec_y7 <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_beta3"] + params["spike_beta4"] + params["spike_eplus_y7"])
+    eplus_spike_rec_y8 <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_beta3"] + params["spike_beta4"] + params["spike_eplus_y8"])
+    eplus_spike_rec_y9 <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_beta3"] + params["spike_beta4"] + params["spike_eplus_y9"])
+    eplus_spike_rec_y10 <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_beta3"] + params["spike_beta4"] + params["spike_eplus_y10"])
+    eplus_spike_rec_y11 <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_beta3"] + params["spike_beta4"] + params["spike_eplus_y11"])
+    
+  # recruitment probability
+    # eminus
+    eminus_recruitment <- invlogit(params["s_to_s_beta1"])
+    eminus_recruitment_y1 <- invlogit(params["s_to_s_beta1"] + params["s_to_s_eminus_y1"])
+    eminus_recruitment_y2 <- invlogit(params["s_to_s_beta1"] + params["s_to_s_eminus_y2"])
+    eminus_recruitment_y3 <- invlogit(params["s_to_s_beta1"] + params["s_to_s_eminus_y3"])
+    eminus_recruitment_y4 <- invlogit(params["s_to_s_beta1"] + params["s_to_s_eminus_y4"])
+    eminus_recruitment_y5 <- invlogit(params["s_to_s_beta1"] + params["s_to_s_eminus_y5"])
+    eminus_recruitment_y6 <- invlogit(params["s_to_s_beta1"] + params["s_to_s_eminus_y6"])
+    eminus_recruitment_y7 <- invlogit(params["s_to_s_beta1"] + params["s_to_s_eminus_y7"])
+    eminus_recruitment_y8 <- invlogit(params["s_to_s_beta1"] + params["s_to_s_eminus_y8"])
+    eminus_recruitment_y9 <- invlogit(params["s_to_s_beta1"] + params["s_to_s_eminus_y9"])
+    eminus_recruitment_y10 <- invlogit(params["s_to_s_beta1"] + params["s_to_s_eminus_y10"])
+    eminus_recruitment_y11 <- invlogit(params["s_to_s_beta1"] + params["s_to_s_eminus_y11"])
+
+    # eplus
+    eplus_recruitment <- invlogit(params["s_to_s_beta1"] + params["s_to_s_beta2"])
+    eplus_recruitment_y1 <- invlogit(params["s_to_s_beta1"] + params["s_to_s_beta2"] + params["s_to_s_eplus_y1"])
+    eplus_recruitment_y2 <- invlogit(params["s_to_s_beta1"] + params["s_to_s_beta2"] + params["s_to_s_eplus_y2"])
+    eplus_recruitment_y3 <- invlogit(params["s_to_s_beta1"] + params["s_to_s_beta2"] + params["s_to_s_eplus_y3"])
+    eplus_recruitment_y4 <- invlogit(params["s_to_s_beta1"] + params["s_to_s_beta2"] + params["s_to_s_eplus_y4"])
+    eplus_recruitment_y5 <- invlogit(params["s_to_s_beta1"] + params["s_to_s_beta2"] + params["s_to_s_eplus_y5"])
+    eplus_recruitment_y6 <- invlogit(params["s_to_s_beta1"] + params["s_to_s_beta2"] + params["s_to_s_eplus_y6"])
+    eplus_recruitment_y7 <- invlogit(params["s_to_s_beta1"] + params["s_to_s_beta2"] + params["s_to_s_eplus_y7"])
+    eplus_recruitment_y8 <- invlogit(params["s_to_s_beta1"] + params["s_to_s_beta2"] + params["s_to_s_eplus_y8"])
+    eplus_recruitment_y9 <- invlogit(params["s_to_s_beta1"] + params["s_to_s_beta2"] + params["s_to_s_eplus_y9"])
+    eplus_recruitment_y10 <- invlogit(params["s_to_s_beta1"] + params["s_to_s_beta2"] + params["s_to_s_eplus_y10"])
+    eplus_recruitment_y11 <- invlogit(params["s_to_s_beta1"] + params["s_to_s_beta2"] + params["s_to_s_eplus_y11"])
+
+  # mean seed per spikelet
+    seed.mean <- params["mu_seed"]
   
-  eplus_p_flw <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_beta3"])
-  eplus_fert.mean <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x) + params["fert_beta3"])
-  eplus_spike.mean <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_beta3"])
-  eplus_seed.mean <- params["mu_seed"]
-  eplus_p_rec <- invlogit(params["s_to_s_beta1"] + params["s_to_s_beta2"])
+  eminus_seedlings <- eminus_flw * eminus_fert * eminus_spike * seed.mean * eminus_recruitment
+  eminus_seedlings_y1 <- eminus_flw_y1 * eminus_fert_y1 * eminus_spike_y1 * seed.mean * eminus_recruitment_y1
+  eminus_seedlings_y2 <- eminus_flw_y2 * eminus_fert_y2 * eminus_spike_y2 * seed.mean * eminus_recruitment_y2
+  eminus_seedlings_y3 <- eminus_flw_y3 * eminus_fert_y3 * eminus_spike_y3 * seed.mean * eminus_recruitment_y3
+  eminus_seedlings_y4 <- eminus_flw_y4 * eminus_fert_y4 * eminus_spike_y4 * seed.mean * eminus_recruitment_y4
+  eminus_seedlings_y5 <- eminus_flw_y5 * eminus_fert_y5 * eminus_spike_y5 * seed.mean * eminus_recruitment_y5
+  eminus_seedlings_y6 <- eminus_flw_y6 * eminus_fert_y6 * eminus_spike_y6 * seed.mean * eminus_recruitment_y6
+  eminus_seedlings_y7 <- eminus_flw_y7 * eminus_fert_y7 * eminus_spike_y7 * seed.mean * eminus_recruitment_y7
+  eminus_seedlings_y8 <- eminus_flw_y8 * eminus_fert_y8 * eminus_spike_y8 * seed.mean * eminus_recruitment_y8
+  eminus_seedlings_y9 <- eminus_flw_y9 * eminus_fert_y9 * eminus_spike_y9 * seed.mean * eminus_recruitment_y9
+  eminus_seedlings_y10 <- eminus_flw_y10 * eminus_fert_y10 * eminus_spike_y10 * seed.mean * eminus_recruitment_y10
+  eminus_seedlings_y11 <- eminus_flw_y11 * eminus_fert_y11 * eminus_spike_y11 * seed.mean * eminus_recruitment_y11
   
-  eminus_seedlings <- eminus_p_flw * eminus_fert.mean * eminus_spike.mean * eminus_seed.mean * eminus_p_rec
-  eplus_seedlings <- eplus_p_flw * eplus_fert.mean * eplus_spike.mean * eplus_seed.mean * eplus_p_rec
-  return(list(eminus_seedlings = eminus_seedlings, eplus_seedlings = eplus_seedlings))
+  eplus_seedlings <- eplus_flw * eplus_fert * eplus_spike * seed.mean * eplus_recruitment
+  eplus_seedlings_y1 <- eplus_flw_y1 * eplus_fert_y1 * eplus_spike_y1 * seed.mean * eplus_recruitment_y1
+  eplus_seedlings_y2 <- eplus_flw_y2 * eplus_fert_y2 * eplus_spike_y2 * seed.mean * eplus_recruitment_y2
+  eplus_seedlings_y3 <- eplus_flw_y3 * eplus_fert_y3 * eplus_spike_y3 * seed.mean * eplus_recruitment_y3
+  eplus_seedlings_y4 <- eplus_flw_y4 * eplus_fert_y4 * eplus_spike_y4 * seed.mean * eplus_recruitment_y4
+  eplus_seedlings_y5 <- eplus_flw_y5 * eplus_fert_y5 * eplus_spike_y5 * seed.mean * eplus_recruitment_y5
+  eplus_seedlings_y6 <- eplus_flw_y6 * eplus_fert_y6 * eplus_spike_y6 * seed.mean * eplus_recruitment_y6
+  eplus_seedlings_y7 <- eplus_flw_y7 * eplus_fert_y7 * eplus_spike_y7 * seed.mean * eplus_recruitment_y7
+  eplus_seedlings_y8 <- eplus_flw_y8 * eplus_fert_y8 * eplus_spike_y8 * seed.mean * eplus_recruitment_y8
+  eplus_seedlings_y9 <- eplus_flw_y9 * eplus_fert_y9 * eplus_spike_y9 * seed.mean * eplus_recruitment_y9
+  eplus_seedlings_y10 <- eplus_flw_y10 * eplus_fert_y10 * eplus_spike_y10 * seed.mean * eplus_recruitment_y10
+  eplus_seedlings_y11 <- eplus_flw_y11 * eplus_fert_y11 * eplus_spike_y11 * seed.mean * eplus_recruitment_y11
+  
+  eminus_seedlings_rec <- eminus_flw_rec * eminus_fert_rec * eminus_spike_rec * seed.mean * eminus_recruitment
+  eminus_seedlings_rec_y1 <- eminus_flw_rec_y1 * eminus_fert_rec_y1 * eminus_spike_rec_y1 * seed.mean * eminus_recruitment_y1
+  eminus_seedlings_rec_y2 <- eminus_flw_rec_y2 * eminus_fert_rec_y2 * eminus_spike_rec_y2 * seed.mean * eminus_recruitment_y2
+  eminus_seedlings_rec_y3 <- eminus_flw_rec_y3 * eminus_fert_rec_y3 * eminus_spike_rec_y3 * seed.mean * eminus_recruitment_y3
+  eminus_seedlings_rec_y4 <- eminus_flw_rec_y4 * eminus_fert_rec_y4 * eminus_spike_rec_y4 * seed.mean * eminus_recruitment_y4
+  eminus_seedlings_rec_y5 <- eminus_flw_rec_y5 * eminus_fert_rec_y5 * eminus_spike_rec_y5 * seed.mean * eminus_recruitment_y5
+  eminus_seedlings_rec_y6 <- eminus_flw_rec_y6 * eminus_fert_rec_y6 * eminus_spike_rec_y6 * seed.mean * eminus_recruitment_y6
+  eminus_seedlings_rec_y7 <- eminus_flw_rec_y7 * eminus_fert_rec_y7 * eminus_spike_rec_y7 * seed.mean * eminus_recruitment_y7
+  eminus_seedlings_rec_y8 <- eminus_flw_rec_y8 * eminus_fert_rec_y8 * eminus_spike_rec_y8 * seed.mean * eminus_recruitment_y8
+  eminus_seedlings_rec_y9 <- eminus_flw_rec_y9 * eminus_fert_rec_y9 * eminus_spike_rec_y9 * seed.mean * eminus_recruitment_y9
+  eminus_seedlings_rec_y10 <- eminus_flw_rec_y10 * eminus_fert_rec_y10 * eminus_spike_rec_y10 * seed.mean * eminus_recruitment_y10
+  eminus_seedlings_rec_y11 <- eminus_flw_rec_y11 * eminus_fert_rec_y11 * eminus_spike_rec_y11 * seed.mean * eminus_recruitment_y11
+  
+  eplus_seedlings_rec <- eplus_flw_rec * eplus_fert_rec * eplus_spike_rec * seed.mean * eplus_recruitment
+  eplus_seedlings_rec_y1 <- eplus_flw_rec_y1 * eplus_fert_rec_y1 * eplus_spike_rec_y1 * seed.mean * eplus_recruitment_y1
+  eplus_seedlings_rec_y2 <- eplus_flw_rec_y2 * eplus_fert_rec_y2 * eplus_spike_rec_y2 * seed.mean * eplus_recruitment_y2
+  eplus_seedlings_rec_y3 <- eplus_flw_rec_y3 * eplus_fert_rec_y3 * eplus_spike_rec_y3 * seed.mean * eplus_recruitment_y3
+  eplus_seedlings_rec_y4 <- eplus_flw_rec_y4 * eplus_fert_rec_y4 * eplus_spike_rec_y4 * seed.mean * eplus_recruitment_y4
+  eplus_seedlings_rec_y5 <- eplus_flw_rec_y5 * eplus_fert_rec_y5 * eplus_spike_rec_y5 * seed.mean * eplus_recruitment_y5
+  eplus_seedlings_rec_y6 <- eplus_flw_rec_y6 * eplus_fert_rec_y6 * eplus_spike_rec_y6 * seed.mean * eplus_recruitment_y6
+  eplus_seedlings_rec_y7 <- eplus_flw_rec_y7 * eplus_fert_rec_y7 * eplus_spike_rec_y7 * seed.mean * eplus_recruitment_y7
+  eplus_seedlings_rec_y8 <- eplus_flw_rec_y8 * eplus_fert_rec_y8 * eplus_spike_rec_y8 * seed.mean * eplus_recruitment_y8
+  eplus_seedlings_rec_y9 <- eplus_flw_rec_y9 * eplus_fert_rec_y9 * eplus_spike_rec_y9 * seed.mean * eplus_recruitment_y9
+  eplus_seedlings_rec_y10 <- eplus_flw_rec_y10 * eplus_fert_rec_y10 * eplus_spike_rec_y10 * seed.mean * eplus_recruitment_y10
+  eplus_seedlings_rec_y11 <- eplus_flw_rec_y11 * eplus_fert_rec_y11 * eplus_spike_rec_y11 * seed.mean * eplus_recruitment_y11
+  
+  
+  return(list(eminus_seedlings=eminus_seedlings,eminus_seedlings_y1=eminus_seedlings_y1,eminus_seedlings_y2=eminus_seedlings_y2,eminus_seedlings_y3=eminus_seedlings_y3,eminus_seedlings_y4=eminus_seedlings_y4,eminus_seedlings_y5=eminus_seedlings_y5,eminus_seedlings_y6=eminus_seedlings_y6,eminus_seedlings_y7=eminus_seedlings_y7,eminus_seedlings_y8=eminus_seedlings_y8,eminus_seedlings_y9=eminus_seedlings_y9,eminus_seedlings_y10=eminus_seedlings_y10,eminus_seedlings_y11=eminus_seedlings_y11,
+              eplus_seedlings=eplus_seedlings,eplus_seedlings_y1=eplus_seedlings_y1,eplus_seedlings_y2=eplus_seedlings_y2,eplus_seedlings_y3=eplus_seedlings_y3,eplus_seedlings_y4=eplus_seedlings_y4,eplus_seedlings_y5=eplus_seedlings_y5,eplus_seedlings_y6=eplus_seedlings_y6,eplus_seedlings_y7=eplus_seedlings_y7,eplus_seedlings_y8=eplus_seedlings_y8,eplus_seedlings_y9=eplus_seedlings_y9,eplus_seedlings_y10=eplus_seedlings_y10,eplus_seedlings_y11=eplus_seedlings_y11,
+              eminus_seedlings_rec=eminus_seedlings_rec,eminus_seedlings_rec_y1=eminus_seedlings_rec_y1,eminus_seedlings_rec_y2=eminus_seedlings_rec_y2,eminus_seedlings_rec_y3=eminus_seedlings_rec_y3,eminus_seedlings_rec_y4=eminus_seedlings_rec_y4,eminus_seedlings_rec_y5=eminus_seedlings_rec_y5,eminus_seedlings_rec_y6=eminus_seedlings_rec_y6,eminus_seedlings_rec_y7=eminus_seedlings_rec_y7,eminus_seedlings_rec_y8=eminus_seedlings_rec_y8,eminus_seedlings_rec_y9=eminus_seedlings_rec_y9,eminus_seedlings_rec_y10=eminus_seedlings_rec_y10,eminus_seedlings_rec_y11=eminus_seedlings_rec_y11,
+              eplus_seedlings_rec=eplus_seedlings_rec,eplus_seedlings_rec_y1=eplus_seedlings_rec_y1,eplus_seedlings_rec_y2=eplus_seedlings_rec_y2,eplus_seedlings_rec_y3=eplus_seedlings_rec_y3,eplus_seedlings_rec_y4=eplus_seedlings_rec_y4,eplus_seedlings_rec_y5=eplus_seedlings_rec_y5,eplus_seedlings_rec_y6=eplus_seedlings_rec_y6,eplus_seedlings_rec_y7=eplus_seedlings_rec_y7,eplus_seedlings_rec_y8=eplus_seedlings_rec_y8,eplus_seedlings_rec_y9=eplus_seedlings_rec_y9,eplus_seedlings_rec_y10=eplus_seedlings_rec_y10,eplus_seedlings_rec_y11=eplus_seedlings_rec_y11))
 }
+# fx(x=1, params = loar_params)
 
 ## note from Tom: we should think about adding a reproductive delay
 # finally, here is the function that takes the parameter vector and assembles the matrix model from all of the pieces
@@ -562,24 +823,286 @@ bigmatrix<-function(params){
   y <- 1:params["max_size"]## size (tiller number) associated with each class
   # Fertility matrix
   Fmat_eminus<-matrix(0,matdim,matdim)
+  Fmat_eminus_y1<-matrix(0,matdim,matdim)
+  Fmat_eminus_y2<-matrix(0,matdim,matdim)
+  Fmat_eminus_y3<-matrix(0,matdim,matdim)
+  Fmat_eminus_y4<-matrix(0,matdim,matdim)
+  Fmat_eminus_y5<-matrix(0,matdim,matdim)
+  Fmat_eminus_y6<-matrix(0,matdim,matdim)
+  Fmat_eminus_y7<-matrix(0,matdim,matdim)
+  Fmat_eminus_y8<-matrix(0,matdim,matdim)
+  Fmat_eminus_y9<-matrix(0,matdim,matdim)
+  Fmat_eminus_y10<-matrix(0,matdim,matdim)
+  Fmat_eminus_y11<-matrix(0,matdim,matdim)
+  
   Fmat_eplus<-matrix(0,matdim,matdim)
+  Fmat_eplus_y1<-matrix(0,matdim,matdim)
+  Fmat_eplus_y2<-matrix(0,matdim,matdim)
+  Fmat_eplus_y3<-matrix(0,matdim,matdim)
+  Fmat_eplus_y4<-matrix(0,matdim,matdim)
+  Fmat_eplus_y5<-matrix(0,matdim,matdim)
+  Fmat_eplus_y6<-matrix(0,matdim,matdim)
+  Fmat_eplus_y7<-matrix(0,matdim,matdim)
+  Fmat_eplus_y8<-matrix(0,matdim,matdim)
+  Fmat_eplus_y9<-matrix(0,matdim,matdim)
+  Fmat_eplus_y10<-matrix(0,matdim,matdim)
+  Fmat_eplus_y11<-matrix(0,matdim,matdim)
+  
+  Fmat_eminus_rec<-matrix(0,matdim,matdim)
+  Fmat_eminus_rec_y1<-matrix(0,matdim,matdim)
+  Fmat_eminus_rec_y2<-matrix(0,matdim,matdim)
+  Fmat_eminus_rec_y3<-matrix(0,matdim,matdim)
+  Fmat_eminus_rec_y4<-matrix(0,matdim,matdim)
+  Fmat_eminus_rec_y5<-matrix(0,matdim,matdim)
+  Fmat_eminus_rec_y6<-matrix(0,matdim,matdim)
+  Fmat_eminus_rec_y7<-matrix(0,matdim,matdim)
+  Fmat_eminus_rec_y8<-matrix(0,matdim,matdim)
+  Fmat_eminus_rec_y9<-matrix(0,matdim,matdim)
+  Fmat_eminus_rec_y10<-matrix(0,matdim,matdim)
+  Fmat_eminus_rec_y11<-matrix(0,matdim,matdim)
+  
+  Fmat_eplus_rec<-matrix(0,matdim,matdim)
+  Fmat_eplus_rec_y1<-matrix(0,matdim,matdim)
+  Fmat_eplus_rec_y2<-matrix(0,matdim,matdim)
+  Fmat_eplus_rec_y3<-matrix(0,matdim,matdim)
+  Fmat_eplus_rec_y4<-matrix(0,matdim,matdim)
+  Fmat_eplus_rec_y5<-matrix(0,matdim,matdim)
+  Fmat_eplus_rec_y6<-matrix(0,matdim,matdim)
+  Fmat_eplus_rec_y7<-matrix(0,matdim,matdim)
+  Fmat_eplus_rec_y8<-matrix(0,matdim,matdim)
+  Fmat_eplus_rec_y9<-matrix(0,matdim,matdim)
+  Fmat_eplus_rec_y10<-matrix(0,matdim,matdim)
+  Fmat_eplus_rec_y11<-matrix(0,matdim,matdim)
   
   # all seedlings get dumped into top row (1-tiller)
   Fmat_eminus[1,]<-fx(x = y, params=params)$eminus_seedlings 
+  Fmat_eminus_y1[1,]<-fx(x = y, params=params)$eminus_seedlings_y1 
+  Fmat_eminus_y2[1,]<-fx(x = y, params=params)$eminus_seedlings_y2 
+  Fmat_eminus_y3[1,]<-fx(x = y, params=params)$eminus_seedlings_y3 
+  Fmat_eminus_y4[1,]<-fx(x = y, params=params)$eminus_seedlings_y4 
+  Fmat_eminus_y5[1,]<-fx(x = y, params=params)$eminus_seedlings_y5 
+  Fmat_eminus_y6[1,]<-fx(x = y, params=params)$eminus_seedlings_y6 
+  Fmat_eminus_y7[1,]<-fx(x = y, params=params)$eminus_seedlings_y7 
+  Fmat_eminus_y8[1,]<-fx(x = y, params=params)$eminus_seedlings_y8 
+  Fmat_eminus_y9[1,]<-fx(x = y, params=params)$eminus_seedlings_y9 
+  Fmat_eminus_y10[1,]<-fx(x = y, params=params)$eminus_seedlings_y10 
+  Fmat_eminus_y11[1,]<-fx(x = y, params=params)$eminus_seedlings_y11 
+  
   Fmat_eplus[1,]<-fx(x = y, params=params)$eplus_seedlings 
+  Fmat_eplus_y1[1,]<-fx(x = y, params=params)$eplus_seedlings_y1 
+  Fmat_eplus_y2[1,]<-fx(x = y, params=params)$eplus_seedlings_y2 
+  Fmat_eplus_y3[1,]<-fx(x = y, params=params)$eplus_seedlings_y3 
+  Fmat_eplus_y4[1,]<-fx(x = y, params=params)$eplus_seedlings_y4 
+  Fmat_eplus_y5[1,]<-fx(x = y, params=params)$eplus_seedlings_y5 
+  Fmat_eplus_y6[1,]<-fx(x = y, params=params)$eplus_seedlings_y6 
+  Fmat_eplus_y7[1,]<-fx(x = y, params=params)$eplus_seedlings_y7 
+  Fmat_eplus_y8[1,]<-fx(x = y, params=params)$eplus_seedlings_y8 
+  Fmat_eplus_y9[1,]<-fx(x = y, params=params)$eplus_seedlings_y9 
+  Fmat_eplus_y10[1,]<-fx(x = y, params=params)$eplus_seedlings_y10 
+  Fmat_eplus_y11[1,]<-fx(x = y, params=params)$eplus_seedlings_y11 
+  
+  Fmat_eminus_rec[1,]<-fx(x = y, params=params)$eminus_seedlings_rec 
+  Fmat_eminus_rec_y1[1,]<-fx(x = y, params=params)$eminus_seedlings_rec_y1
+  Fmat_eminus_rec_y2[1,]<-fx(x = y, params=params)$eminus_seedlings_rec_y2 
+  Fmat_eminus_rec_y3[1,]<-fx(x = y, params=params)$eminus_seedlings_rec_y3
+  Fmat_eminus_rec_y4[1,]<-fx(x = y, params=params)$eminus_seedlings_rec_y4
+  Fmat_eminus_rec_y5[1,]<-fx(x = y, params=params)$eminus_seedlings_rec_y5
+  Fmat_eminus_rec_y6[1,]<-fx(x = y, params=params)$eminus_seedlings_rec_y6
+  Fmat_eminus_rec_y7[1,]<-fx(x = y, params=params)$eminus_seedlings_rec_y7
+  Fmat_eminus_rec_y8[1,]<-fx(x = y, params=params)$eminus_seedlings_rec_y8
+  Fmat_eminus_rec_y9[1,]<-fx(x = y, params=params)$eminus_seedlings_rec_y9
+  Fmat_eminus_rec_y10[1,]<-fx(x = y, params=params)$eminus_seedlings_rec_y10 
+  Fmat_eminus_rec_y11[1,]<-fx(x = y, params=params)$eminus_seedlings_rec_y11
+  
+  Fmat_eplus_rec[1,]<-fx(x = y, params=params)$eplus_seedlings_rec 
+  Fmat_eplus_rec_y1[1,]<-fx(x = y, params=params)$eplus_seedlings_rec_y1
+  Fmat_eplus_rec_y2[1,]<-fx(x = y, params=params)$eplus_seedlings_rec_y2 
+  Fmat_eplus_rec_y3[1,]<-fx(x = y, params=params)$eplus_seedlings_rec_y3
+  Fmat_eplus_rec_y4[1,]<-fx(x = y, params=params)$eplus_seedlings_rec_y4
+  Fmat_eplus_rec_y5[1,]<-fx(x = y, params=params)$eplus_seedlings_rec_y5
+  Fmat_eplus_rec_y6[1,]<-fx(x = y, params=params)$eplus_seedlings_rec_y6
+  Fmat_eplus_rec_y7[1,]<-fx(x = y, params=params)$eplus_seedlings_rec_y7
+  Fmat_eplus_rec_y8[1,]<-fx(x = y, params=params)$eplus_seedlings_rec_y8
+  Fmat_eplus_rec_y9[1,]<-fx(x = y, params=params)$eplus_seedlings_rec_y9
+  Fmat_eplus_rec_y10[1,]<-fx(x = y, params=params)$eplus_seedlings_rec_y10 
+  Fmat_eplus_rec_y11[1,]<-fx(x = y, params=params)$eplus_seedlings_rec_y11
   
   # Growth/survival transition matrix
   Tmat_eminus<-matrix(0,matdim,matdim)
-  Tmat_eminus<-t(outer(y,y,pxy,params=params,output="pxy_eminus"))
+  Tmat_eminus_y1<-matrix(0,matdim,matdim)
+  Tmat_eminus_y2<-matrix(0,matdim,matdim)
+  Tmat_eminus_y3<-matrix(0,matdim,matdim)
+  Tmat_eminus_y4<-matrix(0,matdim,matdim)
+  Tmat_eminus_y5<-matrix(0,matdim,matdim)
+  Tmat_eminus_y6<-matrix(0,matdim,matdim)
+  Tmat_eminus_y7<-matrix(0,matdim,matdim)
+  Tmat_eminus_y8<-matrix(0,matdim,matdim)
+  Tmat_eminus_y9<-matrix(0,matdim,matdim)
+  Tmat_eminus_y10<-matrix(0,matdim,matdim)
+  Tmat_eminus_y11<-matrix(0,matdim,matdim)
   
   Tmat_eplus<-matrix(0,matdim,matdim)
+  Tmat_eplus_y1<-matrix(0,matdim,matdim)
+  Tmat_eplus_y2<-matrix(0,matdim,matdim)
+  Tmat_eplus_y3<-matrix(0,matdim,matdim)
+  Tmat_eplus_y4<-matrix(0,matdim,matdim)
+  Tmat_eplus_y5<-matrix(0,matdim,matdim)
+  Tmat_eplus_y6<-matrix(0,matdim,matdim)
+  Tmat_eplus_y7<-matrix(0,matdim,matdim)
+  Tmat_eplus_y8<-matrix(0,matdim,matdim)
+  Tmat_eplus_y9<-matrix(0,matdim,matdim)
+  Tmat_eplus_y10<-matrix(0,matdim,matdim)
+  Tmat_eplus_y11<-matrix(0,matdim,matdim)
+  
+  Tmat_eminus_rec<-matrix(0,matdim,matdim)
+  Tmat_eminus_rec_y1<-matrix(0,matdim,matdim)
+  Tmat_eminus_rec_y2<-matrix(0,matdim,matdim)
+  Tmat_eminus_rec_y3<-matrix(0,matdim,matdim)
+  Tmat_eminus_rec_y4<-matrix(0,matdim,matdim)
+  Tmat_eminus_rec_y5<-matrix(0,matdim,matdim)
+  Tmat_eminus_rec_y6<-matrix(0,matdim,matdim)
+  Tmat_eminus_rec_y7<-matrix(0,matdim,matdim)
+  Tmat_eminus_rec_y8<-matrix(0,matdim,matdim)
+  Tmat_eminus_rec_y9<-matrix(0,matdim,matdim)
+  Tmat_eminus_rec_y10<-matrix(0,matdim,matdim)
+  Tmat_eminus_rec_y11<-matrix(0,matdim,matdim)
+  
+  Tmat_eplus_rec<-matrix(0,matdim,matdim)
+  Tmat_eplus_rec_y1<-matrix(0,matdim,matdim)
+  Tmat_eplus_rec_y2<-matrix(0,matdim,matdim)
+  Tmat_eplus_rec_y3<-matrix(0,matdim,matdim)
+  Tmat_eplus_rec_y4<-matrix(0,matdim,matdim)
+  Tmat_eplus_rec_y5<-matrix(0,matdim,matdim)
+  Tmat_eplus_rec_y6<-matrix(0,matdim,matdim)
+  Tmat_eplus_rec_y7<-matrix(0,matdim,matdim)
+  Tmat_eplus_rec_y8<-matrix(0,matdim,matdim)
+  Tmat_eplus_rec_y9<-matrix(0,matdim,matdim)
+  Tmat_eplus_rec_y10<-matrix(0,matdim,matdim)
+  Tmat_eplus_rec_y11<-matrix(0,matdim,matdim)
+  
+  Tmat_eminus<-t(outer(y,y,pxy,params=params,output="pxy_eminus"))
+  Tmat_eminus_y1<-t(outer(y,y,pxy,params=params,output="pxy_eminus_y1"))
+  Tmat_eminus_y2<-t(outer(y,y,pxy,params=params,output="pxy_eminus_y2"))
+  Tmat_eminus_y3<-t(outer(y,y,pxy,params=params,output="pxy_eminus_y3"))
+  Tmat_eminus_y4<-t(outer(y,y,pxy,params=params,output="pxy_eminus_y4"))
+  Tmat_eminus_y5<-t(outer(y,y,pxy,params=params,output="pxy_eminus_y5"))
+  Tmat_eminus_y6<-t(outer(y,y,pxy,params=params,output="pxy_eminus_y6"))
+  Tmat_eminus_y7<-t(outer(y,y,pxy,params=params,output="pxy_eminus_y7"))
+  Tmat_eminus_y8<-t(outer(y,y,pxy,params=params,output="pxy_eminus_y8"))
+  Tmat_eminus_y9<-t(outer(y,y,pxy,params=params,output="pxy_eminus_y9"))
+  Tmat_eminus_y10<-t(outer(y,y,pxy,params=params,output="pxy_eminus_y10"))
+  Tmat_eminus_y11<-t(outer(y,y,pxy,params=params,output="pxy_eminus_y11"))
+  
   Tmat_eplus<-t(outer(y,y,pxy,params=params,output="pxy_eplus"))
+  Tmat_eplus_y1<-t(outer(y,y,pxy,params=params,output="pxy_eplus_y1"))
+  Tmat_eplus_y2<-t(outer(y,y,pxy,params=params,output="pxy_eplus_y2"))
+  Tmat_eplus_y3<-t(outer(y,y,pxy,params=params,output="pxy_eplus_y3"))
+  Tmat_eplus_y4<-t(outer(y,y,pxy,params=params,output="pxy_eplus_y4"))
+  Tmat_eplus_y5<-t(outer(y,y,pxy,params=params,output="pxy_eplus_y5"))
+  Tmat_eplus_y6<-t(outer(y,y,pxy,params=params,output="pxy_eplus_y6"))
+  Tmat_eplus_y7<-t(outer(y,y,pxy,params=params,output="pxy_eplus_y7"))
+  Tmat_eplus_y8<-t(outer(y,y,pxy,params=params,output="pxy_eplus_y8"))
+  Tmat_eplus_y9<-t(outer(y,y,pxy,params=params,output="pxy_eplus_y9"))
+  Tmat_eplus_y10<-t(outer(y,y,pxy,params=params,output="pxy_eplus_y10"))
+  Tmat_eplus_y11<-t(outer(y,y,pxy,params=params,output="pxy_eplus_y11"))
+  
+  Tmat_eminus_rec<-t(outer(y,y,pxy,params=params,output="pxy_eminus_rec"))
+  Tmat_eminus_rec_y1<-t(outer(y,y,pxy,params=params,output="pxy_eminus_rec_y1"))
+  Tmat_eminus_rec_y2<-t(outer(y,y,pxy,params=params,output="pxy_eminus_rec_y2"))
+  Tmat_eminus_rec_y3<-t(outer(y,y,pxy,params=params,output="pxy_eminus_rec_y3"))
+  Tmat_eminus_rec_y4<-t(outer(y,y,pxy,params=params,output="pxy_eminus_rec_y4"))
+  Tmat_eminus_rec_y5<-t(outer(y,y,pxy,params=params,output="pxy_eminus_rec_y5"))
+  Tmat_eminus_rec_y6<-t(outer(y,y,pxy,params=params,output="pxy_eminus_rec_y6"))
+  Tmat_eminus_rec_y7<-t(outer(y,y,pxy,params=params,output="pxy_eminus_rec_y7"))
+  Tmat_eminus_rec_y8<-t(outer(y,y,pxy,params=params,output="pxy_eminus_rec_y8"))
+  Tmat_eminus_rec_y9<-t(outer(y,y,pxy,params=params,output="pxy_eminus_rec_y9"))
+  Tmat_eminus_rec_y10<-t(outer(y,y,pxy,params=params,output="pxy_eminus_rec_y10"))
+  Tmat_eminus_rec_y11<-t(outer(y,y,pxy,params=params,output="pxy_eminus_rec_y11"))
+  
+  Tmat_eplus_rec<-t(outer(y,y,pxy,params=params,output="pxy_eplus_rec"))
+  Tmat_eplus_rec_y1<-t(outer(y,y,pxy,params=params,output="pxy_eplus_rec_y1"))
+  Tmat_eplus_rec_y2<-t(outer(y,y,pxy,params=params,output="pxy_eplus_rec_y2"))
+  Tmat_eplus_rec_y3<-t(outer(y,y,pxy,params=params,output="pxy_eplus_rec_y3"))
+  Tmat_eplus_rec_y4<-t(outer(y,y,pxy,params=params,output="pxy_eplus_rec_y4"))
+  Tmat_eplus_rec_y5<-t(outer(y,y,pxy,params=params,output="pxy_eplus_rec_y5"))
+  Tmat_eplus_rec_y6<-t(outer(y,y,pxy,params=params,output="pxy_eplus_rec_y6"))
+  Tmat_eplus_rec_y7<-t(outer(y,y,pxy,params=params,output="pxy_eplus_rec_y7"))
+  Tmat_eplus_rec_y8<-t(outer(y,y,pxy,params=params,output="pxy_eplus_rec_y8"))
+  Tmat_eplus_rec_y9<-t(outer(y,y,pxy,params=params,output="pxy_eplus_rec_y9"))
+  Tmat_eplus_rec_y10<-t(outer(y,y,pxy,params=params,output="pxy_eplus_rec_y10"))
+  Tmat_eplus_rec_y11<-t(outer(y,y,pxy,params=params,output="pxy_eplus_rec_y11"))
   
   # Put it all together
-  MPMmat_eminus<-Tmat_eminus+Fmat_eminus #sum the Tmat & Fmat to get the whole matrix
-  MPMmat_eplus<-Tmat_eplus+Fmat_eplus #sum the Tmat & Fmat to get the whole matrix
+  #sum the Tmat & Fmat to get the whole matrix
+  # eminus original
+  MPMmat_eminus<-Tmat_eminus+Fmat_eminus 
+  MPMmat_eminus_y1<-Tmat_eminus_y1+Fmat_eminus_y1 
+  MPMmat_eminus_y2<-Tmat_eminus_y2+Fmat_eminus_y2
+  MPMmat_eminus_y3<-Tmat_eminus_y3+Fmat_eminus_y3 
+  MPMmat_eminus_y4<-Tmat_eminus_y4+Fmat_eminus_y4 
+  MPMmat_eminus_y5<-Tmat_eminus_y5+Fmat_eminus_y5 
+  MPMmat_eminus_y6<-Tmat_eminus_y6+Fmat_eminus_y6 
+  MPMmat_eminus_y7<-Tmat_eminus_y7+Fmat_eminus_y7 
+  MPMmat_eminus_y8<-Tmat_eminus_y8+Fmat_eminus_y8 
+  MPMmat_eminus_y9<-Tmat_eminus_y9+Fmat_eminus_y9 
+  MPMmat_eminus_y10<-Tmat_eminus_y10+Fmat_eminus_y10 
+  MPMmat_eminus_y11<-Tmat_eminus_y11+Fmat_eminus_y11
   
-  return(list(MPMmat_eminus=MPMmat_eminus,MPMmat_eplus=MPMmat_eplus,Fmat_eminus=Fmat_eminus,Fmat_eplus=Fmat_eplus,Tmat_eminus=Tmat_eminus,Tmat_eplus=Tmat_eplus))
+  # eplus original
+  MPMmat_eplus<-Tmat_eplus+Fmat_eplus 
+  MPMmat_eplus_y1<-Tmat_eplus_y1+Fmat_eplus_y1 
+  MPMmat_eplus_y2<-Tmat_eplus_y2+Fmat_eplus_y2
+  MPMmat_eplus_y3<-Tmat_eplus_y3+Fmat_eplus_y3 
+  MPMmat_eplus_y4<-Tmat_eplus_y4+Fmat_eplus_y4 
+  MPMmat_eplus_y5<-Tmat_eplus_y5+Fmat_eplus_y5 
+  MPMmat_eplus_y6<-Tmat_eplus_y6+Fmat_eplus_y6 
+  MPMmat_eplus_y7<-Tmat_eplus_y7+Fmat_eplus_y7 
+  MPMmat_eplus_y8<-Tmat_eplus_y8+Fmat_eplus_y8 
+  MPMmat_eplus_y9<-Tmat_eplus_y9+Fmat_eplus_y9 
+  MPMmat_eplus_y10<-Tmat_eplus_y10+Fmat_eplus_y10 
+  MPMmat_eplus_y11<-Tmat_eplus_y11+Fmat_eplus_y11
+  
+  # eminus recruit
+  MPMmat_eminus_rec<-Tmat_eminus_rec+Fmat_eminus_rec 
+  MPMmat_eminus_rec_y1<-Tmat_eminus_rec_y1+Fmat_eminus_rec_y1 
+  MPMmat_eminus_rec_y2<-Tmat_eminus_rec_y2+Fmat_eminus_rec_y2
+  MPMmat_eminus_rec_y3<-Tmat_eminus_rec_y3+Fmat_eminus_rec_y3 
+  MPMmat_eminus_rec_y4<-Tmat_eminus_rec_y4+Fmat_eminus_rec_y4 
+  MPMmat_eminus_rec_y5<-Tmat_eminus_rec_y5+Fmat_eminus_rec_y5 
+  MPMmat_eminus_rec_y6<-Tmat_eminus_rec_y6+Fmat_eminus_rec_y6 
+  MPMmat_eminus_rec_y7<-Tmat_eminus_rec_y7+Fmat_eminus_rec_y7 
+  MPMmat_eminus_rec_y8<-Tmat_eminus_rec_y8+Fmat_eminus_rec_y8 
+  MPMmat_eminus_rec_y9<-Tmat_eminus_rec_y9+Fmat_eminus_rec_y9 
+  MPMmat_eminus_rec_y10<-Tmat_eminus_rec_y10+Fmat_eminus_rec_y10 
+  MPMmat_eminus_rec_y11<-Tmat_eminus_rec_y11+Fmat_eminus_rec_y11
+  
+  # eplus recruit
+  MPMmat_eplus_rec<-Tmat_eplus+Fmat_eplus_rec 
+  MPMmat_eplus_rec_y1<-Tmat_eplus_rec_y1+Fmat_eplus_rec_y1 
+  MPMmat_eplus_rec_y2<-Tmat_eplus_rec_y2+Fmat_eplus_rec_y2
+  MPMmat_eplus_rec_y3<-Tmat_eplus_rec_y3+Fmat_eplus_rec_y3 
+  MPMmat_eplus_rec_y4<-Tmat_eplus_rec_y4+Fmat_eplus_rec_y4 
+  MPMmat_eplus_rec_y5<-Tmat_eplus_rec_y5+Fmat_eplus_rec_y5 
+  MPMmat_eplus_rec_y6<-Tmat_eplus_rec_y6+Fmat_eplus_rec_y6 
+  MPMmat_eplus_rec_y7<-Tmat_eplus_rec_y7+Fmat_eplus_rec_y7 
+  MPMmat_eplus_rec_y8<-Tmat_eplus_rec_y8+Fmat_eplus_rec_y8 
+  MPMmat_eplus_rec_y9<-Tmat_eplus_rec_y9+Fmat_eplus_rec_y9 
+  MPMmat_eplus_rec_y10<-Tmat_eplus_rec_y10+Fmat_eplus_rec_y10 
+  MPMmat_eplus_rec_y11<-Tmat_eplus_rec_y11+Fmat_eplus_rec_y11
+  
+  
+  return(list(MPMmat_eminus=MPMmat_eminus,MPMmat_eminus_y1=MPMmat_eminus_y1,MPMmat_eminus_y2=MPMmat_eminus_y2,MPMmat_eminus_y3=MPMmat_eminus_y3,MPMmat_eminus_y4=MPMmat_eminus_y4,MPMmat_eminus_y5=MPMmat_eminus_y5,MPMmat_eminus_y6=MPMmat_eminus_y6,MPMmat_eminus_y7=MPMmat_eminus_y7,MPMmat_eminus_y8=MPMmat_eminus_y8,MPMmat_eminus_y9=MPMmat_eminus_y9,MPMmat_eminus_y10=MPMmat_eminus_y10,MPMmat_eminus_y11=MPMmat_eminus_y11,
+              MPMmat_eplus=MPMmat_eplus,MPMmat_eplus_y1=MPMmat_eplus_y1,MPMmat_eplus_y2=MPMmat_eplus_y2,MPMmat_eplus_y3=MPMmat_eplus_y3,MPMmat_eplus_y4=MPMmat_eplus_y4,MPMmat_eplus_y5=MPMmat_eplus_y5,MPMmat_eplus_y6=MPMmat_eplus_y6,MPMmat_eplus_y7=MPMmat_eplus_y7,MPMmat_eplus_y8=MPMmat_eplus_y8,MPMmat_eplus_y9=MPMmat_eplus_y9,MPMmat_eplus_y10=MPMmat_eplus_y10,MPMmat_eplus_y11=MPMmat_eplus_y11,
+              MPMmat_eminus_rec=MPMmat_eminus_rec,MPMmat_eminus_rec_y1=MPMmat_eminus_rec_y1,MPMmat_eminus_rec_y2=MPMmat_eminus_rec_y2,MPMmat_eminus_rec_y3=MPMmat_eminus_rec_y3,MPMmat_eminus_rec_y4=MPMmat_eminus_rec_y4,MPMmat_eminus_rec_y5=MPMmat_eminus_rec_y5,MPMmat_eminus_rec_y6=MPMmat_eminus_rec_y6,MPMmat_eminus_rec_y7=MPMmat_eminus_rec_y7,MPMmat_eminus_rec_y8=MPMmat_eminus_rec_y8,MPMmat_eminus_rec_y9=MPMmat_eminus_rec_y9,MPMmat_eminus_rec_y10=MPMmat_eminus_rec_y10,MPMmat_eminus_rec_y11=MPMmat_eminus_rec_y11,
+              MPMmat_eplus_rec=MPMmat_eplus_rec,MPMmat_eplus_rec_y1=MPMmat_eplus_rec_y1,MPMmat_eplus_rec_y2=MPMmat_eplus_rec_y2,MPMmat_eplus_rec_y3=MPMmat_eplus_rec_y3,MPMmat_eplus_rec_y4=MPMmat_eplus_rec_y4,MPMmat_eplus_rec_y5=MPMmat_eplus_rec_y5,MPMmat_eplus_rec_y6=MPMmat_eplus_rec_y6,MPMmat_eplus_rec_y7=MPMmat_eplus_rec_y7,MPMmat_eplus_rec_y8=MPMmat_eplus_rec_y8,MPMmat_eplus_rec_y9=MPMmat_eplus_rec_y9,MPMmat_eplus_rec_y10=MPMmat_eplus_rec_y10,MPMmat_eplus_rec_y11=MPMmat_eplus_rec_y11,
+              Fmat_eminus=Fmat_eminus,Fmat_eminus_y1=Fmat_eminus_y1,Fmat_eminus_y2=Fmat_eminus_y2,Fmat_eminus_y3=Fmat_eminus_y3,Fmat_eminus_y4=Fmat_eminus_y4,Fmat_eminus_y5=Fmat_eminus_y5,Fmat_eminus_y6=Fmat_eminus_y6,Fmat_eminus_y7=Fmat_eminus_y7,Fmat_eminus_y8=Fmat_eminus_y8,Fmat_eminus_y9=Fmat_eminus_y9,Fmat_eminus_y10=Fmat_eminus_y10,Fmat_eminus_y11=Fmat_eminus_y11,
+              Fmat_eplus=Fmat_eplus,Fmat_eplus_y1=Fmat_eplus_y1,Fmat_eplus_y2=Fmat_eplus_y2,Fmat_eplus_y3=Fmat_eplus_y3,Fmat_eplus_y4=Fmat_eplus_y4,Fmat_eplus_y5=Fmat_eplus_y5,Fmat_eplus_y6=Fmat_eplus_y6,Fmat_eplus_y7=Fmat_eplus_y7,Fmat_eplus_y8=Fmat_eplus_y8,Fmat_eplus_y9=Fmat_eplus_y9,Fmat_eplus_y10=Fmat_eplus_y10,Fmat_eplus_y11=Fmat_eplus_y11,
+              Fmat_eminus_rec=Fmat_eminus_rec,Fmat_eminus_rec_y1=Fmat_eminus_rec_y1,Fmat_eminus_rec_y2=Fmat_eminus_rec_y2,Fmat_eminus_rec_y3=Fmat_eminus_rec_y3,Fmat_eminus_rec_y4=Fmat_eminus_rec_y4,Fmat_eminus_rec_y5=Fmat_eminus_rec_y5,Fmat_eminus_rec_y6=Fmat_eminus_rec_y6,Fmat_eminus_rec_y7=Fmat_eminus_rec_y7,Fmat_eminus_rec_y8=Fmat_eminus_rec_y8,Fmat_eminus_rec_y9=Fmat_eminus_rec_y9,Fmat_eminus_rec_y10=Fmat_eminus_rec_y10,Fmat_eminus_rec_y11=Fmat_eminus_rec_y11,
+              Fmat_eplus_rec=Fmat_eplus_rec,Fmat_eplus_rec_y1=Fmat_eplus_rec_y1,Fmat_eplus_rec_y2=Fmat_eplus_rec_y2,Fmat_eplus_rec_y3=Fmat_eplus_rec_y3,Fmat_eplus_rec_y4=Fmat_eplus_rec_y4,Fmat_eplus_rec_y5=Fmat_eplus_rec_y5,Fmat_eplus_rec_y6=Fmat_eplus_rec_y6,Fmat_eplus_rec_y7=Fmat_eplus_rec_y7,Fmat_eplus_rec_y8=Fmat_eplus_rec_y8,Fmat_eplus_rec_y9=Fmat_eplus_rec_y9,Fmat_eplus_rec_y10=Fmat_eplus_rec_y10,Fmat_eplus_rec_y11=Fmat_eplus_rec_y11,
+              Tmat_eminus=Tmat_eminus,Tmat_eminus_y1=Tmat_eminus_y1,Tmat_eminus_y2=Tmat_eminus_y2,Tmat_eminus_y3=Tmat_eminus_y3,Tmat_eminus_y4=Tmat_eminus_y4,Tmat_eminus_y5=Tmat_eminus_y5,Tmat_eminus_y6=Tmat_eminus_y6,Tmat_eminus_y7=Tmat_eminus_y7,Tmat_eminus_y8=Tmat_eminus_y8,Tmat_eminus_y9=Tmat_eminus_y9,Tmat_eminus_y10=Tmat_eminus_y10,Tmat_eminus_y11=Tmat_eminus_y11,
+              Tmat_eplus=Tmat_eplus,Tmat_eplus_y1=Tmat_eplus_y1,Tmat_eplus_y2=Tmat_eplus_y2,Tmat_eplus_y3=Tmat_eplus_y3,Tmat_eplus_y4=Tmat_eplus_y4,Tmat_eplus_y5=Tmat_eplus_y5,Tmat_eplus_y6=Tmat_eplus_y6,Tmat_eplus_y7=Tmat_eplus_y7,Tmat_eplus_y8=Tmat_eplus_y8,Tmat_eplus_y9=Tmat_eplus_y9,Tmat_eplus_y10=Tmat_eplus_y10,Tmat_eplus_y11=Tmat_eplus_y11,
+              Tmat_eminus_rec=Tmat_eminus_rec,Tmat_eminus_rec_y1=Tmat_eminus_rec_y1,Tmat_eminus_rec_y2=Tmat_eminus_rec_y2,Tmat_eminus_rec_y3=Tmat_eminus_rec_y3,Tmat_eminus_rec_y4=Tmat_eminus_rec_y4,Tmat_eminus_rec_y5=Tmat_eminus_rec_y5,Tmat_eminus_rec_y6=Tmat_eminus_rec_y6,Tmat_eminus_rec_y7=Tmat_eminus_rec_y7,Tmat_eminus_rec_y8=Tmat_eminus_rec_y8,Tmat_eminus_rec_y9=Tmat_eminus_rec_y9,Tmat_eminus_rec_y10=Tmat_eminus_rec_y10,Tmat_eminus_rec_y11=Tmat_eminus_rec_y11,
+              Tmat_eplus_rec=Tmat_eplus_rec,Tmat_eplus_rec_y1=Tmat_eplus_rec_y1,Tmat_eplus_rec_y2=Tmat_eplus_rec_y2,Tmat_eplus_rec_y3=Tmat_eplus_rec_y3,Tmat_eplus_rec_y4=Tmat_eplus_rec_y4,Tmat_eplus_rec_y5=Tmat_eplus_rec_y5,Tmat_eplus_rec_y6=Tmat_eplus_rec_y6,Tmat_eplus_rec_y7=Tmat_eplus_rec_y7,Tmat_eplus_rec_y8=Tmat_eplus_rec_y8,Tmat_eplus_rec_y9=Tmat_eplus_rec_y9,Tmat_eplus_rec_y10=Tmat_eplus_rec_y10,Tmat_eplus_rec_y11=Tmat_eplus_rec_y11))
 }
 
 ## population growth rate (eigenalaysis of the projection matrix)
@@ -590,7 +1113,7 @@ image(bigmatrix(agpe_params)$Tmat_eplus)
 image(bigmatrix(agpe_params)$Tmat_eminus)
 image(bigmatrix(agpe_params)$MPMmat_eplus)
 image(bigmatrix(agpe_params)$MPMmat_eminus)
-lambda(bigmatrix(agpe_params)$MPMmat_eplus)
+lambda(bigmatrix(agpe_params)$MPMmat_eplus_rec)
 lambda(bigmatrix(agpe_params)$MPMmat_eminus)
 
 image(bigmatrix(fesu_params)$Fmat_eplus)
