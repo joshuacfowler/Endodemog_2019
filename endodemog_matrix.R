@@ -1201,14 +1201,85 @@ yearly <- function(mat){
 }
 # yearly(agpe_mat)
 
-hist(yearly(agpe_mat)$yearly_eminus)
-hist(yearly(agpe_mat)$yearly_eplus)
+# some starter histograms
+# eminus = orange, eplus = purple
+ggplot(data = yearly(agpe_mat))+
+  geom_histogram(aes(yearly_eminus), bins = 25, fill = "#ff7f00", alpha = .6) +
+  geom_histogram(aes(yearly_eplus), bins = 25, fill = "#6a3d9a", alpha = .6) + 
+  labs(x = "population growth rate") + theme_classic()
+
+ggplot(data = yearly(fesu_mat))+
+  geom_histogram(aes(yearly_eminus), bins = 25, fill = "#ff7f00", alpha = .6) +
+  geom_histogram(aes(yearly_eplus), bins = 25, fill = "#6a3d9a", alpha = .6) + 
+  labs(x = "population growth rate") + theme_classic()
+
+ggplot(data = yearly(loar_mat))+
+  geom_histogram(aes(yearly_eminus), bins = 25, fill = "#ff7f00", alpha = .6) +
+  geom_histogram(aes(yearly_eplus), bins = 25, fill = "#6a3d9a", alpha = .6) + 
+  labs(x = "population growth rate") + theme_classic()
+
+ggplot(data = yearly(poal_mat))+
+  geom_histogram(aes(yearly_eminus), bins = 25, fill = "#ff7f00", alpha = .6) +
+  geom_histogram(aes(yearly_eplus), bins = 25, fill = "#6a3d9a", alpha = .6) + 
+  labs(x = "population growth rate") + theme_classic()
+
+ggplot(data = yearly(posy_mat))+
+  geom_histogram(aes(yearly_eminus), bins = 25, fill = "#ff7f00", alpha = .6) +
+  geom_histogram(aes(yearly_eplus), bins = 25, fill = "#6a3d9a", alpha = .6) + 
+  labs(x = "population growth rate") + theme_classic()
+
+
+
+# some starter time series
+ggplot(data = yearly(agpe_mat))+
+  geom_point(aes(x = year_t1, y = yearly_eminus), col = "#ff7f00") +
+  geom_point(aes(x = year_t1, y = yearly_eplus), col = "#6a3d9a") +
+  geom_point(aes(x = year_t1, y = yearly_eminus_rec), col = "#ff7f00", shape = "triangle") +
+  geom_point(aes(x = year_t1, y = yearly_eplus_rec), col = "#6a3d9a", shape = "triangle") +
+  labs(y = "population growth rate", x = "year_t1") + theme_classic() + scale_x_continuous(breaks = c(2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019))
+
+ggplot(data = yearly(fesu_mat))+
+  geom_point(aes(x = year_t1, y = yearly_eminus), col = "#ff7f00") +
+  geom_point(aes(x = year_t1, y = yearly_eplus), col = "#6a3d9a") +
+  labs(y = "population growth rate", x = "year_t1") + theme_classic() + scale_x_continuous(breaks = c(2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019))
+
+ggplot(data = yearly(loar_mat))+
+  geom_point(aes(x = year_t1, y = yearly_eminus), col = "#ff7f00") +
+  geom_point(aes(x = year_t1, y = yearly_eplus), col = "#6a3d9a") +
+  labs(y = "population growth rate", x = "year_t1") + theme_classic() + scale_x_continuous(breaks = c(2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019))
+
+ggplot(data = yearly(poal_mat))+
+  geom_point(aes(x = year_t1, y = yearly_eminus), col = "#ff7f00") +
+  geom_point(aes(x = year_t1, y = yearly_eplus), col = "#6a3d9a") +
+  labs(y = "population growth rate", x = "year_t1") + theme_classic() + scale_x_continuous(breaks = c(2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019))
+
+ggplot(data = yearly(posy_mat))+
+  geom_point(aes(x = year_t1, y = yearly_eminus), col = "#ff7f00") +
+  geom_point(aes(x = year_t1, y = yearly_eplus), col = "#6a3d9a") +
+  labs(y = "population growth rate", x = "year_t1") + theme_classic() + scale_x_continuous(breaks = c(2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019))
+
 
 
 # I'm gonna read in env. data here
 # weather station data downloaded from NOAA, the service is down temporarily
-NOAA <- read_csv(file = "~/Dropbox/EndodemogData//.csv"")
+NOAA <- read_csv(file = "~/Dropbox/EndodemogData//.csv")
 temp <- read_csv(file = "")
+
+
+
+
+
+
+
+# some mean and sd of the lambda values,
+mean(yearly(agpe_mat)$yearly_eminus)
+mean(yearly(agpe_mat)$yearly_eplus)
+sd(yearly(agpe_mat)$yearly_eminus)
+sd(yearly(agpe_mat)$yearly_eplus)
+mean(yearly(agpe_mat)$yearly_eminus_rec)
+mean(yearly(agpe_mat)$yearly_eplus_rec)
+sd(yearly(agpe_mat)$yearly_eminus_rec)
+sd(yearly(agpe_mat)$yearly_eplus_rec)
 
 
 

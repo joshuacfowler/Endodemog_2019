@@ -54,13 +54,14 @@ Plots of variance posteriors
 # This function has code to do either two distributions of the variance between e+ and e- or a distribution of the difference between the two
 variance_histogram <- function(df){
   require(ggplot2)
-  df$"diff_sigma_e" <- df$`sigma_e[1]` - df$`sigma_e[2]`
+  df$diff_sigma_e <- df$`sigma_e[1]` - df$`sigma_e[2]`
   spp <- ggplot() +
     # geom_histogram(data = df, aes(`sigma_e[1]`), fill = "#ff7f00", alpha = .4, bins = 200) +
     # geom_histogram(data = df, aes(`sigma_e[2]`), fill = "#6a3d9a", alpha = .4, bins = 200) +
     geom_histogram(data = df, aes(diff_sigma_e), fill = "#4d9158", alpha = .6, bins = 200) +
-    geom_vline(xintercept = 0) +
-    geom_vline(xintercept = mean(df$diff_sigma_e), col = "#4d9158") + 
+    # geom_vline(xintercept = 0) +
+    # geom_vline(xintercept = mean(df$diff_sigma_e), col = "#4d9158") + 
+    ylim(0,2500) +
     labs(x = expression(σ[year]), y = "Posterior density") + theme_classic()
   return(spp)
 }
@@ -125,6 +126,38 @@ POAL_fert <- variance_histogram(post_fertPOAL)
 
 POSY_fert <- variance_histogram(post_fertPOSY)
 
+# spikelets
+# 
+# AGPE_spike <- variance_histogram(post_spikeAGPE)
+# 
+# # ELRI_spike <- variance_histogram(post_spikeELRI)
+# # 
+# # ELVI_spike <- variance_histogram(post_spikeELVI)
+# 
+# FESU_spike <- variance_histogram(post_spikeFESU)
+# 
+# LOAR_spike <- variance_histogram(post_spikeLOAR)
+# 
+# POAL_spike <- variance_histogram(post_spikePOAL)
+# 
+# POSY_spike <- variance_histogram(post_spikePOSY)
+
+# seed to seedling
+
+# AGPE_s_to_s <- variance_histogram(post_s_to_sAGPE)
+# 
+# # ELRI_s_to_s <- variance_histogram(post_s_to_sELRI)
+# # 
+# # ELVI_s_to_s <- variance_histogram(post_s_to_sELVI)
+# 
+# FESU_s_to_s <- variance_histogram(post_s_to_sFESU)
+# 
+# LOAR_s_to_s <- variance_histogram(post_s_to_sLOAR)
+# 
+# POAL_s_to_s <- variance_histogram(post_s_to_sPOAL)
+# 
+# POSY_s_to_s <- variance_histogram(post_s_to_sPOSY)
+
 
 # combining the individual histograms together with grid.arrange and adding labels
 survvar <- grid.arrange(AGPE_s, ELRI_s, ELVI_s, FESU_s, LOAR_s, POAL_s, POSY_s,  ncol= 1)
@@ -135,15 +168,189 @@ growvar <- grid.arrange(AGPE_g, ELRI_g, ELVI_g, FESU_g, LOAR_g, POAL_g, POSY_g, 
 titlegrow <- annotate_figure(growvar, top = "Growth", left = "")
 fertvar <- grid.arrange(AGPE_fert, ELRI_fert, ELVI_fert, FESU_fert, LOAR_fert, POAL_fert, POSY_fert,  ncol= 1)
 titlefert <- annotate_figure(fertvar, top = "Fertility", left = "")
+# spikevar <- grid.arrange(AGPE_spike,  FESU_spike, LOAR_spike, POAL_spike, POSY_spike,  ncol= 1)
+# titlespike <- annotate_figure(spikevar, top = "Spikelets per Infl.", left = "")
+# s_to_svar <- grid.arrange(AGPE_s_to_s,  FESU_s_to_s, LOAR_s_to_s, POAL_s_to_s, POSY_s_to_s,  ncol= 1)
+# titles_to_s <- annotate_figure(s_to_svar, top = "Seed to Seedling", left = "")
 
-var <- grid.arrange(titlesurv, titlegrow, titleflw, titlefert, ncol = 4)
-titlevar <- annotate_figure(var, top = "Interannual Variance", left = "Posterior Density")
+var <- grid.arrange(titlesurv, titlegrow, titleflw, titlefert, ncol = 5)
+titlevar <- annotate_figure(var, top = "Difference in Interannual Variance", left = "Posterior Density")
 ```
 
 ```{r variance histogram plots, echo=FALSE, fig.width = 9, fig.height = 12}
 # plotting the combined figure of all the variance estimates by species and by vital rate
 # These historgrams can be used indivually as panels for figures with model fits.
 titlevar
+```
+
+Plots of mean posteriors
+```{r mean posterior histogram gg objects, include=FALSE}
+# Variance posterior distributions by species
+# This function has code to do either two distributions of the variance between e+ and e- or a distribution of the difference between the two
+means_histogram <- function(df){
+  require(ggplot2)
+    df$mean_eminus_y1 <- df$`beta[1]` + df$`beta[2]` + df$`tau_year[1,1]` 
+    df$mean_eminus_y2 <- df$`beta[1]` + df$`beta[2]` + df$`tau_year[1,2]` 
+    df$mean_eminus_y3 <- df$`beta[1]` + df$`beta[2]` + df$`tau_year[1,3]` 
+    df$mean_eminus_y4 <- df$`beta[1]` + df$`beta[2]` + df$`tau_year[1,4]` 
+    df$mean_eminus_y5 <- df$`beta[1]` + df$`beta[2]` + df$`tau_year[1,5]` 
+    df$mean_eminus_y6 <- df$`beta[1]` + df$`beta[2]` + df$`tau_year[1,6]` 
+    df$mean_eminus_y7 <- df$`beta[1]` + df$`beta[2]` + df$`tau_year[1,7]` 
+    df$mean_eminus_y8 <- df$`beta[1]` + df$`beta[2]` + df$`tau_year[1,8]` 
+    df$mean_eminus_y9 <- df$`beta[1]` + df$`beta[2]` + df$`tau_year[1,9]` 
+    df$mean_eminus_y10 <- df$`beta[1]` + df$`beta[2]` + df$`tau_year[1,10]` 
+    df$mean_eminus_y11 <- df$`beta[1]` + df$`beta[2]` + df$`tau_year[1,11]` 
+
+    df$mean_eplus_y1 <- df$`beta[1]` + df$`beta[2]` + df$`beta[3]` + df$`tau_year[2,1]` 
+    df$mean_eplus_y2 <- df$`beta[1]` + df$`beta[2]` + df$`beta[3]` + df$`tau_year[2,2]` 
+    df$mean_eplus_y3 <- df$`beta[1]` + df$`beta[2]` + df$`beta[3]` + df$`tau_year[2,3]` 
+    df$mean_eplus_y4 <- df$`beta[1]` + df$`beta[2]` + df$`beta[3]` + df$`tau_year[2,4]` 
+    df$mean_eplus_y5 <- df$`beta[1]` + df$`beta[2]` + df$`beta[3]` + df$`tau_year[2,5]` 
+    df$mean_eplus_y6 <- df$`beta[1]` + df$`beta[2]` + df$`beta[3]` + df$`tau_year[2,6]` 
+    df$mean_eplus_y7 <- df$`beta[1]` + df$`beta[2]` + df$`beta[3]` + df$`tau_year[2,7]` 
+    df$mean_eplus_y8 <- df$`beta[1]` + df$`beta[2]` + df$`beta[3]` + df$`tau_year[2,8]` 
+    df$mean_eplus_y9 <- df$`beta[1]` + df$`beta[2]` + df$`beta[3]` + df$`tau_year[2,9]` 
+    df$mean_eplus_y10 <- df$`beta[1]` + df$`beta[2]` + df$`beta[3]` + df$`tau_year[2,10]` 
+    df$mean_eplus_y11 <- df$`beta[1]` + df$`beta[2]` + df$`beta[3]` + df$`tau_year[2,11]` 
+    
+    df$mean_eminus_sum <- df$mean_eminus_y1 + df$mean_eminus_y2 + df$mean_eminus_y3 + df$mean_eminus_y4 + df$mean_eminus_y5 + df$mean_eminus_y6 + df$mean_eminus_y7 + df$mean_eminus_y8 + df$mean_eminus_y9 + df$mean_eminus_y10 + df$mean_eminus_y11
+    
+    df$mean_eplus_sum <- df$mean_eplus_y1 + df$mean_eplus_y2 + df$mean_eplus_y3 + df$mean_eplus_y4 + df$mean_eplus_y5 + df$mean_eplus_y6 + df$mean_eplus_y7 + df$mean_eplus_y8 + df$mean_eplus_y9 + df$mean_eplus_y10 + df$mean_eplus_y11
+
+    df$diff_mean_sums <- df$mean_eminus_sum - df$mean_eplus_sum
+    
+    df$mu_eminus <- df$`beta[1]` + df$`beta[2]`
+    df$mu_eplus <- df$`beta[1]` + df$`beta[2]` + df$`beta[3]`
+    df$diff_mu <- df$mu_eminus - df$mu_eplus
+    
+  spp <- ggplot() +
+    # geom_histogram(data = df, aes(mean_eminus_sum), fill = "#ff7f00", alpha = .4, bins = 200) +
+    # geom_histogram(data = df, aes(mean_eplus_sum), fill = "#6a3d9a", alpha = .4, bins = 200) +
+    # geom_histogram(data = df, aes(diff_mean), fill = "#4d9158", alpha = .6, bins = 200) +
+    # geom_histogram(data = df, aes(mu_eminus), fill = "#ff7f00", alpha = .4, bins = 200) +
+    # geom_histogram(data = df, aes(mu_eplus), fill = "#6a3d9a", alpha = .4, bins = 200) +
+    geom_histogram(data = df, aes(diff_mu), fill = "#4d9158", alpha = .6, bins = 200) +
+    # geom_vline(xintercept = 0) +
+    geom_vline(xintercept = mean(df$diff_mu), col = "#4d9158") +
+    labs(x = expression(mu[year]), y = "Posterior density") + theme_classic()
+  return(spp)
+}
+# survival
+AGPE_s <- means_histogram(post_survAGPE)
+
+ELRI_s <- means_histogram(post_survELRI)
+
+ELVI_s <- means_histogram(post_survELVI)
+
+FESU_s <- means_histogram(post_survFESU)
+
+LOAR_s <- means_histogram(post_survLOAR)
+
+POAL_s <- means_histogram(post_survPOAL)
+
+POSY_s <- means_histogram(post_survPOSY)
+
+# flowering
+AGPE_f <- means_histogram(post_flwAGPE)
+
+ELRI_f <- means_histogram(post_flwELRI)
+
+ELVI_f <- means_histogram(post_flwELVI)
+
+FESU_f <- means_histogram(post_flwFESU)
+
+LOAR_f <- means_histogram(post_flwLOAR)
+
+POAL_f <- means_histogram(post_flwPOAL)
+
+POSY_f <- means_histogram(post_flwPOSY)
+
+# growth
+AGPE_g <- means_histogram(post_growAGPE)
+
+ELRI_g <- means_histogram(post_growELRI)
+
+ELVI_g <- means_histogram(post_growELVI)
+
+FESU_g <- means_histogram(post_growFESU)
+
+LOAR_g <- means_histogram(post_growLOAR)
+
+POAL_g <- means_histogram(post_growPOAL)
+
+POSY_g <- means_histogram(post_growPOSY)
+
+# fertility
+
+AGPE_fert <- means_histogram(post_fertAGPE)
+
+ELRI_fert <- means_histogram(post_fertELRI)
+
+ELVI_fert <- means_histogram(post_fertELVI)
+
+FESU_fert <- means_histogram(post_fertFESU)
+
+LOAR_fert <- means_histogram(post_fertLOAR)
+
+POAL_fert <- means_histogram(post_fertPOAL)
+
+POSY_fert <- means_histogram(post_fertPOSY)
+
+# spikelets
+# 
+# AGPE_spike <- means_histogram(post_spikeAGPE)
+# 
+# # ELRI_spike <- means_histogram(post_spikeELRI)
+# # 
+# # ELVI_spike <- means_histogram(post_spikeELVI)
+# 
+# FESU_spike <- means_histogram(post_spikeFESU)
+# 
+# LOAR_spike <- means_histogram(post_spikeLOAR)
+# 
+# POAL_spike <- means_histogram(post_spikePOAL)
+# 
+# POSY_spike <- means_histogram(post_spikePOSY)
+
+# seed to seedling
+
+# AGPE_s_to_s <- means_histogram(post_s_to_sAGPE)
+# 
+# # ELRI_s_to_s <- means_histogram(post_s_to_sELRI)
+# # 
+# # ELVI_s_to_s <- means_histogram(post_s_to_sELVI)
+# 
+# FESU_s_to_s <- means_histogram(post_s_to_sFESU)
+# 
+# LOAR_s_to_s <- means_histogram(post_s_to_sLOAR)
+# 
+# POAL_s_to_s <- means_histogram(post_s_to_sPOAL)
+# 
+# POSY_s_to_s <- means_histogram(post_s_to_sPOSY)
+
+
+# combining the individual histograms together with grid.arrange and adding labels
+survmean <- grid.arrange(AGPE_s, ELRI_s, ELVI_s, FESU_s, LOAR_s, POAL_s, POSY_s,  ncol= 1)
+titlesurv <- annotate_figure(survmean, top = "Survival", left = "")
+flwrmean <- grid.arrange(AGPE_f, ELRI_f, ELVI_f, FESU_f, LOAR_f, POAL_f, POSY_f, ncol= 1)
+titleflw <- annotate_figure(flwrmean, top = "Flowering", left = "")
+growmean <- grid.arrange(AGPE_g, ELRI_g, ELVI_g, FESU_g, LOAR_g, POAL_g, POSY_g,  ncol= 1)
+titlegrow <- annotate_figure(growmean, top = "Growth", left = "")
+fertmean <- grid.arrange(AGPE_fert, ELRI_fert, ELVI_fert, FESU_fert, LOAR_fert, POAL_fert, POSY_fert,  ncol= 1)
+titlefert <- annotate_figure(fertmean, top = "Fertility", left = "")
+# spikemean <- grid.arrange(AGPE_spike,  FESU_spike, LOAR_spike, POAL_spike, POSY_spike,  ncol= 1)
+# titlespike <- annotate_figure(spikemean, top = "Spikelets per Infl.", left = "")
+# s_to_smean <- grid.arrange(AGPE_s_to_s,  FESU_s_to_s, LOAR_s_to_s, POAL_s_to_s, POSY_s_to_s,  ncol= 1)
+# titles_to_s <- annotate_figure(s_to_smean, top = "Seed to Seedling", left = "")
+
+means <- grid.arrange(titlesurv, titlegrow, titleflw, titlefert, ncol = 5)
+titlemeans <- annotate_figure(means, top = "Difference in Interannual Variance", left = "Posterior Density")
+```
+
+```{r mean histogram plots, echo=FALSE, fig.width = 9, fig.height = 12}
+# plotting the combined figure of all the mean estimates by species and by vital rate
+# These historgrams can be used indivually as panels for figures with model fits.
+titlemeans
 ```
 
 Plots of model fits with data
