@@ -189,49 +189,9 @@ Plots of mean posteriors
 # This function has code to do either two distributions of the variance between e+ and e- or a distribution of the difference between the two
 means_histogram <- function(df){
   require(ggplot2)
-    df$mean_eminus_y1 <- df$`beta[1]` + df$`beta[2]` + df$`tau_year[1,1]` 
-    df$mean_eminus_y2 <- df$`beta[1]` + df$`beta[2]` + df$`tau_year[1,2]` 
-    df$mean_eminus_y3 <- df$`beta[1]` + df$`beta[2]` + df$`tau_year[1,3]` 
-    df$mean_eminus_y4 <- df$`beta[1]` + df$`beta[2]` + df$`tau_year[1,4]` 
-    df$mean_eminus_y5 <- df$`beta[1]` + df$`beta[2]` + df$`tau_year[1,5]` 
-    df$mean_eminus_y6 <- df$`beta[1]` + df$`beta[2]` + df$`tau_year[1,6]` 
-    df$mean_eminus_y7 <- df$`beta[1]` + df$`beta[2]` + df$`tau_year[1,7]` 
-    df$mean_eminus_y8 <- df$`beta[1]` + df$`beta[2]` + df$`tau_year[1,8]` 
-    df$mean_eminus_y9 <- df$`beta[1]` + df$`beta[2]` + df$`tau_year[1,9]` 
-    df$mean_eminus_y10 <- df$`beta[1]` + df$`beta[2]` + df$`tau_year[1,10]` 
-    df$mean_eminus_y11 <- df$`beta[1]` + df$`beta[2]` + df$`tau_year[1,11]` 
-
-    df$mean_eplus_y1 <- df$`beta[1]` + df$`beta[2]` + df$`beta[3]` + df$`tau_year[2,1]` 
-    df$mean_eplus_y2 <- df$`beta[1]` + df$`beta[2]` + df$`beta[3]` + df$`tau_year[2,2]` 
-    df$mean_eplus_y3 <- df$`beta[1]` + df$`beta[2]` + df$`beta[3]` + df$`tau_year[2,3]` 
-    df$mean_eplus_y4 <- df$`beta[1]` + df$`beta[2]` + df$`beta[3]` + df$`tau_year[2,4]` 
-    df$mean_eplus_y5 <- df$`beta[1]` + df$`beta[2]` + df$`beta[3]` + df$`tau_year[2,5]` 
-    df$mean_eplus_y6 <- df$`beta[1]` + df$`beta[2]` + df$`beta[3]` + df$`tau_year[2,6]` 
-    df$mean_eplus_y7 <- df$`beta[1]` + df$`beta[2]` + df$`beta[3]` + df$`tau_year[2,7]` 
-    df$mean_eplus_y8 <- df$`beta[1]` + df$`beta[2]` + df$`beta[3]` + df$`tau_year[2,8]` 
-    df$mean_eplus_y9 <- df$`beta[1]` + df$`beta[2]` + df$`beta[3]` + df$`tau_year[2,9]` 
-    df$mean_eplus_y10 <- df$`beta[1]` + df$`beta[2]` + df$`beta[3]` + df$`tau_year[2,10]` 
-    df$mean_eplus_y11 <- df$`beta[1]` + df$`beta[2]` + df$`beta[3]` + df$`tau_year[2,11]` 
-    
-    df$mean_eminus_sum <- df$mean_eminus_y1 + df$mean_eminus_y2 + df$mean_eminus_y3 + df$mean_eminus_y4 + df$mean_eminus_y5 + df$mean_eminus_y6 + df$mean_eminus_y7 + df$mean_eminus_y8 + df$mean_eminus_y9 + df$mean_eminus_y10 + df$mean_eminus_y11
-    
-    df$mean_eplus_sum <- df$mean_eplus_y1 + df$mean_eplus_y2 + df$mean_eplus_y3 + df$mean_eplus_y4 + df$mean_eplus_y5 + df$mean_eplus_y6 + df$mean_eplus_y7 + df$mean_eplus_y8 + df$mean_eplus_y9 + df$mean_eplus_y10 + df$mean_eplus_y11
-
-    df$diff_mean_sums <- df$mean_eminus_sum - df$mean_eplus_sum
-    
-    df$mu_eminus <- df$`beta[1]` + df$`beta[2]`
-    df$mu_eplus <- df$`beta[1]` + df$`beta[2]` + df$`beta[3]`
-    df$diff_mu <- df$mu_eminus - df$mu_eplus
-    
   spp <- ggplot() +
-    # geom_histogram(data = df, aes(mean_eminus_sum), fill = "#ff7f00", alpha = .4, bins = 200) +
-    # geom_histogram(data = df, aes(mean_eplus_sum), fill = "#6a3d9a", alpha = .4, bins = 200) +
-    # geom_histogram(data = df, aes(diff_mean), fill = "#4d9158", alpha = .6, bins = 200) +
-    # geom_histogram(data = df, aes(mu_eminus), fill = "#ff7f00", alpha = .4, bins = 200) +
-    # geom_histogram(data = df, aes(mu_eplus), fill = "#6a3d9a", alpha = .4, bins = 200) +
-    geom_histogram(data = df, aes(diff_mu), fill = "#4d9158", alpha = .6, bins = 200) +
-    # geom_vline(xintercept = 0) +
-    geom_vline(xintercept = mean(df$diff_mu), col = "#4d9158") +
+    geom_histogram(data = df, aes(df$`beta[3]`), fill = "#4d9158", alpha = .6, bins = 200) +
+    geom_vline(xintercept = mean(df$`beta[3]`), col = "#4d9158") +
     labs(x = expression(mu[year]), y = "Posterior density") + theme_classic()
   return(spp)
 }
@@ -353,48 +313,111 @@ titlemeans <- annotate_figure(means, top = "Difference in Interannual Variance",
 titlemeans
 ```
 
+```{r caterpiller plot of endo effects on mean and variance}
+# calc mean and 80% CI and calc for each vital rate.
+getmean <- function(post, species = "", vr = ""){
+post_mean <- post %>% 
+  dplyr::select(`beta[3]`, `sigma_e[1]`, `sigma_e[2]`) %>%
+  mutate(diff_sigma = `sigma_e[1]` - `sigma_e[2]`) %>% 
+  mutate(species = species, vitalrate = vr) %>% 
+  melt() %>% 
+  group_by(species, vitalrate, variable) %>% 
+  summarize(mean = mean(value),
+            lowCI = quantile(value, prob = c(.1)),
+            highCI = quantile(value, prob = c(.9)))
+return(post_mean)
+}
+
+s <- list(post_survAGPE = post_survAGPE,post_survELRI = post_survELRI, post_survELVI = post_survELVI,post_survFESU = post_survFESU, post_survLOAR = post_survLOAR, post_survPOAL = post_survPOAL,post_survPOSY = post_survPOSY)
+surv <- lapply(seq_along(s),FUN = function(i) getmean(s[[i]], species = str_sub(names(s)[[i]], -4), vr = "Survival"))
+survdf <- bind_rows(surv)
+
+s <- list(post_growAGPE = post_growAGPE,post_growELRI = post_growELRI, post_growELVI = post_growELVI,post_growFESU = post_growFESU, post_growLOAR = post_growLOAR, post_growPOAL = post_growPOAL,post_growPOSY = post_growPOSY)
+grow <- lapply(seq_along(s),FUN = function(i) getmean(s[[i]], species = str_sub(names(s)[[i]], -4), vr = "Growth"))
+growdf <- bind_rows(grow)
+
+s <- list(post_flwAGPE = post_flwAGPE,post_flwELRI = post_flwELRI, post_flwELVI = post_flwELVI,post_flwFESU = post_flwFESU, post_flwLOAR = post_flwLOAR, post_flwPOAL = post_flwPOAL,post_flwPOSY = post_flwPOSY)
+flw <- lapply(seq_along(s),FUN = function(i) getmean(s[[i]], species = str_sub(names(s)[[i]], -4), vr = "Flowering"))
+flwdf <- bind_rows(flw)
+
+s <- list(post_fertAGPE = post_fertAGPE,post_fertELRI = post_fertELRI, post_fertELVI = post_fertELVI,post_fertFESU = post_fertFESU, post_fertLOAR = post_fertLOAR, post_fertPOAL = post_fertPOAL,post_fertPOSY = post_fertPOSY)
+fert <- lapply(seq_along(s),FUN = function(i) getmean(s[[i]], species = str_sub(names(s)[[i]], -4), vr = "Fertility"))
+fertdf <- bind_rows(fert)
+
+s <- list(post_spikeAGPE = post_spikeAGPE,post_spikeELRI = post_spikeELRI, post_spikeELVI = post_spikeELVI,post_spikeFESU = post_spikeFESU, post_spikeLOAR = post_spikeLOAR, post_spikePOAL = post_spikePOAL,post_spikePOSY = post_spikePOSY)
+spike <- lapply(seq_along(s),FUN = function(i) getmean(s[[i]], species = str_sub(names(s)[[i]], -4), vr = "Spikelets"))
+spikedf <- bind_rows(spike)
+
+# Merge the diff. vital rates summaries into one df
+vrdf <- bind_rows(survdf,growdf, flwdf, fertdf, spikedf) %>% 
+  mutate(variable = recode(variable, "beta[3]" = " Mean Endophyte Effect",
+                                     "diff_sigma" = "Difference in sd",
+                                     "sigma_e[1]" = "E Minus sd",
+                                     "sigma_e[2]" = "E Plus sd"))
+
+CatPlot <- ggplot(data = vrdf, aes(x = species,
+                                   y = mean,
+                                   ymin = lowCI, 
+                                   ymax = highCI,
+                                   col = vitalrate)) +
+                    geom_pointrange(size = 1.0) +  
+                    facet_grid(rows = vars(vitalrate), cols = vars(variable)) +
+                    geom_hline(yintercept = 0, linetype = "dotted") +
+                    xlab("Variable\n") + ylab("\nCoefficient Estimate") +
+                    coord_flip() +
+                    theme_classic(base_size = 20)
+
+```
+
+```{r caterpillar plot, echo=FALSE, fig.width = 9, fig.height = 12}
+# plotting the combined figure of all the mean estimates by species and by vital rate
+# These historgrams can be used indivually as panels for figures with model fits.
+CatPlot
+```
+
 Plots of model fits with data
 ```{r observed survival bins, include=FALSE}
 # Function to bin the observed survival data according to endophyte status and size classes for plotting against the fitted model
 surv_data_bins <- function(df_raw){
   require(tidyverse)
+  df_raw <- ungroup(df_raw)
   surv_bin_minus <- df_raw %>% 
     select(surv_t1, logsize_t, year_t, endo_01) %>%
     filter(endo_01 == 0) %>%
     rename(Endo = endo_01) %>% 
     mutate(Year = as.factor(as.integer(as.factor(year_t)))) %>% 
     mutate(size_bin = cut_interval(logsize_t, n = 15)) %>% 
-    group_by(size_bin, Year) %>% 
+    group_by( size_bin, Year) %>% 
     summarise(mean_size = mean((logsize_t),na.rm=T),
             mean_surv = mean(surv_t1,na.rm=T),
             samplesize = n())
   
-  surv_bin_plus <- df_raw %>% 
+  surv_bin_plus <- df_raw %>%
     select(surv_t1, logsize_t, year_t, endo_01) %>%
-    filter(endo_01 == 1) %>% 
-    rename(Endo = endo_01) %>% 
-    mutate(Year = as.factor(as.integer(as.factor(year_t)))) %>% 
-    mutate(size_bin = cut_interval(logsize_t, n = 15)) %>% 
-    group_by(size_bin, Year) %>% 
+    filter(endo_01 == 1) %>%
+    rename(Endo = endo_01) %>%
+    mutate(Year = as.factor(as.integer(as.factor(year_t)))) %>%
+    mutate(size_bin = cut_interval(logsize_t, n = 15)) %>%
+    group_by(size_bin, Year) %>%
     summarise(mean_size = mean((logsize_t),na.rm=T),
               mean_surv = mean(surv_t1,na.rm=T),
               samplesize = n())
 
-  surv_bin_byyear <- df_raw %>% 
+  surv_bin_byyear <- df_raw %>%
     select(surv_t1, logsize_t, year_t, endo_01) %>%
-    mutate(Year = as.factor(as.integer(as.factor(year_t)))) %>% 
-    rename(Endo = endo_01) %>% 
-    mutate(size_bin = cut_interval(logsize_t, n = 15)) %>% 
-    group_by(size_bin, Year, Endo) %>% 
+    mutate(Year = as.factor(as.integer(as.factor(year_t)))) %>%
+    rename(Endo = endo_01) %>%
+    mutate(size_bin = cut_interval(logsize_t, n = 15)) %>%
+    group_by(size_bin, Year, Endo) %>%
     summarise(mean_size = mean((logsize_t),na.rm=T),
               mean_surv = mean(surv_t1,na.rm=T),
               samplesize = n())
-  
-  surv_bin_mean <- df_raw %>% 
+
+  surv_bin_mean <- df_raw %>%
     select(surv_t1, logsize_t, endo_01) %>%
-    mutate(Endo = recode(endo_01, "0" = "E-", "1" = "E+")) %>% 
-    mutate(size_bin = cut_interval(logsize_t, n = 12)) %>% 
-    group_by(size_bin, Endo) %>% 
+    mutate(Endo = recode(endo_01, "0" = "E-", "1" = "E+")) %>%
+    mutate(size_bin = cut_interval(logsize_t, n = 12)) %>%
+    group_by(size_bin, Endo) %>%
     summarise(mean_size = mean((logsize_t),na.rm=T),
               mean_surv = mean(surv_t1,na.rm=T),
               samplesize = n())
@@ -423,6 +446,7 @@ POSYsurv_bins <- surv_data_bins(POSY_surv_data)
 # Function to bin the observed flowering data according to endophyte status and size classes for plotting against the fitted model
 flw_data_bins <- function(df_raw){
   require(tidyverse)
+  df_raw <- ungroup(df_raw)
   flw_bin_minus <- df_raw %>% 
     select(FLW_STAT_T1, logsize_t, year_t, endo_01) %>%
     filter(endo_01 == 0) %>% 
@@ -489,6 +513,7 @@ POSYflw_bins <- flw_data_bins(POSY_flw_data)
 # Function to bin the observed growth data according to endophyte status and size classes for plotting against the fitted model
 grow_data_bins <- function(df_raw){
   require(tidyverse)
+  df_raw <- ungroup(df_raw)
   grow_bin_minus<- df_raw %>% 
     select(size_t1, logsize_t, year_t, endo_01) %>%
     filter(endo_01 == 0) %>%     
