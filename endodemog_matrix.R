@@ -8,6 +8,7 @@ library(rstan)
 library(StanHeaders)
 library(popbio)
 library(bbmle)
+library(SPEI)
 
 invlogit<-function(x){exp(x)/(1+exp(x))}
 logit = function(x) { log(x/(1-x)) }
@@ -259,6 +260,8 @@ return(params)
 }
 
 agpe_params <- getparams(surv = survAGPE, grow = growAGPE, flw = flwAGPE, fert = fertAGPE, spike = spikeAGPE, seed = seedAGPE, s_to_s = s_to_sAGPE, data = AGPE_surv_data)
+elri_params <- getparams(surv = survELRI, grow = growELRI, flw = flwELRI, fert = fertELRI, spike = spikeELRI, seed = seedELRI, s_to_s = s_to_sELRI, data = ELRI_surv_data)
+elvi_params <- getparams(surv = survELVI, grow = growELVI, flw = flwELVI, fert = fertELVI, spike = spikeELVI, seed = seedELVI, s_to_s = s_to_sELVI, data = ELVI_surv_data)
 fesu_params <- getparams(surv = survFESU, grow = growFESU, flw = flwFESU, fert = fertFESU, spike = spikeFESU, seed = seedFESU, s_to_s = s_to_sFESU, data = FESU_surv_data)
 loar_params <- getparams(surv = survLOAR, grow = growLOAR, flw = flwLOAR, fert = fertLOAR, spike = spikeLOAR, seed = seedLOAR, s_to_s = s_to_sLOAR, data = LOAR_surv_data)
 poal_params <- getparams(surv = survPOAL, grow = growPOAL, flw = flwPOAL, fert = fertPOAL, spike = spikePOAL, seed = seedPOAL, s_to_s = s_to_sPOAL, data = POAL_surv_data)
@@ -1109,6 +1112,8 @@ bigmatrix<-function(params){
 # matrix <- bigmatrix(loar_params)
 # calculating the matrices
 agpe_mat <- bigmatrix(agpe_params)
+elri_mat <- bigmatrix(elri_params)
+elvi_mat <- bigmatrix(elvi_params)
 fesu_mat <- bigmatrix(fesu_params)
 loar_mat <- bigmatrix(loar_params)
 poal_mat <- bigmatrix(poal_params)
@@ -1201,69 +1206,226 @@ yearly <- function(mat){
 }
 # yearly(agpe_mat)
 
+
 # some starter histograms
 # eminus = orange, eplus = purple
 ggplot(data = yearly(agpe_mat))+
-  geom_histogram(aes(yearly_eminus), bins = 25, fill = "#ff7f00", alpha = .6) +
-  geom_histogram(aes(yearly_eplus), bins = 25, fill = "#6a3d9a", alpha = .6) + 
-  labs(x = "population growth rate") + theme_classic()
+  geom_histogram(aes(yearly_eminus_rec), bins = 8, fill = "#ff7f00", alpha = .6) +
+  geom_histogram(aes(yearly_eplus_rec), bins = 8, fill = "#6a3d9a", alpha = .6) + 
+  labs(x = "population growth rate") +labs(title = "AGPE") + theme_classic(base_size = 20)
+
+ggplot(data = yearly(elri_mat))+
+  geom_histogram(aes(yearly_eminus_rec), bins = 8, fill = "#ff7f00", alpha = .6) +
+  geom_histogram(aes(yearly_eplus_rec), bins = 8, fill = "#6a3d9a", alpha = .6) + 
+  labs(x = "population growth rate") +labs(title = "ELRI") + theme_classic(base_size = 20)
+
+ggplot(data = yearly(elvi_mat))+
+  geom_histogram(aes(yearly_eminus_rec), bins = 8, fill = "#ff7f00", alpha = .6) +
+  geom_histogram(aes(yearly_eplus_rec), bins = 8, fill = "#6a3d9a", alpha = .6) + 
+  labs(x = "population growth rate") +labs(title = "ELVI") + theme_classic(base_size = 20)
 
 ggplot(data = yearly(fesu_mat))+
-  geom_histogram(aes(yearly_eminus), bins = 25, fill = "#ff7f00", alpha = .6) +
-  geom_histogram(aes(yearly_eplus), bins = 25, fill = "#6a3d9a", alpha = .6) + 
-  labs(x = "population growth rate") + theme_classic()
+  geom_histogram(aes(yearly_eminus_rec), bins = 8, fill = "#ff7f00", alpha = .6) +
+  geom_histogram(aes(yearly_eplus_rec), bins = 8, fill = "#6a3d9a", alpha = .6) + 
+  labs(x = "population growth rate") +labs(title = "FESU") + theme_classic(base_size = 20)
 
 ggplot(data = yearly(loar_mat))+
-  geom_histogram(aes(yearly_eminus), bins = 25, fill = "#ff7f00", alpha = .6) +
-  geom_histogram(aes(yearly_eplus), bins = 25, fill = "#6a3d9a", alpha = .6) + 
-  labs(x = "population growth rate") + theme_classic()
+  geom_histogram(aes(yearly_eminus_rec), bins = 8, fill = "#ff7f00", alpha = .6) +
+  geom_histogram(aes(yearly_eplus_rec), bins = 8, fill = "#6a3d9a", alpha = .6) + 
+  labs(x = "population growth rate") +labs(title = "LOAR") + theme_classic(base_size = 20)
 
 ggplot(data = yearly(poal_mat))+
-  geom_histogram(aes(yearly_eminus), bins = 25, fill = "#ff7f00", alpha = .6) +
-  geom_histogram(aes(yearly_eplus), bins = 25, fill = "#6a3d9a", alpha = .6) + 
-  labs(x = "population growth rate") + theme_classic()
+  geom_histogram(aes(yearly_eminus_rec), bins = 8, fill = "#ff7f00", alpha = .6) +
+  geom_histogram(aes(yearly_eplus_rec), bins = 8, fill = "#6a3d9a", alpha = .6) + 
+  labs(x = "population growth rate") +labs(title = "POAL") + theme_classic(base_size = 20)
 
 ggplot(data = yearly(posy_mat))+
-  geom_histogram(aes(yearly_eminus), bins = 25, fill = "#ff7f00", alpha = .6) +
-  geom_histogram(aes(yearly_eplus), bins = 25, fill = "#6a3d9a", alpha = .6) + 
-  labs(x = "population growth rate") + theme_classic()
+  geom_histogram(aes(yearly_eminus_rec), bins = 8, fill = "#ff7f00", alpha = .6) +
+  geom_histogram(aes(yearly_eplus_rec), bins = 8, fill = "#6a3d9a", alpha = .6) + 
+  labs(x = "population growth rate") +labs(title = "POSY") + theme_classic(base_size = 20) 
 
-
+# option of a density plot
+ggplot(data = yearly(posy_mat))+
+  geom_density(aes(yearly_eminus_rec), bw = .1, fill = "#ff7f00", alpha = .6) +
+  geom_density(aes(yearly_eplus_rec), bw = .1, fill = "#6a3d9a", alpha = .6) + 
+  labs(x = "population growth rate") + labs(title = "POSY") +theme_classic(base_size = 20)
 
 # some starter time series
 ggplot(data = yearly(agpe_mat))+
-  geom_point(aes(x = year_t1, y = yearly_eminus), col = "#ff7f00") +
-  geom_point(aes(x = year_t1, y = yearly_eplus), col = "#6a3d9a") +
-  geom_point(aes(x = year_t1, y = yearly_eminus_rec), col = "#ff7f00", shape = "triangle") +
-  geom_point(aes(x = year_t1, y = yearly_eplus_rec), col = "#6a3d9a", shape = "triangle") +
-  labs(y = "population growth rate", x = "year_t1") + theme_classic() + scale_x_continuous(breaks = c(2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019))
+  geom_point(aes(x = year_t1, y = yearly_eminus_rec),size = 4, col = "#ff7f00") +
+  geom_point(aes(x = year_t1, y = yearly_eplus_rec),size = 4, col = "#6a3d9a") +
+  geom_hline(yintercept = 1, linetype = "dotted") +
+  labs(y = "population growth rate", x = "year_t1") + ggtitle("AGPE") + theme_classic(base_size = 20) + scale_x_continuous(breaks = c(2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019))
+ggplot(data = yearly(elri_mat))+
+  geom_point(aes(x = year_t1, y = yearly_eminus_rec),size = 4, col = "#ff7f00") +
+  geom_point(aes(x = year_t1, y = yearly_eplus_rec),size = 4, col = "#6a3d9a") +
+  geom_hline(yintercept = 1, linetype = "dotted") +
+  labs(y = "population growth rate", x = "year_t1") + ggtitle("ELRI") + theme_classic(base_size = 20) + scale_x_continuous(breaks = c(2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019))
+ggplot(data = yearly(elvi_mat))+
+  geom_point(aes(x = year_t1, y = yearly_eminus_rec),size = 4, col = "#ff7f00") +
+  geom_point(aes(x = year_t1, y = yearly_eplus_rec),size = 4, col = "#6a3d9a") +
+  geom_hline(yintercept = 1, linetype = "dotted") +
+  labs(y = "population growth rate", x = "year_t1") + ggtitle("ELVI") + theme_classic(base_size = 20) + scale_x_continuous(breaks = c(2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019))
 
 ggplot(data = yearly(fesu_mat))+
-  geom_point(aes(x = year_t1, y = yearly_eminus), col = "#ff7f00") +
-  geom_point(aes(x = year_t1, y = yearly_eplus), col = "#6a3d9a") +
-  labs(y = "population growth rate", x = "year_t1") + theme_classic() + scale_x_continuous(breaks = c(2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019))
+  geom_point(aes(x = year_t1, y = yearly_eminus_rec),size = 4, col = "#ff7f00") +
+  geom_point(aes(x = year_t1, y = yearly_eplus_rec),size = 4, col = "#6a3d9a") +
+  geom_hline(yintercept = 1, linetype = "dotted") +
+  labs(y = "population growth rate", x = "year_t1") + ggtitle("FESU") + theme_classic(base_size = 20) + scale_x_continuous(breaks = c(2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019))
 
 ggplot(data = yearly(loar_mat))+
-  geom_point(aes(x = year_t1, y = yearly_eminus), col = "#ff7f00") +
-  geom_point(aes(x = year_t1, y = yearly_eplus), col = "#6a3d9a") +
-  labs(y = "population growth rate", x = "year_t1") + theme_classic() + scale_x_continuous(breaks = c(2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019))
+  geom_point(aes(x = year_t1, y = yearly_eminus_rec),size = 4, col = "#ff7f00") +
+  geom_point(aes(x = year_t1, y = yearly_eplus_rec),size = 4, col = "#6a3d9a") +
+  geom_hline(yintercept = 1, linetype = "dotted") +
+  labs(y = "population growth rate", x = "year_t1") + ggtitle("LOAR") + theme_classic(base_size = 20) + scale_x_continuous(breaks = c(2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019))
 
 ggplot(data = yearly(poal_mat))+
-  geom_point(aes(x = year_t1, y = yearly_eminus), col = "#ff7f00") +
-  geom_point(aes(x = year_t1, y = yearly_eplus), col = "#6a3d9a") +
-  labs(y = "population growth rate", x = "year_t1") + theme_classic() + scale_x_continuous(breaks = c(2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019))
+  geom_point(aes(x = year_t1, y = yearly_eminus_rec),size = 4, col = "#ff7f00") +
+  geom_point(aes(x = year_t1, y = yearly_eplus_rec),size = 4, col = "#6a3d9a") +
+  geom_hline(yintercept = 1, linetype = "dotted") +
+  labs(y = "population growth rate", x = "year_t1") + ggtitle("POAL") + theme_classic(base_size = 20) + scale_x_continuous(breaks = c(2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019))
 
 ggplot(data = yearly(posy_mat))+
-  geom_point(aes(x = year_t1, y = yearly_eminus), col = "#ff7f00") +
-  geom_point(aes(x = year_t1, y = yearly_eplus), col = "#6a3d9a") +
-  labs(y = "population growth rate", x = "year_t1") + theme_classic() + scale_x_continuous(breaks = c(2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019))
+  geom_point(aes(x = year_t1, y = yearly_eminus_rec),size = 4, col = "#ff7f00") +
+  geom_point(aes(x = year_t1, y = yearly_eplus_rec),size = 4, col = "#6a3d9a") +
+  geom_hline(yintercept = 1, linetype = "dotted") +
+  labs(y = "population growth rate", x = "year_t1") + ggtitle("POSY") + theme_classic(base_size = 20) + scale_x_continuous(breaks = c(2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019))
 
 
 
 # I'm gonna read in env. data here
-# weather station data downloaded from NOAA, the service is down temporarily
-NOAA <- read_csv(file = "~/Dropbox/EndodemogData//.csv")
-temp <- read_csv(file = "")
+# data downloaded from PRISM, daily ppt, tmin, tmean, tmax for GPS point 39.235900000000,-86.218100000000 from Jan 1, 2006 to Jan 1, 2019
+climate <- read_csv(file = "~/Dropbox/EndodemogData/PRISMClimateData_BrownCo.csv") %>% 
+  mutate(year = year(Date), month = month(Date), day = day(Date)) %>% 
+  rename(ppt = `ppt (mm)`, tmean = `tmean (degrees C)`) %>% 
+  mutate(site_lat = 39.235900000000, site_long = -86.218100000000)
+  
+
+AGPE_climate <- climate %>% 
+  mutate(census_month = 9, climate_year = as.numeric(ifelse(month >=census_month, year+1, year))) %>% 
+  filter(climate_year != 2006) %>% 
+  group_by(climate_year) %>% 
+  summarize('Cumulative PPT (mm)' = sum(ppt),
+            'Mean Temp. (C˚)' = mean(tmean))
+AGPE <- yearly(agpe_mat) %>% 
+  mutate(species = "AGPE") %>% 
+  merge(AGPE_climate, by.x = c("year_t1"), by.y = c("climate_year"))
+ELRI_climate <- climate %>%
+  mutate(census_month = 7, climate_year = as.numeric(ifelse(month >=census_month, year+1, year))) %>%
+  filter(climate_year != 2006) %>%
+  group_by(climate_year) %>%
+  summarize('Cumulative PPT (mm)' = sum(ppt),
+            'Mean Temp. (C˚)' = mean(tmean))
+ELRI <- yearly(elri_mat) %>%
+  mutate(species = "ELRI") %>%
+  merge(ELRI_climate, by.x = c("year_t1"), by.y = c("climate_year"))
+ELVI_climate <- climate %>%
+  mutate(census_month = 7, climate_year = as.numeric(ifelse(month >=census_month, year+1, year))) %>%
+  filter(climate_year != 2006) %>%
+  group_by(climate_year) %>%
+  summarize('Cumulative PPT (mm)' = sum(ppt),
+            'Mean Temp. (C˚)' = mean(tmean))
+ELVI <- yearly(elvi_mat) %>%
+  mutate(species = "ELVI") %>%
+  merge(ELVI_climate, by.x = c("year_t1"), by.y = c("climate_year"))
+FESU_climate <- climate %>% 
+  mutate(census_month = 6, climate_year = as.numeric(ifelse(month >=census_month, year+1, year))) %>% 
+  filter(climate_year != 2006) %>% 
+  group_by(climate_year) %>% 
+  summarize('Cumulative PPT (mm)' = sum(ppt),
+            'Mean Temp. (C˚)' = mean(tmean))
+FESU <- yearly(fesu_mat) %>% 
+  mutate(species = "FESU") %>% 
+  merge(FESU_climate, by.x = c("year_t1"), by.y = c("climate_year"))
+LOAR_climate <- climate %>% 
+  mutate(census_month = 7, climate_year = as.numeric(ifelse(month >=census_month, year+1, year))) %>% 
+  filter(climate_year != 2006) %>% 
+  group_by(climate_year) %>% 
+  summarize('Cumulative PPT (mm)' = sum(ppt),
+            'Mean Temp. (C˚)' = mean(tmean))
+LOAR <- yearly(loar_mat) %>% 
+  mutate(species = "LOAR") %>% 
+  merge(LOAR_climate, by.x = c("year_t1"), by.y = c("climate_year"))
+POAL_climate <- climate %>% 
+  mutate(census_month = 5, climate_year = as.numeric(ifelse(month >=census_month, year+1, year))) %>% 
+  filter(climate_year != 2006) %>% 
+  group_by(climate_year) %>% 
+  summarize('Cumulative PPT (mm)' = sum(ppt),
+            'Mean Temp. (C˚)' = mean(tmean))
+POAL <- yearly(poal_mat) %>% 
+  mutate(species = "POAL") %>% 
+  merge(POAL_climate, by.x = c("year_t1"), by.y = c("climate_year"))
+POSY_climate <- climate %>% 
+  mutate(census_month = 5, climate_year = as.numeric(ifelse(month >=census_month, year+1, year))) %>% 
+  filter(climate_year != 2006) %>% 
+  group_by(climate_year) %>% 
+  summarize('Cumulative PPT (mm)' = sum(ppt),
+            'Mean Temp. (C˚)' = mean(tmean))
+POSY <- yearly(posy_mat) %>% 
+  mutate(species = "POSY") %>% 
+  merge(POSY_climate, by.x = c("year_t1"), by.y = c("climate_year"))
+
+endo_climate <-  rbind(AGPE,ELRI,ELVI,FESU,LOAR,POAL,POSY) %>% 
+  melt(id.vars = c("species", "year_t1", 'Cumulative PPT (mm)', 'Mean Temp. (C˚)')) %>% 
+  filter(variable != "yearly_eminus", variable != "yearly_eplus")
+
+
+ggplot(data = endo_climate) +
+  geom_smooth(aes(x = `Cumulative PPT (mm)`, y = value),color = "grey", method = "glm", se = FALSE) +
+  geom_point(aes(x = `Cumulative PPT (mm)`, y = value, color = variable, shape = species)) +
+  facet_grid(rows = vars(variable), cols = vars(species)) +
+  theme_classic() + scale_color_manual(values = c("#ff7f00", "#6a3d9a")) +scale_shape_manual(values=c(0:6))+ labs(y = "Population Growth") + scale_x_continuous(breaks = c(2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019))
+
+
+ggplot(data = endo_climate) +
+  geom_smooth(aes(x = `Cumulative PPT (mm)`, y = value), color = "grey", method = "glm", se = FALSE) +
+  geom_point(aes(x = `Cumulative PPT (mm)`, y = value, color = variable, shape = species)) +
+  facet_grid(cols = vars(species)) +
+  theme_classic() + scale_color_manual(values = c("#ff7f00", "#6a3d9a"))+ scale_shape_manual(values=c(0:6))+ labs(y = "Population Growth") + scale_x_continuous(breaks = c(2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019))
+
+
+ggplot(data = endo_climate) +
+  geom_smooth(aes(x = `Mean Temp. (C˚)`, y = value),color = "grey", method = "glm", se = FALSE) +
+  geom_point(aes(x = `Mean Temp. (C˚)`, y = value, color = variable, shape = species)) +
+  facet_grid(rows = vars(variable), cols = vars(species)) +
+  theme_classic() + scale_color_manual(values = c("#ff7f00", "#6a3d9a")) +scale_shape_manual(values=c(0:6))+ labs(y = "Population Growth") + scale_x_continuous(breaks = c(2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019))
+
+
+ggplot(data = endo_climate) +
+  geom_smooth(aes(x = `Mean Temp. (C˚)`, y = value), color = "grey", method = "glm", se = FALSE) +
+  geom_point(aes(x = `Mean Temp. (C˚)`, y = value, color = variable, shape = species)) +
+  facet_grid(cols = vars(species)) +
+  theme_classic() + scale_color_manual(values = c("#ff7f00", "#6a3d9a"))+ scale_shape_manual(values=c(0:6))+ labs(y = "Population Growth") + scale_x_continuous(breaks = c(2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019))
+
+
+
+ggplot(data = endo_climate) +
+  geom_point(aes(x = year_t1, y = value, color = variable)) +
+  facet_grid(rows = vars(species)) +
+  theme_classic() + scale_color_manual(values = c("#ff7f00","#6a3d9a"))+ labs(y = "Population Growth") + scale_x_continuous(breaks = c(2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019))
+
+# Calculate effect size and sd for lambdas
+
+endo <- endo_climate %>% 
+  mutate(variable = recode(variable, yearly_eplus_rec = "E+", yearly_eminus_rec = "E-")) %>% 
+  group_by(species,variable) %>% 
+  summarize(mean_l = mean(value),
+            sd_l = sd(value),
+            lowCI = mean_l - 2*sd_l,
+            highCI = mean_l + 2*sd_l)
+
+CatPlot <- ggplot(data = endo, aes(x = variable,
+                                   y = mean_l,
+                                   ymin = lowCI, 
+                                   ymax = highCI,
+                                   color = variable)) +
+  geom_pointrange(size = 1.0)  +
+  facet_grid(rows = vars(species)) +
+  geom_hline(yintercept = 1, linetype = "dotted") +
+  xlab("Endophyte") + ylab("Mean Pop. Growth Rate (± 2 sd)") +
+  coord_flip() +
+  theme_classic(base_size = 15) + scale_color_manual(values = c("#ff7f00","#6a3d9a"))+theme(axis.title = element_text(size = 30), axis.text = element_text(size = 20)) 
+
 
 
 

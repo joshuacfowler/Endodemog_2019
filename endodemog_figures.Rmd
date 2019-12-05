@@ -56,13 +56,13 @@ variance_histogram <- function(df){
   require(ggplot2)
   df$diff_sigma_e <- df$`sigma_e[1]` - df$`sigma_e[2]`
   spp <- ggplot() +
-    # geom_histogram(data = df, aes(`sigma_e[1]`), fill = "#ff7f00", alpha = .4, bins = 200) +
-    # geom_histogram(data = df, aes(`sigma_e[2]`), fill = "#6a3d9a", alpha = .4, bins = 200) +
-    geom_histogram(data = df, aes(diff_sigma_e), fill = "#4d9158", alpha = .6, bins = 200) +
+    geom_histogram(data = df, aes(`sigma_e[1]`), fill = "#ff7f00", alpha = .4, bins = 200) +
+    geom_histogram(data = df, aes(`sigma_e[2]`), fill = "#6a3d9a", alpha = .4, bins = 200) +
+    # geom_histogram(data = df, aes(diff_sigma_e), fill = "#4d9158", alpha = .6, bins = 200) +
     # geom_vline(xintercept = 0) +
     # geom_vline(xintercept = mean(df$diff_sigma_e), col = "#4d9158") + 
-    ylim(0,2500) +
-    labs(x = expression(σ[year]), y = "Posterior density") + theme_classic()
+    # ylim(0,2500) +
+    labs(x = expression(σ[year]), y = "Posterior density") + theme_classic() + theme(axis.title=element_text(size=30), axis.text = element_text(size=20))
   return(spp)
 }
 # survival
@@ -350,26 +350,28 @@ spikedf <- bind_rows(spike)
 
 # Merge the diff. vital rates summaries into one df
 vrdf <- bind_rows(survdf,growdf, flwdf, fertdf, spikedf) %>% 
-  mutate(variable = recode(variable, "beta[3]" = " Mean Endophyte Effect",
-                                     "diff_sigma" = "Difference in sd",
+  mutate(variable = recode(variable, "beta[3]" = "Mean Endophyte Effect",
+                                     "diff_sigma" = "Difference in SD",
                                      "sigma_e[1]" = "E Minus sd",
-                                     "sigma_e[2]" = "E Plus sd"))
+                                     "sigma_e[2]" = "E Plus sd")) %>% 
+  filter(variable == "Mean Endophyte Effect")
 
-CatPlot <- ggplot(data = vrdf, aes(x = species,
+CatPlot <- ggplot(data = vrdf, aes(x = fct_reorder(species, lowCI),
                                    y = mean,
                                    ymin = lowCI, 
                                    ymax = highCI,
-                                   col = vitalrate)) +
+                                   col = vitalrate,
+                                   shape = vitalrate)) +
                     geom_pointrange(size = 1.0) +  
                     facet_grid(rows = vars(vitalrate), cols = vars(variable)) +
                     geom_hline(yintercept = 0, linetype = "dotted") +
-                    xlab("Variable\n") + ylab("\nCoefficient Estimate") +
+                    xlab("Species\n") + ylab("\nCoefficient Estimate (w/ 80% CI)") +
                     coord_flip() +
-                    theme_classic(base_size = 20)
+                    theme_classic(base_size = 30) + theme(axis.title = element_text(size = 50), axis.text = element_text(size = 25)) 
 
 ```
 
-```{r caterpillar plot, echo=FALSE, fig.width = 9, fig.height = 12}
+```{r caterpillar plot, echo=FALSE, fig.width = 10, fig.height = 6}
 # plotting the combined figure of all the mean estimates by species and by vital rate
 # These historgrams can be used indivually as panels for figures with model fits.
 CatPlot
@@ -382,7 +384,7 @@ surv_data_bins <- function(df_raw){
   require(tidyverse)
   df_raw <- ungroup(df_raw)
   surv_bin_minus <- df_raw %>% 
-    select(surv_t1, logsize_t, year_t, endo_01) %>%
+    dplyr::select(surv_t1, logsize_t, year_t, endo_01) %>%
     filter(endo_01 == 0) %>%
     rename(Endo = endo_01) %>% 
     mutate(Year = as.factor(as.integer(as.factor(year_t)))) %>% 
@@ -393,7 +395,7 @@ surv_data_bins <- function(df_raw){
             samplesize = n())
   
   surv_bin_plus <- df_raw %>%
-    select(surv_t1, logsize_t, year_t, endo_01) %>%
+    dplyr::select(surv_t1, logsize_t, year_t, endo_01) %>%
     filter(endo_01 == 1) %>%
     rename(Endo = endo_01) %>%
     mutate(Year = as.factor(as.integer(as.factor(year_t)))) %>%
@@ -404,7 +406,7 @@ surv_data_bins <- function(df_raw){
               samplesize = n())
 
   surv_bin_byyear <- df_raw %>%
-    select(surv_t1, logsize_t, year_t, endo_01) %>%
+    dplyr::select(surv_t1, logsize_t, year_t, endo_01) %>%
     mutate(Year = as.factor(as.integer(as.factor(year_t)))) %>%
     rename(Endo = endo_01) %>%
     mutate(size_bin = cut_interval(logsize_t, n = 15)) %>%
@@ -414,7 +416,7 @@ surv_data_bins <- function(df_raw){
               samplesize = n())
 
   surv_bin_mean <- df_raw %>%
-    select(surv_t1, logsize_t, endo_01) %>%
+    dplyr::select(surv_t1, logsize_t, endo_01) %>%
     mutate(Endo = recode(endo_01, "0" = "E-", "1" = "E+")) %>%
     mutate(size_bin = cut_interval(logsize_t, n = 12)) %>%
     group_by(size_bin, Endo) %>%
@@ -448,7 +450,7 @@ flw_data_bins <- function(df_raw){
   require(tidyverse)
   df_raw <- ungroup(df_raw)
   flw_bin_minus <- df_raw %>% 
-    select(FLW_STAT_T1, logsize_t, year_t, endo_01) %>%
+    dplyr::select(FLW_STAT_T1, logsize_t, year_t, endo_01) %>%
     filter(endo_01 == 0) %>% 
     rename(Endo = endo_01) %>% 
     mutate(Year = as.factor(as.integer(as.factor(year_t)))) %>% 
@@ -459,7 +461,7 @@ flw_data_bins <- function(df_raw){
               samplesize = n())
 
   flw_bin_plus <- df_raw %>% 
-    select(FLW_STAT_T1, logsize_t, year_t, endo_01) %>%
+    dplyr::select(FLW_STAT_T1, logsize_t, year_t, endo_01) %>%
     filter(endo_01 == 1) %>% 
     rename(Endo = endo_01) %>% 
     mutate(Year = as.factor(as.integer(as.factor(year_t)))) %>% 
@@ -470,7 +472,7 @@ flw_data_bins <- function(df_raw){
               samplesize = n())
   
   flw_bin_byyear <- df_raw %>% 
-    select(FLW_STAT_T1, logsize_t, year_t, endo_01) %>%
+    dplyr::select(FLW_STAT_T1, logsize_t, year_t, endo_01) %>%
     rename(Endo = endo_01) %>% 
     mutate(Year = as.factor(as.integer(as.factor(year_t)))) %>% 
     mutate(size_bin = cut_interval(logsize_t, n = 15)) %>% 
@@ -481,7 +483,7 @@ flw_data_bins <- function(df_raw){
 
 
   flw_bin_mean <- df_raw %>% 
-    select(FLW_STAT_T1, logsize_t, endo_01) %>%
+    dplyr::select(FLW_STAT_T1, logsize_t, endo_01) %>%
     mutate(Endo = recode(endo_01, "0" = "E-", "1" = "E+", minus = 'E-', plus = 'E+')) %>% 
     mutate(size_bin = cut_interval(logsize_t, n = 12)) %>% 
     group_by(size_bin, endo_01) %>% 
@@ -515,7 +517,7 @@ grow_data_bins <- function(df_raw){
   require(tidyverse)
   df_raw <- ungroup(df_raw)
   grow_bin_minus<- df_raw %>% 
-    select(size_t1, logsize_t, year_t, endo_01) %>%
+    dplyr::select(size_t1, logsize_t, year_t, endo_01) %>%
     filter(endo_01 == 0) %>%     
     rename(Endo = endo_01) %>% 
     mutate(Year = as.factor(as.integer(as.factor(year_t)))) %>% 
@@ -526,7 +528,7 @@ grow_data_bins <- function(df_raw){
               samplesize = n())
   
   grow_bin_plus <- df_raw %>% 
-    select(size_t1, logsize_t, year_t, endo_01) %>%
+    dplyr::select(size_t1, logsize_t, year_t, endo_01) %>%
     filter(endo_01 == 1) %>% 
     rename(Endo = endo_01) %>% 
     mutate(Year = as.factor(as.integer(as.factor(year_t)))) %>% 
@@ -537,7 +539,7 @@ grow_data_bins <- function(df_raw){
               samplesize = n())
   
   grow_bin_byyear <- df_raw %>% 
-    select(size_t1, logsize_t, year_t, endo_01) %>%
+    dplyr::select(size_t1, logsize_t, year_t, endo_01) %>%
     mutate(Year = as.factor(as.integer(as.factor(year_t)))) %>% 
     mutate(size_bin = cut_interval(logsize_t, n = 15)) %>% 
     group_by(size_bin, Year, endo_01) %>% 
@@ -546,7 +548,7 @@ grow_data_bins <- function(df_raw){
               samplesize = n())
   
   grow_binmean <- df_raw %>% 
-    select(size_t1, logsize_t, endo_01) %>%
+    dplyr::select(size_t1, logsize_t, endo_01) %>%
     mutate(endo_01 = as.character(endo_01)) %>%
     mutate(Endo = recode(endo_01, "0" = "E-", "1" = "E+")) %>% 
     mutate(size_bin = cut_interval(logsize_t, n = 12)) %>% 
@@ -580,45 +582,46 @@ POSYgrow_bins <- grow_data_bins(POSY_grow_data)
 # Function to bin the observed growth data according to endophyte status and size classes for plotting against the fitted model
 fert_data_bins <- function(df_raw){
   require(tidyverse)
+  df_raw <- ungroup(df_raw)
   fert_bin_minus<- df_raw %>% 
-    select(FLW_T, logsize_t, year_t, endo_01) %>%
+    dplyr::select(FLW_COUNT_T, logsize_t, year_t, endo_01) %>%
     filter(endo_01 == 0) %>% 
     rename(Endo = endo_01) %>% 
     mutate(Year = as.factor(as.integer(as.factor(year_t)))) %>% 
     mutate(size_bin = cut_interval(logsize_t, n = 15)) %>% 
     group_by(size_bin, Year) %>% 
     summarise(mean_size = mean((logsize_t),na.rm=T),
-              mean_fert = mean(FLW_T,na.rm=T),
+              mean_fert = mean(FLW_COUNT_T,na.rm=T),
               samplesize = n())
   
   fert_bin_plus <- df_raw %>% 
-    select(FLW_T, logsize_t, year_t, endo_01) %>%
+    dplyr::select(FLW_COUNT_T, logsize_t, year_t, endo_01) %>%
     filter(endo_01 == 1) %>% 
     rename(Endo = endo_01) %>% 
     mutate(Year = as.factor(as.integer(as.factor(year_t)))) %>% 
     mutate(size_bin = cut_interval(logsize_t, n = 15)) %>% 
     group_by(size_bin, Year) %>% 
     summarise(mean_size = mean((logsize_t),na.rm=T),
-              mean_fert = mean(FLW_T,na.rm=T),
+              mean_fert = mean(FLW_COUNT_T,na.rm=T),
               samplesize = n())
   
   fert_bin_byyear <- df_raw %>% 
-    select(FLW_T, logsize_t, year_t, endo_01) %>%
+    dplyr::select(FLW_COUNT_T, logsize_t, year_t, endo_01) %>%
     mutate(Year = as.factor(as.integer(as.factor(year_t)))) %>% 
     mutate(size_bin = cut_interval(logsize_t, n = 15)) %>% 
     group_by(size_bin, Year, endo_01) %>% 
     summarise(mean_size = mean((logsize_t),na.rm=T),
-              mean_fert = mean(FLW_T,na.rm=T),
+              mean_fert = mean(FLW_COUNT_T,na.rm=T),
               samplesize = n())
   
   fert_binmean <- df_raw %>% 
-    select(FLW_T, logsize_t, endo_01) %>%
+    dplyr::select(FLW_COUNT_T, logsize_t, endo_01) %>%
     mutate(endo_01 = as.character(endo_01)) %>% 
     rename(Endo = endo_01) %>% 
     mutate(size_bin = cut_interval(logsize_t, n = 12)) %>% 
     group_by(size_bin, Endo) %>% 
     summarise(mean_size = mean((logsize_t),na.rm=T),
-              mean_fert = mean(FLW_T,na.rm=T),
+              mean_fert = mean(FLW_COUNT_T,na.rm=T),
               samplesize = n())
 
   fert_bins_list <- list(fert_bin_minus, fert_bin_plus, fert_bin_byyear, fert_binmean)
@@ -651,22 +654,22 @@ surv_fits <- function(df_raw, df_samples){
   xdummy <- seq(min(df_raw$logsize_t), max(df_raw$logsize_t), length.out = nvalues)
 
   #endophyte negative fits  
-  ydummy_eminus <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*0 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*0))
-  ydummy_eminus_y1 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*0 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*0 + mean(df_samples$'tau_year[1,1]')))
-  ydummy_eminus_y2 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*0 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*0 + mean(df_samples$'tau_year[1,2]')))
-  ydummy_eminus_y3 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + + mean(df_samples$'beta[3]')*0  + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*0 + mean(df_samples$'tau_year[1,3]')))
-  ydummy_eminus_y4 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*0 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*0 + mean(df_samples$'tau_year[1,4]'))) 
-  ydummy_eminus_y5 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*0 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*0 + mean(df_samples$'tau_year[1,5]')))
-  ydummy_eminus_y6 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*0 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*0 + mean(df_samples$'tau_year[1,6]')))
-  ydummy_eminus_y7 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*0 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*0 + mean(df_samples$'tau_year[1,7]')))
-  ydummy_eminus_y8 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*0 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*0 + mean(df_samples$'tau_year[1,8]')))
-  ydummy_eminus_y9 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*0 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*0 + mean(df_samples$'tau_year[1,9]')))
-  ydummy_eminus_y10 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*0 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*0 + mean(df_samples$'tau_year[1,10]')))
-  ydummy_eminus_y11 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*0 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*0 + mean(df_samples$'tau_year[1,11]')))
+  ydummy_eminus <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*0 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01)))
+  ydummy_eminus_y1 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*0 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'tau_year[1,1]')))
+  ydummy_eminus_y2 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*0 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'tau_year[1,2]')))
+  ydummy_eminus_y3 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + + mean(df_samples$'beta[3]')*0  + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) +  mean(df_samples$'tau_year[1,3]')))
+  ydummy_eminus_y4 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*0 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) +  mean(df_samples$'tau_year[1,4]'))) 
+  ydummy_eminus_y5 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*0 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) +  mean(df_samples$'tau_year[1,5]')))
+  ydummy_eminus_y6 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*0 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) +  mean(df_samples$'tau_year[1,6]')))
+  ydummy_eminus_y7 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*0 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) +  mean(df_samples$'tau_year[1,7]')))
+  ydummy_eminus_y8 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*0 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) +  mean(df_samples$'tau_year[1,8]')))
+  ydummy_eminus_y9 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*0 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) +  mean(df_samples$'tau_year[1,9]')))
+  ydummy_eminus_y10 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*0 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) +  mean(df_samples$'tau_year[1,10]')))
+  ydummy_eminus_y11 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*0 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) +  mean(df_samples$'tau_year[1,11]')))
 
     meanminussamps<- matrix(nrow = length(xdummy), ncol = 10000)
   for(i in 1:10000){
-    meanminussamps[,i] <- invlogit(sample(df_samples$'beta[1]', size = 1) + sample(df_samples$'beta[2]', size = 1)*xdummy + sample(df_samples$'beta[3]', size = 1)*0 + sample(df_samples$'beta[4]', size = 1)*mean(df_raw$origin_01) + sample(df_samples$'beta[5]', size = 1)*xdummy*0)
+    meanminussamps[,i] <- invlogit(sample(df_samples$'beta[1]', size = 1) + sample(df_samples$'beta[2]', size = 1)*xdummy + sample(df_samples$'beta[3]', size = 1)*0 + sample(df_samples$'beta[4]', size = 1)*mean(df_raw$origin_01))
 }
  
   meanminusCI <- as.data.frame(t(apply(meanminussamps,1, quantile, prob = c(.1,.9)))) %>% 
@@ -677,22 +680,22 @@ surv_fits <- function(df_raw, df_samples){
   
       
   # endophyte positive fits
-  ydummy_eplus <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*1))
-  ydummy_eplus_y1 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[2,1]')))
-  ydummy_eplus_y2 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[2,2]')))
-  ydummy_eplus_y3 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + + mean(df_samples$'beta[3]')*1  + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[2,3]')))
-  ydummy_eplus_y4 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[2,4]'))) 
-  ydummy_eplus_y5 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[2,5]')))
-  ydummy_eplus_y6 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[2,6]')))
-  ydummy_eplus_y7 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[2,7]')))
-  ydummy_eplus_y8 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[2,8]')))
-  ydummy_eplus_y9 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[2,9]')))
-  ydummy_eplus_y10 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[2,10]')))
-  ydummy_eplus_y11 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) + mean(df_samples$'beta[5]')*xdummy*1 + mean(df_samples$'tau_year[2,11]')))
+  ydummy_eplus <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01)))
+  ydummy_eplus_y1 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) +  mean(df_samples$'tau_year[2,1]')))
+  ydummy_eplus_y2 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) +  mean(df_samples$'tau_year[2,2]')))
+  ydummy_eplus_y3 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + + mean(df_samples$'beta[3]')*1  + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) +  mean(df_samples$'tau_year[2,3]')))
+  ydummy_eplus_y4 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) +  mean(df_samples$'tau_year[2,4]'))) 
+  ydummy_eplus_y5 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) +  mean(df_samples$'tau_year[2,5]')))
+  ydummy_eplus_y6 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) +  mean(df_samples$'tau_year[2,6]')))
+  ydummy_eplus_y7 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) +  mean(df_samples$'tau_year[2,7]')))
+  ydummy_eplus_y8 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) +  mean(df_samples$'tau_year[2,8]')))
+  ydummy_eplus_y9 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) +  mean(df_samples$'tau_year[2,9]')))
+  ydummy_eplus_y10 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) +  mean(df_samples$'tau_year[2,10]')))
+  ydummy_eplus_y11 <- as.vector(invlogit(mean(df_samples$'beta[1]') + mean(df_samples$'beta[2]')*xdummy + mean(df_samples$'beta[3]')*1 + mean(df_samples$'beta[4]')*mean(df_raw$origin_01) +  mean(df_samples$'tau_year[2,11]')))
 
     meanplussamps<- matrix(nrow = length(xdummy), ncol = 10000)
   for(i in 1:10000){
-    meanplussamps[,i] <- invlogit(sample(df_samples$'beta[1]', size = 1) + sample(df_samples$'beta[2]', size = 1)*xdummy + sample(df_samples$'beta[3]', size = 1)*1 + sample(df_samples$'beta[4]', size = 1)*mean(df_raw$origin_01) + sample(df_samples$'beta[5]', size = 1)*xdummy*1)
+    meanplussamps[,i] <- invlogit(sample(df_samples$'beta[1]', size = 1) + sample(df_samples$'beta[2]', size = 1)*xdummy + sample(df_samples$'beta[3]', size = 1)*1 + sample(df_samples$'beta[4]', size = 1)*mean(df_raw$origin_01))
 }
  
   meanplusCI <- as.data.frame(t(apply(meanplussamps,1, quantile, prob = c(.1,.9)))) %>% 
@@ -863,9 +866,9 @@ surv_minus_byyear <- function(fits, bins, title){
   geom_point(data = bins_df, aes(x = mean_size, y = mean_surv, color = Year, lwd = samplesize)) +  
   labs(title = title, subtitle = "E-", x = "log(size_t)", y = "Prob. of Survival") +
   scale_color_manual(values = yearcolors) + guides(lwd = "none") + theme_classic() +           
-  theme(axis.title = element_text(size = 60), axis.text = element_text(size = 30),
-        legend.title = element_text(size = 40), legend.text = element_text(size = 20)) +
-  guides(colour = guide_legend(override.aes = list(size=10)))
+  theme(axis.title = element_text(size = 30), axis.text = element_text(size = 30),
+        legend.title = element_text(size = 30), legend.text = element_text(size = 20)) +
+  guides(colour = guide_legend(override.aes = list(size=8)))
 
 return(Eminusbyyear)  
 }
@@ -891,9 +894,9 @@ surv_plus_byyear <- function(fits, bins, title){
   geom_point(data = bins_df, aes(x = mean_size, y = mean_surv, color = Year, lwd = samplesize)) +  
   labs(title = title, subtitle = "E+", x = "log(size_t)", y = "Prob. of Survival") +
   scale_color_manual(values = yearcolors) + guides(lwd = "none") +theme_classic() +
-  theme(axis.title = element_text(size = 60), axis.text = element_text(size = 30),
-        legend.title = element_text(size = 40), legend.text = element_text(size = 20)) +
-  guides(colour = guide_legend(override.aes = list(size=10)))
+  theme(axis.title = element_text(size = 30), axis.text = element_text(size = 30),
+        legend.title = element_text(size = 30), legend.text = element_text(size = 20)) +
+  guides(colour = guide_legend(override.aes = list(size=8)))
 
 return(Eplusbyyear)  
 }
@@ -908,9 +911,9 @@ survmean <- ggplot(data = fits_df) +
   geom_point(data = bins_df, aes(x = mean_size, y = mean_surv, color = Endo, lwd = samplesize)) +
   labs(title = title, subtitle = "Mean Survival Probability", x = "log(size_t)", y = "Prob. of Survival") +
   scale_color_manual(values = colors2) + guides(lwd = "none") + theme_classic() +
-  theme(axis.title = element_text(size = 60), axis.text = element_text(size = 30),
-        legend.title = element_text(size = 40), legend.text = element_text(size = 20)) +
-  guides(colour = guide_legend(override.aes = list(size=10)))
+  theme(axis.title = element_text(size = 30), axis.text = element_text(size = 30),
+        legend.title = element_text(size = 30), legend.text = element_text(size = 20)) +
+  guides(colour = guide_legend(override.aes = list(size=8)))
 return(survmean)
 }
 
@@ -1095,6 +1098,10 @@ titlegrowthfits <- annotate_figure(growthfits, top = "growth", left = "")
 FESUgrow_mean
 FESUgrow_minus_byyear
 FESUgrow_plus_byyear
+
+POALgrow_mean
+POALgrow_minus_byyear
+POALgrow_plus_byyear
 
 POSYgrow_mean
 POSYgrow_minus_byyear

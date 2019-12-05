@@ -22,8 +22,8 @@ logit = function(x) { log(x/(1-x)) }
 # read in the model outputs for seed means and for spike/inflorescence
 # ELRI and ELVI had data recorded as seed/infl
 sm_seedAGPE <- readRDS(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_seed_mean_AGPE.rds")
-# sm_seedELRI <- readRDS(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_seed_mean_ELRI.rds")
-# sm_seedELVI <- readRDS(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_seed_mean_ELVI.rds")
+sm_seedELRI <- readRDS(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_seed_mean_ELRI.rds")
+sm_seedELVI <- readRDS(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_seed_mean_ELVI.rds")
 sm_seedFESU <- readRDS(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_seed_mean_FESU.rds")
 sm_seedLOAR <- readRDS(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_seed_mean_LOAR.rds")
 sm_seedPOAL <- readRDS(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_seed_mean_POAL.rds")
@@ -74,6 +74,8 @@ est_seed <- function(sm_seed,sm_spike,data){
 
 
 AGPE_s_to_s_data <- est_seed(sm_seed = sm_seedAGPE, sm_spike = sm_spikeAGPE, data = AGPE_surv_data)
+ELRI_s_to_s_data <- est_seed(sm_seed = sm_seedELRI, sm_spike = sm_spikeELRI, data = ELRI_surv_data)
+ELVI_s_to_s_data <- est_seed(sm_seed = sm_seedELVI, sm_spike = sm_spikeELVI, data = ELVI_surv_data)
 FESU_s_to_s_data <- est_seed(sm_seed = sm_seedFESU, sm_spike = sm_spikeFESU, data = FESU_surv_data)
 LOAR_s_to_s_data <- est_seed(sm_seed = sm_seedLOAR, sm_spike = sm_spikeLOAR, data = LOAR_surv_data)
 POAL_s_to_s_data <- est_seed(sm_seed = sm_seedPOAL, sm_spike = sm_spikePOAL, data = POAL_surv_data)
@@ -94,6 +96,34 @@ AGPE_s_to_s_data_list <- list(tot_recruit_t1 = AGPE_s_to_s_data$tot_recruit_t1,
                               nPlot = 10L,
                               nEndo =   2L)
 str(AGPE_s_to_s_data_list)
+
+ELRI_s_to_s_data_list <- list(tot_recruit_t1 = ELRI_s_to_s_data$tot_recruit_t1,
+                              tot_seed_t = ELRI_s_to_s_data$tot_seed_t,
+                              endo_01 = ELRI_s_to_s_data$endo_01,
+                              endo_index = ELRI_s_to_s_data$endo_index,
+                              year_t = ELRI_s_to_s_data$year_t_index,
+                              plot = ELRI_s_to_s_data$plot_index,
+                              N = nrow(ELRI_s_to_s_data),
+                              K = 3L,
+                              lowerlimit = as.integer(min(ELRI_s_to_s_data$tot_recruit_t1)),
+                              nYear = 11L,
+                              nPlot = 10L,
+                              nEndo =   2L)
+str(ELRI_s_to_s_data_list)
+
+ELVI_s_to_s_data_list <- list(tot_recruit_t1 = ELVI_s_to_s_data$tot_recruit_t1,
+                              tot_seed_t = ELVI_s_to_s_data$tot_seed_t,
+                              endo_01 = ELVI_s_to_s_data$endo_01,
+                              endo_index = ELVI_s_to_s_data$endo_index,
+                              year_t = ELVI_s_to_s_data$year_t_index,
+                              plot = ELVI_s_to_s_data$plot_index,
+                              N = nrow(ELVI_s_to_s_data),
+                              K = 3L,
+                              lowerlimit = as.integer(min(ELVI_s_to_s_data$tot_recruit_t1)),
+                              nYear = 11L,
+                              nPlot = 10L,
+                              nEndo =   2L)
+str(ELVI_s_to_s_data_list)
 
 FESU_s_to_s_data_list <- list(tot_recruit_t1 = FESU_s_to_s_data$tot_recruit_t1,
                               tot_seed_t = FESU_s_to_s_data$tot_seed_t,
@@ -231,31 +261,31 @@ stanmodel <- stanc("endodemog_s_to_s.stan")
 
 smAGPE <- stan(file = "endodemog_s_to_s.stan", data = AGPE_s_to_s_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE, control = list(adapt_delta = 0.99, max_treedepth = 20))
-saveRDS(smAGPE, file = "endodemog_s_to_s_AGPE.rds")
+# saveRDS(smAGPE, file = "endodemog_s_to_s_AGPE.rds")
 
-# smELRI <- stan(file = "endodemog_s_to_s.stan", data = ELRI_s_to_s_data_list,
-#                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE, control = list(adapt_delta = 0.99, max_treedepth = 20))
+smELRI <- stan(file = "endodemog_s_to_s.stan", data = ELRI_s_to_s_data_list,
+               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE, control = list(adapt_delta = 0.99, max_treedepth = 20))
 # saveRDS(smELRI, file = "endodemog_s_to_s_ELRI.rds")
-# 
-# smELVI <- stan(file = "endodemog_s_to_s.stan", data = ELVI_s_to_s_data_list,
-#                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE, control = list(adapt_delta = 0.99, max_treedepth = 20))
+
+smELVI <- stan(file = "endodemog_s_to_s.stan", data = ELVI_s_to_s_data_list,
+               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE, control = list(adapt_delta = 0.99, max_treedepth = 20))
 # saveRDS(smELVI, file = "endodemog_s_to_s_ELVI.rds")
 
 smFESU <- stan(file = "endodemog_s_to_s.stan", data = FESU_s_to_s_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE, control = list(adapt_delta = 0.99, max_treedepth = 20))
-saveRDS(smFESU, file = "endodemog_s_to_s_FESU.rds")
+# saveRDS(smFESU, file = "endodemog_s_to_s_FESU.rds")
 
 smLOAR <- stan(file = "endodemog_s_to_s.stan", data = LOAR_s_to_s_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE, control = list(adapt_delta = 0.99, max_treedepth = 20))
-saveRDS(smLOAR, file = "endodemog_s_to_s_LOAR.rds")
+# saveRDS(smLOAR, file = "endodemog_s_to_s_LOAR.rds")
 
 smPOAL <- stan(file = "endodemog_s_to_s.stan", data = POAL_s_to_s_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE, control = list(adapt_delta = 0.99, max_treedepth = 20))
-saveRDS(smPOAL, file = "endodemog_s_to_s_POAL.rds")
+# saveRDS(smPOAL, file = "endodemog_s_to_s_POAL.rds")
 
 smPOSY <- stan(file = "endodemog_s_to_s.stan", data = POSY_s_to_s_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE, control = list(adapt_delta = 0.99, max_treedepth = 20))
-saveRDS(smPOSY, file = "endodemog_s_to_s_POSY.rds")
+# saveRDS(smPOSY, file = "endodemog_s_to_s_POSY.rds")
 
 print(sm)
 summary(sm)

@@ -197,7 +197,7 @@ POSY_surv_yrep <- prediction(data = POSY_surv_data_list, fit = smPOSY, n_post_dr
 # overlay 100 replicates over the actual dataset
 ppc_dens_overlay( y = AGPE_surv_data_list$surv_t1, yrep = AGPE_surv_yrep$yrep[1:100,]) + ggtitle("AGPE")
 
-ppc_dens_overlay( y = ELRI_surv_data_list$surv_t1, yrep = ELRI_surv_yrep$yrep[1:100,]) + ggtitle("ELRI")
+ppc_dens_overlay( y = ELRI_surv_data_list$surv_t1, yrep = ELRI_surv_yrep$yrep[1:500,]) + ggtitle("ELRI")
 
 ppc_dens_overlay( y = ELVI_surv_data_list$surv_t1, yrep = ELVI_surv_yrep$yrep[1:100,]) + ggtitle("ELVI")
 

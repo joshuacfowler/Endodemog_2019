@@ -103,8 +103,8 @@ smELVI <- stan(file = "endodemog_seed_mean.stan", data = ELVI_seed_data_list,
 ##### Checking the mean from the output
 ########################################################################################################################################
 post_seedAGPE <- extract(smAGPE)
-# post_survELRI <- extract(smELRI)
-# post_survELVI <- extract(smELVI)
+post_seedELRI <- extract(smELRI)
+post_seedELVI <- extract(smELVI)
 post_seedFESU <- extract(smFESU)
 post_seedLOAR <- extract(smLOAR)
 post_seedPOAL <- extract(smPOAL)
@@ -123,6 +123,10 @@ seed_histogram <- function(fit,data){
 # survival
 AGPE_seed <- seed_histogram(fit = as.data.frame(post_seedAGPE), data = AGPE_seed_data_list)
 AGPE_seed
+ELRI_seed <- seed_histogram(fit = as.data.frame(post_seedELRI), data = ELRI_seed_data_list)
+ELRI_seed
+ELVI_seed <- seed_histogram(fit = as.data.frame(post_seedELVI), data = ELVI_seed_data_list)
+ELVI_seed
 FESU_seed <- seed_histogram(fit = as.data.frame(post_seedFESU), data = FESU_seed_data_list)
 FESU_seed
 LOAR_seed <- seed_histogram(fit = as.data.frame(post_seedLOAR), data = LOAR_seed_data_list)
@@ -132,4 +136,9 @@ POAL_seed
 POSY_seed <- seed_histogram(fit = as.data.frame(post_seedPOSY), data = POSY_seed_data_list)
 POSY_seed
 
+
+x <- sample(post_seedAGPE$mu_seed, size = 10000)
+x2 <- rnorm(10000, mean = mean(post_seedAGPE$mu_seed), sd = mean(post_seedAGPE$sigma_seed))
+hist(x)
+hist(x2)
 

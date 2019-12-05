@@ -1243,7 +1243,8 @@ elvi_rseedmerge_ssf <- elvi_rseedmerge_ssf[c("plot", "pos", "tag", "Endo", "Birt
 
 ELVIrepro <- elvi_seedmerge_ssf %>% 
   rbind(elvi_rseedmerge_ssf) %>% 
-  mutate(species = "ELVI")
+  mutate(species = "ELVI") %>% 
+  mutate(spikelets = seed)
 
 # ELVIrepro <- ELVIrepro[!(is.na(ELVIrepro$flw)),]
 
@@ -2648,12 +2649,12 @@ ELRI_seed_data_list <- list(seed = ELRI_seed_data$SEED_PER_SPIKE,
                             nEndo =   length(unique(ELRI_seed_data$endo_01)))
 str(ELRI_seed_data_list)
 
-ELVI_seed_data_list <- list(seed = na.omit(ELVI_seed_data$SEEDPERINF_T),
+ELVI_seed_data_list <- list(seed = na.omit(ELVI_seed_data$SEED_PER_SPIKE),
                             endo_01 = na.omit(ELVI_seed_data$endo_01),
                             endo_index = ELVI_seed_data$endo_index,
                             year = ELVI_seed_data$year,
                             plot = ELVI_seed_data$plot_fixed,
-                            Nseed = length(na.omit(ELVI_seed_data$SEEDPERINF_T)),
+                            Nseed = length(na.omit(ELVI_seed_data$SEED_PER_SPIKE)),
                             N = nrow(ELVI_seed_data),
                             K = 2L,
                             nYear = length(unique(ELVI_seed_data$year)),
@@ -3176,3 +3177,12 @@ POSY_all_vr_data_list <- list(  # indices
                                 K_se = 2L)
 str(POSY_all_vr_data_list)
 
+####### 
+# Some data vis of the whole data set
+ggplot(data = LTREB_full) +
+  geom_histogram(aes(size_t)) + facet_wrap(~species)
+ggplot(data = LTREB_endo_check) +
+  geom_histogram(aes(endo_mismatch)) + facet_wrap(~species)
+
+mean(LTREB_full$endo_mismatch, na.rm = T)
+                 
