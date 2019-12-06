@@ -600,6 +600,69 @@ pxy(x = 10,y = 1,params = loar_params, output = "pxy_eplus_rec_y1")
 
 
 #FERTILITY--returns number of seedlings, which we will assume (for now) to be 1-tiller, produced by size X
+fx<-function(x, params, endo = FALSE, recruit = FALSE, year = FALSE){
+# flowering
+  # Eminus original plant
+if(endo == FALSE & recruit == FALSE & year == FALSE){
+  flw <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x))
+  fert <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x))
+  spike <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x))
+  recruitment <- invlogit(params["s_to_s_beta1"])
+}
+if(endo == FALSE & recruit == FALSE & year != FALSE) {
+  flw <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params[paste0("flw_eminus_y",year)])
+  fert <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x) + params[paste0("fert_eminus_y", year)])
+  spike <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params[paste0("spike_eminus_y", year)])
+  recruitment <- invlogit(params["s_to_s_beta1"] + params[paste0("s_to_s_eminus_y", year)])
+}
+  # Eminus recruit plant
+if(endo == FALSE & recruit == TRUE & year == FALSE) {
+  flw <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_beta4"])
+  fert <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x) + params["fert_beta4"])
+  spike <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_beta4"])
+  recruitment <- invlogit(params["s_to_s_beta1"])
+}
+if(endo == FALSE & recruit == TRUE & year != FALSE) {
+  flw <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_beta4"] + params[paste0("flw_eminus_y",year)])
+  fert <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x) + params["fert_beta4"] + params[paste0("fert_eminus_y",year)])
+  spike <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_beta4"] + params[paste0("spike_eminus_y",year)])
+  recruitment <- invlogit(params["s_to_s_beta1"] + params[paste0("s_to_s_eminus_y", year)])
+}
+  # Eplus original plant
+if(endo == TRUE & recruit == FALSE & year == FALSE) {
+  flw <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_beta3"])
+  fert <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x) + params["fert_beta3"])
+  spike <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_beta3"])
+  recruitment <- invlogit(params["s_to_s_beta1"] + params["s_to_s_beta2"])
+}
+if(endo == TRUE & recruit == FALSE & year != FALSE) {
+  flw <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_beta3"] + params[paste0("flw_eplus_y",year)])
+  fert <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x) + params["fert_beta3"] + params[paste0("fert_eplus_y",year)])
+  spike <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_beta3"] + params[paste0("spike_eplus_y",year)])
+  recruitment <- invlogit(params["s_to_s_beta1"] + params["s_to_s_beta2"]+ params[paste0("s_to_s_eplus_y", year)])
+}
+  # EPlus recruit plant
+if(endo == TRUE & recruit == TRUE & year == FALSE) {
+  flw <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_beta3"] + params["flw_beta4"])
+  fert <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x) + params["fert_beta3"] + params["fert_beta4"])
+  spike <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_beta3"] + params["spike_beta4"])
+  recruitment <- invlogit(params["s_to_s_beta1"] + params["s_to_s_beta2"])
+}
+if(endo == TRUE & recruit == TRUE & year != FALSE) {
+  flw <- invlogit(params["flw_beta1"] + params["flw_beta2"]*log(x) + params["flw_beta3"] + params["flw_beta4"] + params[paste0("flw_eplus_y",year)])
+  fert <- exp(params["fert_beta1"] + params["fert_beta2"]*log(x) + params["fert_beta3"] + params["fert_beta4"] + params[paste0("fert_eplus_y",year)])
+  spike <- exp(params["spike_beta1"] + params["spike_beta2"]*log(x) + params["spike_beta3"] + params["spike_beta4"] + params[paste0("spike_eplus_y",year)])
+  recruitment <- invlogit(params["s_to_s_beta1"] + params["s_to_s_beta2"]+ params[paste0("s_to_s_eplus_y", year)])
+}
+# mean seed per spikelet
+seed.mean <- params["mu_seed"]
+
+seedlings <- flw * fert * spike * seed.mean * recruitment
+return(seedlings)
+}
+fx(x=3, params = loar_params, endo = TRUE, year = 1)
+
+
 fx<-function(x, params){
   # flowering
     # eminus original plants
@@ -857,6 +920,28 @@ fx<-function(x, params){
 
 ## note from Tom: we should think about adding a reproductive delay
 # finally, here is the function that takes the parameter vector and assembles the matrix model from all of the pieces
+bigmatrix<-function(params, endo  = FALSE, recruit = FALSE, year = FALSE){   
+  matdim<-params["max_size"]## matrix dimension
+  y <- 1:params["max_size"]## size (tiller number) associated with each class
+  # Fertility matrix
+  Fmat <- matrix(0,matdim,matdim)
+  # all seedlings get dumped into top row (1-tiller)
+  Fmat[1,]<-fx(x = y, params, endo, recruit, year)
+  
+  # Growth/survival transition matrix
+  Tmat <-matrix(0,matdim,matdim)
+  # Filling the transition matrix 
+  Tmat<-t(outer(y,y,pxy,params, endo, recruit, year))
+  
+  
+  # # Put it all together
+  # #sum the Tmat & Fmat to get the whole matrix
+
+  MPMmat<-Tmat + Fmat
+  return(list(MPMmat = MPMmat, Tmat = Tmat, Fmat = Fmat))
+}
+lambda(bigmatrix(loar_params,endo = FALSE)$MPMmat)
+
 bigmatrix<-function(params){   
   
   matdim<-params["max_size"]## matrix dimension
