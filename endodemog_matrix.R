@@ -271,7 +271,7 @@ posy_params <- getparams(surv = survPOSY, grow = growPOSY, flw = flwPOSY, fert =
 # define functions that will be used to populate projection matrix
 #SURVIVAL AT SIZE X.
 # currently this is fitting as if the E- is the intercept
-sx_new<-function(x,params, endo = FALSE, recruit = FALSE, year = FALSE){
+sx<-function(x,params, endo = FALSE, recruit = FALSE, year = FALSE){
   # Eminus Original Plants
   if(endo == FALSE & recruit == FALSE & year == FALSE) surv <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x))
   if(endo == FALSE & recruit == FALSE & year != FALSE) surv <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params[paste0("surv_eminus_y",year)])
@@ -280,13 +280,13 @@ sx_new<-function(x,params, endo = FALSE, recruit = FALSE, year = FALSE){
   if(endo == FALSE & recruit == TRUE & year != FALSE) surv <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta4"] + params[paste0("surv_eminus_y",year)])
   # Eplus priginal Plants
   if(endo == TRUE & recruit == FALSE & year == FALSE) surv <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta3"])
-  if(endo == TRUE & recruit == FALSE & year != FALSE) surv <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta3"] + params[paste0("surv_eminus_y",year)])
+  if(endo == TRUE & recruit == FALSE & year != FALSE) surv <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta3"] + params[paste0("surv_eplus_y",year)])
   # Eplus recruit Plants
   if(endo == TRUE & recruit == TRUE & year == FALSE) surv <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta3"] + params["surv_beta4"])
-  if(endo == TRUE & recruit == TRUE & year != FALSE) surv <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta3"] + params["surv_beta4"] + params[paste0("surv_eminus_y",year)])
-  return(list(surv = surv))
+  if(endo == TRUE & recruit == TRUE & year != FALSE) surv <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta3"] + params["surv_beta4"] + params[paste0("surv_eplus_y",year)])
+return(surv)
 }
-sx(2, loar_params, endo = TRUE, recruit = FALSE, year = 2)
+sx(2, loar_params, endo = FALSE, recruit = FALSE, year = 2)
 sx<-function(x,params){
   # eminus original plants
   eminus_surv <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x))
@@ -347,6 +347,24 @@ sx<-function(x,params){
               eplus_surv_rec=eplus_surv_rec,eplus_surv_rec_y1=eplus_surv_rec_y1,eplus_surv_rec_y2=eplus_surv_rec_y2,eplus_surv_rec_y3=eplus_surv_rec_y3,eplus_surv_rec_y4=eplus_surv_rec_y4,eplus_surv_rec_y5=eplus_surv_rec_y5,eplus_surv_rec_y6=eplus_surv_rec_y6,eplus_surv_rec_y7=eplus_surv_rec_y7,eplus_surv_rec_y8=eplus_surv_rec_y8,eplus_surv_rec_y9=eplus_surv_rec_y9,eplus_surv_rec_y10=eplus_surv_rec_y10,eplus_surv_rec_y11=eplus_surv_rec_y11))
 }
 # sx(x = 10, params = poal_params) # we can test out our functions for different sizes of x
+gxy <- function(x,y,params,endo = FALSE, recruit = FALSE, year = FALSE){
+  # eminus original plants
+  if(endo == FALSE & recruit == FALSE & year == FALSE) grow.mean <- params["grow_beta1"] + params["grow_beta2"]*log(x)
+  if(endo == FALSE & recruit == FALSE & year != FALSE) grow.mean <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params[paste0("grow_eminus_y",year)]
+  # eminus recruit plants
+  if(endo == FALSE & recruit == TRUE & year == FALSE) grow.mean <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta4"]
+  if(endo == FALSE & recruit == TRUE & year != FALSE) grow.mean <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta4"] + params[paste0("grow_eminus_y",year)]
+  # eplus original plants
+  if(endo == TRUE & recruit == FALSE & year == FALSE) grow.mean <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta3"]
+  if(endo == TRUE & recruit == FALSE & year != FALSE) grow.mean <- params["grow_beta1"] + params["grow_beta2"]*log(x)  + params["grow_beta3"] + params[paste0("grow_eplus_y",year)]
+  # eplus recruit plants
+  if(endo == TRUE & recruit == TRUE & year == FALSE) grow.mean <- params["grow_beta1"] + params["grow_beta2"]*log(x) + params["grow_beta3"] + params["grow_beta4"]
+  if(endo == TRUE & recruit == TRUE & year != FALSE) grow.mean <- params["grow_beta1"] + params["grow_beta2"]*log(x)  + params["grow_beta3"] + params["grow_beta4"] + params[paste0("grow_eplus_y",year)]
+  
+  grow <- dnbinom(x=y, mu = exp(grow.mean), size = params["grow_phi"]/(1-dnbinom(0, mu = exp(grow.mean), size = params["grow_phi"])))
+  return(grow)
+}
+# gxy(1,3,loar_params,endo = FALSE, recruit = TRUE, year = FALSE)
 gxy <- function(x,y,params){
   # eminus original plants
   eminus_grow.mean <- params["grow_beta1"] + params["grow_beta2"]*log(x)
@@ -461,7 +479,11 @@ gxy <- function(x,y,params){
 
 #SURVIVAL*GROWTH
 # This function generates the transition matrix by multiplying growth and survival.
-# the output argument is important in our bigmatrix function to specify which one of the categories we are using.
+pxy<-function(x,y,params,endo = FALSE, recruit = FALSE, year = FALSE){
+  sx(x,params, endo, recruit, year) * gxy(x,y,params, endo, recruit, year)
+}
+# pxy(x = 1,y = 4, params = loar_params, endo = TRUE, recruit = FALSE, year = FALSE)
+
 pxy<-function(x,y,params,output = ""){
   # eminus original plants
   pxy_eminus <- sx(x,params)$eminus_surv * gxy(x,y,params)$eminus_pr_grow
@@ -574,7 +596,7 @@ pxy<-function(x,y,params,output = ""){
          if(output == "pxy_eplus_rec_y11") return(result$pxy_eplus_rec_y11)
   else return(result)
 }
-# pxy(x = 10,y = 1,params = loar_params, output = "pxy_eplus_rec_y1")
+pxy(x = 10,y = 1,params = loar_params, output = "pxy_eplus_rec_y1")
 
 
 #FERTILITY--returns number of seedlings, which we will assume (for now) to be 1-tiller, produced by size X
