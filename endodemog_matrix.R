@@ -271,7 +271,22 @@ posy_params <- getparams(surv = survPOSY, grow = growPOSY, flw = flwPOSY, fert =
 # define functions that will be used to populate projection matrix
 #SURVIVAL AT SIZE X.
 # currently this is fitting as if the E- is the intercept
-
+sx_new<-function(x,params, endo = FALSE, recruit = FALSE, year = FALSE){
+  # Eminus Original Plants
+  if(endo == FALSE & recruit == FALSE & year == FALSE) surv <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x))
+  if(endo == FALSE & recruit == FALSE & year != FALSE) surv <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params[paste0("surv_eminus_y",year)])
+  # Eminus recruit Plants
+  if(endo == FALSE & recruit == TRUE & year == FALSE) surv <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta4"])
+  if(endo == FALSE & recruit == TRUE & year != FALSE) surv <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta4"] + params[paste0("surv_eminus_y",year)])
+  # Eplus priginal Plants
+  if(endo == TRUE & recruit == FALSE & year == FALSE) surv <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta3"])
+  if(endo == TRUE & recruit == FALSE & year != FALSE) surv <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta3"] + params[paste0("surv_eminus_y",year)])
+  # Eplus recruit Plants
+  if(endo == TRUE & recruit == TRUE & year == FALSE) surv <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta3"] + params["surv_beta4"])
+  if(endo == TRUE & recruit == TRUE & year != FALSE) surv <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x) + params["surv_beta3"] + params["surv_beta4"] + params[paste0("surv_eminus_y",year)])
+  return(list(surv = surv))
+}
+sx(2, loar_params, endo = TRUE, recruit = FALSE, year = 2)
 sx<-function(x,params){
   # eminus original plants
   eminus_surv <- invlogit(params["surv_beta1"] + params["surv_beta2"]*log(x))
@@ -1396,6 +1411,19 @@ ggplot(data = endo_climate) +
   geom_point(aes(x = `Mean Temp. (C˚)`, y = value, color = variable, shape = species)) +
   facet_grid(cols = vars(species)) +
   theme_classic() + scale_color_manual(values = c("#ff7f00", "#6a3d9a"))+ scale_shape_manual(values=c(0:6))+ labs(y = "Population Growth") + scale_x_continuous(breaks = c(2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019))
+
+endo_climate %>% 
+  filter(species == "AGPE") %>% 
+  ggplot()+
+  geom_point(aes(x = year_t1, y = `Cumulative PPT (mm)`), color = "black") +
+  theme_classic() + ylim(0,1400) + scale_color_manual(values = c("#ff7f00", "#6a3d9a"))+ scale_shape_manual(values=c(0:6))+ labs(y = "Cumulative Precipitation (mm)") + scale_x_continuous(breaks = c(2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019))
+
+endo_climate %>% 
+  filter(species == "AGPE") %>% 
+  ggplot()+
+  geom_point(aes(x = year_t1, y = `Mean Temp. (C˚)`), color = "black") +
+  theme_classic() + ylim(0,15) + scale_color_manual(values = c("#ff7f00", "#6a3d9a"))+ scale_shape_manual(values=c(0:6))+ labs(y = "Mean Temp. (C˚)") + scale_x_continuous(breaks = c(2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019))
+
 
 
 
