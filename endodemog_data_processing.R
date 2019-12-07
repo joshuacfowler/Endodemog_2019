@@ -1620,9 +1620,11 @@ LTREB_repro1 <- LTREB_repro %>%
                                is.na(tillerid) & !is.na(spikelets) ~ "A",
                                is.na(tillerid) & is.na(spikelets) ~ NA_character_)) %>% 
   distinct()
+write.csv(LTREB_repro1,"~/Dropbox/EndodemogData/Fulldataplusmetadata/LTREB_repro1.csv")
+
 
 # spreading out the spikelet info by tiller to create single row per year per individual.
-LTREB_repro2 <- LTREB_repro1 %>%
+LTREB_repro_wide <- LTREB_repro1 %>%
   dplyr::select(plot_fixed, pos, tag, endo_01, birth, year, species, flw, spikelets_fixed, tillerid_fixed) %>% 
   spread(key = tillerid_fixed, value = spikelets_fixed) %>% 
   rename(spike_a_t1 = A, spike_b_t1 = B, spike_c_t1 = C, spike_d_t1 = D,  spikelets_AGPE_mean = multitillermean) %>% 
@@ -1630,12 +1632,12 @@ LTREB_repro2 <- LTREB_repro1 %>%
   
   
 # View(LTREB_repro2)
-dim(LTREB_repro2)
-table(LTREB_repro2$species, LTREB_repro2$year, !is.na(LTREB_repro2$flw))
+dim(LTREB_repro_wide)
+table(LTREB_repro_wide$species, LTREB_repro_wide$year, !is.na(LTREB_repro_wide$flw))
 table(is.na(LTREB_repro1$flw), LTREB_repro1$flw>0, !is.na(LTREB_repro1$spikelets))
 
 # I am going to try to merge and then add the lagged repro variables at the end
-LTREB_repro2_t1 <- LTREB_repro2%>% 
+LTREB_repro2_t1 <- LTREB_repro_wide%>% 
   rename(flw_t1 = flw,
          year_t1 = year)
 
@@ -1853,7 +1855,7 @@ setdiff(LTREB_distances$id, LTREB_full_2$id)
 LTREB_full <- LTREB_full_2 %>% 
   left_join(LTREB_distances, by = c("species" = "species","pos" = "pos", "plot_fixed" = "plot", "origin_01" = "origin_01", "id" = "id")) %>% 
   dplyr::select(-duplicate, -origin_from_check, -origin_from_distance, -date_status, -date_dist) # I'm removing some of the extrneous variable. We also have distance data in the new field data that needs to be merged in.
-
+write.csv(LTREB_full,"~/Dropbox/EndodemogData/Fulldataplusmetadata/LTREB_full.csv")
 
 ##############################################################################
 ####### Preparing datalists for Survival Kernel ------------------------------
