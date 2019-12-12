@@ -2,6 +2,7 @@ library(tidyverse)
 library(rstan)
 rstan_options( auto_write = TRUE )
 options( mc.cores = parallel::detectCores() )
+library(bayesplot)
 
 joshpath <- "/Users/joshuacfowler/Dropbox/EndodemogData/"
 tompath <- "C:/Users/tm9/Dropbox/EndodemogData/"
@@ -21,7 +22,7 @@ table(LTREB_data_forsurv$plot_fixed,LTREB_data_forsurv$species)
 cbind(unique(LTREB_data_forsurv$species),
 as.integer(as.numeric(as.factor(unique(LTREB_data_forsurv$species)))))
 
-surv_dat <- list(nYear = unique(LTREB_data_forsurv$year_t - (min(LTREB_data_forsurv$year_t)-1)),
+surv_dat <- list(nYear = length(unique(LTREB_data_forsurv$year_t - (min(LTREB_data_forsurv$year_t)-1))),
                  nPlot = max(LTREB_data_forsurv$plot_fixed),
                  nSpp = length(unique(LTREB_data_forsurv$species)),
                  N = nrow(LTREB_data_forsurv),
@@ -48,5 +49,6 @@ surv_fit <- stan(
   thin = sim_pars$thin,
   chains = sim_pars$chains )
 
-
-
+mcmc_trace(surv_fit,par=c("beta0"))
+mcmc_trace(surv_fit,par=c("betasize"))
+mcmc_trace(surv_fit,par=c("betaendo"))
