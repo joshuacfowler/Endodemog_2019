@@ -21,7 +21,7 @@ data {
 
 parameters {
     // surv params
-    vector[nSpp] beta0; //spp-specific                     // predictor parameters as grand means and spp rfx
+    vector[nSpp] beta0; //spp-specific      // predictor parameters as grand means and spp rfx
     real mu_beta0; //spp mean
     real<lower=0> sigma_beta0; //spp variance
     vector[nSpp] betasize;                     
@@ -30,9 +30,7 @@ parameters {
     vector[nSpp] betaendo;                     
     real mu_betaendo;                     
     real<lower=0> sigma_betaendo;
-    vector[nSpp] betaorigin;                     
-    real mu_betaorigin;                     
-    real<lower=0> sigma_betaorigin;
+    real betaorigin;  // the origin effect assumed equal across species
     
     vector[nYear] tau_year;      // random year effect
     real<lower=0> sigma_year;        //year variance by endophyte effect
@@ -41,12 +39,12 @@ parameters {
 }
 
 transformed parameters {
-    real mu[N];                           // surv Linear Predictor
+    real p[N];                           // surv Linear Predictor
 
        for(n in 1:N){
-    mu[n] = beta0[spp[n]] + betasize[spp[n]]*logsize_t[n] + betaendo[spp[n]]*endo_01[n] + betaorigin[spp[n]]*origin_01[n]
-    + tau_year[year_t[n]] 
-    + tau_plot[plot[n]];
+    p[n] = beta0[spp[n]] + betasize[spp[n]]*logsize_t[n] + betaendo[spp[n]]*endo_01[n] +
+    betaorigin*origin_01[n]
+    + tau_year[year_t[n]] + tau_plot[plot[n]];
        }
     }
 
@@ -55,12 +53,11 @@ model {
     mu_beta0 ~ normal(0,100);      // prior for predictor intercepts
     mu_betasize ~ normal(0,100);      // prior for predictor intercepts
     mu_betaendo ~ normal(0,100);      // prior for predictor intercepts
-    mu_betaorigin ~ normal(0,100);      // prior for predictor intercepts
+    betaorigin ~ normal(0,100);      // prior for predictor intercepts
     //sigma priors
     sigma_beta0 ~ inv_gamma(0.001, 0.001);
     sigma_betasize ~ inv_gamma(0.001, 0.001);
     sigma_betaendo ~ inv_gamma(0.001, 0.001);
-    sigma_betaorigin ~ inv_gamma(0.001, 0.001);
     sigma_year ~ inv_gamma(0.001, 0.001);
     sigma_plot ~ inv_gamma(0.001, 0.001);
     //sample random effects
@@ -71,13 +68,12 @@ model {
       tau_plot[i] ~ normal(0,sigma_plot);
     }
     for(i in 1:nSpp){
-      beta0[i] ~ normal(0,sigma_beta0);
-      betasize[i] ~ normal(0,sigma_betasize);
-      betaendo[i] ~ normal(0,sigma_betaendo);
-      betaorigin[i] ~ normal(0,sigma_betaorigin);
+      beta0[i] ~ normal(mu_beta0,sigma_beta0);
+      betasize[i] ~ normal(mu_betasize,sigma_betasize);
+      betaendo[i] ~ normal(mu_betaendo,sigma_betaendo);
     }
 
     
-    y ~ bernoulli_logit(mu);
+    y ~ bernoulli_logit(p);
 }
 
