@@ -610,7 +610,8 @@ posy_1m_1v_rec_params <- params_1m_1v_rec(surv = post_survPOSY,
 sx<-function(x,params, year){
   invlogit(params[paste0("surv_intercept_y", year)] + params["surv_slope"]*log(x))
 }
-sx(3, agpe_1m_1v_rec_params, year = 1:11)
+# sx(3, agpe_1m_1v_rec_params, year = 1:11)
+
 #PROBABILITY OF GROWTH FROM SIZE X TO Y
 #This function truncates the density asscociation with x==0 and x>x.max
 gxy<-function(x,y,params, year){
@@ -641,7 +642,6 @@ fx<-function(x,params, year){
 }
 # fx(3, agpe_1m_1v_rec_params, year = 7)
 
-
 ## note from Tom: we should think about adding a reproductive delay
 # finally, here is the function that takes the parameter vector and assembles the matrix model from all of the pieces
 bigmatrix<-function(params, year){   
@@ -662,10 +662,7 @@ bigmatrix<-function(params, year){
   MPMmat<-Tmat + Fmat
   return(list(MPMmat = MPMmat, Tmat = Tmat, Fmat = Fmat))
 }
-lambda(bigmatrix(loar_0m_1v_rec_params, year = 2)$MPMmat)
-
-
-
+lambda(bigmatrix(loar_0m_1v_rec_params, year = 3)$MPMmat)
 
 ## population growth rate (eigenalaysis of the projection matrix)
 # matrix <- bigmatrix(loar_params)
