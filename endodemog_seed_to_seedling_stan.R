@@ -62,8 +62,8 @@ est_seed <- function(sm_seed,sm_spike,data){
   
   
   s_to_s_data <- data %>% 
-    mutate(seed_est = as.integer(FLW_STAT_T*FLW_COUNT_T*spikeperinf_pred*seedperspike_mean)) %>%
-    group_by(species, plot_fixed, plot_index, year_t, year_t_index, year_t1, year_t1_index, endo_01, endo_index) %>% 
+    mutate(seed_est = as.integer(FLW_STAT_T*FLW_COUNT_T*spikeperinf_pred*seedperspike_mean)) %>% 
+    group_by(species, plot_fixed, plot_index, year_t, year_t_index, year_t1, year_t1_index, endo_01, endo_index) %>%
     summarize(tot_seed_t = as.integer(round(sum(seed_est, na.rm = TRUE))),
               tot_recruit_t1 = length((origin_01 == "1"& year_t == birth)),
               samplesize = n()) %>% 
