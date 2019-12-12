@@ -49,7 +49,7 @@ flow_dat <- list(nYear = length(unique(LTREB_data_forflw$year_t - (min(LTREB_dat
                  plot = LTREB_data_forflw$plot_fixed,
                  spp = as.integer(as.numeric(as.factor(LTREB_data_forflw$species))),
                  y = LTREB_data_forflw$FLW_STAT_T1,
-                 logsize_t = LTREB_data_forflw$logsize_t,
+                 logsize_t = LTREB_data_forflw$logsize_t1,
                  endo_01 = LTREB_data_forflw$endo_01,
                  origin_01 = LTREB_data_forflw$origin_01)
   
