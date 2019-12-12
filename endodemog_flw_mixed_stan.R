@@ -32,8 +32,8 @@ options(mc.cores = parallel::detectCores())
 set.seed(123)
 
 ## MCMC settings
-ni <- 1000
-nb <- 500
+ni <- 10000
+nb <- 5000
 nc <- 3
 
 
@@ -67,8 +67,7 @@ cat("
     transformed parameters{
     real mu[N];                             //Linear Predictor
        for(n in 1:N){
-    mu[n] = beta[1] + beta[2]*logsize_t[n] + beta[3]*endo_01[n] +beta[4]*origin_01[n]
-    + beta[5]*logsize_t[n]*endo_01[n] 
+    mu[n] = beta[1] + beta[2]*logsize_t[n] + beta[3]*endo_01[n] + beta[4]*origin_01[n]
     + tau_year[endo_index[n],year_t[n]]
     + tau_plot[plot[n]];
     }
@@ -146,7 +145,7 @@ smPOSY <- readRDS(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/
 #########################################################################################################
 ###### Perform posterior predictive checks and assess model convergence-------------------------
 #########################################################################################################
-params = c("beta[1]", "beta[2]", "tau_year[1,1]", "sigma_e[1]", "sigma_e[2]")
+params = c("beta", "tau_year[1,1]", "sigma_e[1]", "sigma_e[2]")
 
 ##### POAL - flowering
 print(smPOAL)
@@ -158,7 +157,7 @@ traceplot(smELRI, pars = params)
 traceplot(smELVI, pars = params)
 traceplot(smFESU, pars = params)
 traceplot(smLOAR, pars = params)
-traceplot(smPOSY, pars = params)
+traceplot(smPOAL, pars = params)
 traceplot(smPOSY, pars = params)
 
 
@@ -227,6 +226,7 @@ ppc_dens_overlay( y = POSY_flw_data_list$flw_t, yrep = POSY_flw_yrep$yrep[1:100,
 
 
 
+pairs(smPOAL, pars = "beta")
 
 
 

@@ -30,8 +30,8 @@ rstan_options(auto_write = TRUE)
 options(mc.cores = parallel::detectCores())
 set.seed(123)
 ## MCMC settings
-ni <- 10000
-nb <- 5000
+ni <- 1000
+nb <- 500
 nc <- 3
 
 
@@ -262,32 +262,32 @@ stanmodel <- stanc("endodemog_all_vr.stan")
 ## and save the output to .rds files so that they can be called laters
 
 smAGPE <- stan(file = "endodemog_all_vr.stan", data = AGPE_all_vr_data_list,
-               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-# saveRDS(smAGPE, file = "endodemog_all_vr_AGPE.rds")
+               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE, control = list(adapt_delta = 0.99, max_treedepth = 15))
+saveRDS(smAGPE, file = "endodemog_all_vr_AGPE.rds")
 
-smELRI <- stan(file = "endodemog_all_vr.stan", data = ELRI_all_vr_data_list,
-               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-# saveRDS(smELRI, file = "endodemog_all_vr_ELRI.rds")
-
-smELVI <- stan(file = "endodemog_all_vr.stan", data = ELVI_all_vr_data_list,
-               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-# saveRDS(smELVI, file = "endodemog_all_vr_ELVI.rds")
+# smELRI <- stan(file = "endodemog_all_vr.stan", data = ELRI_all_vr_data_list,
+#                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE, control = list(adapt_delta = 0.99, max_treedepth = 20))
+# # saveRDS(smELRI, file = "endodemog_all_vr_ELRI.rds")
+# 
+# smELVI <- stan(file = "endodemog_all_vr.stan", data = ELVI_all_vr_data_list,
+#                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE, control = list(adapt_delta = 0.99, max_treedepth = 20))
+# # saveRDS(smELVI, file = "endodemog_all_vr_ELVI.rds")
 
 smFESU <- stan(file = "endodemog_all_vr.stan", data = FESU_all_vr_data_list,
-               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-# saveRDS(smFESU, file = "endodemog_all_vr_FESU.rds")
+               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE, control = list(adapt_delta = 0.99, max_treedepth = 15))
+saveRDS(smFESU, file = "endodemog_all_vr_FESU.rds")
 
 smLOAR <- stan(file = "endodemog_all_vr.stan", data = LOAR_all_vr_data_list,
-               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-# saveRDS(smLOAR, file = "endodemog_all_vr_LOAR.rds")
+               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE, control = list(adapt_delta = 0.99, max_treedepth = 20))
+saveRDS(smLOAR, file = "endodemog_all_vr_LOAR.rds")
 
 smPOAL <- stan(file = "endodemog_all_vr.stan", data = POAL_all_vr_data_list,
-               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-# saveRDS(smPOAL, file = "endodemog_all_vr_POAL.rds")
+               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE, control = list(adapt_delta = 0.99, max_treedepth = 20))
+saveRDS(smPOAL, file = "endodemog_all_vr_POAL.rds")
 
 smPOSY <- stan(file = "endodemog_all_vr.stan", data = POSY_all_vr_data_list,
-               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-# saveRDS(smPOSY, file = "endodemog_all_vr_POSY.rds")
+               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE, control = list(adapt_delta = 0.99, max_treedepth = 20))
+saveRDS(smPOSY, file = "endodemog_all_vr_POSY.rds")
 
 print(sm)
 summary(sm)

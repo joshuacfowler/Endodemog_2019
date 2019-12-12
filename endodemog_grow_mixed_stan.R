@@ -189,40 +189,6 @@ post_growPOSY <- rstan::extract(smPOSY)
 post_growAGPE$phi
 
 # This function rstan::extracts the posterior draws and generates replicate data for each given model
-for(i in 1:n_post_draws){
-  ## sample survival data (bernoulli)
-  y_s_sim[i,] <- rbinom(n=length(data_allsites_all$y_s), size=1, prob  
-                        = invlogit(predS[i,]))
-  ## sample growth data (zero-truncated NB)
-  #y_g_sim[i,] <- rnbinom(n=length(data_allsites_all$y_g), mu =  
-  exp(predG[i,]), size=phi_G[i])
-## sample flowering data (bernoulli)
-y_f_sim[i,] <- rbinom(n=length(data_allsites_all$y_f), size=1, prob  
-                      = invlogit(predF[i,]))
-## sample panicle data (zero-truncated NB)
-#y_p_sim[i,] <- rnbinom(n=length(data_allsites_all$y_p), mu =  
-exp(predP[i,]), size=phi_P[i])
-## sample viability data (binomial)
-y_v_sim[i,] <- rbinom(n=length(data_allsites_all$y_v),  
-                      size=data_allsites_all$tot_seeds_v, prob = predV[i,])
-## sample germination data (binomial)
-y_m_sim[i,] <- rbinom(n=length(data_allsites_all$y_m),  
-                      size=data_allsites_all$tot_seeds_m, prob = predM[i,])
-
-for(j in 1:length(data_allsites_all$y_g)){
-  y_g_sim[i,j] <-  
-    sample(x=1:1000,size=1,replace=T,prob=dnbinom(1:1000, mu =  
-                                                    exp(predG[i,j]), size=phi_G[i]) / (1 - dnbinom(0, mu =  
-                                                                                                     exp(predG[i,j]), size=phi_G[i])))
-}
-for(j in 1:length(data_allsites_all$y_p)){
-  y_p_sim[i,j] <-  
-    sample(x=1:1000,size=1,replace=T,prob=dnbinom(1:1000, mu =  
-                                                    exp(predP[i,j]), size=phi_P[i]) / (1 - dnbinom(0, mu =  
-                                                                                                     exp(predP[i,j]), size=phi_P[i])))
-}
-}
-
 
 prediction <- function(data, fit, n_post_draws){
   post <- rstan::extract(fit)
@@ -238,20 +204,14 @@ prediction <- function(data, fit, n_post_draws){
   return(out)
 }
 
-for(j in 1:length(data_allsites_all$y_g)){
-  y_g_sim[i,j] <-  
-    sample(x=1:1000,size=1,replace=T,prob=dnbinom(1:1000, mu =  
-                                                    exp(mu[i,j]), size=phi_G[i]) / (1 - dnbinom(0, mu =  
-                                                                                                     exp(predG[i,j]), size=phi_G[i])))
-}
 # apply the function for each species
-AGPE_grow_yrep <- prediction(data = AGPE_grow_data_list, fit = smAGPE, n_post_draws = 500)
-ELRI_grow_yrep <- prediction(data = ELRI_grow_data_list, fit = smELRI, n_post_draws =500)
-ELVI_grow_yrep <- prediction(data = ELVI_grow_data_list, fit = smELVI, n_post_draws =500)
-FESU_grow_yrep <- prediction(data = FESU_grow_data_list, fit = smFESU, n_post_draws =500)
-LOAR_grow_yrep <- prediction(data = LOAR_grow_data_list, fit = smLOAR, n_post_draws =500)
-POAL_grow_yrep <- prediction(data = POAL_grow_data_list, fit = smPOAL, n_post_draws =500)
-POSY_grow_yrep <- prediction(data = POSY_grow_data_list, fit = smPOSY, n_post_draws =500)
+AGPE_grow_yrep <- prediction(data = AGPE_grow_data_list, fit = smAGPE, n_post_draws =100)
+ELRI_grow_yrep <- prediction(data = ELRI_grow_data_list, fit = smELRI, n_post_draws =100)
+ELVI_grow_yrep <- prediction(data = ELVI_grow_data_list, fit = smELVI, n_post_draws =100)
+FESU_grow_yrep <- prediction(data = FESU_grow_data_list, fit = smFESU, n_post_draws =100)
+LOAR_grow_yrep <- prediction(data = LOAR_grow_data_list, fit = smLOAR, n_post_draws =100)
+POAL_grow_yrep <- prediction(data = POAL_grow_data_list, fit = smPOAL, n_post_draws =100)
+POSY_grow_yrep <- prediction(data = POSY_grow_data_list, fit = smPOSY, n_post_draws =100)
 
 
 # overlay 100 replicates over the actual dataset

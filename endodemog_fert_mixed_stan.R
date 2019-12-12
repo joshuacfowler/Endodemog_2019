@@ -10,6 +10,7 @@ library(StanHeaders)
 library(shinystan)
 library(bayesplot)
 library(devtools)
+library(countreg)
 
 invlogit<-function(x){exp(x)/(1+exp(x))}
 logit = function(x) { log(x/(1-x)) }
@@ -30,8 +31,8 @@ options(mc.cores = parallel::detectCores())
 set.seed(123)
 
 ## MCMC settings
-ni <-1000
-nb <- 500
+ni <-10000
+nb <- 5000
 nc <- 3
 
 # Stan model -------------
@@ -71,8 +72,7 @@ cat("
     real mu[N];
     
     for(n in 1:N){
-      mu[n] = beta[1] + beta[2]*logsize_t[n] + beta[3]*endo_01[n] +beta[4]*origin_01[n]
-      + beta[5]*logsize_t[n]*endo_01[n] 
+      mu[n] = beta[1] + beta[2]*logsize_t[n] + beta[3]*endo_01[n] + beta[4]*origin_01[n]
       + tau_year[endo_index[n],year_t[n]]
       + tau_plot[plot[n]];
     }
@@ -90,7 +90,7 @@ cat("
     // Likelihood
     for(n in 1:N){
       flw_t[n] ~ neg_binomial_2_log(mu[n],phi);
-      target += -log1m(neg_binomial_2_log_lpmf(0 | mu[n], phi)); // manually adjusting computation of likelihood because T[,] truncation syntax doesn't compile for neg binomial
+      target += -log1m(neg_binomial_2_log_lpmf(lowerlimit | mu[n], phi)); // manually adjusting computation of likelihood because T[,] truncation syntax doesn't compile for neg binomial
     }
     }
     
@@ -107,31 +107,31 @@ stanmodel <- stanc("endodemog_fert.stan")
 
 smAGPE<- stan(file = "endodemog_fert.stan", data = AGPE_fert_data_list,
               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-# saveRDS(smAGPE, file = "endodemog_fert_AGPE_withplot.rds")
+# saveRDS(smAGPE, file = "endodemog_fert_AGPE.rds")
 
 smELRI <- stan(file = "endodemog_fert.stan", data = ELRI_fert_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-# saveRDS(smELRI, file = "endodemog_fert_ELRI_withplot.rds")
+# saveRDS(smELRI, file = "endodemog_fert_ELRI.rds")
 
 smELVI <- stan(file = "endodemog_fert.stan", data = ELVI_fert_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-# saveRDS(smELVI, file = "endodemog_fert_ELVI_withplot.rds")
+# saveRDS(smELVI, file = "endodemog_fert_ELVI.rds")
 
 smFESU <- stan(file = "endodemog_fert.stan", data = FESU_fert_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-# saveRDS(smFESU, file = "endodemog_fert_FESU_withplot.rds")
+# saveRDS(smFESU, file = "endodemog_fert_FESU.rds")
 
 smLOAR <- stan(file = "endodemog_fert.stan", data = LOAR_fert_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-# saveRDS(smLOAR, file = "endodemog_fert_LOAR_withplot.rds")
+# saveRDS(smLOAR, file = "endodemog_fert_LOAR.rds")
 
 smPOAL <- stan(file = "endodemog_fert.stan", data = POAL_fert_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-# saveRDS(smPOAL, file = "endodemog_fert_POAL_withplot.rds")
+# saveRDS(smPOAL, file = "endodemog_fert_POAL.rds")
 
 smPOSY <- stan(file = "endodemog_fert.stan", data = POSY_fert_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-# saveRDS(smPOSY, file = "endodemog_fert_POSY_withplot.rds")
+# saveRDS(smPOSY, file = "endodemog_fert_POSY.rds")
 
 
 
@@ -164,13 +164,13 @@ traceplot(smPOSY, pars = params)
 
 
 # Pull out the posteriors
-post_spikeAGPE <- extract(smAGPE)
-post_spikeELRI <- extract(smELRI)
-post_spikeELVI <- extract(smELVI)
-post_spikeFESU <- extract(smFESU)
-post_spikeLOAR <- extract(smLOAR)
-post_spikePOAL <- extract(smPOAL)
-post_spikePOSY <- extract(smPOSY)
+post_fertAGPE <- extract(smAGPE)
+post_fertELRI <- extract(smELRI)
+post_fertELVI <- extract(smELVI)
+post_fertFESU <- extract(smFESU)
+post_fertLOAR <- extract(smLOAR)
+post_fertPOAL <- extract(smPOAL)
+post_fertPOSY <- extract(smPOSY)
 
 
 
@@ -203,7 +203,7 @@ POSY_fert_yrep <- prediction(data = POSY_fert_data_list, fit = smPOSY, n_post_dr
 # overlay 100 replicates over the actual dataset
 ppc_dens_overlay( y = AGPE_fert_data_list$flw_t, yrep = AGPE_fert_yrep$yrep[1:100,]) + xlim(0,40) + xlab("prob. of y") + ggtitle("AGPE")
 
-ppc_dens_overlay( y = ELRI_fert_data_list$flw_t, yrep = ELRI_fert_yrep$yrep[1:100,])+ xlab("prob. of y") + ggtitle("ELRI")
+ppc_dens_overlay( y = ELRI_fert_data_list$flw_t, yrep = ELRI_fert_yrep$yrep[1:100,]) + xlim(0,10) + xlab("prob. of y") + ggtitle("ELRI")
 
 ppc_dens_overlay( y = ELVI_fert_data_list$flw_t, yrep = ELVI_fert_yrep$yrep[1:100,]) + xlab("prob. of y") + ggtitle("ELVI")
 
@@ -213,7 +213,7 @@ ppc_dens_overlay( y = LOAR_fert_data_list$flw_t, yrep = LOAR_fert_yrep$yrep[1:10
 
 ppc_dens_overlay( y = POAL_fert_data_list$flw_t, yrep = POAL_fert_yrep$yrep[1:100,]) + xlim(0,40) + xlab("prob. of y") + ggtitle("POAL")
 
-ppc_dens_overlay( y = POSY_fert_data_list$flw_t, yrep = POSY_fert_yrep$yrep[1:100,]) + xlab("prob. of y") + ggtitle("POSY")
+ppc_dens_overlay( y = POSY_fert_data_list$flw_t, yrep = POSY_fert_yrep$yrep[1:100,]) + xlim(0,10)  + xlab("prob. of y") + ggtitle("POSY")
 
 
 
