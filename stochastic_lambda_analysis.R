@@ -50,16 +50,56 @@ lambdaSim(toy_matrices)
 ## so for AGPE as an example:
 AGPE_lambdaS <- c()
 
-AGPE_Eplus_mean_var <- list() ## assemble this from parameters
+AGPE_Eplus_mean_var <- list(bigmatrix(agpe_1m_1v_rec_params, year = 1)$MPMmat,
+                            bigmatrix(agpe_1m_1v_rec_params, year = 2)$MPMmat,
+                            bigmatrix(agpe_1m_1v_rec_params, year = 3)$MPMmat,
+                            bigmatrix(agpe_1m_1v_rec_params, year = 4)$MPMmat,
+                            bigmatrix(agpe_1m_1v_rec_params, year = 5)$MPMmat,
+                            bigmatrix(agpe_1m_1v_rec_params, year = 6)$MPMmat,
+                            bigmatrix(agpe_1m_1v_rec_params, year = 7)$MPMmat,
+                            bigmatrix(agpe_1m_1v_rec_params, year = 8)$MPMmat,
+                            bigmatrix(agpe_1m_1v_rec_params, year = 9)$MPMmat,
+                            bigmatrix(agpe_1m_1v_rec_params, year = 10)$MPMmat,
+                            bigmatrix(agpe_1m_1v_rec_params, year = 11)$MPMmat) ## assemble this from parameters
 AGPE_lambdaS[1]<-lambdaSim(AGPE_Eplus_mean_var)$log_lambdaS
 
-AGPE_Eplus_mean_only <- list() ## assemble this from parameters
+AGPE_Eplus_mean_only <- list(bigmatrix(agpe_1m_0v_rec_params, year = 1)$MPMmat,
+                             bigmatrix(agpe_1m_0v_rec_params, year = 2)$MPMmat,
+                             bigmatrix(agpe_1m_0v_rec_params, year = 3)$MPMmat,
+                             bigmatrix(agpe_1m_0v_rec_params, year = 4)$MPMmat,
+                             bigmatrix(agpe_1m_0v_rec_params, year = 5)$MPMmat,
+                             bigmatrix(agpe_1m_0v_rec_params, year = 6)$MPMmat,
+                             bigmatrix(agpe_1m_0v_rec_params, year = 7)$MPMmat,
+                             bigmatrix(agpe_1m_0v_rec_params, year = 8)$MPMmat,
+                             bigmatrix(agpe_1m_0v_rec_params, year = 9)$MPMmat,
+                             bigmatrix(agpe_1m_0v_rec_params, year = 10)$MPMmat,
+                             bigmatrix(agpe_1m_0v_rec_params, year = 11)$MPMmat) ## assemble this from parameters
 AGPE_lambdaS[2]<-lambdaSim(AGPE_Eplus_mean_only)$log_lambdaS
 
-AGPE_Eplus_var_only <- list() ## assemble this from parameters
+AGPE_Eplus_var_only <- list(bigmatrix(agpe_0m_1v_rec_params, year = 1)$MPMmat,
+                            bigmatrix(agpe_0m_1v_rec_params, year = 2)$MPMmat,
+                            bigmatrix(agpe_0m_1v_rec_params, year = 3)$MPMmat,
+                            bigmatrix(agpe_0m_1v_rec_params, year = 4)$MPMmat,
+                            bigmatrix(agpe_0m_1v_rec_params, year = 5)$MPMmat,
+                            bigmatrix(agpe_0m_1v_rec_params, year = 6)$MPMmat,
+                            bigmatrix(agpe_0m_1v_rec_params, year = 7)$MPMmat,
+                            bigmatrix(agpe_0m_1v_rec_params, year = 8)$MPMmat,
+                            bigmatrix(agpe_0m_1v_rec_params, year = 9)$MPMmat,
+                            bigmatrix(agpe_0m_1v_rec_params, year = 10)$MPMmat,
+                            bigmatrix(agpe_0m_1v_rec_params, year = 11)$MPMmat) ## assemble this from parameters
 AGPE_lambdaS[3]<-lambdaSim(AGPE_Eplus_var_only)$log_lambdaS
 
-AGPE_Eminus <- list() ## assemble this from parameters
+AGPE_Eminus <- list(bigmatrix(agpe_0m_0v_rec_params, year = 1)$MPMmat,
+                    bigmatrix(agpe_0m_0v_rec_params, year = 2)$MPMmat,
+                    bigmatrix(agpe_0m_0v_rec_params, year = 3)$MPMmat,
+                    bigmatrix(agpe_0m_0v_rec_params, year = 4)$MPMmat,
+                    bigmatrix(agpe_0m_0v_rec_params, year = 5)$MPMmat,
+                    bigmatrix(agpe_0m_0v_rec_params, year = 6)$MPMmat,
+                    bigmatrix(agpe_0m_0v_rec_params, year = 7)$MPMmat,
+                    bigmatrix(agpe_0m_0v_rec_params, year = 8)$MPMmat,
+                    bigmatrix(agpe_0m_0v_rec_params, year = 9)$MPMmat,
+                    bigmatrix(agpe_0m_0v_rec_params, year = 10)$MPMmat,
+                    bigmatrix(agpe_0m_0v_rec_params, year = 11)$MPMmat) ## assemble this from parameters
 AGPE_lambdaS[4]<-lambdaSim(AGPE_Eminus)$log_lambdaS
 
 ## compute E+ / E- difference for different types of E+ effects (both, mean, variance)
@@ -67,4 +107,132 @@ AGPE_lambdaS_effect <- AGPE_lambdaS[1:3]-AGPE_lambdaS[4]
 
 ## visualize results to see how much the endo effe
 barplot(AGPE_lambdaS_effect,col=rainbow(3),
+        names.arg = c("Total effect","Mean effect","Variance effect"))
+
+## so for FESU as an example:
+FESU_lambdaS <- c()
+
+FESU_Eplus_mean_var <- list(bigmatrix(fesu_1m_1v_rec_params, year = 1)$MPMmat,
+                            bigmatrix(fesu_1m_1v_rec_params, year = 2)$MPMmat,
+                            bigmatrix(fesu_1m_1v_rec_params, year = 3)$MPMmat,
+                            bigmatrix(fesu_1m_1v_rec_params, year = 4)$MPMmat,
+                            bigmatrix(fesu_1m_1v_rec_params, year = 5)$MPMmat,
+                            bigmatrix(fesu_1m_1v_rec_params, year = 6)$MPMmat,
+                            bigmatrix(fesu_1m_1v_rec_params, year = 7)$MPMmat,
+                            bigmatrix(fesu_1m_1v_rec_params, year = 8)$MPMmat,
+                            bigmatrix(fesu_1m_1v_rec_params, year = 9)$MPMmat,
+                            bigmatrix(fesu_1m_1v_rec_params, year = 10)$MPMmat,
+                            bigmatrix(fesu_1m_1v_rec_params, year = 11)$MPMmat) ## assemble this from parameters
+FESU_lambdaS[1]<-lambdaSim(FESU_Eplus_mean_var)$log_lambdaS
+
+FESU_Eplus_mean_only <- list(bigmatrix(fesu_1m_0v_rec_params, year = 1)$MPMmat,
+                             bigmatrix(fesu_1m_0v_rec_params, year = 2)$MPMmat,
+                             bigmatrix(fesu_1m_0v_rec_params, year = 3)$MPMmat,
+                             bigmatrix(fesu_1m_0v_rec_params, year = 4)$MPMmat,
+                             bigmatrix(fesu_1m_0v_rec_params, year = 5)$MPMmat,
+                             bigmatrix(fesu_1m_0v_rec_params, year = 6)$MPMmat,
+                             bigmatrix(fesu_1m_0v_rec_params, year = 7)$MPMmat,
+                             bigmatrix(fesu_1m_0v_rec_params, year = 8)$MPMmat,
+                             bigmatrix(fesu_1m_0v_rec_params, year = 9)$MPMmat,
+                             bigmatrix(fesu_1m_0v_rec_params, year = 10)$MPMmat,
+                             bigmatrix(fesu_1m_0v_rec_params, year = 11)$MPMmat) ## assemble this from parameters
+FESU_lambdaS[2]<-lambdaSim(FESU_Eplus_mean_only)$log_lambdaS
+
+FESU_Eplus_var_only <- list(bigmatrix(fesu_0m_1v_rec_params, year = 1)$MPMmat,
+                            bigmatrix(fesu_0m_1v_rec_params, year = 2)$MPMmat,
+                            bigmatrix(fesu_0m_1v_rec_params, year = 3)$MPMmat,
+                            bigmatrix(fesu_0m_1v_rec_params, year = 4)$MPMmat,
+                            bigmatrix(fesu_0m_1v_rec_params, year = 5)$MPMmat,
+                            bigmatrix(fesu_0m_1v_rec_params, year = 6)$MPMmat,
+                            bigmatrix(fesu_0m_1v_rec_params, year = 7)$MPMmat,
+                            bigmatrix(fesu_0m_1v_rec_params, year = 8)$MPMmat,
+                            bigmatrix(fesu_0m_1v_rec_params, year = 9)$MPMmat,
+                            bigmatrix(fesu_0m_1v_rec_params, year = 10)$MPMmat,
+                            bigmatrix(fesu_0m_1v_rec_params, year = 11)$MPMmat) ## assemble this from parameters
+FESU_lambdaS[3]<-lambdaSim(FESU_Eplus_var_only)$log_lambdaS
+
+FESU_Eminus <- list(bigmatrix(fesu_0m_0v_rec_params, year = 1)$MPMmat,
+                    bigmatrix(fesu_0m_0v_rec_params, year = 2)$MPMmat,
+                    bigmatrix(fesu_0m_0v_rec_params, year = 3)$MPMmat,
+                    bigmatrix(fesu_0m_0v_rec_params, year = 4)$MPMmat,
+                    bigmatrix(fesu_0m_0v_rec_params, year = 5)$MPMmat,
+                    bigmatrix(fesu_0m_0v_rec_params, year = 6)$MPMmat,
+                    bigmatrix(fesu_0m_0v_rec_params, year = 7)$MPMmat,
+                    bigmatrix(fesu_0m_0v_rec_params, year = 8)$MPMmat,
+                    bigmatrix(fesu_0m_0v_rec_params, year = 9)$MPMmat,
+                    bigmatrix(fesu_0m_0v_rec_params, year = 10)$MPMmat,
+                    bigmatrix(fesu_0m_0v_rec_params, year = 11)$MPMmat) ## assemble this from parameters
+FESU_lambdaS[4]<-lambdaSim(FESU_Eminus)$log_lambdaS
+
+## compute E+ / E- difference for different types of E+ effects (both, mean, variance)
+FESU_lambdaS_effect <- FESU_lambdaS[1:3]-FESU_lambdaS[4]
+
+## visualize results to see how much the endo effe
+barplot(FESU_lambdaS_effect,col=rainbow(3),
+        names.arg = c("Total effect","Mean effect","Variance effect"))
+
+
+
+
+
+## so for LOAR as an example:
+LOAR_lambdaS <- c()
+
+LOAR_Eplus_mean_var <- list(bigmatrix(loar_1m_1v_rec_params, year = 1)$MPMmat,
+                            bigmatrix(loar_1m_1v_rec_params, year = 2)$MPMmat,
+                            bigmatrix(loar_1m_1v_rec_params, year = 3)$MPMmat,
+                            bigmatrix(loar_1m_1v_rec_params, year = 4)$MPMmat,
+                            bigmatrix(loar_1m_1v_rec_params, year = 5)$MPMmat,
+                            bigmatrix(loar_1m_1v_rec_params, year = 6)$MPMmat,
+                            bigmatrix(loar_1m_1v_rec_params, year = 7)$MPMmat,
+                            bigmatrix(loar_1m_1v_rec_params, year = 8)$MPMmat,
+                            bigmatrix(loar_1m_1v_rec_params, year = 9)$MPMmat,
+                            bigmatrix(loar_1m_1v_rec_params, year = 10)$MPMmat,
+                            bigmatrix(loar_1m_1v_rec_params, year = 11)$MPMmat) ## assemble this from parameters
+LOAR_lambdaS[1]<-lambdaSim(LOAR_Eplus_mean_var)$log_lambdaS
+
+LOAR_Eplus_mean_only <- list(bigmatrix(loar_1m_0v_rec_params, year = 1)$MPMmat,
+                             bigmatrix(loar_1m_0v_rec_params, year = 2)$MPMmat,
+                             bigmatrix(loar_1m_0v_rec_params, year = 3)$MPMmat,
+                             bigmatrix(loar_1m_0v_rec_params, year = 4)$MPMmat,
+                             bigmatrix(loar_1m_0v_rec_params, year = 5)$MPMmat,
+                             bigmatrix(loar_1m_0v_rec_params, year = 6)$MPMmat,
+                             bigmatrix(loar_1m_0v_rec_params, year = 7)$MPMmat,
+                             bigmatrix(loar_1m_0v_rec_params, year = 8)$MPMmat,
+                             bigmatrix(loar_1m_0v_rec_params, year = 9)$MPMmat,
+                             bigmatrix(loar_1m_0v_rec_params, year = 10)$MPMmat,
+                             bigmatrix(loar_1m_0v_rec_params, year = 11)$MPMmat) ## assemble this from parameters
+LOAR_lambdaS[2]<-lambdaSim(LOAR_Eplus_mean_only)$log_lambdaS
+
+LOAR_Eplus_var_only <- list(bigmatrix(loar_0m_1v_rec_params, year = 1)$MPMmat,
+                            bigmatrix(loar_0m_1v_rec_params, year = 2)$MPMmat,
+                            bigmatrix(loar_0m_1v_rec_params, year = 3)$MPMmat,
+                            bigmatrix(loar_0m_1v_rec_params, year = 4)$MPMmat,
+                            bigmatrix(loar_0m_1v_rec_params, year = 5)$MPMmat,
+                            bigmatrix(loar_0m_1v_rec_params, year = 6)$MPMmat,
+                            bigmatrix(loar_0m_1v_rec_params, year = 7)$MPMmat,
+                            bigmatrix(loar_0m_1v_rec_params, year = 8)$MPMmat,
+                            bigmatrix(loar_0m_1v_rec_params, year = 9)$MPMmat,
+                            bigmatrix(loar_0m_1v_rec_params, year = 10)$MPMmat,
+                            bigmatrix(loar_0m_1v_rec_params, year = 11)$MPMmat) ## assemble this from parameters
+LOAR_lambdaS[3]<-lambdaSim(LOAR_Eplus_var_only)$log_lambdaS
+
+LOAR_Eminus <- list(bigmatrix(loar_0m_0v_rec_params, year = 1)$MPMmat,
+                    bigmatrix(loar_0m_0v_rec_params, year = 2)$MPMmat,
+                    bigmatrix(loar_0m_0v_rec_params, year = 3)$MPMmat,
+                    bigmatrix(loar_0m_0v_rec_params, year = 4)$MPMmat,
+                    bigmatrix(loar_0m_0v_rec_params, year = 5)$MPMmat,
+                    bigmatrix(loar_0m_0v_rec_params, year = 6)$MPMmat,
+                    bigmatrix(loar_0m_0v_rec_params, year = 7)$MPMmat,
+                    bigmatrix(loar_0m_0v_rec_params, year = 8)$MPMmat,
+                    bigmatrix(loar_0m_0v_rec_params, year = 9)$MPMmat,
+                    bigmatrix(loar_0m_0v_rec_params, year = 10)$MPMmat,
+                    bigmatrix(loar_0m_0v_rec_params, year = 11)$MPMmat) ## assemble this from parameters
+LOAR_lambdaS[4]<-lambdaSim(LOAR_Eminus)$log_lambdaS
+
+## compute E+ / E- difference for different types of E+ effects (both, mean, variance)
+LOAR_lambdaS_effect <- LOAR_lambdaS[1:3]-LOAR_lambdaS[4]
+
+## visualize results to see how much the endo effe
+barplot(LOAR_lambdaS_effect,col=rainbow(3),
         names.arg = c("Total effect","Mean effect","Variance effect"))
