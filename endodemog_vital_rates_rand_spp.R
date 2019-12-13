@@ -133,7 +133,7 @@ write_rds(fert_fit,paste0(tompath,"Fulldataplusmetadata/SppRFX/fert_fit.rds"))
 
 
 # Diagnostics and results -------------------------------------------------
-surv_fit <- read_rds(paste0(tompath,"Fulldataplusmetadata/SppRFX/surv_fit.rds"))
+surv_fit <- read_rds(paste0(tompath,"Fulldataplusmetadata/SppRFX/flow_fit.rds"))
 mcmc_dens_overlay(surv_fit,pars = c("mu_betaendo","mu_sigmaendo"))
 mcmc_dens_overlay(surv_fit,pars = c("mu_betaendo","mu_sigmaendo"))
 mcmc_rhat(rhat(surv_fit,pars = c("mu_betaendo","mu_sigmaendo")))
@@ -162,9 +162,6 @@ sigmaendo_surv<-rstan::extract(surv_fit, pars = c("mu_sigmaendo","sigmaendo[1]",
                                                  "sigmaendo[3]","sigmaendo[4]","sigmaendo[5]",
                                                  "sigmaendo[6]","sigmaendo[7]"))
 
-sigmaendo_surv<-rstan::extract(surv_fit, pars = c("sigma0[1]","sigma0[2]",
-                                                  "sigma0[3]","sigma0[4]","sigma0[5]",
-                                                  "sigma0[6]","sigma0[7]"))
 sigmaendo_surv_mean <- lapply(sigmaendo_surv,"mean")
 sigmaendo_surv_quant <- as.matrix(data.frame(lapply(sigmaendo_surv,"quantile",probs=c(0.05,0.25,0.75,0.95))))
 
