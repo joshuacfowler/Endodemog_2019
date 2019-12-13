@@ -43,18 +43,27 @@ sink("endodemog_seed_mean.stan")
 cat("
     data { 
     int<lower=0> Nseed;                       // number of observations of seed/spikelet
+    int<lower=0> K;                            // number of predictors
+    int<lower=0,upper=1> endo_01[Nseed];          // Endophyte status
     real<lower=0> seed[Nseed];               // number of seeds per spikelet
     }
     
-    
     parameters {
-    real<lower=0> mu_seed;
+    vector[K] beta;
     real<lower=0> sigma_seed;
+    }
+    
+    transformed parameters{
+    vector[Nseed] mu_seed;
+    for(n in 1:Nseed){
+    mu_seed[n] = beta[1] + beta[2]*endo_01[n];
+    }
     }
     
     model {
 
     // Priors
+    beta ~ normal(0,100);
     // Likelihood
       seed ~ normal(mu_seed,sigma_seed);
     }
@@ -68,77 +77,114 @@ stanmodel <- stanc("endodemog_seed_mean.stan")
 ## Save the outputs as rds files
 smFESU <- stan(file = "endodemog_seed_mean.stan", data = FESU_seed_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-# saveRDS(smFESU, file = "endodemog_seed_mean_FESU.rds")
+saveRDS(smFESU, file = "endodemog_seed_mean_FESU.rds")
 
 smLOAR <- stan(file = "endodemog_seed_mean.stan", data = LOAR_seed_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-# saveRDS(smLOAR, file = "endodemog_seed_mean_LOAR.rds")
+saveRDS(smLOAR, file = "endodemog_seed_mean_LOAR.rds")
 
 smPOAL <- stan(file = "endodemog_seed_mean.stan", data = POAL_seed_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-# saveRDS(smPOAL, file = "endodemog_seed_mean_POAL.rds")
+saveRDS(smPOAL, file = "endodemog_seed_mean_POAL.rds")
 
 smPOSY <- stan(file = "endodemog_seed_mean.stan", data = POSY_seed_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-# saveRDS(smPOSY, file = "endodemog_seed_mean_POSY.rds")
+saveRDS(smPOSY, file = "endodemog_seed_mean_POSY.rds")
 
 # AGPE had data recorded as seed/spikelet already, but we are using this model to calculate seed/spikelet on average, so this is using the seed/spikelet info from AGPE
 smAGPE<- stan(file = "endodemog_seed_mean.stan", data = AGPE_seed_data_list,
               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-# saveRDS(smAGPE, file = "endodemog_seed_mean_AGPE.rds")
+saveRDS(smAGPE, file = "endodemog_seed_mean_AGPE.rds")
 
 
 # ELRI and ELVI had data collected in a slightly different way. They recorded seeds/inflorescence, so this is our calculation for the mean seeds/infl
 smELRI <- stan(file = "endodemog_seed_mean.stan", data = ELRI_seed_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-# saveRDS(smELRI, file = "endodemog_seed_mean_ELRI.rds")
+saveRDS(smELRI, file = "endodemog_seed_mean_ELRI.rds")
 
 smELVI <- stan(file = "endodemog_seed_mean.stan", data = ELVI_seed_data_list,
                iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
-# saveRDS(smELVI, file = "endodemog_seed_mean_ELVI.rds")
+saveRDS(smELVI, file = "endodemog_seed_mean_ELVI.rds")
 
 
-
-########################################################################################################################################
-##### Checking the mean from the output
-########################################################################################################################################
-post_seedAGPE <- extract(smAGPE)
-post_seedELRI <- extract(smELRI)
-post_seedELVI <- extract(smELVI)
-post_seedFESU <- extract(smFESU)
-post_seedLOAR <- extract(smLOAR)
-post_seedPOAL <- extract(smPOAL)
-post_seedPOSY <- extract(smPOSY)
+## to read in model output without rerunning models
+smAGPE <- readRDS(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_seed_mean_AGPE.rds")
+smELRI <- readRDS(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_seed_mean_ELRI.rds")
+smELVI <- readRDS(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_seed_mean_ELVI.rds")
+smFESU <- readRDS(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_seed_mean_FESU.rds")
+smLOAR <- readRDS(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_seed_mean_LOAR.rds")
+smPOAL <- readRDS(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_seed_mean_POAL.rds")
+smPOSY <- readRDS(file = "/Users/joshuacfowler/Dropbox/EndodemogData/Model_Runs/endodemog_seed_mean_POSY.rds")
 
 
-seed_histogram <- function(fit,data){
-  require(ggplot2)
-  spp <- ggplot() + 
-    geom_histogram(data = fit, aes(mu_seed), fill = "#ff7f77", alpha = .4, bins = 200)  +
-    geom_vline(aes(xintercept = mean(data$seed))) +
-    labs(x = "mean seed per inflorescence", y = "Posterior density",
-         title = deparse(substitute(df))) + theme_classic()
-  return(spp)
+#########################################################################################################
+###### Perform posterior predictive checks and assess model convergence-------------------------
+#########################################################################################################
+params <- c("beta", "sigma_seed")
+
+##### POAL - survival
+print(smPOAL)
+# summary(smPOAL)
+
+## plot traceplots of chains for select parameters
+traceplot(smAGPE, pars = params)
+traceplot(smELRI, pars = params)
+traceplot(smELVI, pars = params)
+traceplot(smFESU, pars = params)
+traceplot(smLOAR, pars = params)
+traceplot(smPOSY, pars = params)
+traceplot(smPOSY, pars = params)
+
+
+# Pull out the posteriors
+post_survAGPE <- extract(smAGPE)
+post_survELRI <- extract(smELRI)
+post_survELVI <- extract(smELVI)
+post_survFESU <- extract(smFESU)
+post_survLOAR <- extract(smLOAR)
+post_survPOAL <- extract(smPOAL)
+post_survPOSY <- extract(smPOSY)
+
+
+# This function extracts the posterior draws and generates replicate data for each given model
+prediction <- function(data, fit, n_post_draws){
+  post <- rstan::extract(fit)
+  mu <- post$mu_seed
+  sd <- post$sigma_seed
+  yrep <- matrix(nrow = n_post_draws, ncol = data$N)
+  for(n in 1:n_post_draws){
+    yrep[n,] <- rnorm(n = data$N, mean = mu[n], sd = sd[n])
+  }
+  out <- list(yrep, mu)
+  names(out) <- c("yrep", "mu")
+  return(out)
 }
-# survival
-AGPE_seed <- seed_histogram(fit = as.data.frame(post_seedAGPE), data = AGPE_seed_data_list)
-AGPE_seed
-ELRI_seed <- seed_histogram(fit = as.data.frame(post_seedELRI), data = ELRI_seed_data_list)
-ELRI_seed
-ELVI_seed <- seed_histogram(fit = as.data.frame(post_seedELVI), data = ELVI_seed_data_list)
-ELVI_seed
-FESU_seed <- seed_histogram(fit = as.data.frame(post_seedFESU), data = FESU_seed_data_list)
-FESU_seed
-LOAR_seed <- seed_histogram(fit = as.data.frame(post_seedLOAR), data = LOAR_seed_data_list)
-LOAR_seed
-POAL_seed <- seed_histogram(fit = as.data.frame(post_seedPOAL), data = POAL_seed_data_list)
-POAL_seed
-POSY_seed <- seed_histogram(fit = as.data.frame(post_seedPOSY), data = POSY_seed_data_list)
-POSY_seed
+
+# apply the function for each species
+AGPE_seed_yrep <- prediction(data = AGPE_seed_data_list, fit = smAGPE, n_post_draws = 500)
+ELRI_seed_yrep <- prediction(data = ELRI_seed_data_list, fit = smELRI, n_post_draws = 500)
+ELVI_seed_yrep <- prediction(data = ELVI_seed_data_list, fit = smELVI, n_post_draws = 500)
+FESU_seed_yrep <- prediction(data = FESU_seed_data_list, fit = smFESU, n_post_draws = 500)
+LOAR_seed_yrep <- prediction(data = LOAR_seed_data_list, fit = smLOAR, n_post_draws = 500)
+POAL_seed_yrep <- prediction(data = POAL_seed_data_list, fit = smPOAL, n_post_draws = 500)
+POSY_seed_yrep <- prediction(data = POSY_seed_data_list, fit = smPOSY, n_post_draws = 500)
 
 
-x <- sample(post_seedAGPE$mu_seed, size = 10000)
-x2 <- rnorm(10000, mean = mean(post_seedAGPE$mu_seed), sd = mean(post_seedAGPE$sigma_seed))
-hist(x)
-hist(x2)
+# overlay 100 replicates over the actual dataset
+ppc_dens_overlay( y = AGPE_seed_data_list$seed, yrep = AGPE_seed_yrep$yrep[1:100,]) + ggtitle("AGPE")
+
+ppc_dens_overlay( y = ELRI_seed_data_list$seed, yrep = ELRI_seed_yrep$yrep[1:100,]) + ggtitle("ELRI")
+
+ppc_dens_overlay( y = ELVI_seed_data_list$seed, yrep = ELVI_seed_yrep$yrep[1:100,]) + ggtitle("ELVI")
+
+ppc_dens_overlay( y = FESU_seed_data_list$seed, yrep = FESU_seed_yrep$yrep[1:100,]) + ggtitle("FESU")
+
+ppc_dens_overlay( y = LOAR_seed_data_list$seed, yrep = LOAR_seed_yrep$yrep[1:100,]) + ggtitle("LOAR")
+
+ppc_dens_overlay( y = POAL_seed_data_list$seed, yrep = POAL_seed_yrep$yrep[1:100,]) + ggtitle("POAL")
+
+ppc_dens_overlay( y = POSY_seed_data_list$seed, yrep = POSY_seed_yrep$yrep[1:100,]) + ggtitle("POSY")
+
+
+
 

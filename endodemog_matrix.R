@@ -79,7 +79,7 @@ params_0m_0v_rec <- function(surv, grow,flw, fert, spike, s_to_s, seed, data){
   params[49:59] <- mean(spike$beta[,1]) + mean(spike$beta[,4]) + colMeans(spike$tau_year[,1,1:11]); names(params)[49:59] <- paste0("spike_intercept_y", 1:11)
   params[60] <- mean(spike$beta[,2]); names(params)[60] <- "spike_slope"
   params[61:71] <- mean(s_to_s$beta[,1]) + colMeans(s_to_s$tau_year[,1,1:11]); names(params)[61:71] <- paste0("s_to_s_intercept_y", 1:11)
-  params[72] <- mean(seed$mu_seed); names(params)[72] <- "mu_seed"
+  params[72] <- mean(seed$beta[,1]); names(params)[72] <- "mu_seed"
   params[73] <- mean(grow$phi); names(params)[73] <- "grow_phi"
   params[74] <- mean(fert$phi); names(params)[74] <- "fert_phi"
   params[75] <- mean(spike$phi); names(params)[75] <- "spike_phi"
@@ -102,7 +102,7 @@ params_1m_0v_rec <- function(surv, grow,flw, fert, spike, s_to_s, seed, data){
   params[49:59] <- mean(spike$beta[,1]) + mean(spike$beta[,3]) + mean(spike$beta[,4]) + colMeans(spike$tau_year[,1,1:11]); names(params)[49:59] <- paste0("spike_intercept_y", 1:11)
   params[60] <- mean(spike$beta[,2]); names(params)[60] <- "spike_slope"
   params[61:71] <- mean(s_to_s$beta[,1]) + mean(s_to_s$beta[,2]) + colMeans(s_to_s$tau_year[,1,1:11]); names(params)[61:71] <- paste0("s_to_s_intercept_y", 1:11)
-  params[72] <- mean(seed$mu_seed); names(params)[72] <- "mu_seed"
+  params[72] <- mean(seed$beta[,1]) + mean(seed$beta[,2]); names(params)[72] <- "mu_seed"
   params[73] <- mean(grow$phi); names(params)[73] <- "grow_phi"
   params[74] <- mean(fert$phi); names(params)[74] <- "fert_phi"
   params[75] <- mean(spike$phi); names(params)[75] <- "spike_phi"
@@ -125,7 +125,7 @@ params_0m_1v_rec <- function(surv, grow,flw, fert, spike, s_to_s, seed, data){
   params[49:59] <- mean(spike$beta[,1]) + mean(spike$beta[,4]) + colMeans(spike$tau_year[,2,1:11]); names(params)[49:59] <- paste0("spike_intercept_y", 1:11)
   params[60] <- mean(spike$beta[,2]); names(params)[60] <- "spike_slope"
   params[61:71] <- mean(s_to_s$beta[,1]) + colMeans(s_to_s$tau_year[,2,1:11]); names(params)[61:71] <- paste0("s_to_s_intercept_y", 1:11)
-  params[72] <- mean(seed$mu_seed); names(params)[72] <- "mu_seed"
+  params[72] <- mean(seed$beta[,1]); names(params)[72] <- "mu_seed"
   params[73] <- mean(grow$phi); names(params)[73] <- "grow_phi"
   params[74] <- mean(fert$phi); names(params)[74] <- "fert_phi"
   params[75] <- mean(spike$phi); names(params)[75] <- "spike_phi"
@@ -148,7 +148,7 @@ params_1m_1v_rec <- function(surv, grow,flw, fert, spike, s_to_s, seed, data){
   params[49:59] <- mean(spike$beta[,1]) + mean(spike$beta[,3]) + mean(spike$beta[,4]) + colMeans(spike$tau_year[,2,1:11]); names(params)[49:59] <- paste0("spike_intercept_y", 1:11)
   params[60] <- mean(spike$beta[,2]); names(params)[60] <- "spike_slope"
   params[61:71] <- mean(s_to_s$beta[,1]) + mean(s_to_s$beta[,2]) + colMeans(s_to_s$tau_year[,2,1:11]); names(params)[61:71] <- paste0("s_to_s_intercept_y", 1:11)
-  params[72] <- mean(seed$mu_seed); names(params)[72] <- "mu_seed"
+  params[72] <- mean(seed$beta[,1]) + mean(seed$beta[,2]); names(params)[72] <- "mu_seed"
   params[73] <- mean(grow$phi); names(params)[73] <- "grow_phi"
   params[74] <- mean(fert$phi); names(params)[74] <- "fert_phi"
   params[75] <- mean(spike$phi); names(params)[75] <- "spike_phi"
