@@ -29,7 +29,7 @@ parameters {
     vector[nSpp] betaendo;                     
     //real mu_betaendo;                     
     //real<lower=0> sigma_betaendo;
-    real betaorigin;  // the origin effect assumed equal across species
+    vector[nSpp] betaorigin;  // the origin effect
     
     real tau_year[nSpp,nEndo,nYear];      // random year effect, unique to species and endo
     //real mu_sigma0;
@@ -49,8 +49,7 @@ transformed parameters {
 
     // surv Linear Predictor
     for(n in 1:N){
-    p[n] = beta0[spp[n]] + betasize[spp[n]]*logsize_t[n] + betaendo[spp[n]]*endo_01[n] +
-    betaorigin[spp[n]]*origin_01[n]
+    p[n] = beta0[spp[n]] + betasize[spp[n]]*logsize_t[n] + betaendo[spp[n]]*endo_01[n] + betaorigin[spp[n]]*origin_01[n]
     + tau_year[spp[n],(endo_01[n]+1),year_t[n]] + tau_plot[plot[n]];
     }
     
@@ -79,22 +78,20 @@ model {
     //sigma_mu_sigmaendo ~ inv_gamma(0.001, 0.001);
     //this is plot variance
     sigma_plot ~ inv_gamma(0.001, 0.001);
-    
-    //sample random effects
-
     for(i in 1:nPlot){
       tau_plot[i] ~ normal(0,sigma_plot);
     }
+    //fixed effect priors
     for(s in 1:nSpp){
       beta0[s] ~ normal(0,100);
       betasize[s] ~ normal(0,100);
       betaendo[s] ~ normal(0,100);
-      betaorigin[s] ~ normal(0,100);      // prior for predictor intercepts
+      betaorigin[s] ~ normal(0,100);      
       sigma0[s] ~ normal(0,100);
       sigmaendo[s] ~ normal(0,100);
       for(d in 1:nEndo){
         for(t in 1:nYear){
-          tau_year[s,d,t] ~ normal(0,sigma_year[s,d]);
+          tau_year[s,d,t] ~ normal(0,sigma_year[s,d]); // sample year effects
         }
       }
     }
