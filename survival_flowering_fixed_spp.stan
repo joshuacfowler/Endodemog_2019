@@ -50,7 +50,7 @@ transformed parameters {
     // surv Linear Predictor
     for(n in 1:N){
     p[n] = beta0[spp[n]] + betasize[spp[n]]*logsize_t[n] + betaendo[spp[n]]*endo_01[n] +
-    betaorigin*origin_01[n]
+    betaorigin[spp[n]]*origin_01[n]
     + tau_year[spp[n],(endo_01[n]+1),year_t[n]] + tau_plot[plot[n]];
     }
     
@@ -65,7 +65,6 @@ transformed parameters {
 model {
     // priors
     // this coefficient is shared across spp
-    betaorigin ~ normal(0,100);      // prior for predictor intercepts
     //the are the grand means across spp
     //mu_beta0 ~ normal(0,100);      // prior for predictor intercepts
     //mu_betasize ~ normal(0,100);      // prior for predictor intercepts
@@ -90,6 +89,7 @@ model {
       beta0[s] ~ normal(0,100);
       betasize[s] ~ normal(0,100);
       betaendo[s] ~ normal(0,100);
+      betaorigin[s] ~ normal(0,100);      // prior for predictor intercepts
       sigma0[s] ~ normal(0,100);
       sigmaendo[s] ~ normal(0,100);
       for(d in 1:nEndo){
