@@ -90,10 +90,10 @@ fert_dat <- list(nYear = length(unique(LTREB_data_forfert$year_t - (min(LTREB_da
                  origin_01 = LTREB_data_forfert$origin_01);rm(LTREB_data_forfert)
 
 sim_pars <- list(
-  warmup = 1000, 
-  iter = 5000, 
+  warmup = 2000, 
+  iter = 15000, 
   thin = 3, 
-  chains = 1
+  chains = 3
 )
 
 flow_fit <- stan(
