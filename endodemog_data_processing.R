@@ -2447,6 +2447,12 @@ LTREB_data_forspike <- LTREB_full %>%
   mutate(spike_count_t = as.integer(spike_count_t))
 
 dim(LTREB_data_forspike)
+table(LTREB_data_forspike$year_t,LTREB_data_forspike$species,LTREB_data_forspike$endo_01)
+
+ggplot(LTREB_data_forspike)+
+  geom_histogram(aes(x=spike_count_t))+
+  facet_grid(year_t~species)
+
 
 # Creating individual species data lists to be passed to the model
 # Split up the main dataframe by species and recode plot to be used as an index for each species
