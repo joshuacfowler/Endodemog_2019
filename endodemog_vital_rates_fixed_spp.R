@@ -75,7 +75,7 @@ grow_dat <- list(nYear = length(unique(LTREB_data_forgrow$year_t - (min(LTREB_da
                  y = LTREB_data_forgrow$size_t1,
                  logsize_t = LTREB_data_forgrow$logsize_t,
                  endo_01 = LTREB_data_forgrow$endo_01,
-                 origin_01 = LTREB_data_forgrow$origin_01)
+                 origin_01 = LTREB_data_forgrow$origin_01);rm(LTREB_data_forgrow)
 fert_dat <- list(nYear = length(unique(LTREB_data_forfert$year_t - (min(LTREB_data_forfert$year_t)-1))),
                  nPlot = max(LTREB_data_forfert$plot_fixed),
                  nSpp = length(unique(LTREB_data_forfert$species)),
@@ -87,13 +87,13 @@ fert_dat <- list(nYear = length(unique(LTREB_data_forfert$year_t - (min(LTREB_da
                  y = LTREB_data_forfert$FLW_COUNT_T1,
                  logsize_t = LTREB_data_forfert$logsize_t1,
                  endo_01 = LTREB_data_forfert$endo_01,
-                 origin_01 = LTREB_data_forfert$origin_01)
+                 origin_01 = LTREB_data_forfert$origin_01);rm(LTREB_data_forfert)
 
 sim_pars <- list(
   warmup = 1000, 
-  iter = 15000, 
+  iter = 5000, 
   thin = 3, 
-  chains = 3
+  chains = 1
 )
 
 flow_fit <- stan(
