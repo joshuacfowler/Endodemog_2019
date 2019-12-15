@@ -134,7 +134,7 @@ write_rds(fert_fit,paste0(tompath,"Fulldataplusmetadata/SppRFX/fert_fit_fixed.rd
 
 
 # Diagnostics and results -------------------------------------------------
-surv_fit <- read_rds(paste0(tompath,"Fulldataplusmetadata/SppRFX/surv_fit.rds"))
+surv_fit <- read_rds(paste0(tompath,"Fulldataplusmetadata/SppRFX/grow_fit_fixed.rds"))
 mcmc_dens_overlay(surv_fit,pars = c("mu_betaendo","mu_sigmaendo"))
 mcmc_dens_overlay(surv_fit,pars = c("mu_betaendo","mu_sigmaendo"))
 mcmc_rhat(rhat(surv_fit,pars = c("mu_betaendo","mu_sigmaendo")))
@@ -153,31 +153,27 @@ mcmc_trace(surv_fit,par=c("beta0"))
 mcmc_trace(surv_fit,par=c("betasize"))
 mcmc_trace(surv_fit,par=c("betaendo"))
 
-betaendo_surv<-rstan::extract(surv_fit, pars = c("mu_betaendo","betaendo[1]","betaendo[2]",
+betaendo_surv<-rstan::extract(surv_fit, pars = c("betaendo[1]","betaendo[2]",
                                                  "betaendo[3]","betaendo[4]","betaendo[5]",
                                                  "betaendo[6]","betaendo[7]"))
 betaendo_surv_mean <- lapply(betaendo_surv,"mean")
 betaendo_surv_quant <- as.matrix(data.frame(lapply(betaendo_surv,"quantile",probs=c(0.05,0.25,0.75,0.95))))
 
-sigmaendo_surv<-rstan::extract(surv_fit, pars = c("mu_sigmaendo","sigmaendo[1]","sigmaendo[2]",
+sigmaendo_surv<-rstan::extract(surv_fit, pars = c("sigmaendo[1]","sigmaendo[2]",
                                                  "sigmaendo[3]","sigmaendo[4]","sigmaendo[5]",
                                                  "sigmaendo[6]","sigmaendo[7]"))
-
-sigmaendo_surv<-rstan::extract(surv_fit, pars = c("sigma0[1]","sigma0[2]",
-                                                  "sigma0[3]","sigma0[4]","sigma0[5]",
-                                                  "sigma0[6]","sigma0[7]"))
 sigmaendo_surv_mean <- lapply(sigmaendo_surv,"mean")
 sigmaendo_surv_quant <- as.matrix(data.frame(lapply(sigmaendo_surv,"quantile",probs=c(0.05,0.25,0.75,0.95))))
 
 par(mfrow=c(2,1))
-plot(rep(0,8),1:8,type="n")
+plot(rep(0,7),1:7,type="n",xlim=c(-2,2))
 abline(v=0,lty=2,col="gray")
-points(betaendo_surv_mean,1:8,cex=c(4,rep(2,7)),pch=16)
-arrows(betaendo_surv_quant[1,],1:8,betaendo_surv_quant[4,],1:8,length=0,lwd=2)
-arrows(betaendo_surv_quant[2,],1:8,betaendo_surv_quant[3,],1:8,length=0,lwd=4)
+points(betaendo_surv_mean,1:7,cex=2,pch=16)
+arrows(betaendo_surv_quant[1,],1:7,betaendo_surv_quant[4,],1:7,length=0,lwd=2)
+arrows(betaendo_surv_quant[2,],1:7,betaendo_surv_quant[3,],1:7,length=0,lwd=4)
 
-plot(rep(0,8),1:8,type="n")
+plot(rep(0,7),1:7,type="n",xlim=c(-2,2))
 abline(v=0,lty=2,col="gray")
-points(sigmaendo_surv_mean,1:8,cex=c(4,rep(2,7)),pch=16)
-arrows(sigmaendo_surv_quant[1,],1:8,sigmaendo_surv_quant[4,],1:8,length=0,lwd=2)
-arrows(sigmaendo_surv_quant[2,],1:8,sigmaendo_surv_quant[3,],1:8,length=0,lwd=4)
+points(sigmaendo_surv_mean,1:7,cex=2,pch=16)
+arrows(sigmaendo_surv_quant[1,],1:7,sigmaendo_surv_quant[4,],1:7,length=0,lwd=2)
+arrows(sigmaendo_surv_quant[2,],1:7,sigmaendo_surv_quant[3,],1:7,length=0,lwd=4)
