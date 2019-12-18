@@ -135,6 +135,16 @@ fert_fit <- stan(
   chains = sim_pars$chains )
 write_rds(fert_fit,paste0(tompath,"Fulldataplusmetadata/SppRFX/fert_fit_fixed.rds"))
 
+## the stan file here is fitting endo effects on mean only
+fert_fit_endo_mean <- stan(
+  file = 'fertility_fixed_spp_endo_mean.stan', 
+  data = fert_dat,
+  warmup = sim_pars$warmup,
+  iter = sim_pars$iter,
+  thin = sim_pars$thin,
+  chains = sim_pars$chains )
+write_rds(fert_fit_endo_mean,paste0(tompath,"Fulldataplusmetadata/SppRFX/fert_fit_fixed_endo_mean.rds"))
+
 
 # Diagnostics and results -------------------------------------------------
 #survival
