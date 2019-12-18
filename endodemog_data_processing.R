@@ -1637,7 +1637,7 @@ table(LTREB_repro_wide$species, LTREB_repro_wide$year, !is.na(LTREB_repro_wide$f
 table(is.na(LTREB_repro1$flw), LTREB_repro1$flw>0, !is.na(LTREB_repro1$spikelets))
 
 # I am going to try to merge and then add the lagged repro variables at the end
-LTREB_repro2_t1 <- LTREB_repro_wide%>% 
+LTREB_repro_t1 <- LTREB_repro_wide%>% 
   rename(flw_t1 = flw,
          year_t1 = year)
 
@@ -1653,7 +1653,7 @@ LTREB_data1 <- LTREB_data %>%
 
 # now we can merge the two datasets together.
 LTREB_repro_combo <- LTREB_data1 %>% 
-  left_join(LTREB_repro2_t1,
+  left_join(LTREB_repro_t1,
             by = c("plot_fixed" = "plot_fixed", "pos" = "pos",
                    "id" = "tag", "species" = "species",
                    "endo_01" = "endo_01",
