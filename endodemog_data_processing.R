@@ -1620,7 +1620,7 @@ LTREB_repro1 <- LTREB_repro %>%
                                is.na(tillerid) & !is.na(spikelets) ~ "A",
                                is.na(tillerid) & is.na(spikelets) ~ NA_character_)) %>% 
   distinct()
-write.csv(LTREB_repro1,"~/Dropbox/EndodemogData/Fulldataplusmetadata/LTREB_repro1.csv")
+write_csv(LTREB_repro1,"~/Dropbox/EndodemogData/Fulldataplusmetadata/LTREB_repro1.csv")
 
 
 # spreading out the spikelet info by tiller to create single row per year per individual.
@@ -1683,7 +1683,8 @@ LTREB_full_to2018 <- LTREB_repro_combo %>%
          SPIKE_C_T1 =  case_when(is.na(spike_c_t1_fromrepro) & !is.na(spike_c_t1_long) ~ as.numeric(spike_c_t1_long),
                                  !is.na(spike_c_t1_fromrepro) & is.na(spike_c_t1_long) ~ as.numeric(spike_c_t1_fromrepro),                                                                          
                                  !is.na(spike_c_t1_fromrepro) & !is.na(spike_c_t1_long) ~ as.numeric(spike_c_t1_fromrepro)),
-         SPIKE_D_T1 = spike_d_t1_fromrepro)
+         SPIKE_D_T1 = spike_d_t1_fromrepro,
+         SPIKE_AGPE_MEAN_T1 = spikelets_AGPE_mean) # <- This last column is because AGPE has some years of spikelet data collected as a mean, so I am keeping it separate from the other data.
          
 
 # Then we will add lagged variables to have the measurements in time t
@@ -1694,16 +1695,17 @@ LTREB_full_to2018_lag <- LTREB_full_to2018 %>%
          SPIKE_A_T = dplyr::lag(SPIKE_A_T1, n = 1, default = NA),
          SPIKE_B_T = dplyr::lag(SPIKE_B_T1, n = 1, default = NA),
          SPIKE_C_T = dplyr::lag(SPIKE_C_T1, n = 1, default = NA),
-         SPIKE_D_T = dplyr::lag(SPIKE_D_T1, n = 1, default = NA)) %>% 
+         SPIKE_D_T = dplyr::lag(SPIKE_D_T1, n = 1, default = NA),
+         SPIKE_AGPE_MEAN_T = dplyr::lag(SPIKE_AGPE_MEAN_T1, n = 1, default = NA)) %>% 
   dplyr::select(plot_fixed, pos, id, species, species_index, 
          endo_01, endo_index, origin_01, birth,
          year_t1, year_t1_index,
          surv_t1, size_t1, logsize_t1,
          FLW_COUNT_T1, FLW_STAT_T1,
-         SPIKE_A_T1, SPIKE_B_T1, SPIKE_C_T1, SPIKE_D_T1,
+         SPIKE_A_T1, SPIKE_B_T1, SPIKE_C_T1, SPIKE_D_T1, SPIKE_AGPE_MEAN_T1,
          year_t, year_t_index, size_t, logsize_t, 
          FLW_COUNT_T, FLW_STAT_T,
-         SPIKE_A_T, SPIKE_B_T, SPIKE_C_T, SPIKE_D_T)
+         SPIKE_A_T, SPIKE_B_T, SPIKE_C_T, SPIKE_D_T, SPIKE_AGPE_MEAN_T)
 
 ##############################################################################
 ####### Here we will merge in 2019 data ------------------------------
@@ -1855,7 +1857,7 @@ setdiff(LTREB_distances$id, LTREB_full_2$id)
 LTREB_full <- LTREB_full_2 %>% 
   left_join(LTREB_distances, by = c("species" = "species","pos" = "pos", "plot_fixed" = "plot", "origin_01" = "origin_01", "id" = "id")) %>% 
   dplyr::select(-duplicate, -origin_from_check, -origin_from_distance, -date_status, -date_dist) # I'm removing some of the extrneous variable. We also have distance data in the new field data that needs to be merged in.
-write.csv(LTREB_full,"~/Dropbox/EndodemogData/Fulldataplusmetadata/LTREB_full.csv")
+write_csv(LTREB_full,"~/Dropbox/EndodemogData/Fulldataplusmetadata/LTREB_full.csv")
 
 ##############################################################################
 ####### Preparing datalists for Survival Kernel ------------------------------
@@ -2430,7 +2432,7 @@ str(POSY_fert_data_list)
 ####### Preparing datalists for Spikelet/inflorescence Kernel ------------------------------
 ##############################################################################
 LTREB_data_forspike <- LTREB_full %>%
-  dplyr::select(-FLW_COUNT_T1, -FLW_STAT_T1, -SPIKE_A_T1, -SPIKE_B_T1, -SPIKE_C_T1, -SPIKE_D_T1, -endo_status_from_check, -plot_endo_for_check, -endo_mismatch, -dist_a, -dist_b) %>% 
+  dplyr::select(-FLW_COUNT_T1, -FLW_STAT_T1, -SPIKE_A_T1, -SPIKE_B_T1, -SPIKE_C_T1, -SPIKE_D_T1, -SPIKE_AGPE_MEAN_T1, -endo_status_from_check, -plot_endo_for_check, -endo_mismatch, -dist_a, -dist_b) %>% 
   filter(!is.na(FLW_STAT_T)) %>% 
   filter(FLW_STAT_T>0) %>% 
   melt(id.var = c("plot_fixed" ,            "pos"         ,           "id",
@@ -2444,8 +2446,11 @@ LTREB_data_forspike <- LTREB_full %>%
                   value.name = "spike_count_t") %>% 
   rename(spikelet_id = variable) %>% 
   filter(!is.na(spike_count_t), spike_count_t > 0) %>% 
-  mutate(spike_count_t = as.integer(spike_count_t))
+  mutate(spike_count_t = as.integer(spike_count_t)) # This is especially important for the AGPE spikelet data which includes means; some of the values for this are also kind of large
 
+ggplot(data = LTREB_data_forspike) + 
+  geom_histogram(aes(spike_count_t)) + 
+  facet_wrap(~species)
 dim(LTREB_data_forspike)
 
 # Creating individual species data lists to be passed to the model
@@ -3181,10 +3186,10 @@ str(POSY_all_vr_data_list)
 
 ####### 
 # Some data vis of the whole data set
-ggplot(data = LTREB_full) +
-  geom_histogram(aes(size_t)) + facet_wrap(~species)
-ggplot(data = LTREB_endo_check) +
-  geom_histogram(aes(endo_mismatch)) + facet_wrap(~species)
-
-mean(LTREB_full$endo_mismatch, na.rm = T)
-                 
+# ggplot(data = LTREB_full) +
+#   geom_histogram(aes(size_t)) + facet_wrap(~species)
+# ggplot(data = LTREB_endo_check) +
+#   geom_histogram(aes(endo_mismatch)) + facet_wrap(~species)
+# 
+# mean(LTREB_full$endo_mismatch, na.rm = T)
+#                  
