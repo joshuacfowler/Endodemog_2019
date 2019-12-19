@@ -32,6 +32,28 @@ LTREB_data_forfert <- LTREB_full %>%
   filter(!is.na(FLW_COUNT_T1)) %>% 
   filter(FLW_COUNT_T1 > 0) %>% 
   filter(!is.na(logsize_t1))
+LTREB_data_forspike <- LTREB_full %>%
+  dplyr::select(-FLW_COUNT_T1, -FLW_STAT_T1, -SPIKE_A_T1, -SPIKE_B_T1, -SPIKE_C_T1, -SPIKE_D_T1, -endo_status_from_check, -plot_endo_for_check, -endo_mismatch, -dist_a, -dist_b) %>% 
+  filter(!is.na(FLW_STAT_T)) %>% 
+  filter(FLW_STAT_T>0) %>% 
+  melt(id.var = c("plot_fixed" ,            "pos"         ,           "id",
+                  "species"       ,         "species_index"  ,        "endo_01",
+                  "endo_index"  ,           "origin_01"       ,       "birth" ,
+                  "year_t1"         ,       "year_t1_index"       ,   "surv_t1" ,
+                  "size_t1"         ,       "logsize_t1"       ,
+                  "year_t",
+                  "year_t_index"     ,      "size_t"           ,      "logsize_t"  ,
+                  "FLW_COUNT_T"      ,      "FLW_STAT_T"),
+       value.name = "spike_count_t") %>% 
+  rename(spikelet_id = variable) %>% 
+  filter(!is.na(spike_count_t), spike_count_t > 0) %>% 
+  mutate(spike_count_t = as.integer(spike_count_t))
+
+ggplot(LTREB_data_forspike)+
+  geom_histogram(aes(x=spike_count_t))+
+  facet_grid(year_t~species)
+## I don't think there are enough data to fit year variances
+## so I am just going to fit fixed effects of size and endo
 rm(LTREB_full)
 
 ## this is good, there are no plot numbers duplicated across species
@@ -92,9 +114,22 @@ fert_dat <- list(nYear = length(unique(LTREB_data_forfert$year_t - (min(LTREB_da
                  endo_01 = LTREB_data_forfert$endo_01,
                  origin_01 = LTREB_data_forfert$origin_01);rm(LTREB_data_forfert)
 
+spike_dat <- list(nYear = length(unique(LTREB_data_forspike$year_t - (min(LTREB_data_forspike$year_t)-1))),
+                  nPlot = max(LTREB_data_forspike$plot_fixed),
+                  nSpp = length(unique(LTREB_data_forspike$species)),
+                  nEndo=length(unique(LTREB_data_forspike$endo_01)),
+                  N = nrow(LTREB_data_forspike),
+                  year_t = LTREB_data_forspike$year_t - (min(LTREB_data_forspike$year_t)-1),
+                  plot = LTREB_data_forspike$plot_fixed,
+                  spp = as.integer(as.numeric(as.factor(LTREB_data_forspike$species))),
+                  y = LTREB_data_forspike$spike_count_t,
+                  logsize_t = LTREB_data_forspike$logsize_t,
+                  endo_01 = LTREB_data_forspike$endo_01,
+                  origin_01 = LTREB_data_forspike$origin_01);rm(LTREB_data_forspike)
+
 sim_pars <- list(
   warmup = 2000, 
-  iter = 15000, 
+  iter = 10000, 
   thin = 3, 
   chains = 3
 )
@@ -145,6 +180,24 @@ fert_fit_endo_mean <- stan(
   chains = sim_pars$chains )
 write_rds(fert_fit_endo_mean,paste0(tompath,"Fulldataplusmetadata/SppRFX/fert_fit_fixed_endo_mean.rds"))
 
+spike_fit_endo_mean <- stan(
+  file = 'spikelets_fixed_spp_endo_mean.stan', 
+  data = spike_dat,
+  warmup = sim_pars$warmup,
+  iter = sim_pars$iter,
+  thin = sim_pars$thin,
+  chains = sim_pars$chains )
+write_rds(spike_fit_endo_mean,paste0(tompath,"Fulldataplusmetadata/SppRFX/spike_fit_fixed_endo_mean.rds"))
+
+spike_fit_no_endo <- stan(
+  file = 'spikelets_fixed_spp_no_endo.stan', 
+  data = spike_dat,
+  warmup = sim_pars$warmup,
+  iter = sim_pars$iter,
+  thin = sim_pars$thin,
+  chains = sim_pars$chains )
+write_rds(spike_fit_no_endo,paste0(tompath,"Fulldataplusmetadata/SppRFX/spike_fit_no_endo.rds"))
+
 
 # Diagnostics and results -------------------------------------------------
 #survival
@@ -186,6 +239,27 @@ mcmc_trace(fert_fit,pars=c("sigmaendo[1]","sigmaendo[2]","sigmaendo[3]"
 mcmc_trace(fert_fit,pars=c("sigma0[1]","sigma0[2]","sigma0[3]"
                            ,"sigma0[4]","sigma0[5]","sigma0[6]"
                            ,"sigma0[7]"))
+
+fert_fit_endo_mean <- read_rds(paste0(tompath,"Fulldataplusmetadata/SppRFX/fert_fit_fixed_endo_mean.rds"))
+mcmc_trace(fert_fit_endo_mean,pars=c("betaendo[1]","betaendo[2]","betaendo[3]"
+                           ,"betaendo[4]","betaendo[5]","betaendo[6]"
+                           ,"betaendo[7]"))
+
+## spikelets
+spike_fit_no_endo <- read_rds(paste0(tompath,"Fulldataplusmetadata/SppRFX/spike_fit_no_endo.rds"))
+mcmc_trace(spike_fit_no_endo,pars=c("betasize[1]","betasize[2]","betasize[3]"
+                           ,"betasize[4]","betasize[5]","betasize[6]"
+                           ,"betasize[7]"))
+predSpike <- rstan::extract(spike_fit_no_endo, pars = c("lambda"))$lambda
+n_post_draws <- 100
+post_draws <- sample.int(dim(predSpike)[1], n_post_draws)
+y_spike_sim <- matrix(NA,n_post_draws,length(spike_dat$y))
+for(i in 1:n_post_draws){
+  y_spike_sim[i,] <- rpois(n=length(spike_dat$y), lambda = exp(predSpike[post_draws[i],]))
+}
+ppc_dens_overlay(spike_dat$y, y_spike_sim)
+
+
 # Visualize endo effects --------------------------------------------------
 # survival
 betaendo_surv<-rstan::extract(surv_fit, pars = c("betaendo[1]","betaendo[2]",
@@ -342,6 +416,9 @@ arrows(sigmaendo_fert_quant[2,],1:8,sigmaendo_fert_quant[3,],1:8,length=0,lwd=8,
 points(sigmaendo_fert_mean,1:8,cex=3,pch=16,col=alpha(spp_cols,spp_alpha))
 
 
+# Examples of mean and variance effects -----------------------------------
+
+
 ## cherry-pick nice examples of endo mean and variance effects
 ## LOAR and FESU survival
 mean_surv <- LTREB_data_forsurv %>% 
@@ -360,3 +437,18 @@ plot(mean_surv$mean_size[mean_surv$species=="LOAR"],mean_surv$mean_surv[mean_sur
 plot(mean_surv$mean_size[mean_surv$species=="FESU"],mean_surv$mean_surv[mean_surv$species=="FESU"],
      pch=mean_surv$endo_pch[mean_surv$species=="FESU"],ylim=c(0,1),
      cex=2 + 3*(mean_surv$n_surv[mean_surv$species=="FESU"]/max(mean_surv$n_surv[mean_surv$species=="FESU"])))
+
+
+# climate data ------------------------------------------------------------
+climate <- read_csv(file = "~/Dropbox/EndodemogData/PRISMClimateData_BrownCo.csv") %>% 
+  mutate(year = year(Date), month = month(Date), day = day(Date)) %>% 
+  rename(ppt = `ppt (mm)`, tmean = `tmean (degrees C)`) %>% 
+  mutate(site_lat = 39.235900000000, site_long = -86.218100000000)
+
+
+AGPE_climate <- climate %>% 
+  mutate(census_month = 9, climate_year = as.numeric(ifelse(month >=census_month, year+1, year))) %>% 
+  filter(climate_year != 2006) %>% 
+  group_by(climate_year) %>% 
+  summarize('Cumulative PPT (mm)' = sum(ppt),
+            'Mean Temp. (C˚)' = mean(tmean))
