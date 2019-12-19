@@ -180,6 +180,17 @@ fert_fit_endo_mean <- stan(
   chains = sim_pars$chains )
 write_rds(fert_fit_endo_mean,paste0(tompath,"Fulldataplusmetadata/SppRFX/fert_fit_fixed_endo_mean.rds"))
 
+## the stan file here is fitting no endo effects
+fert_fit_no_endo <- stan(
+  file = 'fertility_fixed_spp_no_endo.stan', 
+  data = fert_dat,
+  warmup = sim_pars$warmup,
+  iter = sim_pars$iter,
+  thin = sim_pars$thin,
+  chains = sim_pars$chains )
+write_rds(fert_fit_no_endo,paste0(tompath,"Fulldataplusmetadata/SppRFX/fert_fit_no_endo.rds"))
+
+
 spike_fit_endo_mean <- stan(
   file = 'spikelets_fixed_spp_endo_mean.stan', 
   data = spike_dat,

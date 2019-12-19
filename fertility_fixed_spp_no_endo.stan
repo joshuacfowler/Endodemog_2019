@@ -1,18 +1,14 @@
 
 data {
-    // indices
     int<lower=0> nYear;                       // number of years
     int<lower=0> nPlot;                         // number of plots
     int<lower=0> nSpp;                        // number of host species
-    i//nt<lower=0> nEndo;                        // number of endophyte levels
-    // surv data
     int<lower=0> N;                       // number of observations for surv model
     int<lower=0, upper=nYear> year_t[N];         // year of observation for surv model
     int<lower=0> plot[N];                   // plot of observation for surv model
     int<lower=0, upper=nSpp> spp[N];         // year of observation for surv model
     int<lower=0> y[N];      // plant survival or flowering at time t+1
     vector<lower=0>[N] logsize_t;             // plant size at time t for surv model
-    //int<lower=0,upper=1> endo_01[N];            // plant endophyte status for surv model
     int<lower=0,upper=1> origin_01[N];          // plant origin status for surv model
 }
 
@@ -33,7 +29,6 @@ parameters {
 transformed parameters {
     real lambda[N]; 
     real od[N];
-    real sigma_year[nSpp];
 
     // surv Linear Predictor
     for(n in 1:N){
