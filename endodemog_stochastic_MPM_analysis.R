@@ -20,7 +20,7 @@ seed_par <- read_csv(paste0(tompath,"Fulldataplusmetadata/LTREB_repro1.csv")) %>
   select(species,SEED_PER_SPIKE) %>% group_by(species) %>% 
   summarise(mean_seeds = mean(SEED_PER_SPIKE))
 ## I am a little concerned about AGPE mean = 0.427. SHould be 1!
-seed_par$mean_seeds[seeds_per_spikelet$species=="AGPE"] <- 1
+seed_par$mean_seeds[seed_par$species=="AGPE"] <- 1
 
 ## recruitment data frame
 recruit_par <- bind_rows(read_csv(paste0(tompath,"Fulldataplusmetadata/AGPE_s_to_s_data.csv")),
@@ -62,9 +62,8 @@ cbind(unique(LTREB_full$species),
 
 ## draw a posterior sample
 i <- 765
-
 ## get "mean" parameters
-test_params <- make_params(species=1,
+test_params <- make_params(species=4,
             endo_mean=1,
             endo_var=1,
             draw=i,
@@ -78,12 +77,106 @@ test_params <- make_params(species=1,
             spike_par=spike_par,
             seed_par=seed_par,
             recruit_par=recruit_par)
-
 lambda(bigmatrix(test_params)$MPMmat)
 
 ## estimate endo effects on mean lambda and variance in lambda  
+n_draws <- 100
+post_draws <- sample.int(5000,size=n_draws)
+lambda_mean <- array(dim = c(8,2,n_draws))
+for(i in 1:length(post_draws)){
+  for(e in 1:2){
+    for(s in 1:7){
+        lambda_mean[s,e,i] <- lambda(bigmatrix(make_params(species=s,
+                                                         endo_mean=(e-1),
+                                                         endo_var=(e-1),
+                                                         draw=post_draws[i],
+                                                         max_size=max_size,
+                                                         rfx=F,
+                                                         surv_par=surv_par,
+                                                         grow_par=grow_par,
+                                                         flow_par=flow_par,
+                                                         fert_par=fert_par,
+                                                         spike_par=spike_par,
+                                                         seed_par=seed_par,
+                                                         recruit_par=recruit_par))$MPMmat)
+    }
+    lambda_mean[8,e,i] <- mean(lambda_mean[1:7,e,i])
+  }
+}
+
+lambda_mean_diff <- matrix(NA,8,5)
+for(s in 1:8){
+  lambda_mean_diff[s,1] = mean(lambda_mean[s,2,] - lambda_mean[s,1,])
+  lambda_mean_diff[s,2:5] = quantile(lambda_mean[s,2,] - lambda_mean[s,1,],probs=c(0.05,0.25,0.75,0.95))
+}
+
+## now do variance in lambda
+lambda_hold <- array(dim = c(10,7,2,n_draws))
+lambda_var <- array(dim = c(8,2,n_draws))
+for(i in 1:length(post_draws)){
+  for(e in 1:2){
+    for(s in 1:7){
+      for(y in 1:10){
+        
+      lambda_hold[y,s,e,i] <- lambda(bigmatrix(make_params(species=s,
+                                                         endo_mean=(e-1),
+                                                         endo_var=(e-1),
+                                                         draw=post_draws[i],
+                                                         max_size=max_size,
+                                                         rfx=T,
+                                                         year=y,
+                                                         surv_par=surv_par,
+                                                         grow_par=grow_par,
+                                                         flow_par=flow_par,
+                                                         fert_par=fert_par,
+                                                         spike_par=spike_par,
+                                                         seed_par=seed_par,
+                                                         recruit_par=recruit_par))$MPMmat)
+      }
+      lambda_var[s,e,i] <- sd(lambda_hold[,s,e,i])
+    }
+    lambda_var[8,e,i] <- mean(lambda_var[1:7,e,i])
+  }
+}
+
+lambda_var_diff <- matrix(NA,8,5)
+for(s in 1:8){
+  lambda_var_diff[s,1] = mean(lambda_var[s,2,] - lambda_var[s,1,])
+  lambda_var_diff[s,2:5] = quantile(lambda_var[s,2,] - lambda_var[s,1,],probs=c(0.05,0.25,0.75,0.95))
+}
+
+
+
+
+
+
+
+
+
+
+spp_cols <- c("#1b9e77","#d95f02","#7570b3","#e7298a","#66a61e","#e6ab02","#a6761d","black")
+spp_alpha <- 0.75
+
+win.graph()
+par(mfrow=c(1,2),mar=c(5,5,1,1))
+plot(rep(0,8),1:8,type="n",xlim=c(-2,2),axes=F,ylab=" ",xlab=expression(paste("Endophyte effect on ",bar(lambda))),cex.lab=1.4)
+axis(side=1)
+axis(side=2,at=1:8,labels=spp_names[1:8],las=1,cex.axis=1.6)
+arrows(0,1,0,8,lty=2,col="gray",length=0)
+arrows(lambda_mean_diff[,2],1:8,lambda_mean_diff[,5],1:8,length=0,lwd=2,col=alpha(spp_cols,spp_alpha))
+arrows(lambda_mean_diff[,3],1:8,lambda_mean_diff[,4],1:8,length=0,lwd=6,col=alpha(spp_cols,spp_alpha))
+points(lambda_mean_diff[,1],1:8,cex=3,pch=16,col=alpha(spp_cols,spp_alpha))
+
+plot(rep(0,8),1:8,type="n",xlim=c(-0.5,0.5),axes=F,ylab=" ",xlab=expression(paste("Endophyte effect on Var(",lambda,")")),cex.lab=1.4)
+axis(side=1)
+axis(side=2,at=1:8,labels=spp_names[1:8],las=1,cex.axis=1.6)
+arrows(0,1,0,8,lty=2,col="gray",length=0)
+arrows(lambda_var_diff[,2],1:8,lambda_var_diff[,5],1:8,length=0,lwd=2,col=alpha(spp_cols,spp_alpha))
+arrows(lambda_var_diff[,3],1:8,lambda_var_diff[,4],1:8,length=0,lwd=6,col=alpha(spp_cols,spp_alpha))
+points(lambda_var_diff[,1],1:8,cex=3,pch=16,col=alpha(spp_cols,spp_alpha))
 
 ## make a list of year-specific transition matrices
+
 
 
 

@@ -5,6 +5,7 @@ options( mc.cores = parallel::detectCores() )
 library(bayesplot)
 library(scales)
 library(popbio)
+library(lme4)
 
 # misc functions -----------------------------------------------------------
 invlogit<-function(x){exp(x)/(1+exp(x))}
@@ -19,13 +20,13 @@ quote_bare <- function( ... ){
 make_params <- function(species,endo_mean,endo_var,draw,original=0,rfx=F,year=NULL,max_size,
                         surv_par,grow_par,flow_par,fert_par,spike_par,seed_par,recruit_par){
   
-  if(rfx==F){rfx_surv <- rfx_grow <- rfx_flow <- rfx_fert <- 0}
+  if(rfx==F){rfx_surv <- rfx_grow <- rfx_flow <- rfx_fert <- rfx_spike <- 0}
   if(rfx==T){
     ## timing and survival and growth (size_t / y_t1) is meant to line up with reproduction (size_t1 / y_t1)
     rfx_surv <- surv_par$tau_year[draw,species,(endo_var+1),(year+1)]; 
     rfx_grow <- grow_par$tau_year[draw,species,(endo_var+1),(year+1)];
     rfx_flow <- flow_par$tau_year[draw,species,(endo_var+1),year];
-    rfx_fert <- fert_par$tau_year[draw,species,year]; #no endo effects on variance here
+    #rfx_fert <- fert_par$tau_year[draw,species,year]; #no endo effects on variance here
     rfx_spike <- spike_par$tau_year[draw,year]; #no endo effects or species differences
   }
   
@@ -63,7 +64,7 @@ make_params <- function(species,endo_mean,endo_var,draw,original=0,rfx=F,year=NU
   #recruits per seed
   params$recruits_per_seed <- recruit_par$mean_rec[species] #no posterior sampling here
   #tack on max size
-  params$max_size <- max_size[species]
+  params$max_size <- max_size$max_size[species]
   
   return(params)
 }
