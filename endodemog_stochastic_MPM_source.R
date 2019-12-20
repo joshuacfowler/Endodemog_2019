@@ -16,50 +16,54 @@ quote_bare <- function( ... ){
 }
 
 # Parameter assembly function ---------------------------------------------
-make_params <- function(species,endo_mean,endo_var,original=0,rfx=F,year=NULL,
+make_params <- function(species,endo_mean,endo_var,draw,original=0,rfx=F,year=NULL,max_size,
                         surv_par,grow_par,flow_par,fert_par,spike_par,seed_par,recruit_par){
   
   if(rfx==F){rfx_surv <- rfx_grow <- rfx_flow <- rfx_fert <- 0}
   if(rfx==T){
     ## timing and survival and growth (size_t / y_t1) is meant to line up with reproduction (size_t1 / y_t1)
-    rfx_surv <- surv_par$tau_year[species,(endo_var+1),(year+1)]; 
-    rfx_grow <- grow_par$tau_year[species,(endo_var+1),(year+1)];
-    rfx_flow <- flow_par$tau_year[species,(endo_var+1),year];
-    rfx_fert <- fert_par$tau_year[species,year]; #no endo effects on variance here
-    rfx_spike <- spike_par$tau_year[year]; #no endo effects or species differences
+    rfx_surv <- surv_par$tau_year[draw,species,(endo_var+1),(year+1)]; 
+    rfx_grow <- grow_par$tau_year[draw,species,(endo_var+1),(year+1)];
+    rfx_flow <- flow_par$tau_year[draw,species,(endo_var+1),year];
+    rfx_fert <- fert_par$tau_year[draw,species,year]; #no endo effects on variance here
+    rfx_spike <- spike_par$tau_year[draw,year]; #no endo effects or species differences
   }
   
   params <- c()
   #survival
-  params$surv_int <- surv_par$beta0[species] + 
-    endo_mean * surv_par$betaendo[species] + 
-    original * surv_par$betaorigin[species] + rfx_surv
-  params$surv_slope <- surv_par$betasize[species]
+  params$surv_int <- surv_par$beta0[draw,species] + 
+    endo_mean * surv_par$betaendo[draw,species] + 
+    original * surv_par$betaorigin[draw,species] + rfx_surv
+  params$surv_slope <- surv_par$betasize[draw,species]
   #growth
-  params$grow_int <- grow_par$beta0[species] + 
-    endo_mean * grow_par$betaendo[species] + 
-    original * grow_par$betaorigin[species] + rfx_grow
-  params$grow_slope <- grow_par$betasize[species]  
-  params$grow_phi <- grow_par$phi[species] 
+  params$grow_int <- grow_par$beta0[draw,species] + 
+    endo_mean * grow_par$betaendo[draw,species] + 
+    original * grow_par$betaorigin[draw,species] + rfx_grow
+  params$grow_slope <- grow_par$betasize[draw,species]  
+  params$grow_phi <- grow_par$phi[draw,species] 
   #flowering
-  params$flow_int <- flow_par$beta0[species] + 
-    endo_mean * flow_par$betaendo[species] + 
-    original * flow_par$betaorigin[species] + rfx_flow
-  params$flow_slope <- flow_par$betasize[species]  
+  params$flow_int <- flow_par$beta0[draw,species] + 
+    endo_mean * flow_par$betaendo[draw,species] + 
+    original * flow_par$betaorigin[draw,species] + rfx_flow
+  params$flow_slope <- flow_par$betasize[draw,species]  
   #fertility
-  params$fert_int <- fert_par$beta0[species] + 
-    endo_mean * fert_par$betaendo[species] + 
-    original * fert_par$betaorigin[species] + rfx_fert
-  params$fert_slope <- fert_par$betasize[species]   
+  #params$fert_int <- fert_par$beta0[draw,species] + 
+  #  endo_mean * fert_par$betaendo[draw,species] + 
+  #  original * fert_par$betaorigin[draw,species] + rfx_fert
+  #params$fert_slope <- fert_par$betasize[draw,species]  
+  ## hacking my way through fertility for now with a glmm with spp intercet and other params shared
+  params$fert_int <- fert_par[species]
+  params$fert_slope <- fert_par[8] + original * fert_par[9]
   #spikelets
-  params$spike_int <- spike_par$beta0[species] + 
-    endo_mean * spike_par$betaendo[species] + 
-    original * spike_par$betaorigin[species] + rfx_spike
-  params$spike_slope <- spike_par$betasize[species]  
+  params$spike_int <- spike_par$beta0[draw,species]  + 
+    original * spike_par$betaorigin[draw,species] + rfx_spike
+  params$spike_slope <- spike_par$betasize[draw,species]  
   #seeds per spikelet
-  params$seeds_per_spike <- seed_par[species]
+  params$seeds_per_spike <- seed_par$mean_seeds[species] #no posterior sampling here
   #recruits per seed
-  params$recruits_per_seed <- recruit_par[species]
+  params$recruits_per_seed <- recruit_par$mean_rec[species] #no posterior sampling here
+  #tack on max size
+  params$max_size <- max_size[species]
   
   return(params)
 }
@@ -70,10 +74,10 @@ sx<-function(x,params){
 }
 
 gxy <- function(x,y,params){
-  grow.mean <- params$grow_int + params$grow_slope*log(x)
-  grow<-dnbinom(x=y,mu=exp(grow_mean),size=params$grow_phi,log=F)
-  truncLower<-dnbinom(x=0,mu=exp(grow_mean),size=params$grow_phi,log=F)
-  truncUpper<-sum(dnbinom(x=params$max_size:10000,mu=exp(grow_mean),size=params$grow_phi,log=F))
+  grow_mean <- params$grow_int + params$grow_slope*log(x)
+  grow<-dnbinom(x=y,mu=exp(grow_mean),size=exp(params$grow_phi),log=F)
+  truncLower<-dnbinom(x=0,mu=exp(grow_mean),size=exp(params$grow_phi),log=F)
+  truncUpper<-sum(dnbinom(x=params$max_size:10000,mu=exp(grow_mean),size=exp(params$grow_phi),log=F))
   return(grow/(1-(truncLower+truncUpper)))
 }
 
@@ -82,7 +86,7 @@ pxy<-function(x,y,params){
 }
 
 fx<-function(x, params){
-    flw <- invlogit(params$flw_int + params$flw_slope*log(x))
+    flw <- invlogit(params$flow_int + params$flow_slope*log(x))
     fert <- exp(params$fert_int + params$fert_slope*log(x))
     spike <- exp(params$spike_int + params$spike_slope*log(x))
   seedlings <- flw * fert * spike * params$seeds_per_spike * params$recruits_per_seed
