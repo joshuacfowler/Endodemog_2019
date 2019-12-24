@@ -80,7 +80,7 @@ test_params <- make_params(species=4,
 lambda(bigmatrix(test_params)$MPMmat)
 
 ## estimate endo effects on mean lambda and variance in lambda  
-n_draws <- 100
+n_draws <- 500
 post_draws <- sample.int(5000,size=n_draws)
 lambda_mean <- array(dim = c(8,2,n_draws))
 for(i in 1:length(post_draws)){
@@ -145,15 +145,10 @@ for(s in 1:8){
   lambda_var_diff[s,2:5] = quantile(lambda_var[s,2,] - lambda_var[s,1,],probs=c(0.05,0.25,0.75,0.95))
 }
 
-
-
-
-
-
-
-
-
-
+spp_names <- c(data.frame(cbind(unique(LTREB_full$species),
+                                as.integer(as.numeric(as.factor(unique(LTREB_full$species)))))
+) %>% 
+  arrange(X2) %>% select(X1)); spp_names<- c(as.character(spp_names$X1),"Mean")
 spp_cols <- c("#1b9e77","#d95f02","#7570b3","#e7298a","#66a61e","#e6ab02","#a6761d","black")
 spp_alpha <- 0.75
 
@@ -177,17 +172,90 @@ points(lambda_var_diff[,1],1:8,cex=3,pch=16,col=alpha(spp_cols,spp_alpha))
 
 ## make a list of year-specific transition matrices
 
+lambdaS_out <- array(dim = c(8,4,n_draws))
+for(i in 1:length(post_draws)){
+for(s in 1:7){
+  eminus_list <- eplus_list <- eplus__mean_only_list <- eplus__var_only_list <- list()
+    for(y in 1:10){
+    eminus_list[[y]] <- bigmatrix(make_params(species=s,endo_mean=0,endo_var=0,draw=post_draws[i],max_size=max_size,rfx=T,
+                                              year=y,surv_par=surv_par,grow_par=grow_par,flow_par=flow_par,fert_par=fert_par,
+                                              spike_par=spike_par,seed_par=seed_par,recruit_par=recruit_par))$MPMmat
+    eplus_list[[y]] <- bigmatrix(make_params(species=s,endo_mean=1,endo_var=1,draw=post_draws[i],max_size=max_size,rfx=T,
+                                              year=y,surv_par=surv_par,grow_par=grow_par,flow_par=flow_par,fert_par=fert_par,
+                                              spike_par=spike_par,seed_par=seed_par,recruit_par=recruit_par))$MPMmat
+    eplus__mean_only_list[[y]] <- bigmatrix(make_params(species=s,endo_mean=1,endo_var=0,draw=post_draws[i],max_size=max_size,rfx=T,
+                                             year=y,surv_par=surv_par,grow_par=grow_par,flow_par=flow_par,fert_par=fert_par,
+                                             spike_par=spike_par,seed_par=seed_par,recruit_par=recruit_par))$MPMmat
+    eplus__var_only_list[[y]] <- bigmatrix(make_params(species=s,endo_mean=0,endo_var=1,draw=post_draws[i],max_size=max_size,rfx=T,
+                                                        year=y,surv_par=surv_par,grow_par=grow_par,flow_par=flow_par,fert_par=fert_par,
+                                                        spike_par=spike_par,seed_par=seed_par,recruit_par=recruit_par))$MPMmat
+  }
+  lambdaS_out[s,1,i] <- lambdaSim(eminus_list)$lambdaS
+  lambdaS_out[s,2,i] <- lambdaSim(eplus__mean_only_list)$lambdaS
+  lambdaS_out[s,3,i] <- lambdaSim(eplus__var_only_list)$lambdaS
+  lambdaS_out[s,4,i] <- lambdaSim(eplus_list)$lambdaS
+}
+  lambdaS_out[8,1,i] <- mean(lambdaS_out[1:7,1,i])
+  lambdaS_out[8,2,i] <- mean(lambdaS_out[1:7,2,i])
+  lambdaS_out[8,3,i] <- mean(lambdaS_out[1:7,3,i])
+  lambdaS_out[8,4,i] <- mean(lambdaS_out[1:7,4,i])
+}
+
+lambdaS_diff <- lambdaS_diff_mean_only <- lambdaS_diff_var_only <- matrix(NA,8,7)
+for(s in 1:8){
+  lambdaS_diff[s,1] = mean(lambdaS_out[s,4,] - lambdaS_out[s,1,])
+  lambdaS_diff[s,2:7] = quantile(lambdaS_out[s,4,] - lambdaS_out[s,1,],probs=c(0.05,0.125,0.25,0.75,0.875,0.95))
+  
+  lambdaS_diff_mean_only[s,1] = mean(lambdaS_out[s,2,] - lambdaS_out[s,1,])
+  lambdaS_diff_mean_only[s,2:7] = quantile(lambdaS_out[s,2,] - lambdaS_out[s,1,],probs=c(0.05,0.125,0.25,0.75,0.875,0.95))
+  
+  lambdaS_diff_var_only[s,1] = mean(lambdaS_out[s,3,] - lambdaS_out[s,1,])
+  lambdaS_diff_var_only[s,2:7] = quantile(lambdaS_out[s,3,] - lambdaS_out[s,1,],probs=c(0.05,0.125,0.25,0.75,0.875,0.95))
+}
 
 
+win.graph()
+par(mfrow=c(4,2),mar=c(5,5,4,1),xpd=T)
+for(s in 1:8){
+  plot(rep(0,3),1:3,type="n",xlim=c(-1.2,1.2),axes=F,ylab=" ",xlab=expression(paste("Endophyte effect on ",lambda,"S")),cex.lab=1.4)
+  axis(side=1)
+  abline(v=0,lty=2,col="gray")
+  arrows(lambdaS_diff[s,2],1,lambdaS_diff[s,7],1,length=0,lwd=2,col=alpha(spp_cols[s],spp_alpha))
+  arrows(lambdaS_diff[s,3],1,lambdaS_diff[s,6],1,length=0,lwd=4,col=alpha(spp_cols[s],spp_alpha))
+  arrows(lambdaS_diff[s,4],1,lambdaS_diff[s,5],1,length=0,lwd=6,col=alpha(spp_cols[s],spp_alpha))
+  points(lambdaS_diff[s,1],1,cex=3,pch=16,col=alpha(spp_cols[s],spp_alpha))
+  
+  arrows(lambdaS_diff_mean_only[s,2],2,lambdaS_diff_mean_only[s,7],2,length=0,lwd=2,col=alpha(spp_cols[s],spp_alpha))
+  arrows(lambdaS_diff_mean_only[s,3],2,lambdaS_diff_mean_only[s,6],2,length=0,lwd=4,col=alpha(spp_cols[s],spp_alpha))
+  arrows(lambdaS_diff_mean_only[s,4],2,lambdaS_diff_mean_only[s,5],2,length=0,lwd=6,col=alpha(spp_cols[s],spp_alpha))
+  points(lambdaS_diff_mean_only[s,1],2,cex=3,pch=0,col=alpha(spp_cols[s],spp_alpha))
+  
+  arrows(lambdaS_diff_var_only[s,2],3,lambdaS_diff_var_only[s,7],3,length=0,lwd=2,col=alpha(spp_cols[s],spp_alpha))
+  arrows(lambdaS_diff_var_only[s,3],3,lambdaS_diff_var_only[s,6],3,length=0,lwd=4,col=alpha(spp_cols[s],spp_alpha))
+  arrows(lambdaS_diff_var_only[s,4],3,lambdaS_diff_var_only[s,5],3,length=0,lwd=6,col=alpha(spp_cols[s],spp_alpha))
+  points(lambdaS_diff_var_only[s,1],3,cex=3,pch=2,col=alpha(spp_cols[s],spp_alpha))
+  
+}
 
 
+win.graph()
+par(mar=c(5,5,4,1),xpd=T)
+plot(rep(0,8),1:8,type="n",xlim=c(-1.2,1.2),axes=F,ylab=" ",xlab=expression(paste("Endophyte effect on ",lambda,"S")),cex.lab=1.4)
+axis(side=1)
+axis(side=2,at=(1:8)+0.5,labels=spp_names[1:8],las=1,cex.axis=1.6)
+arrows(0,1,0,9,lty=2,col="gray",length=0)
+arrows(lambdaS_diff[,2],1:8,lambdaS_diff[,7],1:8,length=0,lwd=2,col=alpha(spp_cols,spp_alpha))
+arrows(lambdaS_diff[,3],1:8,lambdaS_diff[,6],1:8,length=0,lwd=4,col=alpha(spp_cols,spp_alpha))
+arrows(lambdaS_diff[,4],1:8,lambdaS_diff[,5],1:8,length=0,lwd=6,col=alpha(spp_cols,spp_alpha))
+points(lambdaS_diff[,1],1:8,cex=3,pch=16,col=alpha(spp_cols,spp_alpha))
 
+arrows(lambdaS_diff_mean_only[,2],(1:8)+0.33,lambdaS_diff_mean_only[,7],(1:8)+0.33,length=0,lwd=2,col=alpha(spp_cols,spp_alpha))
+arrows(lambdaS_diff_mean_only[,3],(1:8)+0.33,lambdaS_diff_mean_only[,6],(1:8)+0.33,length=0,lwd=4,col=alpha(spp_cols,spp_alpha))
+arrows(lambdaS_diff_mean_only[,4],(1:8)+0.33,lambdaS_diff_mean_only[,5],(1:8)+0.33,length=0,lwd=6,col=alpha(spp_cols,spp_alpha))
+points(lambdaS_diff_mean_only[,1],(1:8)+0.33,cex=3,pch=15,col=alpha(spp_cols,spp_alpha))
 
-dim(surv_par$tau_year)
-dim(flow_par$tau_year)
+arrows(lambdaS_diff_var_only[,2],(1:8)+0.66,lambdaS_diff_var_only[,7],(1:8)+0.66,length=0,lwd=2,col=alpha(spp_cols,spp_alpha))
+arrows(lambdaS_diff_var_only[,3],(1:8)+0.66,lambdaS_diff_var_only[,6],(1:8)+0.66,length=0,lwd=4,col=alpha(spp_cols,spp_alpha))
+arrows(lambdaS_diff_var_only[,4],(1:8)+0.66,lambdaS_diff_var_only[,5],(1:8)+0.66,length=0,lwd=6,col=alpha(spp_cols,spp_alpha))
+points(lambdaS_diff_var_only[,1],(1:8)+0.66,cex=3,pch=17,col=alpha(spp_cols,spp_alpha))
 
-surv_par$beta0[100,]
-surv_par$tau_year[3445,2,1,5]
-surv_par$tau_year[3445,,,]
-
-lapply(surv_par,mean)
