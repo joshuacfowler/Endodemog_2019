@@ -494,7 +494,7 @@ legend("bottomright",legend=c("E+","E-"),lty=1:2,lwd=3,pch=c(16,1),
 ##now year-specific
 year_surv <- LTREB_data_forsurv %>% 
   mutate(size_bin = as.integer(cut_interval(logsize_t,12))) %>% 
-  filter(species=="LOAR" | species=="FESU") %>% 
+  filter(species=="LOAR" | species=="FESU" | species=="POAL") %>% 
   group_by(year_t,species,size_bin,endo_01) %>% 
   summarise(mean_size = mean(logsize_t),
             mean_surv = mean(surv_t1),
