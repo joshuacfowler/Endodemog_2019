@@ -55,6 +55,307 @@ flow_par <- extract(flow_fit, pars = quote_bare(beta0,betasize,betaendo,betaorig
 fert_par <- fixef(fert_fit)
 spike_par <- extract(spike_fit, pars = quote_bare(beta0,betasize,betaorigin,tau_year))
 
+# Visualize endo effects --------------------------------------------------
+# survival
+betaendo_surv<-rstan::extract(surv_fit, pars = c("betaendo[1]","betaendo[2]",
+                                                 "betaendo[3]","betaendo[4]","betaendo[5]",
+                                                 "betaendo[6]","betaendo[7]"))
+betaendo_surv$betaendo_mean <- (betaendo_surv[[1]] + betaendo_surv[[2]] + betaendo_surv[[3]] + betaendo_surv[[4]]
+                                + betaendo_surv[[5]] + betaendo_surv[[6]] + betaendo_surv[[7]])/7
+
+betaendo_surv_mean <- lapply(betaendo_surv,"mean")
+betaendo_surv_quant <- as.matrix(data.frame(lapply(betaendo_surv,"quantile",probs=c(0.05,0.25,0.75,0.95))))
+
+sigmaendo_surv<-rstan::extract(surv_fit, pars = c("sigmaendo[1]","sigmaendo[2]",
+                                                  "sigmaendo[3]","sigmaendo[4]","sigmaendo[5]",
+                                                  "sigmaendo[6]","sigmaendo[7]"))
+sigmaendo_surv$sigmaendo_mean <- (sigmaendo_surv[[1]] + sigmaendo_surv[[2]] + sigmaendo_surv[[3]] + sigmaendo_surv[[4]]
+                                  + sigmaendo_surv[[5]] + sigmaendo_surv[[6]] + sigmaendo_surv[[7]])/7
+sigmaendo_surv_mean <- lapply(sigmaendo_surv,"mean")
+sigmaendo_surv_quant <- as.matrix(data.frame(lapply(sigmaendo_surv,"quantile",probs=c(0.05,0.25,0.75,0.95))))
+
+## growth
+betaendo_grow<-rstan::extract(grow_fit, pars = c("betaendo[1]","betaendo[2]",
+                                                 "betaendo[3]","betaendo[4]","betaendo[5]",
+                                                 "betaendo[6]","betaendo[7]"))
+betaendo_grow$betaendo_mean <- (betaendo_grow[[1]] + betaendo_grow[[2]] + betaendo_grow[[3]] + betaendo_grow[[4]]
+                                + betaendo_grow[[5]] + betaendo_grow[[6]] + betaendo_grow[[7]])/7
+
+betaendo_grow_mean <- lapply(betaendo_grow,"mean")
+betaendo_grow_quant <- as.matrix(data.frame(lapply(betaendo_grow,"quantile",probs=c(0.05,0.25,0.75,0.95))))
+
+sigmaendo_grow<-rstan::extract(grow_fit, pars = c("sigmaendo[1]","sigmaendo[2]",
+                                                  "sigmaendo[3]","sigmaendo[4]","sigmaendo[5]",
+                                                  "sigmaendo[6]","sigmaendo[7]"))
+sigmaendo_grow$sigmaendo_mean <- (sigmaendo_grow[[1]] + sigmaendo_grow[[2]] + sigmaendo_grow[[3]] + sigmaendo_grow[[4]]
+                                  + sigmaendo_grow[[5]] + sigmaendo_grow[[6]] + sigmaendo_grow[[7]])/7
+sigmaendo_grow_mean <- lapply(sigmaendo_grow,"mean")
+sigmaendo_grow_quant <- as.matrix(data.frame(lapply(sigmaendo_grow,"quantile",probs=c(0.05,0.25,0.75,0.95))))
+
+## flowering
+betaendo_flow<-rstan::extract(flow_fit, pars = c("betaendo[1]","betaendo[2]",
+                                                 "betaendo[3]","betaendo[4]","betaendo[5]",
+                                                 "betaendo[6]","betaendo[7]"))
+betaendo_flow$betaendo_mean <- (betaendo_flow[[1]] + betaendo_flow[[2]] + betaendo_flow[[3]] + betaendo_flow[[4]]
+                                + betaendo_flow[[5]] + betaendo_flow[[6]] + betaendo_flow[[7]])/7
+
+betaendo_flow_mean <- lapply(betaendo_flow,"mean")
+betaendo_flow_quant <- as.matrix(data.frame(lapply(betaendo_flow,"quantile",probs=c(0.05,0.25,0.75,0.95))))
+
+sigmaendo_flow<-rstan::extract(flow_fit, pars = c("sigmaendo[1]","sigmaendo[2]",
+                                                  "sigmaendo[3]","sigmaendo[4]","sigmaendo[5]",
+                                                  "sigmaendo[6]","sigmaendo[7]"))
+sigmaendo_flow$sigmaendo_mean <- (sigmaendo_flow[[1]] + sigmaendo_flow[[2]] + sigmaendo_flow[[3]] + sigmaendo_flow[[4]]
+                                  + sigmaendo_flow[[5]] + sigmaendo_flow[[6]] + sigmaendo_flow[[7]])/7
+sigmaendo_flow_mean <- lapply(sigmaendo_flow,"mean")
+sigmaendo_flow_quant <- as.matrix(data.frame(lapply(sigmaendo_flow,"quantile",probs=c(0.05,0.25,0.75,0.95))))
+
+## make a nice figure
+spp_names <- c(data.frame(cbind(unique(LTREB_full$species),
+                                as.integer(as.numeric(as.factor(unique(LTREB_full$species)))))
+) %>% 
+  arrange(X2) %>% select(X1)); spp_names<- c(as.character(spp_names$X1),"Mean")
+
+spp_cols <- c("#1b9e77","#d95f02","#7570b3","#e7298a","#66a61e","#e6ab02","#a6761d","black")
+spp_alpha <- 0.75
+
+
+## start with LOAR and FESU survival as example
+win.graph()
+par(mfrow=c(2,1),mar=c(5,5,1,1))
+plot(rep(0,7),1:7,type="n",xlim=c(-2,2),axes=F,ylab=" ",xlab="Endophyte effect on mean survival",cex.lab=1.4)
+axis(side=1)
+arrows(0,1,0,8,lty=2,col="gray",length=0)
+arrows(betaendo_surv_quant[1,5],5,betaendo_surv_quant[4,5],5,length=0,lwd=2,col=alpha(spp_cols[5],spp_alpha))
+arrows(betaendo_surv_quant[2,5],5,betaendo_surv_quant[3,5],5,length=0,lwd=8,col=alpha(spp_cols[5],spp_alpha))
+points(betaendo_surv_mean[5],5,cex=3,pch=16,col=alpha(spp_cols[5],spp_alpha))
+#axis(side=2,at=5,labels=spp_names[5],las=1,cex.axis=1.5,tick=F)
+
+plot(rep(0,7),1:7,type="n",xlim=c(-2,2),axes=F,ylab=" ",xlab="Endophyte effect on survival variance",cex.lab=1.4)
+axis(side=1)
+abline(v=0,lty=2,col="gray")#;box()
+arrows(sigmaendo_surv_quant[1,5],5,sigmaendo_surv_quant[4,5],5,length=0,lwd=2,col=alpha(spp_cols[5],spp_alpha))
+arrows(sigmaendo_surv_quant[2,5],5,sigmaendo_surv_quant[3,5],5,length=0,lwd=8,col=alpha(spp_cols[5],spp_alpha))
+points(sigmaendo_surv_mean[5],5,cex=3,pch=16,col=alpha(spp_cols[5],spp_alpha))
+#axis(side=2,at=5,labels=spp_names[5],las=1,cex.axis=1.5,tick=F)
+
+## now all of them
+win.graph()
+par(mfrow=c(2,3),mar=c(5,5,1,1))
+## survival
+plot(rep(0,8),1:8,type="n",xlim=c(-2,2),axes=F,ylab=" ",xlab="Endophyte effect on mean survival",cex.lab=1.6)
+axis(side=2,at=1:8,labels=spp_names[1:8],las=1,cex.axis=1.6)
+axis(side=1)
+#abline(v=0,lty=2,col="gray")#;box()
+arrows(0,1,0,8,lty=2,col="gray",length=0)
+arrows(betaendo_surv_quant[1,],1:8,betaendo_surv_quant[4,],1:8,length=0,lwd=2,col=alpha(spp_cols,spp_alpha))
+arrows(betaendo_surv_quant[2,],1:8,betaendo_surv_quant[3,],1:8,length=0,lwd=8,col=alpha(spp_cols,spp_alpha))
+points(betaendo_surv_mean,1:8,cex=3,pch=16,col=alpha(spp_cols,spp_alpha))
+
+# growth
+plot(rep(0,8),1:8,type="n",xlim=c(-1,1),axes=F,ylab=" ",xlab="Endophyte effect on mean growth",cex.lab=1.5)
+axis(side=2,at=1:8,labels=spp_names[1:8],las=1,cex.axis=1.6)
+axis(side=1)
+arrows(0,1,0,8,lty=2,col="gray",length=0)
+arrows(betaendo_grow_quant[1,],1:8,betaendo_grow_quant[4,],1:8,length=0,lwd=2,col=alpha(spp_cols,spp_alpha))
+arrows(betaendo_grow_quant[2,],1:8,betaendo_grow_quant[3,],1:8,length=0,lwd=8,col=alpha(spp_cols,spp_alpha))
+points(betaendo_grow_mean,1:8,cex=3,pch=16,col=alpha(spp_cols,spp_alpha))
+
+# flowering
+plot(rep(0,8),1:8,type="n",xlim=c(-3,3),axes=F,ylab=" ",xlab="Endophyte effect on mean flowering",cex.lab=1.5)
+axis(side=2,at=1:8,labels=spp_names[1:8],las=1,cex.axis=1.6)
+axis(side=1)
+arrows(0,1,0,8,lty=2,col="gray",length=0)
+arrows(betaendo_flow_quant[1,],1:8,betaendo_flow_quant[4,],1:8,length=0,lwd=2,col=alpha(spp_cols,spp_alpha))
+arrows(betaendo_flow_quant[2,],1:8,betaendo_flow_quant[3,],1:8,length=0,lwd=8,col=alpha(spp_cols,spp_alpha))
+points(betaendo_flow_mean,1:8,cex=3,pch=16,col=alpha(spp_cols,spp_alpha))
+
+## same for sigmas
+plot(rep(0,8),1:8,type="n",xlim=c(-1.5,1.5),axes=F,ylab=" ",xlab="Endophyte effect on survival variance",cex.lab=1.5)
+axis(side=2,at=1:8,labels=spp_names[1:8],las=1,cex.axis=1.6)
+axis(side=1)
+abline(v=0,lty=2,col="gray")#;box()
+arrows(sigmaendo_surv_quant[1,],1:8,sigmaendo_surv_quant[4,],1:8,length=0,lwd=2,col=alpha(spp_cols,spp_alpha))
+arrows(sigmaendo_surv_quant[2,],1:8,sigmaendo_surv_quant[3,],1:8,length=0,lwd=8,col=alpha(spp_cols,spp_alpha))
+points(sigmaendo_surv_mean,1:8,cex=3,pch=16,col=alpha(spp_cols,spp_alpha))
+
+plot(rep(0,8),1:8,type="n",xlim=c(-2,2),axes=F,ylab=" ",xlab="Endophyte effect on growth variance",cex.lab=1.5)
+axis(side=2,at=1:8,labels=spp_names[1:8],las=1,cex.axis=1.6)
+axis(side=1)
+abline(v=0,lty=2,col="gray")#;box()
+arrows(sigmaendo_grow_quant[1,],1:8,sigmaendo_grow_quant[4,],1:8,length=0,lwd=2,col=alpha(spp_cols,spp_alpha))
+arrows(sigmaendo_grow_quant[2,],1:8,sigmaendo_grow_quant[3,],1:8,length=0,lwd=8,col=alpha(spp_cols,spp_alpha))
+points(sigmaendo_grow_mean,1:8,cex=3,pch=16,col=alpha(spp_cols,spp_alpha))
+
+plot(rep(0,8),1:8,type="n",xlim=c(-1,1),axes=F,ylab=" ",xlab="Endophyte effect on flowering variance",cex.lab=1.5)
+axis(side=2,at=1:8,labels=spp_names[1:8],las=1,cex.axis=1.6)
+axis(side=1)
+abline(v=0,lty=2,col="gray")#;box()
+arrows(sigmaendo_flow_quant[1,],1:8,sigmaendo_flow_quant[4,],1:8,length=0,lwd=2,col=alpha(spp_cols,spp_alpha))
+arrows(sigmaendo_flow_quant[2,],1:8,sigmaendo_flow_quant[3,],1:8,length=0,lwd=8,col=alpha(spp_cols,spp_alpha))
+points(sigmaendo_flow_mean,1:8,cex=3,pch=16,col=alpha(spp_cols,spp_alpha))
+
+
+# fertility -- may not show w the others bc endo effects on sigma not converging
+plot(rep(0,7),1:7,type="n",xlim=c(-3,3),axes=F,ylab=" ",xlab="Endophyte effect",cex.lab=1.4)
+axis(side=2,at=1:7,labels=spp_names[1:7],las=1)
+axis(side=1)
+arrows(0,1,0,8,lty=2,col="gray",length=0)
+arrows(betaendo_fert_quant[1,],1:8,betaendo_fert_quant[4,],1:8,length=0,lwd=2,col=alpha(spp_cols,spp_alpha))
+arrows(betaendo_fert_quant[2,],1:8,betaendo_fert_quant[3,],1:8,length=0,lwd=8,col=alpha(spp_cols,spp_alpha))
+points(betaendo_fert_mean,1:8,cex=3,pch=16,col=alpha(spp_cols,spp_alpha))
+
+plot(rep(0,8),1:8,type="n",xlim=c(-10,10),axes=F,ylab=" ",xlab="Endophyte effect")
+axis(side=2,at=1:8,labels=spp_names,las=1)
+axis(side=1)
+abline(v=0,lty=2,col="gray")#;box()
+arrows(sigmaendo_fert_quant[1,],1:8,sigmaendo_fert_quant[4,],1:8,length=0,lwd=2,col=alpha(spp_cols,spp_alpha))
+arrows(sigmaendo_fert_quant[2,],1:8,sigmaendo_fert_quant[3,],1:8,length=0,lwd=8,col=alpha(spp_cols,spp_alpha))
+points(sigmaendo_fert_mean,1:8,cex=3,pch=16,col=alpha(spp_cols,spp_alpha))
+
+
+# Examples of mean and variance effects -----------------------------------
+
+
+## cherry-pick nice examples of endo mean and variance effects
+## LOAR and FESU survival
+mean_surv <- LTREB_data_forsurv %>% 
+  mutate(size_bin = as.integer(cut_interval(logsize_t,12))) %>% 
+  filter(species=="LOAR" | species=="FESU") %>% 
+  group_by(species,size_bin,endo_01) %>% 
+  summarise(mean_size = mean(logsize_t),
+            mean_surv = mean(surv_t1),
+            n_surv = n()) %>% 
+  mutate(endo_pch=ifelse(endo_01==0,1,16))
+
+x_seq <- seq(min(LTREB_data_forsurv$logsize_t),max(LTREB_data_forsurv$logsize_t),length.out = 50)
+surv_mean<-lapply(rstan::extract(surv_fit, pars = c("beta0[4]","beta0[5]",
+                                                    "betasize[4]","betasize[5]",
+                                                    "betaendo[4]","betaendo[5]",
+                                                    "tau_year[4,1,1]","tau_year[4,1,2]","tau_year[4,1,3]","tau_year[4,1,4]",
+                                                    "tau_year[4,1,5]","tau_year[4,1,6]","tau_year[4,1,7]","tau_year[4,1,8]",
+                                                    "tau_year[4,1,9]","tau_year[4,1,10]","tau_year[4,1,11]",
+                                                    "tau_year[4,2,1]","tau_year[4,2,2]","tau_year[4,2,3]","tau_year[4,2,4]",
+                                                    "tau_year[4,2,5]","tau_year[4,2,6]","tau_year[4,2,7]","tau_year[4,2,8]",
+                                                    "tau_year[4,2,9]","tau_year[4,2,10]","tau_year[4,2,11]",
+                                                    "tau_year[5,1,1]","tau_year[5,1,2]","tau_year[5,1,3]","tau_year[5,1,4]",
+                                                    "tau_year[5,1,5]","tau_year[5,1,6]","tau_year[5,1,7]","tau_year[5,1,8]",
+                                                    "tau_year[5,1,9]","tau_year[5,1,10]","tau_year[5,1,11]",
+                                                    "tau_year[5,2,1]","tau_year[5,2,2]","tau_year[5,2,3]","tau_year[5,2,4]",
+                                                    "tau_year[5,2,5]","tau_year[5,2,6]","tau_year[5,2,7]","tau_year[5,2,8]",
+                                                    "tau_year[5,2,9]","tau_year[5,2,10]","tau_year[5,2,11]"
+                                                    
+)),mean)
+
+LOAR_rfx <- matrix(unlist(surv_mean[7:28]),nrow=11,ncol=2,byrow = T)
+FESU_rfx <- matrix(unlist(surv_mean[29:50]),nrow=11,ncol=2,byrow = T)
+
+win.graph()
+par(mfrow=c(1,1),mar=c(5,5,1,1))
+plot(mean_surv$mean_size[mean_surv$species=="LOAR"],mean_surv$mean_surv[mean_surv$species=="LOAR"],
+     pch=mean_surv$endo_pch[mean_surv$species=="LOAR"],ylim=c(0,1),col=alpha(spp_cols[5],.5),xlab="log Size",ylab="Pr.(Survival)",cex.lab=1.4,
+     lwd=2,cex=2 + 3*(mean_surv$n_surv[mean_surv$species=="LOAR"]/max(mean_surv$n_surv[mean_surv$species=="LOAR"])))
+lines(x_seq,invlogit(surv_mean$`beta0[5]`+surv_mean$`betasize[5]`*x_seq),lwd=4,lty=2,col=spp_cols[5])
+lines(x_seq,invlogit(surv_mean$`beta0[5]`+surv_mean$`betasize[5]`*x_seq + surv_mean$`betaendo[5]`),lwd=4,lty=1,col=spp_cols[5])
+legend("bottomright",legend=c("E+","E-"),lty=1:2,lwd=3,pch=c(16,1),
+       col=spp_cols[5],cex=1.8,bty="n")
+
+plot(mean_surv$mean_size[mean_surv$species=="FESU"],mean_surv$mean_surv[mean_surv$species=="FESU"],
+     pch=mean_surv$endo_pch[mean_surv$species=="FESU"],ylim=c(0,1),col=alpha(spp_cols[4],.5),xlab="log Size",ylab="Pr.(Survival)",cex.lab=1.4,
+     lwd=2,cex=2 + 3*(mean_surv$n_surv[mean_surv$species=="FESU"]/max(mean_surv$n_surv[mean_surv$species=="FESU"])))
+lines(x_seq,invlogit(surv_mean$`beta0[4]`+surv_mean$`betasize[4]`*x_seq),lwd=4,col=spp_cols[4],lty=2)
+lines(x_seq,invlogit(surv_mean$`beta0[4]`+surv_mean$`betasize[4]`*x_seq + surv_mean$`betaendo[4]`),col=spp_cols[4],lwd=4,lty=1)
+legend("bottomright",legend=c("E+","E-"),lty=1:2,lwd=3,pch=c(16,1),
+       col=spp_cols[4],cex=1.8,bty="n")
+
+##now year-specific
+year_surv <- LTREB_data_forsurv %>% 
+  mutate(size_bin = as.integer(cut_interval(logsize_t,12))) %>% 
+  filter(species=="LOAR" | species=="FESU" | species=="POAL") %>% 
+  group_by(year_t,species,size_bin,endo_01) %>% 
+  summarise(mean_size = mean(logsize_t),
+            mean_surv = mean(surv_t1),
+            n_surv = n()) %>% 
+  mutate(endo_pch=ifelse(endo_01==0,1,16))
+year_surv_years <- unique(year_surv$year_t)
+
+plot(mean_surv$mean_size[mean_surv$species=="FESU"],mean_surv$mean_surv[mean_surv$species=="FESU"],
+     pch=mean_surv$endo_pch[mean_surv$species=="FESU"],ylim=c(0,1),col=alpha(spp_cols[4],.5),xlab="log Size",ylab="Pr.(Survival)",cex.lab=1.4,
+     lwd=2,cex=2 + 3*(mean_surv$n_surv[mean_surv$species=="FESU"]/max(mean_surv$n_surv[mean_surv$species=="FESU"])))
+for(t in 1:length(year_surv_years)){
+  lines(x_seq,invlogit(surv_mean$`beta0[4]`+surv_mean$`betasize[4]`*x_seq + 
+                         FESU_rfx[t,1]),lwd=4,col=spp_cols[4],lty=2)
+  lines(x_seq,invlogit(surv_mean$`beta0[4]`+surv_mean$`betasize[4]`*x_seq + 
+                         FESU_rfx[t,2]),lwd=4,col=spp_cols[4],lty=1)
+}
+
+win.graph()
+par(mfrow=c(2,1),mar=c(5,5,1,1))
+plot(mean_surv$mean_size[mean_surv$species=="LOAR" & mean_surv$endo_01==0],mean_surv$mean_surv[mean_surv$species=="LOAR" & mean_surv$endo_01==0],
+     pch=mean_surv$endo_pch[mean_surv$species=="LOAR" & mean_surv$endo_01==0],ylim=c(0,1),col=alpha(spp_cols[5],.5),xlab="log Size",ylab="Pr.(Survival)",cex.lab=1.4,
+     lwd=2,cex=2 + 3*(mean_surv$n_surv[mean_surv$species=="LOAR" & mean_surv$endo_01==0]/max(mean_surv$n_surv[mean_surv$species=="LOAR" & mean_surv$endo_01==0])))
+for(t in 1:length(year_surv_years)){
+  lines(x_seq,invlogit(surv_mean$`beta0[5]`+surv_mean$`betasize[4]`*x_seq + 
+                         LOAR_rfx[t,1]),lwd=4,col=spp_cols[5],lty=2)
+}
+
+plot(mean_surv$mean_size[mean_surv$species=="LOAR" & mean_surv$endo_01==1],mean_surv$mean_surv[mean_surv$species=="LOAR" & mean_surv$endo_01==1],
+     pch=mean_surv$endo_pch[mean_surv$species=="LOAR" & mean_surv$endo_01==1],ylim=c(0,1),col=alpha(spp_cols[5],.5),xlab="log Size",ylab="Pr.(Survival)",cex.lab=1.4,
+     lwd=2,cex=2 + 3*(mean_surv$n_surv[mean_surv$species=="LOAR" & mean_surv$endo_01==1]/max(mean_surv$n_surv[mean_surv$species=="LOAR" & mean_surv$endo_01==1])))
+for(t in 1:length(year_surv_years)){
+  lines(x_seq,invlogit(surv_mean$`beta0[5]`+surv_mean$`betasize[4]`*x_seq + 
+                         LOAR_rfx[t,2]),lwd=4,col=spp_cols[5],lty=1)
+}
+# climate data ------------------------------------------------------------
+climate <- read_csv(file = "C:/Users/tm9/Dropbox/EndodemogData/PRISMClimateData_BrownCo.csv") %>% 
+  mutate(year = year(Date), month = month(Date), day = day(Date)) %>% 
+  rename(ppt = `ppt (mm)`, tmean = `tmean (degrees C)`) %>% 
+  mutate(site_lat = 39.235900000000, site_long = -86.218100000000)
+
+LOAR_climate <- climate %>% 
+  mutate(census_month = 7, climate_year = as.numeric(ifelse(month >=census_month, year+1, year))) %>% 
+  filter(climate_year != 2006) %>% 
+  group_by(climate_year) %>% 
+  summarize('Cumulative PPT (mm)' = sum(ppt),
+            'Mean Temp. (C˚)' = mean(tmean)) %>% 
+  filter(climate_year <= max(LTREB_full$year_t))
+
+FESU_lm_Em <- lm(FESU_rfx[,1] ~ LOAR_climate$`Cumulative PPT (mm)`)
+FESU_lm_Ep <- lm(FESU_rfx[,2] ~ LOAR_climate$`Cumulative PPT (mm)`)
+
+win.graph()
+plot(LOAR_climate$`Cumulative PPT (mm)`,FESU_rfx[,2],col=alpha(spp_cols[4],.5),cex.lab=1.4,
+     cex=3,lwd=2,xlab="Annual precipitation (mm)",ylab="Survival (standardized)")
+points(LOAR_climate$`Cumulative PPT (mm)`,FESU_rfx[,1],pch=16,col=alpha(spp_cols[4],.5),cex=3,lwd=2)
+
+
+abline(coef(FESU_lm_Em),lty=2)
+abline(coef(FESU_lm_Ep))
+
+LOAR_lm_Em <- lm(LOAR_rfx[,1] ~ LOAR_climate$`Cumulative PPT (mm)`)
+LOAR_lm_Ep <- lm(LOAR_rfx[,2] ~ LOAR_climate$`Cumulative PPT (mm)`)
+
+plot(LOAR_climate$`Cumulative PPT (mm)`,LOAR_rfx[,1])
+points(LOAR_climate$`Cumulative PPT (mm)`,LOAR_rfx[,2],pch=16)
+abline(coef(LOAR_lm_Em),lty=2)
+abline(coef(LOAR_lm_Ep))
+
+plot(LOAR_climate$`Mean Temp. (C°)`,LOAR_rfx[,1])
+points(LOAR_climate$`Mean Temp. (C°)`,LOAR_rfx[,2],pch=16)
+
+## check out AGPE growth
+AGPE_grow_rfx<-lapply(rstan::extract(grow_fit, pars = c("tau_year[1,1,1]","tau_year[1,1,2]","tau_year[1,1,3]","tau_year[1,1,4]",
+                                                        "tau_year[1,1,5]","tau_year[1,1,6]","tau_year[1,1,7]","tau_year[1,1,8]",
+                                                        "tau_year[1,1,9]","tau_year[1,1,10]","tau_year[1,1,11]",
+                                                        "tau_year[1,2,1]","tau_year[1,2,2]","tau_year[1,2,3]","tau_year[1,2,4]",
+                                                        "tau_year[1,2,5]","tau_year[1,2,6]","tau_year[1,2,7]","tau_year[1,2,8]",
+                                                        "tau_year[1,2,9]","tau_year[1,2,10]","tau_year[1,2,11]"
+                                                        
+)),mean)
+AGPE_grow_rfx <- matrix(unlist(AGPE_grow_rfx[1:22]),nrow=11,ncol=2,byrow = T)
+plot(LOAR_climate$`Cumulative PPT (mm)`,AGPE_grow_rfx[,1])
+points(LOAR_climate$`Cumulative PPT (mm)`,AGPE_grow_rfx[,2],pch=16)
+
 ## try out the make_params function
 ## note that this is how species are indexing:
 cbind(unique(LTREB_full$species),
@@ -78,6 +379,8 @@ test_params <- make_params(species=4,
             seed_par=seed_par,
             recruit_par=recruit_par)
 lambda(bigmatrix(test_params)$MPMmat)
+
+# MPM stuff ---------------------------------------------------------------
 
 ## estimate endo effects on mean lambda and variance in lambda  
 n_draws <- 500
