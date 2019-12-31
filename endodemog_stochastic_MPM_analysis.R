@@ -216,62 +216,44 @@ points(sigmaendo_fert_mean,1:8,cex=3,pch=16,col=alpha(spp_cols,spp_alpha))
 
 # Examples of mean and variance effects -----------------------------------
 
+focal_spp <- "FESU"
+focal_index <- which(spp_names==focal_spp)
+focal_month <- c(9,7,7,5,7,5,5,NA)[focal_index]
+cut_n <- 10
 
-## cherry-pick nice examples of endo mean and variance effects
-## LOAR and FESU survival
-mean_surv <- LTREB_data_forsurv %>% 
-  mutate(size_bin = as.integer(cut_interval(logsize_t,12))) %>% 
-  filter(species=="LOAR" | species=="FESU") %>% 
+mean_surv <- LTREB_full %>% 
+  mutate(size_bin = as.integer(cut_interval(logsize_t,cut_n))) %>% 
+  filter(species==focal_spp) %>% 
   group_by(species,size_bin,endo_01) %>% 
   summarise(mean_size = mean(logsize_t),
             mean_surv = mean(surv_t1),
             n_surv = n()) %>% 
   mutate(endo_pch=ifelse(endo_01==0,1,16))
 
-x_seq <- seq(min(LTREB_data_forsurv$logsize_t),max(LTREB_data_forsurv$logsize_t),length.out = 50)
-surv_mean<-lapply(rstan::extract(surv_fit, pars = c("beta0[4]","beta0[5]",
-                                                    "betasize[4]","betasize[5]",
-                                                    "betaendo[4]","betaendo[5]",
-                                                    "tau_year[4,1,1]","tau_year[4,1,2]","tau_year[4,1,3]","tau_year[4,1,4]",
-                                                    "tau_year[4,1,5]","tau_year[4,1,6]","tau_year[4,1,7]","tau_year[4,1,8]",
-                                                    "tau_year[4,1,9]","tau_year[4,1,10]","tau_year[4,1,11]",
-                                                    "tau_year[4,2,1]","tau_year[4,2,2]","tau_year[4,2,3]","tau_year[4,2,4]",
-                                                    "tau_year[4,2,5]","tau_year[4,2,6]","tau_year[4,2,7]","tau_year[4,2,8]",
-                                                    "tau_year[4,2,9]","tau_year[4,2,10]","tau_year[4,2,11]",
-                                                    "tau_year[5,1,1]","tau_year[5,1,2]","tau_year[5,1,3]","tau_year[5,1,4]",
-                                                    "tau_year[5,1,5]","tau_year[5,1,6]","tau_year[5,1,7]","tau_year[5,1,8]",
-                                                    "tau_year[5,1,9]","tau_year[5,1,10]","tau_year[5,1,11]",
-                                                    "tau_year[5,2,1]","tau_year[5,2,2]","tau_year[5,2,3]","tau_year[5,2,4]",
-                                                    "tau_year[5,2,5]","tau_year[5,2,6]","tau_year[5,2,7]","tau_year[5,2,8]",
-                                                    "tau_year[5,2,9]","tau_year[5,2,10]","tau_year[5,2,11]"
+x_seq <- seq(min(LTREB_full$logsize_t,na.rm=T),max(LTREB_full$logsize_t,na.rm=T),length.out = 50)
+surv_mean<-unlist(lapply(rstan::extract(surv_fit, pars = c(paste0("beta0[",focal_index,"]"),
+                                                  paste0("betasize[",focal_index,"]"),
+                                                  paste0("betaendo[",focal_index,"]"),
+                                                  paste0("tau_year[",focal_index,",1,",1:11,"]"),
+                                                  paste0("tau_year[",focal_index,",2,",1:11,"]")
                                                     
-)),mean)
-
-LOAR_rfx <- matrix(unlist(surv_mean[7:28]),nrow=11,ncol=2,byrow = T)
-FESU_rfx <- matrix(unlist(surv_mean[29:50]),nrow=11,ncol=2,byrow = T)
+)),mean))
 
 win.graph()
-par(mfrow=c(1,1),mar=c(5,5,1,1))
-plot(mean_surv$mean_size[mean_surv$species=="LOAR"],mean_surv$mean_surv[mean_surv$species=="LOAR"],
-     pch=mean_surv$endo_pch[mean_surv$species=="LOAR"],ylim=c(0,1),col=alpha(spp_cols[5],.5),xlab="log Size",ylab="Pr.(Survival)",cex.lab=1.4,
-     lwd=2,cex=2 + 3*(mean_surv$n_surv[mean_surv$species=="LOAR"]/max(mean_surv$n_surv[mean_surv$species=="LOAR"])))
-lines(x_seq,invlogit(surv_mean$`beta0[5]`+surv_mean$`betasize[5]`*x_seq),lwd=4,lty=2,col=spp_cols[5])
-lines(x_seq,invlogit(surv_mean$`beta0[5]`+surv_mean$`betasize[5]`*x_seq + surv_mean$`betaendo[5]`),lwd=4,lty=1,col=spp_cols[5])
+par(mfrow=c(3,1),mar=c(5,5,1,1))
+plot(mean_surv$mean_size,mean_surv$mean_surv,
+     pch=mean_surv$endo_pch,ylim=c(0,1),col=alpha(spp_cols[focal_index],.5),xlab="log Size",ylab="Pr.(Survival)",cex.lab=1.4,
+     lwd=2,cex=2 + 3*(mean_surv$n_surv/max(mean_surv$n_surv)))
+lines(x_seq,invlogit(surv_mean[1]+surv_mean[2]*x_seq),lwd=4,lty=2,col=spp_cols[focal_index])
+lines(x_seq,invlogit(surv_mean[1]+surv_mean[2]*x_seq + surv_mean[3]),lwd=4,lty=1,col=spp_cols[focal_index])
 legend("bottomright",legend=c("E+","E-"),lty=1:2,lwd=3,pch=c(16,1),
-       col=spp_cols[5],cex=1.8,bty="n")
+       col=spp_cols[focal_index],cex=1.8,bty="n")
 
-plot(mean_surv$mean_size[mean_surv$species=="FESU"],mean_surv$mean_surv[mean_surv$species=="FESU"],
-     pch=mean_surv$endo_pch[mean_surv$species=="FESU"],ylim=c(0,1),col=alpha(spp_cols[4],.5),xlab="log Size",ylab="Pr.(Survival)",cex.lab=1.4,
-     lwd=2,cex=2 + 3*(mean_surv$n_surv[mean_surv$species=="FESU"]/max(mean_surv$n_surv[mean_surv$species=="FESU"])))
-lines(x_seq,invlogit(surv_mean$`beta0[4]`+surv_mean$`betasize[4]`*x_seq),lwd=4,col=spp_cols[4],lty=2)
-lines(x_seq,invlogit(surv_mean$`beta0[4]`+surv_mean$`betasize[4]`*x_seq + surv_mean$`betaendo[4]`),col=spp_cols[4],lwd=4,lty=1)
-legend("bottomright",legend=c("E+","E-"),lty=1:2,lwd=3,pch=c(16,1),
-       col=spp_cols[4],cex=1.8,bty="n")
 
 ##now year-specific
-year_surv <- LTREB_data_forsurv %>% 
-  mutate(size_bin = as.integer(cut_interval(logsize_t,12))) %>% 
-  filter(species=="LOAR" | species=="FESU" | species=="POAL") %>% 
+year_surv <- LTREB_full %>% 
+  mutate(size_bin = as.integer(cut_interval(logsize_t,cut_n))) %>% 
+  filter(species==focal_spp) %>% 
   group_by(year_t,species,size_bin,endo_01) %>% 
   summarise(mean_size = mean(logsize_t),
             mean_surv = mean(surv_t1),
@@ -279,69 +261,57 @@ year_surv <- LTREB_data_forsurv %>%
   mutate(endo_pch=ifelse(endo_01==0,1,16))
 year_surv_years <- unique(year_surv$year_t)
 
-plot(mean_surv$mean_size[mean_surv$species=="FESU"],mean_surv$mean_surv[mean_surv$species=="FESU"],
-     pch=mean_surv$endo_pch[mean_surv$species=="FESU"],ylim=c(0,1),col=alpha(spp_cols[4],.5),xlab="log Size",ylab="Pr.(Survival)",cex.lab=1.4,
-     lwd=2,cex=2 + 3*(mean_surv$n_surv[mean_surv$species=="FESU"]/max(mean_surv$n_surv[mean_surv$species=="FESU"])))
+focal_rfx <- matrix(surv_mean[4:25],nrow=11,ncol=2,byrow = F)
+
+
+plot(mean_surv$mean_size[mean_surv$endo_01==0],mean_surv$mean_surv[mean_surv$endo_01==0],
+     pch=mean_surv$endo_pch[mean_surv$endo_01==0],ylim=c(0,1),col=alpha(spp_cols[focal_index],.5),xlab="log Size",ylab="Pr.(Survival)",cex.lab=1.4,
+     lwd=2,cex=2 + 3*(mean_surv$n_surv[mean_surv$endo_01==0]/max(mean_surv$n_surv[mean_surv$endo_01==0],na.rm=T)))
 for(t in 1:length(year_surv_years)){
-  lines(x_seq,invlogit(surv_mean$`beta0[4]`+surv_mean$`betasize[4]`*x_seq + 
-                         FESU_rfx[t,1]),lwd=4,col=spp_cols[4],lty=2)
-  lines(x_seq,invlogit(surv_mean$`beta0[4]`+surv_mean$`betasize[4]`*x_seq + 
-                         FESU_rfx[t,2]),lwd=4,col=spp_cols[4],lty=1)
+  lines(x_seq,invlogit(surv_mean[1]+surv_mean[2]*x_seq + 
+                         focal_rfx[t,1]),lwd=4,col=spp_cols[focal_index],lty=2)
 }
 
-win.graph()
-par(mfrow=c(2,1),mar=c(5,5,1,1))
-plot(mean_surv$mean_size[mean_surv$species=="LOAR" & mean_surv$endo_01==0],mean_surv$mean_surv[mean_surv$species=="LOAR" & mean_surv$endo_01==0],
-     pch=mean_surv$endo_pch[mean_surv$species=="LOAR" & mean_surv$endo_01==0],ylim=c(0,1),col=alpha(spp_cols[5],.5),xlab="log Size",ylab="Pr.(Survival)",cex.lab=1.4,
-     lwd=2,cex=2 + 3*(mean_surv$n_surv[mean_surv$species=="LOAR" & mean_surv$endo_01==0]/max(mean_surv$n_surv[mean_surv$species=="LOAR" & mean_surv$endo_01==0])))
+plot(mean_surv$mean_size[mean_surv$endo_01==1],mean_surv$mean_surv[mean_surv$endo_01==1],
+     pch=mean_surv$endo_pch[mean_surv$endo_01==1],ylim=c(0,1),col=alpha(spp_cols[focal_index],.5),xlab="log Size",ylab="Pr.(Survival)",cex.lab=1.4,
+     lwd=2,cex=2 + 3*(mean_surv$n_surv[mean_surv$endo_01==1]/max(mean_surv$n_surv[mean_surv$endo_01==1],na.rm=T)))
 for(t in 1:length(year_surv_years)){
-  lines(x_seq,invlogit(surv_mean$`beta0[5]`+surv_mean$`betasize[4]`*x_seq + 
-                         LOAR_rfx[t,1]),lwd=4,col=spp_cols[5],lty=2)
-}
-
-plot(mean_surv$mean_size[mean_surv$species=="LOAR" & mean_surv$endo_01==1],mean_surv$mean_surv[mean_surv$species=="LOAR" & mean_surv$endo_01==1],
-     pch=mean_surv$endo_pch[mean_surv$species=="LOAR" & mean_surv$endo_01==1],ylim=c(0,1),col=alpha(spp_cols[5],.5),xlab="log Size",ylab="Pr.(Survival)",cex.lab=1.4,
-     lwd=2,cex=2 + 3*(mean_surv$n_surv[mean_surv$species=="LOAR" & mean_surv$endo_01==1]/max(mean_surv$n_surv[mean_surv$species=="LOAR" & mean_surv$endo_01==1])))
-for(t in 1:length(year_surv_years)){
-  lines(x_seq,invlogit(surv_mean$`beta0[5]`+surv_mean$`betasize[4]`*x_seq + 
-                         LOAR_rfx[t,2]),lwd=4,col=spp_cols[5],lty=1)
+  lines(x_seq,invlogit(surv_mean[1]+surv_mean[2]*x_seq + surv_mean[3]+
+                         focal_rfx[t,2]),lwd=4,col=spp_cols[focal_index],lty=1)
 }
 # climate data ------------------------------------------------------------
 climate <- read_csv(file = "C:/Users/tm9/Dropbox/EndodemogData/PRISMClimateData_BrownCo.csv") %>% 
-  mutate(year = year(Date), month = month(Date), day = day(Date)) %>% 
+  #mutate(year = year(Date), month = month(Date), day = day(Date)) %>% 
+  mutate(year = as.numeric(str_sub(Date,1,4)), 
+         month = as.numeric(str_sub(Date,6,7)), 
+         day = as.numeric(str_sub(Date,9,10)))%>% 
   rename(ppt = `ppt (mm)`, tmean = `tmean (degrees C)`) %>% 
-  mutate(site_lat = 39.235900000000, site_long = -86.218100000000)
-
-LOAR_climate <- climate %>% 
-  mutate(census_month = 7, climate_year = as.numeric(ifelse(month >=census_month, year+1, year))) %>% 
+  mutate(site_lat = 39.235900000000, site_long = -86.218100000000) %>% 
+  mutate(census_month = focal_month, 
+         climate_year = as.numeric(ifelse(month >=census_month, year+1, year))) %>% 
   filter(climate_year != 2006) %>% 
   group_by(climate_year) %>% 
   summarize('Cumulative PPT (mm)' = sum(ppt),
             'Mean Temp. (C˚)' = mean(tmean)) %>% 
   filter(climate_year <= max(LTREB_full$year_t))
 
-FESU_lm_Em <- lm(FESU_rfx[,1] ~ LOAR_climate$`Cumulative PPT (mm)`)
-FESU_lm_Ep <- lm(FESU_rfx[,2] ~ LOAR_climate$`Cumulative PPT (mm)`)
 
-win.graph()
-plot(LOAR_climate$`Cumulative PPT (mm)`,FESU_rfx[,2],col=alpha(spp_cols[4],.5),cex.lab=1.4,
-     cex=3,lwd=2,xlab="Annual precipitation (mm)",ylab="Survival (standardized)")
-points(LOAR_climate$`Cumulative PPT (mm)`,FESU_rfx[,1],pch=16,col=alpha(spp_cols[4],.5),cex=3,lwd=2)
+par(mfrow=c(2,1),mar=c(5,5,1,1))
 
+plot(climate$`Cumulative PPT (mm)`,focal_rfx[,1],col=alpha(spp_cols[focal_index],.5),cex.lab=1.4,
+     cex=3,lwd=2,xlab="Annual precipitation (mm)",ylab="Survival (standardized)",pch=1,
+     ylim=c(min(focal_rfx),max(focal_rfx)))
+points(climate$`Cumulative PPT (mm)`,focal_rfx[,2],pch=16,col=alpha(spp_cols[focal_index],.5),cex=3)
+abline(coef(lm(focal_rfx[,1] ~ climate$`Cumulative PPT (mm)`)),lty=2,lwd=2,col=spp_cols[focal_index])
+abline(coef(lm(focal_rfx[,2] ~ climate$`Cumulative PPT (mm)`)),lwd=2,col=spp_cols[focal_index])
 
-abline(coef(FESU_lm_Em),lty=2)
-abline(coef(FESU_lm_Ep))
+plot(climate$`Mean Temp. (C°)`,focal_rfx[,1],col=alpha(spp_cols[focal_index],.5),cex.lab=1.4,
+     cex=3,lwd=2,xlab="Mean temp (C)",ylab="Survival (standardized)",pch=1,
+     ylim=c(min(focal_rfx),max(focal_rfx)))
+points(climate$`Mean Temp. (C°)`,focal_rfx[,2],pch=16,col=alpha(spp_cols[focal_index],.5),cex=3)
+abline(coef(lm(focal_rfx[,1] ~ climate$`Mean Temp. (C°)`)),lty=2)
+abline(coef(lm(focal_rfx[,2] ~ climate$`Mean Temp. (C°)`)))
 
-LOAR_lm_Em <- lm(LOAR_rfx[,1] ~ LOAR_climate$`Cumulative PPT (mm)`)
-LOAR_lm_Ep <- lm(LOAR_rfx[,2] ~ LOAR_climate$`Cumulative PPT (mm)`)
-
-plot(LOAR_climate$`Cumulative PPT (mm)`,LOAR_rfx[,1])
-points(LOAR_climate$`Cumulative PPT (mm)`,LOAR_rfx[,2],pch=16)
-abline(coef(LOAR_lm_Em),lty=2)
-abline(coef(LOAR_lm_Ep))
-
-plot(LOAR_climate$`Mean Temp. (C°)`,LOAR_rfx[,1])
-points(LOAR_climate$`Mean Temp. (C°)`,LOAR_rfx[,2],pch=16)
 
 ## check out AGPE growth
 AGPE_grow_rfx<-lapply(rstan::extract(grow_fit, pars = c("tau_year[1,1,1]","tau_year[1,1,2]","tau_year[1,1,3]","tau_year[1,1,4]",
