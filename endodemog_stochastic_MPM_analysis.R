@@ -64,7 +64,7 @@ betaendo_surv$betaendo_mean <- (betaendo_surv[[1]] + betaendo_surv[[2]] + betaen
                                 + betaendo_surv[[5]] + betaendo_surv[[6]] + betaendo_surv[[7]])/7
 
 betaendo_surv_mean <- lapply(betaendo_surv,"mean")
-betaendo_surv_quant <- as.matrix(data.frame(lapply(betaendo_surv,"quantile",probs=c(0.05,0.25,0.75,0.95))))
+betaendo_surv_quant <- as.matrix(data.frame(lapply(betaendo_surv,"quantile",probs=c(0.05,0.125,0.25,0.75,0.875,0.95))))
 
 sigmaendo_surv<-rstan::extract(surv_fit, pars = c("sigmaendo[1]","sigmaendo[2]",
                                                   "sigmaendo[3]","sigmaendo[4]","sigmaendo[5]",
@@ -72,7 +72,7 @@ sigmaendo_surv<-rstan::extract(surv_fit, pars = c("sigmaendo[1]","sigmaendo[2]",
 sigmaendo_surv$sigmaendo_mean <- (sigmaendo_surv[[1]] + sigmaendo_surv[[2]] + sigmaendo_surv[[3]] + sigmaendo_surv[[4]]
                                   + sigmaendo_surv[[5]] + sigmaendo_surv[[6]] + sigmaendo_surv[[7]])/7
 sigmaendo_surv_mean <- lapply(sigmaendo_surv,"mean")
-sigmaendo_surv_quant <- as.matrix(data.frame(lapply(sigmaendo_surv,"quantile",probs=c(0.05,0.25,0.75,0.95))))
+sigmaendo_surv_quant <- as.matrix(data.frame(lapply(sigmaendo_surv,"quantile",probs=c(0.05,0.125,0.25,0.75,0.875,0.95))))
 
 ## growth
 betaendo_grow<-rstan::extract(grow_fit, pars = c("betaendo[1]","betaendo[2]",
@@ -82,7 +82,7 @@ betaendo_grow$betaendo_mean <- (betaendo_grow[[1]] + betaendo_grow[[2]] + betaen
                                 + betaendo_grow[[5]] + betaendo_grow[[6]] + betaendo_grow[[7]])/7
 
 betaendo_grow_mean <- lapply(betaendo_grow,"mean")
-betaendo_grow_quant <- as.matrix(data.frame(lapply(betaendo_grow,"quantile",probs=c(0.05,0.25,0.75,0.95))))
+betaendo_grow_quant <- as.matrix(data.frame(lapply(betaendo_grow,"quantile",probs=c(0.05,0.125,0.25,0.75,0.875,0.95))))
 
 sigmaendo_grow<-rstan::extract(grow_fit, pars = c("sigmaendo[1]","sigmaendo[2]",
                                                   "sigmaendo[3]","sigmaendo[4]","sigmaendo[5]",
@@ -90,7 +90,7 @@ sigmaendo_grow<-rstan::extract(grow_fit, pars = c("sigmaendo[1]","sigmaendo[2]",
 sigmaendo_grow$sigmaendo_mean <- (sigmaendo_grow[[1]] + sigmaendo_grow[[2]] + sigmaendo_grow[[3]] + sigmaendo_grow[[4]]
                                   + sigmaendo_grow[[5]] + sigmaendo_grow[[6]] + sigmaendo_grow[[7]])/7
 sigmaendo_grow_mean <- lapply(sigmaendo_grow,"mean")
-sigmaendo_grow_quant <- as.matrix(data.frame(lapply(sigmaendo_grow,"quantile",probs=c(0.05,0.25,0.75,0.95))))
+sigmaendo_grow_quant <- as.matrix(data.frame(lapply(sigmaendo_grow,"quantile",probs=c(0.05,0.125,0.25,0.75,0.875,0.95))))
 
 ## flowering
 betaendo_flow<-rstan::extract(flow_fit, pars = c("betaendo[1]","betaendo[2]",
@@ -100,7 +100,7 @@ betaendo_flow$betaendo_mean <- (betaendo_flow[[1]] + betaendo_flow[[2]] + betaen
                                 + betaendo_flow[[5]] + betaendo_flow[[6]] + betaendo_flow[[7]])/7
 
 betaendo_flow_mean <- lapply(betaendo_flow,"mean")
-betaendo_flow_quant <- as.matrix(data.frame(lapply(betaendo_flow,"quantile",probs=c(0.05,0.25,0.75,0.95))))
+betaendo_flow_quant <- as.matrix(data.frame(lapply(betaendo_flow,"quantile",probs=c(0.05,0.125,0.25,0.75,0.875,0.95))))
 
 sigmaendo_flow<-rstan::extract(flow_fit, pars = c("sigmaendo[1]","sigmaendo[2]",
                                                   "sigmaendo[3]","sigmaendo[4]","sigmaendo[5]",
@@ -108,7 +108,7 @@ sigmaendo_flow<-rstan::extract(flow_fit, pars = c("sigmaendo[1]","sigmaendo[2]",
 sigmaendo_flow$sigmaendo_mean <- (sigmaendo_flow[[1]] + sigmaendo_flow[[2]] + sigmaendo_flow[[3]] + sigmaendo_flow[[4]]
                                   + sigmaendo_flow[[5]] + sigmaendo_flow[[6]] + sigmaendo_flow[[7]])/7
 sigmaendo_flow_mean <- lapply(sigmaendo_flow,"mean")
-sigmaendo_flow_quant <- as.matrix(data.frame(lapply(sigmaendo_flow,"quantile",probs=c(0.05,0.25,0.75,0.95))))
+sigmaendo_flow_quant <- as.matrix(data.frame(lapply(sigmaendo_flow,"quantile",probs=c(0.05,0.125,0.25,0.75,0.875,0.95))))
 
 ## make a nice figure
 spp_names <- c(data.frame(cbind(unique(LTREB_full$species),
@@ -120,26 +120,47 @@ spp_cols <- c("#1b9e77","#d95f02","#7570b3","#e7298a","#66a61e","#e6ab02","#a676
 spp_alpha <- 0.75
 
 
-## start with LOAR and FESU survival as example
+## start with FESU survival as example
 win.graph()
 par(mfrow=c(2,1),mar=c(5,5,1,1))
 plot(rep(0,7),1:7,type="n",xlim=c(-2,2),axes=F,ylab=" ",xlab="Endophyte effect on mean survival",cex.lab=1.4)
 axis(side=1)
 arrows(0,1,0,8,lty=2,col="gray",length=0)
-arrows(betaendo_surv_quant[1,5],5,betaendo_surv_quant[4,5],5,length=0,lwd=2,col=alpha(spp_cols[5],spp_alpha))
-arrows(betaendo_surv_quant[2,5],5,betaendo_surv_quant[3,5],5,length=0,lwd=8,col=alpha(spp_cols[5],spp_alpha))
-points(betaendo_surv_mean[5],5,cex=3,pch=16,col=alpha(spp_cols[5],spp_alpha))
-#axis(side=2,at=5,labels=spp_names[5],las=1,cex.axis=1.5,tick=F)
+arrows(betaendo_surv_quant[1,4],4,betaendo_surv_quant[6,4],4,length=0,lwd=2,col=alpha(spp_cols[4],spp_alpha))
+arrows(betaendo_surv_quant[2,4],4,betaendo_surv_quant[5,4],4,length=0,lwd=6,col=alpha(spp_cols[4],spp_alpha))
+arrows(betaendo_surv_quant[3,4],4,betaendo_surv_quant[4,4],4,length=0,lwd=10,col=alpha(spp_cols[4],spp_alpha))
+points(betaendo_surv_mean[4],4,cex=3,pch=16,col=alpha(spp_cols[4],spp_alpha))
+axis(side=2,at=4,labels=spp_names[4],las=1,cex.axis=1.4,tick=F)
 
 plot(rep(0,7),1:7,type="n",xlim=c(-2,2),axes=F,ylab=" ",xlab="Endophyte effect on survival variance",cex.lab=1.4)
 axis(side=1)
 abline(v=0,lty=2,col="gray")#;box()
-arrows(sigmaendo_surv_quant[1,5],5,sigmaendo_surv_quant[4,5],5,length=0,lwd=2,col=alpha(spp_cols[5],spp_alpha))
-arrows(sigmaendo_surv_quant[2,5],5,sigmaendo_surv_quant[3,5],5,length=0,lwd=8,col=alpha(spp_cols[5],spp_alpha))
-points(sigmaendo_surv_mean[5],5,cex=3,pch=16,col=alpha(spp_cols[5],spp_alpha))
-#axis(side=2,at=5,labels=spp_names[5],las=1,cex.axis=1.5,tick=F)
+arrows(sigmaendo_surv_quant[1,4],4,sigmaendo_surv_quant[6,4],4,length=0,lwd=2,col=alpha(spp_cols[4],spp_alpha))
+arrows(sigmaendo_surv_quant[2,4],4,sigmaendo_surv_quant[5,4],4,length=0,lwd=6,col=alpha(spp_cols[4],spp_alpha))
+arrows(sigmaendo_surv_quant[3,4],4,sigmaendo_surv_quant[4,4],4,length=0,lwd=10,col=alpha(spp_cols[4],spp_alpha))
+points(sigmaendo_surv_mean[4],4,cex=3,pch=16,col=alpha(spp_cols[4],spp_alpha))
+axis(side=2,at=4,labels=spp_names[4],las=1,cex.axis=1.4,tick=F)
 
 ## now all of them
+plot(rep(0,8),1:8,type="n",xlim=c(-2,2),axes=F,ylab=" ",xlab="Endophyte effect on mean survival",cex.lab=1.4)
+axis(side=1)
+arrows(0,1,0,8,lty=2,col="gray",length=0)
+arrows(betaendo_surv_quant[1,],1:8,betaendo_surv_quant[6,],1:8,length=0,lwd=2,col=alpha(spp_cols,spp_alpha))
+arrows(betaendo_surv_quant[2,],1:8,betaendo_surv_quant[5,],1:8,length=0,lwd=6,col=alpha(spp_cols,spp_alpha))
+arrows(betaendo_surv_quant[3,],1:8,betaendo_surv_quant[4,],1:8,length=0,lwd=10,col=alpha(spp_cols,spp_alpha))
+points(betaendo_surv_mean,1:8,cex=3,pch=16,col=alpha(spp_cols,spp_alpha))
+axis(side=2,at=1:8,labels=spp_names,las=1,cex.axis=1.4,tick=F)
+
+plot(rep(0,8),1:8,type="n",xlim=c(-2,2),axes=F,ylab=" ",xlab="Endophyte effect on survival variance",cex.lab=1.4)
+axis(side=1)
+abline(v=0,lty=2,col="gray")#;box()
+arrows(sigmaendo_surv_quant[1,],1:8,sigmaendo_surv_quant[6,],1:8,length=0,lwd=2,col=alpha(spp_cols,spp_alpha))
+arrows(sigmaendo_surv_quant[2,],1:8,sigmaendo_surv_quant[5,],1:8,length=0,lwd=6,col=alpha(spp_cols,spp_alpha))
+arrows(sigmaendo_surv_quant[3,],1:8,sigmaendo_surv_quant[4,],1:8,length=0,lwd=10,col=alpha(spp_cols,spp_alpha))
+points(sigmaendo_surv_mean,1:8,cex=3,pch=16,col=alpha(spp_cols,spp_alpha))
+axis(side=2,at=1:8,labels=spp_names,las=1,cex.axis=1.4,tick=F)
+
+## all VR all spp
 win.graph()
 par(mfrow=c(2,3),mar=c(5,5,1,1))
 ## survival
@@ -219,7 +240,7 @@ points(sigmaendo_fert_mean,1:8,cex=3,pch=16,col=alpha(spp_cols,spp_alpha))
 focal_spp <- "FESU"
 focal_index <- which(spp_names==focal_spp)
 focal_month <- c(9,7,7,5,7,5,5,NA)[focal_index]
-cut_n <- 10
+cut_n <- 9
 
 mean_surv <- LTREB_full %>% 
   mutate(size_bin = as.integer(cut_interval(logsize_t,cut_n))) %>% 
@@ -244,9 +265,9 @@ par(mfrow=c(3,1),mar=c(5,5,1,1))
 plot(mean_surv$mean_size,mean_surv$mean_surv,
      pch=mean_surv$endo_pch,ylim=c(0,1),col=alpha(spp_cols[focal_index],.5),xlab="log Size",ylab="Pr.(Survival)",cex.lab=1.4,
      lwd=2,cex=2 + 3*(mean_surv$n_surv/max(mean_surv$n_surv)))
-lines(x_seq,invlogit(surv_mean[1]+surv_mean[2]*x_seq),lwd=4,lty=2,col=spp_cols[focal_index])
-lines(x_seq,invlogit(surv_mean[1]+surv_mean[2]*x_seq + surv_mean[3]),lwd=4,lty=1,col=spp_cols[focal_index])
-legend("bottomright",legend=c("E+","E-"),lty=1:2,lwd=3,pch=c(16,1),
+lines(x_seq,invlogit(surv_mean[1]+surv_mean[2]*x_seq),lwd=2,lty=2,col=spp_cols[focal_index])
+lines(x_seq,invlogit(surv_mean[1]+surv_mean[2]*x_seq + surv_mean[3]),lwd=2,lty=1,col=spp_cols[focal_index])
+legend("bottomright",legend=c("E+","E-"),lty=1:2,lwd=2,pch=c(16,1),
        col=spp_cols[focal_index],cex=1.8,bty="n")
 
 
@@ -263,21 +284,25 @@ year_surv_years <- unique(year_surv$year_t)
 
 focal_rfx <- matrix(surv_mean[4:25],nrow=11,ncol=2,byrow = F)
 
+plot(mean_surv$mean_size[mean_surv$endo_01==1],mean_surv$mean_surv[mean_surv$endo_01==1],
+     pch=mean_surv$endo_pch[mean_surv$endo_01==1],ylim=c(0,1),col=alpha(spp_cols[focal_index],.5),xlab="log Size",ylab="Pr.(Survival)",cex.lab=1.4,
+     lwd=2,cex=2 + 3*(mean_surv$n_surv[mean_surv$endo_01==1]/max(mean_surv$n_surv[mean_surv$endo_01==1],na.rm=T)))
+for(t in 1:length(year_surv_years)){
+  lines(x_seq,invlogit(surv_mean[1]+surv_mean[2]*x_seq + surv_mean[3]+
+                         focal_rfx[t,2]),lwd=2,col=spp_cols[focal_index],lty=1)
+  text(x_seq[1],invlogit(surv_mean[1]+surv_mean[2]*x_seq[1] + surv_mean[3]+
+                           focal_rfx[t,2]),labels = year_surv_years[t],adj=0,cex=1.2)
+}
 
 plot(mean_surv$mean_size[mean_surv$endo_01==0],mean_surv$mean_surv[mean_surv$endo_01==0],
      pch=mean_surv$endo_pch[mean_surv$endo_01==0],ylim=c(0,1),col=alpha(spp_cols[focal_index],.5),xlab="log Size",ylab="Pr.(Survival)",cex.lab=1.4,
      lwd=2,cex=2 + 3*(mean_surv$n_surv[mean_surv$endo_01==0]/max(mean_surv$n_surv[mean_surv$endo_01==0],na.rm=T)))
 for(t in 1:length(year_surv_years)){
   lines(x_seq,invlogit(surv_mean[1]+surv_mean[2]*x_seq + 
-                         focal_rfx[t,1]),lwd=4,col=spp_cols[focal_index],lty=2)
-}
-
-plot(mean_surv$mean_size[mean_surv$endo_01==1],mean_surv$mean_surv[mean_surv$endo_01==1],
-     pch=mean_surv$endo_pch[mean_surv$endo_01==1],ylim=c(0,1),col=alpha(spp_cols[focal_index],.5),xlab="log Size",ylab="Pr.(Survival)",cex.lab=1.4,
-     lwd=2,cex=2 + 3*(mean_surv$n_surv[mean_surv$endo_01==1]/max(mean_surv$n_surv[mean_surv$endo_01==1],na.rm=T)))
-for(t in 1:length(year_surv_years)){
-  lines(x_seq,invlogit(surv_mean[1]+surv_mean[2]*x_seq + surv_mean[3]+
-                         focal_rfx[t,2]),lwd=4,col=spp_cols[focal_index],lty=1)
+                         focal_rfx[t,1]),lwd=2,col=spp_cols[focal_index],lty=2)
+  
+  text(x_seq[1],invlogit(surv_mean[1]+surv_mean[2]*x_seq[1] + 
+                           focal_rfx[t,1]),labels = year_surv_years[t],adj=0,cex=1.2)
 }
 # climate data ------------------------------------------------------------
 climate <- read_csv(file = "C:/Users/tm9/Dropbox/EndodemogData/PRISMClimateData_BrownCo.csv") %>% 
@@ -295,15 +320,16 @@ climate <- read_csv(file = "C:/Users/tm9/Dropbox/EndodemogData/PRISMClimateData_
             'Mean Temp. (C˚)' = mean(tmean)) %>% 
   filter(climate_year <= max(LTREB_full$year_t))
 
-
-par(mfrow=c(2,1),mar=c(5,5,1,1))
-
+win.graph()
+par(mfrow=c(1,1),mar=c(5,5,1,1))
 plot(climate$`Cumulative PPT (mm)`,focal_rfx[,1],col=alpha(spp_cols[focal_index],.5),cex.lab=1.4,
      cex=3,lwd=2,xlab="Annual precipitation (mm)",ylab="Survival (standardized)",pch=1,
      ylim=c(min(focal_rfx),max(focal_rfx)))
 points(climate$`Cumulative PPT (mm)`,focal_rfx[,2],pch=16,col=alpha(spp_cols[focal_index],.5),cex=3)
-abline(coef(lm(focal_rfx[,1] ~ climate$`Cumulative PPT (mm)`)),lty=2,lwd=2,col=spp_cols[focal_index])
-abline(coef(lm(focal_rfx[,2] ~ climate$`Cumulative PPT (mm)`)),lwd=2,col=spp_cols[focal_index])
+abline(coef(lm(focal_rfx[,1] ~ climate$`Cumulative PPT (mm)`)),lty=2,lwd=3,col=spp_cols[focal_index])
+abline(coef(lm(focal_rfx[,2] ~ climate$`Cumulative PPT (mm)`)),lwd=3,col=spp_cols[focal_index])
+legend("bottomright",legend=c("E+","E-"),lty=1:2,lwd=2,pch=c(16,1),
+       col=spp_cols[focal_index],cex=1.8)
 
 plot(climate$`Mean Temp. (C°)`,focal_rfx[,1],col=alpha(spp_cols[focal_index],.5),cex.lab=1.4,
      cex=3,lwd=2,xlab="Mean temp (C)",ylab="Survival (standardized)",pch=1,
@@ -377,10 +403,10 @@ for(i in 1:length(post_draws)){
   }
 }
 
-lambda_mean_diff <- matrix(NA,8,5)
+lambda_mean_diff <- matrix(NA,8,7)
 for(s in 1:8){
   lambda_mean_diff[s,1] = mean(lambda_mean[s,2,] - lambda_mean[s,1,])
-  lambda_mean_diff[s,2:5] = quantile(lambda_mean[s,2,] - lambda_mean[s,1,],probs=c(0.05,0.25,0.75,0.95))
+  lambda_mean_diff[s,2:7] = quantile(lambda_mean[s,2,] - lambda_mean[s,1,],probs=c(0.05,0.125,0.25,0.75,0.875,0.95))
 }
 
 ## now do variance in lambda
@@ -412,10 +438,10 @@ for(i in 1:length(post_draws)){
   }
 }
 
-lambda_var_diff <- matrix(NA,8,5)
+lambda_var_diff <- matrix(NA,8,7)
 for(s in 1:8){
   lambda_var_diff[s,1] = mean(lambda_var[s,2,] - lambda_var[s,1,])
-  lambda_var_diff[s,2:5] = quantile(lambda_var[s,2,] - lambda_var[s,1,],probs=c(0.05,0.25,0.75,0.95))
+  lambda_var_diff[s,2:7] = quantile(lambda_var[s,2,] - lambda_var[s,1,],probs=c(0.05,0.125,0.25,0.75,0.875,0.95))
 }
 
 spp_names <- c(data.frame(cbind(unique(LTREB_full$species),
@@ -426,21 +452,23 @@ spp_cols <- c("#1b9e77","#d95f02","#7570b3","#e7298a","#66a61e","#e6ab02","#a676
 spp_alpha <- 0.75
 
 win.graph()
-par(mfrow=c(1,2),mar=c(5,5,1,1))
-plot(rep(0,8),1:8,type="n",xlim=c(-2,2),axes=F,ylab=" ",xlab=expression(paste("Endophyte effect on ",bar(lambda))),cex.lab=1.4)
+par(mfrow=c(2,1),mar=c(6,5,0,1))
+plot(rep(0,8),1:8,type="n",xlim=c(-1.3,1.3),axes=F,ylab=" ",xlab=expression(paste("Endophyte effect on ",bar(lambda))),cex.lab=1.4)
 axis(side=1)
 axis(side=2,at=1:8,labels=spp_names[1:8],las=1,cex.axis=1.6)
 arrows(0,1,0,8,lty=2,col="gray",length=0)
-arrows(lambda_mean_diff[,2],1:8,lambda_mean_diff[,5],1:8,length=0,lwd=2,col=alpha(spp_cols,spp_alpha))
-arrows(lambda_mean_diff[,3],1:8,lambda_mean_diff[,4],1:8,length=0,lwd=6,col=alpha(spp_cols,spp_alpha))
+arrows(lambda_mean_diff[,2],1:8,lambda_mean_diff[,7],1:8,length=0,lwd=2,col=alpha(spp_cols,spp_alpha))
+arrows(lambda_mean_diff[,3],1:8,lambda_mean_diff[,6],1:8,length=0,lwd=6,col=alpha(spp_cols,spp_alpha))
+arrows(lambda_mean_diff[,4],1:8,lambda_mean_diff[,5],1:8,length=0,lwd=10,col=alpha(spp_cols,spp_alpha))
 points(lambda_mean_diff[,1],1:8,cex=3,pch=16,col=alpha(spp_cols,spp_alpha))
 
 plot(rep(0,8),1:8,type="n",xlim=c(-0.5,0.5),axes=F,ylab=" ",xlab=expression(paste("Endophyte effect on Var(",lambda,")")),cex.lab=1.4)
 axis(side=1)
 axis(side=2,at=1:8,labels=spp_names[1:8],las=1,cex.axis=1.6)
 arrows(0,1,0,8,lty=2,col="gray",length=0)
-arrows(lambda_var_diff[,2],1:8,lambda_var_diff[,5],1:8,length=0,lwd=2,col=alpha(spp_cols,spp_alpha))
-arrows(lambda_var_diff[,3],1:8,lambda_var_diff[,4],1:8,length=0,lwd=6,col=alpha(spp_cols,spp_alpha))
+arrows(lambda_var_diff[,2],1:8,lambda_var_diff[,7],1:8,length=0,lwd=2,col=alpha(spp_cols,spp_alpha))
+arrows(lambda_var_diff[,3],1:8,lambda_var_diff[,6],1:8,length=0,lwd=6,col=alpha(spp_cols,spp_alpha))
+arrows(lambda_var_diff[,4],1:8,lambda_var_diff[,5],1:8,length=0,lwd=10,col=alpha(spp_cols,spp_alpha))
 points(lambda_var_diff[,1],1:8,cex=3,pch=16,col=alpha(spp_cols,spp_alpha))
 
 ## make a list of year-specific transition matrices
@@ -486,28 +514,39 @@ for(s in 1:8){
   lambdaS_diff_var_only[s,2:7] = quantile(lambdaS_out[s,3,] - lambdaS_out[s,1,],probs=c(0.05,0.125,0.25,0.75,0.875,0.95))
 }
 
-
+## create blanks for predictions slide
 win.graph()
-par(mfrow=c(4,2),mar=c(5,5,4,1),xpd=T)
-for(s in 1:8){
-  plot(rep(0,3),1:3,type="n",xlim=c(-1.2,1.2),axes=F,ylab=" ",xlab=expression(paste("Endophyte effect on ",lambda,"S")),cex.lab=1.4)
+par(mfrow=c(1,3),mar=c(5,5,2,1),xpd=F)
+for(s in 1:3){
+  plot(rep(0,5),0:4,type="n",xlim=c(-1,1),
+       axes=F,ylab=" ",xlab=expression(paste("Endophyte effect on ",lambda[S])),cex.lab=1.6)
   axis(side=1)
   abline(v=0,lty=2,col="gray")
-  arrows(lambdaS_diff[s,2],1,lambdaS_diff[s,7],1,length=0,lwd=2,col=alpha(spp_cols[s],spp_alpha))
-  arrows(lambdaS_diff[s,3],1,lambdaS_diff[s,6],1,length=0,lwd=4,col=alpha(spp_cols[s],spp_alpha))
-  arrows(lambdaS_diff[s,4],1,lambdaS_diff[s,5],1,length=0,lwd=6,col=alpha(spp_cols[s],spp_alpha))
-  points(lambdaS_diff[s,1],1,cex=3,pch=16,col=alpha(spp_cols[s],spp_alpha))
-  
+}
+
+win.graph()
+par(mfrow=c(2,4),mar=c(5,5,2,1),xpd=F)
+for(s in 1:8){
+  plot(rep(0,5),0:4,type="n",xlim=c(min(c(lambdaS_diff[s,],lambdaS_diff_mean_only[s,],lambdaS_diff_var_only[s,])),
+                                    max(c(lambdaS_diff[s,],lambdaS_diff_mean_only[s,],lambdaS_diff_var_only[s,]))),
+       axes=F,ylab=" ",xlab=expression(paste("Endophyte effect on ",lambda[S])),cex.lab=1.6)
+  title(main=spp_names[s],cex.main=2)
+  axis(side=1)
+  abline(v=0,lty=2,col="gray")
+  arrows(lambdaS_diff[s,2],3,lambdaS_diff[s,7],3,length=0,lwd=2,col=alpha(spp_cols[s],spp_alpha))
+  arrows(lambdaS_diff[s,3],3,lambdaS_diff[s,6],3,length=0,lwd=4,col=alpha(spp_cols[s],spp_alpha))
+  arrows(lambdaS_diff[s,4],3,lambdaS_diff[s,5],3,length=0,lwd=6,col=alpha(spp_cols[s],spp_alpha))
+  points(lambdaS_diff[s,1],3,cex=3,pch=21,col=spp_cols[s],bg=spp_cols[s])
+#}
   arrows(lambdaS_diff_mean_only[s,2],2,lambdaS_diff_mean_only[s,7],2,length=0,lwd=2,col=alpha(spp_cols[s],spp_alpha))
   arrows(lambdaS_diff_mean_only[s,3],2,lambdaS_diff_mean_only[s,6],2,length=0,lwd=4,col=alpha(spp_cols[s],spp_alpha))
   arrows(lambdaS_diff_mean_only[s,4],2,lambdaS_diff_mean_only[s,5],2,length=0,lwd=6,col=alpha(spp_cols[s],spp_alpha))
-  points(lambdaS_diff_mean_only[s,1],2,cex=3,pch=0,col=alpha(spp_cols[s],spp_alpha))
+  points(lambdaS_diff_mean_only[s,1],2,cex=3,pch=22,col=spp_cols[s],bg="white",lwd=2)
   
-  arrows(lambdaS_diff_var_only[s,2],3,lambdaS_diff_var_only[s,7],3,length=0,lwd=2,col=alpha(spp_cols[s],spp_alpha))
-  arrows(lambdaS_diff_var_only[s,3],3,lambdaS_diff_var_only[s,6],3,length=0,lwd=4,col=alpha(spp_cols[s],spp_alpha))
-  arrows(lambdaS_diff_var_only[s,4],3,lambdaS_diff_var_only[s,5],3,length=0,lwd=6,col=alpha(spp_cols[s],spp_alpha))
-  points(lambdaS_diff_var_only[s,1],3,cex=3,pch=2,col=alpha(spp_cols[s],spp_alpha))
-  
+  arrows(lambdaS_diff_var_only[s,2],1,lambdaS_diff_var_only[s,7],1,length=0,lwd=2,col=alpha(spp_cols[s],spp_alpha))
+  arrows(lambdaS_diff_var_only[s,3],1,lambdaS_diff_var_only[s,6],1,length=0,lwd=4,col=alpha(spp_cols[s],spp_alpha))
+  arrows(lambdaS_diff_var_only[s,4],1,lambdaS_diff_var_only[s,5],1,length=0,lwd=6,col=alpha(spp_cols[s],spp_alpha))
+  points(lambdaS_diff_var_only[s,1],1,cex=3,pch=24,col=spp_cols[s],bg="white",lwd=2)
 }
 
 
