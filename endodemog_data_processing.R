@@ -1685,109 +1685,156 @@ LTREB_full_to2018 <- LTREB_repro_combo %>%
                                  !is.na(spike_c_t1_fromrepro) & !is.na(spike_c_t1_long) ~ as.numeric(spike_c_t1_fromrepro)),
          SPIKE_D_T1 = spike_d_t1_fromrepro,
          SPIKE_AGPE_MEAN_T1 = spikelets_AGPE_mean) # <- This last column is because AGPE has some years of spikelet data collected as a mean, so I am keeping it separate from the other data.
-         
-
-# Then we will add lagged variables to have the measurements in time t
-LTREB_full_to2018_lag <- LTREB_full_to2018 %>% 
-  group_by(id) %>% 
-  mutate(FLW_COUNT_T = dplyr::lag(FLW_COUNT_T1, n = 1, default = NA),
-         FLW_STAT_T = dplyr::lag(FLW_STAT_T1, n = 1, default = NA),
+LTREB_full_to2018_lag <- LTREB_full_to2018 %>%         
+group_by(id) %>% 
+  mutate(FLW_COUNT_T = as.integer(dplyr::lag(FLW_COUNT_T1, n = 1, default = NA)),
+         FLW_STAT_T = as.integer(dplyr::lag(FLW_STAT_T1, n = 1, default = NA)),
          SPIKE_A_T = dplyr::lag(SPIKE_A_T1, n = 1, default = NA),
          SPIKE_B_T = dplyr::lag(SPIKE_B_T1, n = 1, default = NA),
          SPIKE_C_T = dplyr::lag(SPIKE_C_T1, n = 1, default = NA),
          SPIKE_D_T = dplyr::lag(SPIKE_D_T1, n = 1, default = NA),
          SPIKE_AGPE_MEAN_T = dplyr::lag(SPIKE_AGPE_MEAN_T1, n = 1, default = NA)) %>% 
   dplyr::select(plot_fixed, pos, id, species, species_index, 
-         endo_01, endo_index, origin_01, birth,
-         year_t1, year_t1_index,
-         surv_t1, size_t1, logsize_t1,
-         FLW_COUNT_T1, FLW_STAT_T1,
-         SPIKE_A_T1, SPIKE_B_T1, SPIKE_C_T1, SPIKE_D_T1, SPIKE_AGPE_MEAN_T1,
-         year_t, year_t_index, size_t, logsize_t, 
-         FLW_COUNT_T, FLW_STAT_T,
-         SPIKE_A_T, SPIKE_B_T, SPIKE_C_T, SPIKE_D_T, SPIKE_AGPE_MEAN_T)
+                endo_01, endo_index, origin_01, birth,
+                year_t1, year_t1_index,
+                surv_t1, size_t1, logsize_t1,
+                FLW_COUNT_T1, FLW_STAT_T1,
+                SPIKE_A_T1, SPIKE_B_T1, SPIKE_C_T1, SPIKE_D_T1, SPIKE_AGPE_MEAN_T1,
+                year_t, year_t_index, size_t, logsize_t, 
+                FLW_COUNT_T, FLW_STAT_T,
+                SPIKE_A_T, SPIKE_B_T, SPIKE_C_T, SPIKE_D_T, SPIKE_AGPE_MEAN_T)
+
+
 
 ##############################################################################
 ####### Here we will merge in 2019 data ------------------------------
 ##############################################################################
-# AGPE_2019_data <- read_xlsx("~/Dropbox/EndodemogData/Field Data/2019/LTREB_data_2019_July2019FieldData_NumbersConversion.xlsx", sheet = "AGPE")
-# ELRI_2019_data <- read_xlsx("~/Dropbox/EndodemogData/Field Data/2019/LTREB_data_2019_July2019FieldData_NumbersConversion.xlsx", sheet = "ELRI")
-# ELVI_2019_data <- read_xlsx("~/Dropbox/EndodemogData/Field Data/2019/LTREB_data_2019_July2019FieldData_NumbersConversion.xlsx", sheet = "ELVI")
-# FESU_2019_data <- read_xlsx("~/Dropbox/EndodemogData/Field Data/2019/LTREB_data_2019_July2019FieldData_NumbersConversion.xlsx", sheet = "FESU")
-# LOAR_2019_data <- read_xlsx("~/Dropbox/EndodemogData/Field Data/2019/LTREB_data_2019_July2019FieldData_NumbersConversion.xlsx", sheet = "LOAR")
-# POAL_2019_data <- read_xlsx("~/Dropbox/EndodemogData/Field Data/2019/LTREB_data_2019_July2019FieldData_NumbersConversion.xlsx", sheet = "POAL") %>%
-#   mutate(id = paste(plot, "_", pos))
-# POSY_2019_data <- read_xlsx("~/Dropbox/EndodemogData/Field Data/2019/LTREB_data_2019_July2019FieldData_NumbersConversion.xlsx", sheet = "POSY") %>%
-#   mutate(id = paste(plot, "_", pos))
-# 
-# # Now we can merge all the different species together.
-# LTREB_2019_data <- ELRI_2019_data %>%
-#   merge(ELVI_2019_data, by = c("species", "origin", "plot", "pos","id",  "birth_year", "observation_year", "species", "distance_A", "distance_B", "survival", "size_tillers", "flowering_tillers", "spikelets_A", "spikelets_B", "spikelets_C", "notes"), all = TRUE) %>%
-#   merge(FESU_2019_data, by = c("species", "origin", "plot", "pos","id",  "birth_year", "observation_year", "species", "distance_A", "distance_B", "survival", "size_tillers", "flowering_tillers", "spikelets_A", "spikelets_B", "spikelets_C", "notes"), all = TRUE) %>%
-#   merge(LOAR_2019_data, by = c("species", "origin", "plot", "pos","id",  "birth_year", "observation_year", "species", "distance_A", "distance_B", "survival", "size_tillers", "flowering_tillers", "spikelets_A", "spikelets_B", "spikelets_C", "notes"), all = TRUE) %>%
-#   merge(POAL_2019_data, by = c("species", "origin", "plot", "pos","id",  "birth_year", "observation_year", "species", "distance_A", "distance_B", "survival", "size_tillers", "flowering_tillers", "spikelets_A", "spikelets_B", "spikelets_C", "notes"), all = TRUE) %>%
-#   merge(POSY_2019_data, by = c("species", "origin", "plot", "pos","id",  "birth_year", "observation_year", "species", "distance_A", "distance_B", "survival", "size_tillers", "flowering_tillers", "spikelets_A", "spikelets_B", "spikelets_C", "notes"), all = TRUE)
-# 
-# # We need to do a little bit of cleaning up for some of the missing tags and changing variable names.
-# LTREB_2019_cleaned <- LTREB_2019_data %>%
-#   rename(year_t1 = observation_year, surv_t1 = survival,
-#          size_t1 = size_tillers, FLW_COUNT_T1 = flowering_tillers,
-#          SPIKE_A_T1 = spikelets_A, SPIKE_B_T1 = spikelets_B, SPIKE_C_T1 = spikelets_C,
-#          dist_a = distance_A, dist_b = distance_B)
-#   mutate(plot_fixed = as.integer(plot))
-# 
-# 
-#   # I'm gonna talk to Tom about this stuff and see if the excel sheet can be cleaned up more.
-# 
-#   LTREB_data <- LTREB_endodemog %>%
-#     mutate(size_t = na_if(size_t, 0)) %>%
-#     mutate(size_t1 = na_if(size_t1, 0)) %>%
-#     mutate(size_t, logsize_t = log(size_t)) %>%
-#     mutate(size_t1, logsize_t1 = log(size_t1)) %>%
-#     mutate(surv_t1 = as.integer(recode(surv_t1, "0" = 0, "1" =1, "2" = 1, "4" = 1))) %>%
-#     mutate(endo_01 = as.integer(case_when(endo == "0" | endo == "minus" ~ 0,
-#                                           endo == "1"| endo =="plus" ~ 1))) %>%
-#     mutate(endo_index = as.integer(as.factor(endo_01+1)))  %>%
-#     mutate(species = case_when(species == "ELVI" & plot == 101 ~ "ELRI", species == "ELVI" & plot != 101 ~ "ELVI",  # This is for the compiled data where a ELRI data point in plot 101, tag 2004 is labelled as ELVI
-#                                species == "ELRI" ~ "ELRI",
-#                                species == "FESU" ~ "FESU",
-#                                species == "AGPE" ~ "AGPE",
-#                                species == "POAL" ~ "POAL",
-#                                species == "POSY" ~ "POSY",
-#                                species == "LOAR" ~ "LOAR"))  %>%
-#     mutate(species_index = as.integer(recode_factor(species,
-#                                                     "AGPE" = 1, "ELRI" = 2, "ELVI" = 3,
-#                                                     "FESU" = 4, "LOAR" = 5, "POAL" = 6,
-#                                                     "POSY" = 7))) %>%
-#     mutate(year_t_index = as.integer(recode(year_t,
-#                                             '2007' = 1, '2008' = 2, '2009' = 3,
-#                                             '2010' = 4, '2011' = 5, '2012' = 6,
-#                                             '2013' = 7, '2014' = 8, '2015' = 9,
-#                                             '2016' = 10, '2017' = 11))) %>%
-#     mutate(year_t1_index = as.integer(recode(year_t1,
-#                                              '2008' = 2, '2009' = 3, '2010' = 4,
-#                                              '2011' = 5, '2012' = 6, '2013' = 7,
-#                                              '2014' = 8, '2015' = 9, '2016' = 10,
-#                                              '2017' = 11, '2018' = 12))) %>%
-#     mutate(origin_01 = as.integer(case_when(origin == "O" ~ 0,
-#                                             origin == "R" ~ 1,
-#                                             origin != "R" | origin != "O" ~ 1))) %>%
-#     mutate(plot_fixed = as.integer(case_when(species == "LOAR" & id == "39_1B" ~ "39", # This is for a copy error with LOAR individual 39_1B, which assigned it to plots 41-44
-#                                              plot != "R" ~ as.character(plot),
-#                                              plot == "R" ~ as.character(origin)))) %>%
-#     mutate(surv_t1 = as.integer(case_when(surv_t1 == 1 ~ 1,
-#                                           surv_t1 == 0 ~ 0,
-#                                           is.na(surv_t1) & birth == year_t1 ~ 1))) %>%
-#     filter(duplicated(.) == FALSE)
-#   # dim(LTREB_data)
-# 
-# 
-# 
-# 
-# # We still need 2019 AGPE data
-# LTREB_full_to2019 <- LTREB_full_to2018_lag %>%
-#   full_join()
+AGPE_2019_data <- read_xlsx("~/Dropbox/EndodemogData/Field Data/2019/LTREB_data_2019.xlsx", sheet = "AGPE")
+ELRI_2019_data <- read_xlsx("~/Dropbox/EndodemogData/Field Data/2019/LTREB_data_2019.xlsx", sheet = "ELRI")
+ELVI_2019_data <- read_xlsx("~/Dropbox/EndodemogData/Field Data/2019/LTREB_data_2019.xlsx", sheet = "ELVI")
+FESU_2019_data <- read_xlsx("~/Dropbox/EndodemogData/Field Data/2019/LTREB_data_2019.xlsx", sheet = "FESU")
+LOAR_2019_data <- read_xlsx("~/Dropbox/EndodemogData/Field Data/2019/LTREB_data_2019.xlsx", sheet = "LOAR")
+POAL_2019_data <- read_xlsx("~/Dropbox/EndodemogData/Field Data/2019/LTREB_data_2019.xlsx", sheet = "POAL") %>% 
+  mutate(id = paste(plot, pos, sep = "_"))
+POSY_2019_data <- read_xlsx("~/Dropbox/EndodemogData/Field Data/2019/LTREB_data_2019.xlsx", sheet = "POSY") %>%
+  mutate(id = paste(plot, pos, sep = "_"))
 
+# # Now we can merge all the different species together.
+LTREB_2019_data <- AGPE_2019_data %>% 
+  merge(ELRI_2019_data, by = c("species", "origin", "plot", "pos","id",  "birth_year", "observation_year", "species", "distance_A", "distance_B", "survival", "size_tillers", "flowering_tillers", "spikelets_A", "spikelets_B", "spikelets_C", "notes"), all = TRUE) %>%
+  merge(ELVI_2019_data, by = c("species", "origin", "plot", "pos","id",  "birth_year", "observation_year", "species", "distance_A", "distance_B", "survival", "size_tillers", "flowering_tillers", "spikelets_A", "spikelets_B", "spikelets_C", "notes"), all = TRUE) %>%
+  merge(FESU_2019_data, by = c("species", "origin", "plot", "pos","id",  "birth_year", "observation_year", "species", "distance_A", "distance_B", "survival", "size_tillers", "flowering_tillers", "spikelets_A", "spikelets_B", "spikelets_C", "notes"), all = TRUE) %>%
+  merge(LOAR_2019_data, by = c("species", "origin", "plot", "pos","id",  "birth_year", "observation_year", "species", "distance_A", "distance_B", "survival", "size_tillers", "flowering_tillers", "spikelets_A", "spikelets_B", "spikelets_C", "notes"), all = TRUE) %>%
+  merge(POAL_2019_data, by = c("species", "origin", "plot", "pos","id",  "birth_year", "observation_year", "species", "distance_A", "distance_B", "survival", "size_tillers", "flowering_tillers", "spikelets_A", "spikelets_B", "spikelets_C", "notes"), all = TRUE) %>%
+  merge(POSY_2019_data, by = c("species", "origin", "plot", "pos","id",  "birth_year", "observation_year", "species", "distance_A", "distance_B", "survival", "size_tillers", "flowering_tillers", "spikelets_A", "spikelets_B", "spikelets_C", "notes"), all = TRUE)
+
+# # We need to do a little bit of cleaning up for some of the missing tags and changing variable names.
+# 
+LTREB_2019_cleaned <- LTREB_2019_data %>%
+  rename(year_t1 = observation_year, surv_t1 = survival,
+         size_t1 = size_tillers, FLW_COUNT_T1 = flowering_tillers,
+         SPIKE_A_T1 = spikelets_A, SPIKE_B_T1 = spikelets_B, SPIKE_C_T1 = spikelets_C,
+         dist_a = distance_A, dist_b = distance_B, birth = birth_year) %>% 
+    mutate(birth = as.integer(birth)) %>% 
+    mutate(plot_fixed = as.integer(plot)) %>% 
+    mutate(size_t1 = na_if(size_t1, 0)) %>%
+    mutate(size_t1, logsize_t1 = log(size_t1)) %>%
+    mutate(surv_t1 = as.integer(recode(surv_t1, "0" = 0, "1" =1))) %>%
+    mutate(FLW_STAT_T1 = case_when(FLW_COUNT_T1 == 0 ~ 0,
+                                   FLW_COUNT_T1 > 0 ~1)) %>% 
+    mutate(species_index = as.integer(recode_factor(species,
+                                                    "AGPE" = 1, "ELRI" = 2, "ELVI" = 3,
+                                                    "FESU" = 4, "LOAR" = 5, "POAL" = 6,
+                                                    "POSY" = 7))) %>%
+    mutate(year_t1_index = as.integer(recode(year_t1,
+                                             '2008' = 2, '2009' = 3, '2010' = 4,
+                                             '2011' = 5, '2012' = 6, '2013' = 7,
+                                             '2014' = 8, '2015' = 9, '2016' = 10,
+                                             '2017' = 11, '2018' = 12, '2019' = 13))) %>%
+    mutate(origin_01 = as.integer(case_when(origin == "O" ~ 0,
+                                            origin == "R" ~ 1,
+                                            origin != "R" | origin != "O" ~ 1))) %>%
+    mutate(surv_t1 = as.integer(case_when(surv_t1 == 1 ~ 1,
+                                          surv_t1 == 0 ~ 0,
+                                          is.na(surv_t1) & birth == year_t1 ~ 1))) %>% 
+    filter(duplicated(.) == FALSE, !is.na(surv_t1)) %>% 
+    filter(!is.na(size_t1) & surv_t1 == 1 | surv_t1 == 0) # filtering out mismatches where there is no size data but the survival was recorded; this is sometimes TNF or new recruits where I think it was an oversight in data entry where they are likely a small size like 1 tiller.
+# dim(LTREB_2019_cleaned)
+
+
+LTREB_2019 <- LTREB_2019_cleaned %>% 
+  group_by(id) %>% 
+  mutate(year_t = 2018,
+         year_t_index = 12) %>% 
+  dplyr::select(plot_fixed, pos, id, species, species_index, 
+                origin_01, birth,
+                year_t1, year_t1_index,
+                surv_t1, size_t1, logsize_t1,
+                FLW_COUNT_T1, FLW_STAT_T1,
+                SPIKE_A_T1, SPIKE_B_T1, SPIKE_C_T1,
+                year_t, year_t_index)
+# Assigning plot endo status to the 2019 data
+LTREB_plot_endo_status <- LTREB_full_to2018 %>% 
+  group_by(plot_fixed) %>% 
+  summarize(endo_01 = round(mean(endo_01, na.rm = T)),
+            endo_index = round(mean(endo_index, na.rm = T)))
+
+LTREB_2019 <- LTREB_2019 %>% 
+  left_join(LTREB_plot_endo_status)
+
+# Now we can merge our 2019 data with our full dataframe
+LTREB_full_to2019 <- LTREB_full_to2018_lag %>%
+  full_join(LTREB_2019)
+
+
+##############################################################################
+####### Then we will add lagged variables to have the measurements in time t 
+##############################################################################
+
+# I'm creating the lagged variable from the combined data because the 2019 data by itself doesn't have 2018 data
+# This leaves some NA's in the year t variables, so I am creating from the merged data frame and then selecting the values without NA's from the new column and from the endo_demog_long's column.
+# There is probably a smoother way to do some of this, but I think this works okay.
+LTREB_full_to2019_lag <- LTREB_full_to2019 %>% 
+  group_by(id) %>% 
+  mutate(SIZE_T_NEW = dplyr::lag(size_t1, n = 1, default = NA),
+         LOGSIZE_T_NEW = dplyr::lag(logsize_t1, n = 1, default = NA),
+         FLW_COUNT_T_NEW = as.integer(dplyr::lag(FLW_COUNT_T1, n = 1, default = NA)),
+         FLW_STAT_T_NEW = as.integer(dplyr::lag(FLW_STAT_T1, n = 1, default = NA)),
+         SPIKE_A_T_NEW  = dplyr::lag(SPIKE_A_T1, n = 1, default = NA),
+         SPIKE_B_T_NEW  = dplyr::lag(SPIKE_B_T1, n = 1, default = NA),
+         SPIKE_C_T_NEW  = dplyr::lag(SPIKE_C_T1, n = 1, default = NA),
+         SPIKE_D_T_NEW  = dplyr::lag(SPIKE_D_T1, n = 1, default = NA),
+         SPIKE_AGPE_MEAN_T_NEW  = dplyr::lag(SPIKE_AGPE_MEAN_T1, n = 1, default = NA)) %>% 
+  mutate(size_t = case_when(!is.na(size_t) ~ size_t,
+                           !is.na(SIZE_T_NEW) ~ SIZE_T_NEW),
+         logsize_t = case_when(!is.na(logsize_t) ~ logsize_t,
+                            !is.na(LOGSIZE_T_NEW) ~ LOGSIZE_T_NEW),
+         FLW_COUNT_T = case_when(!is.na(FLW_COUNT_T) ~ FLW_COUNT_T,
+                                 !is.na(FLW_COUNT_T_NEW) ~ FLW_COUNT_T_NEW),
+         FLW_STAT_T = case_when(!is.na(FLW_STAT_T) ~ FLW_STAT_T,
+                                 !is.na(FLW_STAT_T_NEW) ~ FLW_STAT_T_NEW),
+         SPIKE_A_T = case_when(!is.na(SPIKE_A_T) ~ SPIKE_A_T,
+                                !is.na(SPIKE_A_T_NEW) ~ SPIKE_A_T_NEW),
+         SPIKE_B_T = case_when(!is.na(SPIKE_B_T) ~ SPIKE_B_T,
+                               !is.na(SPIKE_B_T_NEW) ~ SPIKE_B_T_NEW),
+         SPIKE_C_T = case_when(!is.na(SPIKE_C_T) ~ SPIKE_C_T,
+                               !is.na(SPIKE_C_T_NEW) ~ SPIKE_C_T_NEW),
+         SPIKE_D_T = case_when(!is.na(SPIKE_D_T) ~ SPIKE_D_T,
+                               !is.na(SPIKE_D_T_NEW) ~ SPIKE_D_T_NEW),
+         SPIKE_AGHE_MEAN_T = case_when(!is.na(SPIKE_AGPE_MEAN_T) ~ SPIKE_AGPE_MEAN_T,
+                                       !is.na(SPIKE_AGPE_MEAN_T_NEW) ~ SPIKE_AGPE_MEAN_T_NEW),
+         ) %>% 
+  dplyr::select(plot_fixed, pos, id, species, species_index, 
+                endo_01, endo_index, origin_01, birth,
+                year_t1, year_t1_index,
+                surv_t1, size_t1, logsize_t1,
+                FLW_COUNT_T1, FLW_STAT_T1,
+                SPIKE_A_T1, SPIKE_B_T1, SPIKE_C_T1, SPIKE_D_T1, SPIKE_AGPE_MEAN_T1,
+                year_t, year_t_index, size_t, logsize_t, 
+                FLW_COUNT_T, FLW_STAT_T,
+                SPIKE_A_T, SPIKE_B_T, SPIKE_C_T, SPIKE_D_T, SPIKE_AGPE_MEAN_T)
+
+dim(LTREB_full_to2019_lag)
 
 ##############################################################################
 ####### Merging in the endophyte checks ------------------------------
