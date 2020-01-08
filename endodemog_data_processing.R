@@ -1757,8 +1757,7 @@ LTREB_2019_cleaned <- LTREB_2019_data %>%
     mutate(surv_t1 = as.integer(case_when(surv_t1 == 1 ~ 1,
                                           surv_t1 == 0 ~ 0,
                                           is.na(surv_t1) & birth == year_t1 ~ 1))) %>% 
-    filter(duplicated(.) == FALSE, !is.na(surv_t1)) %>% 
-    filter(!is.na(size_t1) & surv_t1 == 1 | surv_t1 == 0) # filtering out mismatches where there is no size data but the survival was recorded; this is sometimes TNF or new recruits where I think it was an oversight in data entry where they are likely a small size like 1 tiller.
+    filter(!is.na(size_t1) & surv_t1 == 1 | surv_t1 == 0) # filtering out mismatches where there is no size data entry but the survival was recorded; this is sometimes TNF or new recruits where I think it was an oversight in data entry where they are likely a small size like 1 tiller. For now, I am just removing them
 # dim(LTREB_2019_cleaned)
 
 
@@ -1860,9 +1859,9 @@ LTREB_endo_check <- read_csv(file = "~/Dropbox/EndodemogData/Fulldataplusmetadat
 #   check:	"x" indicates the incorrect status was detected given original plot level treatment
 
 # There are two plants that are checked but are not present in the endo_demog_long dataset
-setdiff(LTREB_endo_check$id,LTREB_full_to2018_lag$id)
+setdiff(LTREB_endo_check$id,LTREB_full_to2019_lag$id)
 
-LTREB_full_2 <- LTREB_full_to2018_lag %>% 
+LTREB_full_2 <- LTREB_full_to2019_lag %>% 
   left_join(LTREB_endo_check, by = c("species" = "species", "plot_fixed" = "plot", "pos" = "pos", "origin_01" = "origin_01", "id" = "id"))
 
 # here are some summaries of the amount of changes in endophyte status
@@ -1900,11 +1899,11 @@ LTREB_distances <- read_csv(file = "~/Dropbox/EndodemogData/Fulldataplusmetadata
 # Here are the plant id's that are in the distance file but not the long file
 setdiff(LTREB_distances$id, LTREB_full_2$id)
 
-
+# This is the main dataframe this is used to create vital rate model lists
 LTREB_full <- LTREB_full_2 %>% 
   left_join(LTREB_distances, by = c("species" = "species","pos" = "pos", "plot_fixed" = "plot", "origin_01" = "origin_01", "id" = "id")) %>% 
   dplyr::select(-duplicate, -origin_from_check, -origin_from_distance, -date_status, -date_dist) # I'm removing some of the extrneous variable. We also have distance data in the new field data that needs to be merged in.
-write_csv(LTREB_full,"~/Dropbox/EndodemogData/Fulldataplusmetadata/LTREB_full.csv")
+# write_csv(LTREB_full,"~/Dropbox/EndodemogData/Fulldataplusmetadata/LTREB_full.csv")
 
 ##############################################################################
 ####### Preparing datalists for Survival Kernel ------------------------------
