@@ -4,7 +4,7 @@ author:
 - Joshua C. Fowler^[Rice University][jcf3@rice.edu]
 - Kenneth D. Whitney^[University of New Mexico]
 - Jennifer A. Rudgers^[University of New Mexico]
-- Thomas E. X. Miller^[Rice University]
+- Tom E. X. Miller^[Rice University]
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
   html_document: default
@@ -38,11 +38,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Introduction
 ===========================
+Environmental variability is a ubiquitious feature of natural ecosystems with important consequences for population dynamics  (cite). Classic theory demonstrates that stochastic population growth is influenced by both the average growth rate and by the variability in growth rate (cite). Commonly, mutualistic interactions are quantified by their effect only on these average growth rates, due in part to constraints of study design and length.
 
-
-Methods
-===========================
-
+Microbial symbionts are common (cite) and often provide context-dependent benefits to their hosts (cite). This context dependence may act to limit the environmental variability experienced by the host by reducing extremely bad and extremely good years.
 
 Results
 ===========================
@@ -52,12 +50,17 @@ Discussion
 ===========================
 
 
+Methods
+===========================
+
+
 Acknowledgements
 ===========================
 
 
 References
 ===========================
+
 
 Figures and Tables
 ===========================
