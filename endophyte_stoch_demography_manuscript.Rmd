@@ -1,0 +1,73 @@
+---
+title: "Context-dependent microbial symbiosis in stochastic environments"
+author:
+- Joshua C. Fowler^[Rice University][jcf3@rice.edu]
+- Kenneth D. Whitney^[University of New Mexico]
+- Jennifer A. Rudgers^[University of New Mexico]
+- Thomas E. X. Miller^[Rice University]
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+keywords: keywords
+abstract: "One or two sentences providing a **basic introduction** to the field,  comprehensible
+  to a scientist in any discipline.\n\nTwo to three sentences of **more detailed background**,
+  comprehensible  to scientists in related disciplines.\n\nOne sentence clearly stating
+  the **general problem** being addressed by  this particular study.\n\nOne sentence
+  summarizing the main result (with the words \"**here we show**\" or their equivalent).\n\nTwo
+  or three sentences explaining what the **main result** reveals in direct comparison
+  to what was thought to be the case previously, or how the  main result adds to previous
+  knowledge.\n\nOne or two sentences to put the results into a more **general context**.\n\nTwo
+  or three sentences to provide a **broader perspective**, readily comprehensible
+  to a scientist in any discipline.\n  \n"
+header-includes:
+- \usepackage{fancyhdr}
+- \pagestyle{fancy}
+- \fancyhead[L]{MANUSCRIPT AUTHORS}
+- \fancyhead[R]{MANUSCRIPT SHORT TITLE}
+- \usepackage{lineno}
+- \linenumbers
+linestretch: 2
+link-citations: yes
+linkcolor: blue
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Introduction
+===========================
+
+
+Methods
+===========================
+
+
+Results
+===========================
+
+
+Discussion
+===========================
+
+
+Acknowledgements
+===========================
+
+
+References
+===========================
+
+Figures and Tables
+===========================
+
+
+
+
+
+
+
+
+
+
