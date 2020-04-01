@@ -32,8 +32,8 @@ options(mc.cores = parallel::detectCores())
 set.seed(123)
 
 ## MCMC settings
-ni <-5000
-nb <- 2000
+ni <-10000
+nb <- 5000
 nc <- 3
 
 sink("endodemog_spike.stan")
@@ -77,7 +77,7 @@ cat("
     model {
     
     // Priors
-    beta ~ normal(0,100);
+    beta ~ normal(0,10);
     tau_plot ~ normal(0,sigma_p);   // prior for plot random effects
     to_vector(tau_year[1]) ~ normal(0,sigma_e[1]);   // prior for E- year random effects
     to_vector(tau_year[2]) ~ normal(0,sigma_e[2]);   // prior for E+ year random effects
@@ -105,15 +105,15 @@ stanmodel <- stanc("endodemog_spike.stan")
 ## Save the outputs as rds files
 
 smAGPE<- stan(file = "endodemog_spike.stan", data = AGPE_spike_data_list,
-              iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
+              iter = ni, warmup = nb, chains = nc, save_warmup = FALSE, control = list(adapt_delta = .99))
 # saveRDS(smAGPE, file = "endodemog_spike_AGPE.rds")
 
 smELRI <- stan(file = "endodemog_spike.stan", data = ELRI_spike_data_list,
-               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
+               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE, control = list(adapt_delta = .99))
 # saveRDS(smELRI, file = "endodemog_spike_ELRI.rds")
 
 smELVI <- stan(file = "endodemog_spike.stan", data = ELVI_spike_data_list,
-               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE)
+               iter = ni, warmup = nb, chains = nc, save_warmup = FALSE, control = list(adapt_delta = .99))
 # saveRDS(smELVI, file = "endodemog_spike_ELVI.rds")
 
 smFESU <- stan(file = "endodemog_spike.stan", data = FESU_spike_data_list,

@@ -192,7 +192,7 @@ means_histogram <- function(df){
   spp <- ggplot() +
     geom_histogram(data = df, aes(df$`beta[3]`), fill = "#4d9158", alpha = .6, bins = 200) +
     geom_vline(xintercept = mean(df$`beta[3]`), col = "#4d9158") +
-    labs(x = expression(mu[year]), y = "Posterior density") + theme_classic()
+    labs(x = "Mean Endophyte Effect", y = "Posterior density") + theme_classic()
   return(spp)
 }
 # survival
