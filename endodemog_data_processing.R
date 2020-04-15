@@ -3238,3 +3238,22 @@ str(POSY_all_vr_data_list)
 # 
 # mean(LTREB_full$endo_mismatch, na.rm = T)
 #                  
+
+# Looking at plot density
+# We can sum up the number of recruits in each year and the number of surviving plants in each year for each plot
+
+LTREB_density <- LTREB_full %>% 
+  group_by(species, plot_fixed, year_t, year_t1) %>% 
+  summarize(recruitcount_t = sum(birth == year_t),
+            survcount_t = sum(birth != year_t),
+            fullcount_t = n())
+
+# Validation that our counts are okay
+LTREB_plot1_2009 <- LTREB_full %>% 
+  filter(plot_fixed == 1, year_t == 2009)
+
+
+ggplot(data = subset(LTREB_density, species == "POSY"), aes(x = year_t, y = survcount_t, color = plot_fixed))+
+  geom_point() +
+  geom_smooth(aes(x = year_t, y = survcount_t, group = plot_fixed), method = lm, se = F) +
+  facet_wrap(~species)
