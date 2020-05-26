@@ -1,8 +1,79 @@
-\begin{thebibliography}{0}
+\begin{thebibliography}{8}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
   \providecommand{\doi}[1]{doi: #1}\else
   \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Lewontin and Cohen(1969)]{lewontin_population_1969}
+R.~C. Lewontin and D.~Cohen.
+\newblock On {Population} {Growth} in a {Randomly} {Varying} {Environment}.
+\newblock \emph{Proceedings of the National Academy of Sciences}, 62\penalty0
+  (4):\penalty0 1056--1060, April 1969.
+\newblock ISSN 0027-8424, 1091-6490.
+\newblock \doi{10.1073/pnas.62.4.1056}.
+\newblock URL \url{https://www.pnas.org/content/62/4/1056}.
+\newblock Publisher: National Academy of Sciences Section: Biological Sciences:
+  Zoology.
+
+\bibitem[Tuljapurkar(1982)]{tuljapurkar_population_1982}
+Shripad~D. Tuljapurkar.
+\newblock Population dynamics in variable environments. {III}. {Evolutionary}
+  dynamics of r-selection.
+\newblock \emph{Theoretical Population Biology}, 21\penalty0 (1):\penalty0
+  141--165, February 1982.
+\newblock ISSN 0040-5809.
+\newblock \doi{10.1016/0040-5809(82)90010-7}.
+\newblock URL
+  \url{http://www.sciencedirect.com/science/article/pii/0040580982900107}.
+
+\bibitem[Hilde et~al.(2020)Hilde, Gamelon, Sæther, Gaillard, Yoccoz, and
+  Pélabon]{hilde_demographic_2020}
+Christoffer~H. Hilde, Marlène Gamelon, Bernt-Erik Sæther, Jean-Michel
+  Gaillard, Nigel~G. Yoccoz, and Christophe Pélabon.
+\newblock The {Demographic} {Buffering} {Hypothesis}: {Evidence} and
+  {Challenges}.
+\newblock \emph{Trends in Ecology \& Evolution}, 0\penalty0 (0), March 2020.
+\newblock ISSN 0169-5347.
+\newblock \doi{10.1016/j.tree.2020.02.004}.
+\newblock URL
+  \url{https://www.cell.com/trends/ecology-evolution/abstract/S0169-5347(20)30050-1}.
+\newblock Publisher: Elsevier.
+
+\bibitem[Pfister(1998)]{pfister1998patterns}
+Catherine~A Pfister.
+\newblock Patterns of variance in stage-structured populations: evolutionary
+  predictions and ecological implications.
+\newblock \emph{Proceedings of the National Academy of Sciences}, 95\penalty0
+  (1):\penalty0 213--218, 1998.
+
+\bibitem[on~Climate~Change)(2012)]{IPCC2012managing}
+IPCC (Intergovernmental~Panel on~Climate~Change).
+\newblock \emph{Managing the risks of extreme events and disasters to advance
+  climate change adaptation: special report of the intergovernmental panel on
+  climate change. Special Report.}
+\newblock Cambridge University Press, 2012.
+
+\bibitem[Iles et~al.(2019)Iles, Rockwell, and Koons]{iles2019shifting}
+David~T Iles, Robert~F Rockwell, and David~N Koons.
+\newblock Shifting vital rate correlations alter predicted population responses
+  to increasingly variable environments.
+\newblock \emph{The American Naturalist}, 193\penalty0 (3):\penalty0 E57--E64,
+  2019.
+
+\bibitem[Doak et~al.(2005)Doak, Morris, Pfister, Kendall, and
+  Bruna]{doak2005correctly}
+Daniel~F Doak, William~F Morris, Cathy Pfister, Bruce~E Kendall, and Emilio~M
+  Bruna.
+\newblock Correctly estimating how environmental stochasticity influences
+  fitness and population growth.
+\newblock \emph{The American Naturalist}, 166\penalty0 (1):\penalty0 E14--E21,
+  2005.
+
+\bibitem[Chamberlain et~al.(2014)Chamberlain, Bronstein, and
+  Rudgers]{chamberlain2014context}
+Scott~A Chamberlain, Judith~L Bronstein, and Jennifer~A Rudgers.
+\newblock How context dependent are species interactions?
+\newblock \emph{Ecology letters}, 17\penalty0 (7):\penalty0 881--890, 2014.
 
 \end{thebibliography}
