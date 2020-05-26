@@ -65,8 +65,6 @@ Across species, we find that variance buffering by endophytes contributes (perce
 
 
 
-Do continuous models have the same cost of variability?
-
 \section*{Results}
 
 \section*{Discussion}
