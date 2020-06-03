@@ -1717,7 +1717,7 @@ LOAR_2019_data <- read_xlsx("~/Dropbox/EndodemogData/Field Data/2019/LTREB_data_
 POAL_2019_data <- read_xlsx("~/Dropbox/EndodemogData/Field Data/2019/LTREB_data_2019.xlsx", sheet = "POAL")
 POSY_2019_data <- read_xlsx("~/Dropbox/EndodemogData/Field Data/2019/LTREB_data_2019.xlsx", sheet = "POSY")
 # # Now we can merge all the different species together.
-LTREB_2019_data <- AGPE_2019_data %>% 
+LTREB_update_data <- AGPE_2019_data %>% 
   merge(ELRI_2019_data, by = c("species", "origin", "plot", "pos","id",  "birth_year", "observation_year", "species", "distance_A", "distance_B", "survival", "size_tillers", "flowering_tillers", "spikelets_A", "spikelets_B", "spikelets_C", "notes"), all = TRUE) %>%
   merge(ELVI_2019_data, by = c("species", "origin", "plot", "pos","id",  "birth_year", "observation_year", "species", "distance_A", "distance_B", "survival", "size_tillers", "flowering_tillers", "spikelets_A", "spikelets_B", "spikelets_C", "notes"), all = TRUE) %>%
   merge(FESU_2019_data, by = c("species", "origin", "plot", "pos","id",  "birth_year", "observation_year", "species", "distance_A", "distance_B", "survival", "size_tillers", "flowering_tillers", "spikelets_A", "spikelets_B", "spikelets_C", "notes"), all = TRUE) %>%
@@ -1727,7 +1727,7 @@ LTREB_2019_data <- AGPE_2019_data %>%
 
 # # We need to do a little bit of cleaning up for some of the missing tags and changing variable names.
 # 
-LTREB_2019_cleaned <- LTREB_2019_data %>%
+LTREB_update_cleaned <- LTREB_update_data %>%
   rename(year_t1 = observation_year, surv_t1 = survival,
          size_t1 = size_tillers, FLW_COUNT_T1 = flowering_tillers,
          SPIKE_A_T1 = spikelets_A, SPIKE_B_T1 = spikelets_B, SPIKE_C_T1 = spikelets_C,
@@ -1750,15 +1750,15 @@ LTREB_2019_cleaned <- LTREB_2019_data %>%
                                              '2017' = 11, '2018' = 12, '2019' = 13))) %>%
     mutate(origin_01 = as.integer(case_when(origin == "O" ~ 0,
                                             origin == "R" ~ 1,
-                                            origin != "R" | origin != "O" ~ 1))) %>%
+                                            origin != "R" | origin != "O" ~ 1))) 
     mutate(surv_t1 = as.integer(case_when(surv_t1 == 1 ~ 1,
                                           surv_t1 == 0 ~ 0,
                                           is.na(surv_t1) & birth == year_t1 ~ 1))) %>% 
     filter(!is.na(size_t1) & surv_t1 == 1 | surv_t1 == 0) # filtering out mismatches where there is no size data entry but the survival was recorded; this is sometimes TNF or new recruits where I think it was an oversight in data entry where they are likely a small size like 1 tiller. For now, I am just removing them
-# dim(LTREB_2019_cleaned)
+# dim(LTREB_update_cleaned)
 
 
-LTREB_2019 <- LTREB_2019_cleaned %>% 
+LTREB_update <- LTREB_update_cleaned %>% 
   group_by(id) %>% 
   mutate(year_t = 2018,
          year_t_index = 12) %>% 
@@ -1775,12 +1775,12 @@ LTREB_plot_endo_status <- LTREB_full_to2018 %>%
   summarize(endo_01 = round(mean(endo_01, na.rm = T)),
             endo_index = round(mean(endo_index, na.rm = T)))
 
-LTREB_2019 <- LTREB_2019 %>% 
+LTREB_update <- LTREB_update %>% 
   left_join(LTREB_plot_endo_status)
 
 # Now we can merge our 2019 data with our full dataframe
-LTREB_full_to2019 <- LTREB_full_to2018_lag %>%
-  full_join(LTREB_2019)
+LTREB_full_update <- LTREB_full_to2018_lag %>%
+  full_join(LTREB_update)
 
 
 ##############################################################################
@@ -1790,7 +1790,7 @@ LTREB_full_to2019 <- LTREB_full_to2018_lag %>%
 # I'm creating the lagged variable from the combined data because the 2019 data by itself doesn't have 2018 data
 # This leaves some NA's in the year t variables, so I am creating from the merged data frame and then selecting the values without NA's from the new column and from the endo_demog_long's column.
 # There is probably a smoother way to do some of this, but I think this works okay.
-LTREB_full_to2019_lag <- LTREB_full_to2019 %>% 
+LTREB_full_update_lag <- LTREB_full_update %>% 
   group_by(id) %>% 
   mutate(SIZE_T_NEW = dplyr::lag(size_t1, n = 1, default = NA),
          LOGSIZE_T_NEW = dplyr::lag(logsize_t1, n = 1, default = NA),
@@ -1830,7 +1830,7 @@ LTREB_full_to2019_lag <- LTREB_full_to2019 %>%
                 FLW_COUNT_T, FLW_STAT_T,
                 SPIKE_A_T, SPIKE_B_T, SPIKE_C_T, SPIKE_D_T, SPIKE_AGPE_MEAN_T)
 
-dim(LTREB_full_to2019_lag)
+dim(LTREB_full_update_lag)
 
 ##############################################################################
 ####### Merging in the endophyte checks ------------------------------
@@ -1858,7 +1858,7 @@ LTREB_endo_check <- read_csv(file = "~/Dropbox/EndodemogData/Fulldataplusmetadat
 # There are two plants that are checked but are not present in the endo_demog_long dataset
 setdiff(LTREB_endo_check$id,LTREB_full_to2019_lag$id)
 
-LTREB_full_2 <- LTREB_full_to2019_lag %>% 
+LTREB_full_2 <- LTREB_full_update_lag %>% 
   left_join(LTREB_endo_check, by = c("species" = "species", "plot_fixed" = "plot", "pos" = "pos", "origin_01" = "origin_01", "id" = "id"))
 
 # here are some summaries of the amount of changes in endophyte status
