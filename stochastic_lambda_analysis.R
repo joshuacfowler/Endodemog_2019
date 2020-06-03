@@ -27,6 +27,7 @@ lambdaSim<-function(mat_list, ## a list of transition matrices, each correspondi
   }
   #discard initial values (to get rid of transient)
   burnin    <- round(max_yrs*0.1)
+
   rtracker  <- rtracker[-c(1:burnin)]
   #Finish and return
   log_lambdaS <- mean(rtracker)
@@ -50,6 +51,16 @@ lambdaSim(toy_matrices)
 ## so for AGPE as an example:
 AGPE_lambdaS <- c()
 
+AGPE_Eplus_mean_var <- list() ## assemble this from parameters
+AGPE_lambdaS[1]<-lambdaSim(AGPE_Eplus_mean_var)$log_lambdaS
+
+AGPE_Eplus_mean_only <- list() ## assemble this from parameters
+AGPE_lambdaS[2]<-lambdaSim(AGPE_Eplus_mean_only)$log_lambdaS
+
+AGPE_Eplus_var_only <- list() ## assemble this from parameters
+AGPE_lambdaS[3]<-lambdaSim(AGPE_Eplus_var_only)$log_lambdaS
+
+AGPE_Eminus <- list() ## assemble this from parameters
 AGPE_Eplus_mean_var <- list(bigmatrix(agpe_1m_1v_rec_params, year = 1)$MPMmat,
                             bigmatrix(agpe_1m_1v_rec_params, year = 2)$MPMmat,
                             bigmatrix(agpe_1m_1v_rec_params, year = 3)$MPMmat,
@@ -105,7 +116,7 @@ AGPE_lambdaS[4]<-lambdaSim(AGPE_Eminus)$log_lambdaS
 ## compute E+ / E- difference for different types of E+ effects (both, mean, variance)
 AGPE_lambdaS_effect <- AGPE_lambdaS[1:3]-AGPE_lambdaS[4]
 
-## visualize results to see how much the endo effe
+## visualize results to see how much the endo effect is due to mean vs variance
 barplot(AGPE_lambdaS_effect,col=rainbow(3),
         names.arg = c("Total effect","Mean effect","Variance effect"))
 
