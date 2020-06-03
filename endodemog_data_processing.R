@@ -58,7 +58,8 @@ LTREB_data <- LTREB_endodemog %>%
                                  plot == "R" ~ as.character(origin)))) %>% 
   mutate(surv_t1 = as.integer(case_when(surv_t1 == 1 ~ 1,
                                    surv_t1 == 0 ~ 0,
-                                   is.na(surv_t1) & birth == year_t1 ~ 1))) %>% 
+                                   is.na(surv_t1) & birth == year_t1 ~ 1,
+                                   is.na(surv_t1) & size_t1 > 0 ~ 1))) %>% 
   filter(duplicated(.) == FALSE)
 # dim(LTREB_data)
 
@@ -1713,11 +1714,8 @@ ELRI_2019_data <- read_xlsx("~/Dropbox/EndodemogData/Field Data/2019/LTREB_data_
 ELVI_2019_data <- read_xlsx("~/Dropbox/EndodemogData/Field Data/2019/LTREB_data_2019.xlsx", sheet = "ELVI")
 FESU_2019_data <- read_xlsx("~/Dropbox/EndodemogData/Field Data/2019/LTREB_data_2019.xlsx", sheet = "FESU")
 LOAR_2019_data <- read_xlsx("~/Dropbox/EndodemogData/Field Data/2019/LTREB_data_2019.xlsx", sheet = "LOAR")
-POAL_2019_data <- read_xlsx("~/Dropbox/EndodemogData/Field Data/2019/LTREB_data_2019.xlsx", sheet = "POAL") %>% 
-  mutate(id = paste(plot, pos, sep = "_"))
-POSY_2019_data <- read_xlsx("~/Dropbox/EndodemogData/Field Data/2019/LTREB_data_2019.xlsx", sheet = "POSY") %>%
-  mutate(id = paste(plot, pos, sep = "_"))
-
+POAL_2019_data <- read_xlsx("~/Dropbox/EndodemogData/Field Data/2019/LTREB_data_2019.xlsx", sheet = "POAL")
+POSY_2019_data <- read_xlsx("~/Dropbox/EndodemogData/Field Data/2019/LTREB_data_2019.xlsx", sheet = "POSY")
 # # Now we can merge all the different species together.
 LTREB_2019_data <- AGPE_2019_data %>% 
   merge(ELRI_2019_data, by = c("species", "origin", "plot", "pos","id",  "birth_year", "observation_year", "species", "distance_A", "distance_B", "survival", "size_tillers", "flowering_tillers", "spikelets_A", "spikelets_B", "spikelets_C", "notes"), all = TRUE) %>%
@@ -1907,13 +1905,22 @@ LTREB_full <- LTREB_full_2 %>%
 ##############################################################################
 ####### Preparing datalists for Survival Kernel ------------------------------
 ##############################################################################
+# Looking at plot density
+# We can sum up the number of recruits in each year and the number of surviving plants in each year for each plot
+
+LTREB_density <- LTREB_full %>% 
+  group_by(species, plot_fixed, year_t, year_t1) %>% 
+  summarize(recruitcount_t = sum(birth == year_t),
+            survcount_t = sum(birth != year_t),
+            fullcount_t = n())
 
 # NA's in survival come from mostly 2017 recruits.
 LTREB_data_forsurv <- LTREB_full %>%
   filter(!is.na(surv_t1)) %>% 
   filter(!is.na(logsize_t)) %>% 
   filter(logsize_t >= 0) %>% 
-  filter(!is.na(endo_01))
+  filter(!is.na(endo_01)) %>% 
+  left_join(LTREB_density)
 
 dim(LTREB_data_forsurv)
 
@@ -1949,6 +1956,7 @@ AGPE_surv_data_list <- list(surv_t1 = AGPE_surv_data$surv_t1,
                             origin_01 = AGPE_surv_data$origin_01,
                             endo_01 = AGPE_surv_data$endo_01,
                             endo_index = AGPE_surv_data$endo_index,
+                            density = as.numeric(AGPE_surv_data$fullcount_t),
                             year_t = AGPE_surv_data$year_t_index,
                             plot = AGPE_surv_data$plot_index,
                             N = nrow(AGPE_surv_data),
@@ -1963,6 +1971,7 @@ ELRI_surv_data_list <- list(surv_t1 = ELRI_surv_data$surv_t1,
                             origin_01 = ELRI_surv_data$origin_01,
                             endo_01 = ELRI_surv_data$endo_01,
                             endo_index = ELRI_surv_data$endo_index,
+                            density = as.numeric(ELRI_surv_data$fullcount_t),
                             year_t = ELRI_surv_data$year_t_index,
                             plot = ELRI_surv_data$plot_index,
                             N = nrow(ELRI_surv_data),
@@ -1977,6 +1986,7 @@ ELVI_surv_data_list <- list(surv_t1 = ELVI_surv_data$surv_t1,
                             origin_01 = ELVI_surv_data$origin_01,
                             endo_01 = ELVI_surv_data$endo_01,
                             endo_index = ELVI_surv_data$endo_index,
+                            density = as.numeric(ELVI_surv_data$fullcount_t),
                             year_t = ELVI_surv_data$year_t_index,
                             plot = ELVI_surv_data$plot_index,
                             N = nrow(ELVI_surv_data),
@@ -1991,6 +2001,7 @@ FESU_surv_data_list <- list(surv_t1 = FESU_surv_data$surv_t1,
                             origin_01 = FESU_surv_data$origin_01,
                             endo_01 = FESU_surv_data$endo_01,
                             endo_index = FESU_surv_data$endo_index,
+                            density = as.numeric(FESU_surv_data$fullcount_t),
                             year_t = FESU_surv_data$year_t_index,
                             plot = FESU_surv_data$plot_index,
                             N = nrow(FESU_surv_data),
@@ -2005,6 +2016,7 @@ LOAR_surv_data_list <- list(surv_t1 = LOAR_surv_data$surv_t1,
                             origin_01 = LOAR_surv_data$origin_01,
                             endo_01 = LOAR_surv_data$endo_01,
                             endo_index = LOAR_surv_data$endo_index,
+                            density = as.numeric(LOAR_surv_data$fullcount_t),
                             year_t = LOAR_surv_data$year_t_index,
                             plot = LOAR_surv_data$plot_index,
                             N = nrow(LOAR_surv_data),
@@ -2019,6 +2031,7 @@ POAL_surv_data_list <- list(surv_t1 = POAL_surv_data$surv_t1,
                             origin_01 = POAL_surv_data$origin_01,
                             endo_01 = POAL_surv_data$endo_01,
                             endo_index = POAL_surv_data$endo_index,
+                            density = as.numeric(POAL_surv_data$fullcount_t),
                             year_t = POAL_surv_data$year_t_index,
                             plot = POAL_surv_data$plot_index,
                             N = nrow(POAL_surv_data),
@@ -2033,6 +2046,7 @@ POSY_surv_data_list <- list(surv_t1 = POSY_surv_data$surv_t1,
                             origin_01 = POSY_surv_data$origin_01,
                             endo_01 = POSY_surv_data$endo_01,
                             endo_index = POSY_surv_data$endo_index,
+                            density = as.numeric(POSY_surv_data$fullcount_t),
                             year_t = POSY_surv_data$year_t_index,
                             plot = POSY_surv_data$plot_index,
                             N = nrow(POSY_surv_data),
@@ -3248,12 +3262,56 @@ LTREB_density <- LTREB_full %>%
             survcount_t = sum(birth != year_t),
             fullcount_t = n())
 
+
+
+
 # Validation that our counts are okay
 LTREB_plot1_2009 <- LTREB_full %>% 
-  filter(plot_fixed == 1, year_t == 2009)
+  filter(plot_fixed == 101)
+table(LTREB_plot1_2009$year_t)
 
-
-ggplot(data = subset(LTREB_density, species == "POSY"), aes(x = year_t, y = survcount_t, color = plot_fixed))+
-  geom_point() +
-  geom_smooth(aes(x = year_t, y = survcount_t, group = plot_fixed), method = lm, se = F) +
-  facet_wrap(~species)
+df <- LTREB_full %>% 
+  group_by(species) %>% 
+  mutate(dummyvar = as.character(x = factor(x = plot_fixed, labels = seq_len(length.out = n_distinct(x = plot_fixed))))) %>% 
+  ungroup()
+#   
+# ggplot(data = df, aes(x = year_t)) +
+#   geom_bar(mapping = aes(fill = dummyvar), color = "gray87",size = .2, position = "stack") + 
+#   facet_wrap(~species, scale = "free") +
+#   scale_fill_manual(values = getPalette(colorCount))
+# 
+# df <- LTREB_density %>% 
+#   group_by(species) %>% 
+#   mutate(dummyvar = as.character(x = factor(x = plot_fixed, labels = seq_len(length.out = n_distinct(x = plot_fixed))))) %>% 
+#   ungroup()
+# library(RColorBrewer)
+# colorCount <- length(unique(df$dummyvar))
+# getPalette <- colorRampPalette(brewer.pal(8, "Dark2"))
+# 
+# ggplot(data = df, aes(x = year_t, y = fullcount_t, fill = as.factor(dummyvar))) +
+#   geom_area(stat = "identity", position = "fill") + facet_wrap(~species) +
+#   scale_fill_manual(values = getPalette(colorCount))
+# 
+# 
+# ggplot(data = df, aes(x = year_t1, y = fullcount_t, fill = as.factor(dummyvar), position = "stack")) +
+#   geom_area(data = subset(df, species == "AGPE")) +
+#   geom_area(data = subset(df, species == "POSY")) +
+#   geom_area(data = subset(df, species == "POAL")) +
+#   geom_area(data = subset(df, species == "FESU")) +
+#   geom_area(data = subset(df, species == "LOAR")) +
+#   geom_area(data = subset(df, species == "ELVI")) +
+#   geom_area(data = subset(df, species == "ELRI")) +
+#   facet_wrap(~species, scales = "free") +
+#   scale_fill_manual(values = getPalette(colorCount))
+# 
+# 
+# ggplot(data = df, aes(x = year_t1, fill = as.factor(dummyvar), position = "stack")) +
+#   geom_bar(data = subset(df, species == "AGPE")) +
+#   geom_bar(data = subset(df, species == "POSY")) +
+#   geom_bar(data = subset(df, species == "POAL")) +
+#   geom_bar(data = subset(df, species == "FESU")) +
+#   geom_bar(data = subset(df, species == "LOAR")) +
+#   geom_bar(data = subset(df, species == "ELVI")) +
+#   geom_bar(data = subset(df, species == "ELRI")) +
+#   facet_wrap(~species, scales = "free") +
+#   scale_fill_manual(values = getPalette(colorCount))
