@@ -20,6 +20,25 @@ LTREB_endodemog <-
 
 
 ## Clean up the main data frame for NA's, other small data entry errors, and change standardize the coding for variables.
+year_factor_key <- c('2007' = 1, '2008' = 2, '2009' = 3, 
+                       '2010' = 4, '2011' = 5, '2012' = 6, 
+                       '2013' = 7, '2014' = 8, '2015' = 9, 
+                       '2016' = 10, '2017' = 11, "2018" = 12,
+                       "2019" = 13, "2020" = 14)
+species_factor_key <- c("AGPE" = 1, "ELRI" = 2, "ELVI" = 3, 
+                        "FESU" = 4, "LOAR" = 5, "POAL" = 6, 
+                        "POSY" = 7)
+For reference
+plot_factor_key <- c("1" = 1, "2" = 2, "3" = 3, "4" = 4, "5" = 5,"6" = 6, "7" = 7, "8" = 8, "9" = 9, "10" = 10,
+                     "11" = 11, "12" = 12, "13" = 13, "14" = 14, "15" = 15, "16" = 16, "17" = 17, "18" = 18, "19" = 19, "20" = 20,
+                     "31" = 21, " 32" = 22, "33" = 23, "34" = 24, "35" = 25, "36" = 26, "37" = 27, "38" = 28, "39" = 29, "40" = 30,
+                     "91" = 31, " 92" = 32, " 93" = 33, " 94" = 34, " 95" = 35, " 96" = 36, " 97" = 37, "98" = 38, " 99" = 39, "100" = 40,
+                     "101" = 41, "102" = 42, "103" = 43, "104" = 44, "105" = 45, "106" = 46, "107" = 47, "108" = 48, "109" = 49, "110" = 50,
+                     "111" = 51, "112" = 52, "113" = 53, "114" = 54, "115" = 55, "116" = 56, "117" = 57, "118" = 58, "119" = 59, "120" = 60,
+                     "121" = 61, "122" = 62, "123" = 63, "124" = 64, "125" = 65, "126" = 66, "127" = 67, "128" = 68, "129" = 69, "130" = 70,
+                     "141" = 71, "142" = 72, "143" = 73, "144" = 74, "145" = 75, "146" = 76, "147" = 77, "148" = 78, "149" = 79, "150" = 80,
+                     "151" = 81, "152" = 82, "153" = 83, "154" = 84, "155" = 85, "156" = 86, "157" = 87, "158" = 88)
+
 LTREB_data <- LTREB_endodemog %>% 
   mutate(size_t = na_if(size_t, 0)) %>% 
   mutate(size_t1 = na_if(size_t1, 0)) %>%  
@@ -36,26 +55,16 @@ LTREB_data <- LTREB_endodemog %>%
                                    species == "POAL" ~ "POAL",
                                    species == "POSY" ~ "POSY",
                                    species == "LOAR" ~ "LOAR"))  %>%    
-  mutate(species_index = as.integer(recode_factor(species,                   
-                                                  "AGPE" = 1, "ELRI" = 2, "ELVI" = 3, 
-                                                  "FESU" = 4, "LOAR" = 5, "POAL" = 6, 
-                                                  "POSY" = 7))) %>% 
-  mutate(year_t_index = as.integer(recode(year_t, 
-                                          '2007' = 1, '2008' = 2, '2009' = 3, 
-                                          '2010' = 4, '2011' = 5, '2012' = 6, 
-                                          '2013' = 7, '2014' = 8, '2015' = 9, 
-                                          '2016' = 10, '2017' = 11))) %>%             
-  mutate(year_t1_index = as.integer(recode(year_t1, 
-                                           '2008' = 2, '2009' = 3, '2010' = 4, 
-                                           '2011' = 5, '2012' = 6, '2013' = 7, 
-                                           '2014' = 8, '2015' = 9, '2016' = 10, 
-                                           '2017' = 11, '2018' = 12))) %>%               
+  mutate(species_index = as.integer(recode(species, !!!species_factor_key))) %>% 
+  mutate(year_t_index = as.integer(recode(year_t, !!!year_factor_key))) %>%             
+  mutate(year_t1_index = as.integer(recode(year_t1, !!!year_factor_key))) %>%               
   mutate(origin_01 = as.integer(case_when(origin == "O" ~ 0, 
                                           origin == "R" ~ 1, 
                                           origin != "R" | origin != "O" ~ 1))) %>%
-  mutate(plot_fixed = as.integer(case_when(species == "LOAR" & id == "39_1B" ~ "39", # This is for a copy error with LOAR individual 39_1B, which assigned it to plots 41-44
+  mutate(plot_fixed = as.integer(case_when(species == "LOAR" & id == "39_1B" ~ "39", # This is for a copy error with LOAR individual 39_1B, which assigned it to plots 41-44, as well as 
                                  plot != "R" ~ as.character(plot), 
                                  plot == "R" ~ as.character(origin)))) %>% 
+  mutate(plot_index = as.integer(recode(plot_fixed, !!! plot_factor_key))) %>% 
   mutate(surv_t1 = as.integer(case_when(surv_t1 == 1 ~ 1,
                                    surv_t1 == 0 ~ 0,
                                    is.na(surv_t1) & birth == year_t1 ~ 1,
@@ -1698,7 +1707,7 @@ group_by(id) %>%
          SPIKE_C_T = dplyr::lag(SPIKE_C_T1, n = 1, default = NA),
          SPIKE_D_T = dplyr::lag(SPIKE_D_T1, n = 1, default = NA),
          SPIKE_AGPE_MEAN_T = dplyr::lag(SPIKE_AGPE_MEAN_T1, n = 1, default = NA)) %>% 
-  dplyr::select(plot_fixed, pos, id, species, species_index, 
+  dplyr::select(plot_fixed, plot_index, pos, id, species, species_index, 
                 endo_01, endo_index, origin_01, birth,
                 year_t1, year_t1_index,
                 surv_t1, size_t1, logsize_t1,
@@ -1738,23 +1747,17 @@ LTREB_update_cleaned <- LTREB_update_data %>%
          dist_a = distance_A, dist_b = distance_B, birth = birth_year) %>% 
     mutate(birth = as.integer(birth)) %>% 
     mutate(plot_fixed = as.integer(plot)) %>% 
+    mutate(plot_index = as.integer(recode(plot_fixed, !!!plot_factor_key))) %>% 
     mutate(size_t1 = na_if(size_t1, 0)) %>%
     mutate(size_t1, logsize_t1 = log(size_t1)) %>%
     mutate(surv_t1 = as.integer(recode(surv_t1, "0" = 0, "1" =1))) %>%
     mutate(FLW_STAT_T1 = case_when(FLW_COUNT_T1 == 0 ~ 0,
                                    FLW_COUNT_T1 > 0 ~1)) %>% 
-    mutate(species_index = as.integer(recode_factor(species,
-                                                    "AGPE" = 1, "ELRI" = 2, "ELVI" = 3,
-                                                    "FESU" = 4, "LOAR" = 5, "POAL" = 6,
-                                                    "POSY" = 7))) %>%
-    mutate(year_t1_index = as.integer(recode(year_t1,
-                                             '2008' = 2, '2009' = 3, '2010' = 4,
-                                             '2011' = 5, '2012' = 6, '2013' = 7,
-                                             '2014' = 8, '2015' = 9, '2016' = 10,
-                                             '2017' = 11, '2018' = 12, '2019' = 13))) %>%
+    mutate(species_index = as.integer(recode(species, !!!species_factor_key))) %>% 
+    mutate(year_t1_index = as.integer(recode(year_t1, !!!year_factor_key))) %>%
     mutate(origin_01 = as.integer(case_when(origin == "O" ~ 0,
                                             origin == "R" ~ 1,
-                                            origin != "R" | origin != "O" ~ 1))) 
+                                            origin != "R" | origin != "O" ~ 1))) %>% 
     mutate(surv_t1 = as.integer(case_when(surv_t1 == 1 ~ 1,
                                           surv_t1 == 0 ~ 0,
                                           is.na(surv_t1) & birth == year_t1 ~ 1))) %>% 
@@ -1763,10 +1766,9 @@ LTREB_update_cleaned <- LTREB_update_data %>%
 
 
 LTREB_update <- LTREB_update_cleaned %>% 
-  group_by(id) %>% 
-  mutate(year_t = 2018,
-         year_t_index = 12) %>% 
-  dplyr::select(plot_fixed, pos, id, species, species_index, 
+  mutate(year_t = year_t1 - 1,
+         year_t_index = year_t1_index -1) %>% 
+  dplyr::select(plot_fixed, plot_index, pos, id, species, species_index, 
                 origin_01, birth,
                 year_t1, year_t1_index,
                 surv_t1, size_t1, logsize_t1,
@@ -1775,7 +1777,7 @@ LTREB_update <- LTREB_update_cleaned %>%
                 year_t, year_t_index)
 # Assigning plot endo status to the 2019 data
 LTREB_plot_endo_status <- LTREB_full_to2018 %>% 
-  group_by(plot_fixed) %>% 
+  group_by(plot_fixed, plot_index) %>% 
   summarize(endo_01 = round(mean(endo_01, na.rm = T)),
             endo_index = round(mean(endo_index, na.rm = T)))
 
@@ -1900,10 +1902,12 @@ LTREB_distances <- read_csv(file = "~/Dropbox/EndodemogData/Fulldataplusmetadata
 # Here are the plant id's that are in the distance file but not the long file
 setdiff(LTREB_distances$id, LTREB_full_2$id)
 
+########
 # This is the main dataframe this is used to create vital rate model lists
 LTREB_full <- LTREB_full_2 %>% 
   left_join(LTREB_distances, by = c("species" = "species","pos" = "pos", "plot_fixed" = "plot", "origin_01" = "origin_01", "id" = "id")) %>% 
-  dplyr::select(-duplicate, -origin_from_check, -origin_from_distance, -date_status, -date_dist) # I'm removing some of the extrneous variable. We also have distance data in the new field data that needs to be merged in.
+  dplyr::select(-duplicate, -origin_from_check, -origin_from_distance, -date_status, -date_dist, ) %>%  # I'm removing some of the extraneous variable. We also have distance data in the new field data that needs to be merged in.
+  dplyr::select(plot_fixed, id, surv_t1, size_t1, year_t1, size_t, year_t, birth)
 # write_csv(LTREB_full,"~/Dropbox/EndodemogData/Fulldataplusmetadata/LTREB_full.csv")
 
 ## Tom is loading this in, bypassing above code
@@ -1911,6 +1915,9 @@ tompath <- "C:/Users/tm9/Dropbox/EndodemogData/"
 #tompath <- "C:/Users/tm634/Dropbox/EndodemogData/"
 
 LTREB_full <- read_csv(paste0(tompath,"Fulldataplusmetadata/LTREB_full.csv"))
+
+
+
 
 
 ##############################################################################
